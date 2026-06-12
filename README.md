@@ -48,6 +48,21 @@ AI：在开始实现之前，我需要了解几个关键问题：
 
 ---
 
+## ❤️ 赞助商 &nbsp;<sub>🙏 想出现在这里？联系 **jnMetaCode@qq.com** 赞助</sub>
+
+<table>
+<tr>
+<td width="200" align="center">
+<a href="https://www.5cookie.cc/sign-up?aff=Pj7u"><img src="assets/sponsors/5cookie-code.png" width="180" alt="5Cookie Code"></a>
+</td>
+<td>
+<a href="https://www.5cookie.cc/sign-up?aff=Pj7u"><b>5Cookie Code</b></a> 是一家稳定高速的 API 中继服务提供商，为 Claude Code、Codex 等平台或模型提供 API 中继服务。面向个人、团队和企业用户提供 AI 编码服务和 AI 生图服务。
+</td>
+</tr>
+</table>
+
+---
+
 ## 这是什么？
 
 [superpowers](https://github.com/obra/superpowers) 是目前最火的 AI 编程 skills 框架（159k+ stars），为 AI 编程工具提供**系统化的工作方法论**。
