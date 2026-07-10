@@ -6,7 +6,7 @@
 
 **架构：** Docker Compose 编排 PostgreSQL 16 + Redis 7 + MeiliSearch v1.12 + Strapi v5 四个服务。Strapi 使用 TypeScript，内容模型通过 schema.json 定义，权限通过内置 RBAC 配置，异步任务通过 BullMQ + Worker 处理。
 
-**技术栈：** Strapi v5、PostgreSQL 16、Redis 7、MeiliSearch v1.12、BullMQ、Docker Compose、Node 20 LTS、TypeScript
+**技术栈：** Strapi v5 (5.48+)、PostgreSQL 16、Redis 7、MeiliSearch v1.12、BullMQ、Docker Compose、Node 22 LTS (推荐 v24)、TypeScript
 
 ---
 
@@ -191,6 +191,12 @@ git commit -m "feat: add docker compose base config with postgres redis meilisea
 
 - [ ] **步骤 1：创建 backend 目录并初始化 package.json**
 
+> **重要说明（Strapi v5 变更）：**
+> - `@strapi/plugin-i18n` 在 v5 中**已内置到 `@strapi/strapi` 核心**，不再作为独立 npm 包，无需在 dependencies 中列出（但 `config/plugins.ts` 中仍需配置启用）。
+> - 版本号推荐用 `"5"` 而非 `"^5.0.0"`，避免子依赖解析失败。
+> - Strapi v5 构建 Admin Panel 需要 React 全家桶作为 peer dependencies，必须显式声明。
+> - Node.js 最低版本要求 22.x（v5.48+ 推荐 v24）。
+
 ```json
 {
   "name": "strapi-backend",
@@ -205,20 +211,24 @@ git commit -m "feat: add docker compose base config with postgres redis meilisea
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@strapi/strapi": "^5.0.0",
-    "@strapi/plugin-users-permissions": "^5.0.0",
-    "@strapi/plugin-i18n": "^5.0.0",
+    "@strapi/strapi": "5",
+    "@strapi/plugin-users-permissions": "5",
     "pg": "^8.12.0",
     "bullmq": "^5.8.0",
-    "ioredis": "^5.4.1"
+    "ioredis": "^5.4.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.0",
+    "styled-components": "^6.1.0"
   },
   "devDependencies": {
-    "@strapi/ts-config": "^5.0.0",
-    "@types/node": "^20.0.0",
-    "typescript": "^5.4.0"
+    "@strapi/ts-config": "5",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.0.0 <=24.x.x",
+    "npm": ">=10.0.0"
   }
 }
 ```
