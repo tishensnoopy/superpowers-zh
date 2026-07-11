@@ -65,6 +65,15 @@ export default {
       console.warn('[Bootstrap] Default data initialization failed:', err instanceof Error ? err.message : err);
     }
 
+    console.log('[Bootstrap] Initializing RBAC roles...');
+    try {
+      const rbacService = await import('./services/rbac');
+      await rbacService.default({ strapi }).initializeRoles();
+      console.log('[Bootstrap] RBAC roles initialized');
+    } catch (err) {
+      console.warn('[Bootstrap] RBAC initialization failed:', err instanceof Error ? err.message : err);
+    }
+
     console.log('[Bootstrap] Startup complete');
   },
 
