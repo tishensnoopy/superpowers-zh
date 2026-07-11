@@ -13,6 +13,11 @@
     "draftAndPublish": true,
     "singleton": false
   },
+  "lifecycle": {
+    "afterCreate": "./lifecycles",
+    "afterUpdate": "./lifecycles",
+    "afterDelete": "./lifecycles"
+  },
   "attributes": {
     "name": {
       "type": "string",
