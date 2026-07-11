@@ -1,0 +1,71 @@
+{
+  "kind": "contentType",
+  "collectionName": "product_categories",
+  "info": {
+    "singularName": "product-category",
+    "pluralName": "product-categories",
+    "displayName": "Product Category",
+    "description": "Product category for organizing products",
+    "icon": "Folder",
+    "draftAndPublish": false
+  },
+  "options": {
+    "draftAndPublish": false,
+    "singleton": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100,
+      "description": "Category name"
+    },
+    "slug": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "maxLength": 100,
+      "description": "Category URL path"
+    },
+    "description": {
+      "type": "text",
+      "description": "Category description"
+    },
+    "image": {
+      "type": "media",
+      "description": "Category icon/image",
+      "multiple": false
+    },
+    "position": {
+      "type": "integer",
+      "default": 0,
+      "description": "Sort order"
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this category is active"
+    },
+    "parent": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::product-category.product-category",
+      "inversedBy": "children",
+      "description": "Parent category"
+    },
+    "children": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::product-category.product-category",
+      "mappedBy": "parent",
+      "description": "Child categories"
+    },
+    "products": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::product.product",
+      "mappedBy": "categories",
+      "description": "Products in this category"
+    }
+  }
+}

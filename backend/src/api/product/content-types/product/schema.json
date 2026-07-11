@@ -1,0 +1,102 @@
+{
+  "kind": "contentType",
+  "collectionName": "products",
+  "info": {
+    "singularName": "product",
+    "pluralName": "products",
+    "displayName": "Product",
+    "description": "Product catalog item",
+    "icon": "Package",
+    "draftAndPublish": true
+  },
+  "options": {
+    "draftAndPublish": true,
+    "singleton": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200,
+      "description": "Product name"
+    },
+    "slug": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "maxLength": 200,
+      "description": "Product URL path"
+    },
+    "description": {
+      "type": "text",
+      "description": "Product description"
+    },
+    "shortDescription": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Short description for listing"
+    },
+    "price": {
+      "type": "float",
+      "description": "Price"
+    },
+    "originalPrice": {
+      "type": "float",
+      "description": "Original price (for discount display)"
+    },
+    "sku": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "maxLength": 100,
+      "description": "SKU code"
+    },
+    "stock": {
+      "type": "integer",
+      "default": 0,
+      "description": "Stock quantity"
+    },
+    "isInStock": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether product is in stock"
+    },
+    "isFeatured": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether product is featured"
+    },
+    "images": {
+      "type": "media",
+      "multiple": true,
+      "description": "Product images"
+    },
+    "thumbnail": {
+      "type": "media",
+      "description": "Product thumbnail",
+      "multiple": false
+    },
+    "categories": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::product-category.product-category",
+      "inversedBy": "products",
+      "description": "Product categories"
+    },
+    "specs": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::product-spec.product-spec",
+      "description": "Product specifications"
+    },
+    "seo": {
+      "type": "component",
+      "component": "common.seo",
+      "description": "SEO configuration"
+    },
+    "specValues": {
+      "type": "json",
+      "description": "Specification values (key: spec code, value: actual value)"
+    }
+  }
+}

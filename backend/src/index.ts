@@ -41,6 +41,18 @@ export default {
       const pageService = strapi.service('api::page.page');
       await pageService.initializeDefaults();
       console.log('[Bootstrap] Pages initialized');
+
+      const productCategoryService = strapi.service('api::product-category.product-category');
+      await productCategoryService.initializeDefaults();
+      console.log('[Bootstrap] Product Categories initialized');
+
+      const productSpecService = strapi.service('api::product-spec.product-spec');
+      await productSpecService.initializeDefaults();
+      console.log('[Bootstrap] Product Specs initialized');
+
+      const productService = strapi.service('api::product.product');
+      await productService.initializeDefaults();
+      console.log('[Bootstrap] Products initialized');
     } catch (err) {
       console.warn('[Bootstrap] Default data initialization failed:', err instanceof Error ? err.message : err);
     }

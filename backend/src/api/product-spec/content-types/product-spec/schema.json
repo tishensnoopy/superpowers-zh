@@ -1,0 +1,56 @@
+{
+  "kind": "contentType",
+  "collectionName": "product_specs",
+  "info": {
+    "singularName": "product-spec",
+    "pluralName": "product-specs",
+    "displayName": "Product Spec",
+    "description": "Product specification/attribute for comparison",
+    "icon": "Settings",
+    "draftAndPublish": false
+  },
+  "options": {
+    "draftAndPublish": false,
+    "singleton": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100,
+      "description": "Specification name (e.g., 'Dimensions')"
+    },
+    "code": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "maxLength": 50,
+      "description": "Specification code (e.g., 'dimensions')"
+    },
+    "unit": {
+      "type": "string",
+      "maxLength": 20,
+      "description": "Unit (e.g., 'mm', 'kg')"
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": ["text", "number", "select", "boolean"],
+      "default": "text",
+      "description": "Value type"
+    },
+    "options": {
+      "type": "string",
+      "description": "Select options (comma separated, for type=select)"
+    },
+    "isVisible": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether to show in comparison table"
+    },
+    "position": {
+      "type": "integer",
+      "default": 0,
+      "description": "Sort order in comparison table"
+    }
+  }
+}
