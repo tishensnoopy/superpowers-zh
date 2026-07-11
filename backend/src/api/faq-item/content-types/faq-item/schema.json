@@ -1,0 +1,66 @@
+{
+  "kind": "contentType",
+  "collectionName": "faq_items",
+  "info": {
+    "singularName": "faq-item",
+    "pluralName": "faq-items",
+    "displayName": "FAQ Item",
+    "description": "Frequently asked question",
+    "icon": "HelpCircle",
+    "draftAndPublish": false
+  },
+  "options": {
+    "draftAndPublish": false,
+    "singleton": false
+  },
+  "attributes": {
+    "question": {
+      "type": "string",
+      "required": true,
+      "maxLength": 500,
+      "description": "FAQ question"
+    },
+    "answer": {
+      "type": "text",
+      "required": true,
+      "description": "FAQ answer"
+    },
+    "category": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "FAQ category"
+    },
+    "tags": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Tags (comma separated)"
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this FAQ is active"
+    },
+    "sortOrder": {
+      "type": "integer",
+      "default": 0,
+      "description": "Sort order"
+    },
+    "sourceDocument": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::knowledge-base.knowledge-base",
+      "inversedBy": "faqs",
+      "description": "Source knowledge base document"
+    },
+    "feedbackCount": {
+      "type": "integer",
+      "default": 0,
+      "description": "Total feedback count"
+    },
+    "helpfulCount": {
+      "type": "integer",
+      "default": 0,
+      "description": "Helpful feedback count"
+    }
+  }
+}

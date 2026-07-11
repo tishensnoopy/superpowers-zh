@@ -1,0 +1,90 @@
+{
+  "kind": "contentType",
+  "collectionName": "knowledge_bases",
+  "info": {
+    "singularName": "knowledge-base",
+    "pluralName": "knowledge-bases",
+    "displayName": "Knowledge Base",
+    "description": "Knowledge base document with vectorization support",
+    "icon": "Book",
+    "draftAndPublish": false
+  },
+  "options": {
+    "draftAndPublish": false,
+    "singleton": false
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200,
+      "description": "Document title"
+    },
+    "content": {
+      "type": "text",
+      "description": "Document content"
+    },
+    "sourceType": {
+      "type": "enumeration",
+      "enum": ["manual", "faq", "pdf", "webpage", "chat-history"],
+      "default": "manual",
+      "description": "Source type"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending", "processing", "ready", "failed"],
+      "default": "pending",
+      "description": "Processing status"
+    },
+    "statusMessage": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Status message (error reason, etc.)"
+    },
+    "vectorDbIds": {
+      "type": "json",
+      "description": "Vector database IDs (array)"
+    },
+    "chunkCount": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of document chunks"
+    },
+    "processedAt": {
+      "type": "datetime",
+      "description": "Processing completed timestamp"
+    },
+    "failedAt": {
+      "type": "datetime",
+      "description": "Failed timestamp"
+    },
+    "retryCount": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of retries"
+    },
+    "priority": {
+      "type": "enumeration",
+      "enum": ["low", "medium", "high"],
+      "default": "medium",
+      "description": "Processing priority"
+    },
+    "tags": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Tags (comma separated)"
+    },
+    "seo": {
+      "type": "component",
+      "component": "common.seo",
+      "description": "SEO configuration"
+    },
+    "faqs": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::faq-item.faq-item",
+      "mappedBy": "sourceDocument",
+      "description": "FAQs generated from this document"
+    }
+  }
+}

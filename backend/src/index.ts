@@ -53,6 +53,14 @@ export default {
       const productService = strapi.service('api::product.product');
       await productService.initializeDefaults();
       console.log('[Bootstrap] Products initialized');
+
+      const knowledgeBaseService = strapi.service('api::knowledge-base.knowledge-base');
+      await knowledgeBaseService.initializeDefaults();
+      console.log('[Bootstrap] Knowledge Base initialized');
+
+      const faqItemService = strapi.service('api::faq-item.faq-item');
+      await faqItemService.initializeDefaults();
+      console.log('[Bootstrap] FAQ Items initialized');
     } catch (err) {
       console.warn('[Bootstrap] Default data initialization failed:', err instanceof Error ? err.message : err);
     }
