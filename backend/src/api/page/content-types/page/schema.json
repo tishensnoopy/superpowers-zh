@@ -4,8 +4,8 @@
   "info": {
     "singularName": "page",
     "pluralName": "pages",
-    "displayName": "Page",
-    "description": "Dynamic page with sections",
+    "displayName": "页面",
+    "description": "动态页面，支持拖拽区块组装",
     "icon": "FileText",
     "draftAndPublish": true
   },
@@ -18,19 +18,19 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Page title"
+      "description": "页面标题"
     },
     "slug": {
       "type": "string",
       "required": true,
       "unique": true,
       "maxLength": 200,
-      "description": "Page URL path"
+      "description": "页面 URL 路径"
     },
     "isHomepage": {
       "type": "boolean",
       "default": false,
-      "description": "Whether this is the homepage"
+      "description": "是否为首页"
     },
     "sections": {
       "type": "dynamiczone",
@@ -48,42 +48,135 @@
         "section.gallery",
         "section.floating-button"
       ],
-      "description": "Page sections (drag and drop)"
+      "description": "页面区块（拖拽排序）"
     },
     "seo": {
       "type": "component",
       "component": "common.seo",
-      "description": "SEO configuration"
+      "description": "SEO 配置"
     },
     "parent": {
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::page.page",
       "inversedBy": "children",
-      "description": "Parent page"
+      "description": "父页面"
     },
     "children": {
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::page.page",
       "mappedBy": "parent",
-      "description": "Child pages"
+      "description": "子页面"
     },
     "layout": {
       "type": "enumeration",
       "enum": ["full-width", "boxed", "sidebar-left", "sidebar-right"],
       "default": "full-width",
-      "description": "Page layout"
+      "description": "页面布局"
     },
     "showNavigation": {
       "type": "boolean",
       "default": true,
-      "description": "Show navigation bar"
+      "description": "显示导航栏"
     },
     "showFooter": {
       "type": "boolean",
       "default": true,
-      "description": "Show footer"
+      "description": "显示页脚"
+    }
+  },
+  "admin": {
+    "list": {
+      "title": "页面管理",
+      "description": "管理网站页面，支持动态区块组装",
+      "fields": [
+        {
+          "field": "title",
+          "label": "页面标题",
+          "sortable": true
+        },
+        {
+          "field": "slug",
+          "label": "URL 路径",
+          "sortable": true
+        },
+        {
+          "field": "isHomepage",
+          "label": "首页",
+          "sortable": true
+        },
+        {
+          "field": "layout",
+          "label": "布局",
+          "sortable": true
+        },
+        {
+          "field": "publishedAt",
+          "label": "发布时间",
+          "sortable": true
+        }
+      ],
+      "filters": [
+        {
+          "field": "isHomepage",
+          "label": "首页"
+        },
+        {
+          "field": "layout",
+          "label": "布局"
+        },
+        {
+          "field": "publishedAt",
+          "label": "发布状态"
+        }
+      ]
+    },
+    "edit": {
+      "title": "编辑页面",
+      "description": "创建或编辑网站页面",
+      "fields": [
+        {
+          "field": "title",
+          "label": "页面标题",
+          "placeholder": "请输入页面标题"
+        },
+        {
+          "field": "slug",
+          "label": "URL 路径",
+          "placeholder": "请输入页面路径，如 /about"
+        },
+        {
+          "field": "isHomepage",
+          "label": "设为首页",
+          "description": "勾选后该页面将作为网站首页"
+        },
+        {
+          "field": "layout",
+          "label": "页面布局"
+        },
+        {
+          "field": "showNavigation",
+          "label": "显示导航栏"
+        },
+        {
+          "field": "showFooter",
+          "label": "显示页脚"
+        },
+        {
+          "field": "sections",
+          "label": "页面区块",
+          "description": "拖拽区块组件来构建页面内容"
+        },
+        {
+          "field": "parent",
+          "label": "父页面"
+        },
+        {
+          "field": "seo",
+          "label": "SEO 配置"
+        }
+      ]
     }
   }
 }

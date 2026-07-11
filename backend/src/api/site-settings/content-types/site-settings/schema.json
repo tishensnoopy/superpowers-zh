@@ -4,8 +4,8 @@
   "info": {
     "singularName": "site-settings",
     "pluralName": "site-settings",
-    "displayName": "Site Settings",
-    "description": "Global site settings and configuration",
+    "displayName": "站点设置",
+    "description": "全局站点设置和配置",
     "icon": "Settings",
     "draftAndPublish": false
   },
@@ -19,46 +19,114 @@
       "required": true,
       "maxLength": 255,
       "minLength": 1,
-      "description": "Site name / brand name"
+      "description": "站点名称 / 品牌名称"
     },
     "slogan": {
       "type": "string",
       "maxLength": 500,
-      "description": "Site slogan or tagline"
+      "description": "站点标语"
     },
     "logo": {
       "type": "media",
-      "description": "Site logo image",
+      "description": "站点 Logo 图片",
       "multiple": false
     },
     "favicon": {
       "type": "media",
-      "description": "Website favicon",
+      "description": "网站图标",
       "multiple": false
     },
     "phone": {
       "type": "string",
       "maxLength": 50,
-      "description": "Contact phone number"
+      "description": "联系电话"
     },
     "email": {
       "type": "string",
       "maxLength": 255,
-      "description": "Contact email address"
+      "description": "联系邮箱"
     },
     "address": {
       "type": "text",
-      "description": "Company address"
+      "description": "公司地址"
     },
     "wechat": {
       "type": "string",
       "maxLength": 100,
-      "description": "WeChat ID"
+      "description": "微信号"
     },
     "seo": {
       "type": "component",
       "component": "common.seo",
-      "description": "SEO configuration"
+      "description": "SEO 配置"
+    }
+  },
+  "admin": {
+    "list": {
+      "title": "站点设置",
+      "description": "管理全局站点配置",
+      "fields": [
+        {
+          "field": "name",
+          "label": "站点名称"
+        },
+        {
+          "field": "phone",
+          "label": "联系电话"
+        },
+        {
+          "field": "email",
+          "label": "联系邮箱"
+        }
+      ]
+    },
+    "edit": {
+      "title": "编辑站点设置",
+      "description": "修改全局站点配置",
+      "fields": [
+        {
+          "field": "name",
+          "label": "站点名称",
+          "placeholder": "请输入站点名称"
+        },
+        {
+          "field": "slogan",
+          "label": "站点标语",
+          "placeholder": "请输入站点标语"
+        },
+        {
+          "field": "logo",
+          "label": "站点 Logo"
+        },
+        {
+          "field": "favicon",
+          "label": "网站图标"
+        },
+        {
+          "field": "phone",
+          "label": "联系电话",
+          "placeholder": "请输入联系电话"
+        },
+        {
+          "field": "email",
+          "label": "联系邮箱",
+          "placeholder": "请输入联系邮箱"
+        },
+        {
+          "field": "address",
+          "label": "公司地址",
+          "placeholder": "请输入公司地址"
+        },
+        {
+          "field": "wechat",
+          "label": "微信号",
+          "placeholder": "请输入微信号"
+        },
+        {
+          "field": "seo",
+          "label": "SEO 配置"
+        }
+      ]
     }
   }
 }

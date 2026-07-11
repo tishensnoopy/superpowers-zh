@@ -4,8 +4,8 @@
   "info": {
     "singularName": "product",
     "pluralName": "products",
-    "displayName": "Product",
-    "description": "Product catalog item",
+    "displayName": "产品",
+    "description": "产品目录项",
     "icon": "Package",
     "draftAndPublish": true
   },
@@ -18,62 +18,62 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Product name"
+      "description": "产品名称"
     },
     "slug": {
       "type": "string",
       "required": true,
       "unique": true,
       "maxLength": 200,
-      "description": "Product URL path"
+      "description": "产品 URL 路径"
     },
     "description": {
       "type": "text",
-      "description": "Product description"
+      "description": "产品描述"
     },
     "shortDescription": {
       "type": "string",
       "maxLength": 500,
-      "description": "Short description for listing"
+      "description": "列表显示的简短描述"
     },
     "price": {
       "type": "float",
-      "description": "Price"
+      "description": "价格"
     },
     "originalPrice": {
       "type": "float",
-      "description": "Original price (for discount display)"
+      "description": "原价（用于显示折扣）"
     },
     "sku": {
       "type": "string",
       "required": true,
       "unique": true,
       "maxLength": 100,
-      "description": "SKU code"
+      "description": "SKU 编码"
     },
     "stock": {
       "type": "integer",
       "default": 0,
-      "description": "Stock quantity"
+      "description": "库存数量"
     },
     "isInStock": {
       "type": "boolean",
       "default": true,
-      "description": "Whether product is in stock"
+      "description": "是否有库存"
     },
     "isFeatured": {
       "type": "boolean",
       "default": false,
-      "description": "Whether product is featured"
+      "description": "是否为特色产品"
     },
     "images": {
       "type": "media",
       "multiple": true,
-      "description": "Product images"
+      "description": "产品图片"
     },
     "thumbnail": {
       "type": "media",
-      "description": "Product thumbnail",
+      "description": "产品缩略图",
       "multiple": false
     },
     "categories": {
@@ -81,22 +81,148 @@
       "relation": "manyToMany",
       "target": "api::product-category.product-category",
       "inversedBy": "products",
-      "description": "Product categories"
+      "description": "产品分类"
     },
     "specs": {
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::product-spec.product-spec",
-      "description": "Product specifications"
+      "description": "产品规格"
     },
     "seo": {
       "type": "component",
       "component": "common.seo",
-      "description": "SEO configuration"
+      "description": "SEO 配置"
     },
     "specValues": {
       "type": "json",
-      "description": "Specification values (key: spec code, value: actual value)"
+      "description": "规格值（键值对）"
+    }
+  },
+  "admin": {
+    "list": {
+      "title": "产品管理",
+      "description": "管理产品目录",
+      "fields": [
+        {
+          "field": "name",
+          "label": "产品名称",
+          "sortable": true
+        },
+        {
+          "field": "slug",
+          "label": "URL 路径",
+          "sortable": true
+        },
+        {
+          "field": "price",
+          "label": "价格",
+          "sortable": true
+        },
+        {
+          "field": "isFeatured",
+          "label": "特色",
+          "sortable": true
+        },
+        {
+          "field": "isInStock",
+          "label": "库存",
+          "sortable": true
+        },
+        {
+          "field": "publishedAt",
+          "label": "发布时间",
+          "sortable": true
+        }
+      ],
+      "filters": [
+        {
+          "field": "categories",
+          "label": "分类"
+        },
+        {
+          "field": "isFeatured",
+          "label": "特色产品"
+        },
+        {
+          "field": "isInStock",
+          "label": "库存状态"
+        },
+        {
+          "field": "publishedAt",
+          "label": "发布状态"
+        }
+      ]
+    },
+    "edit": {
+      "title": "编辑产品",
+      "description": "创建或编辑产品",
+      "fields": [
+        {
+          "field": "name",
+          "label": "产品名称",
+          "placeholder": "请输入产品名称"
+        },
+        {
+          "field": "slug",
+          "label": "URL 路径",
+          "placeholder": "请输入产品路径"
+        },
+        {
+          "field": "sku",
+          "label": "SKU 编码",
+          "placeholder": "请输入 SKU 编码"
+        },
+        {
+          "field": "price",
+          "label": "价格"
+        },
+        {
+          "field": "originalPrice",
+          "label": "原价"
+        },
+        {
+          "field": "stock",
+          "label": "库存数量"
+        },
+        {
+          "field": "isInStock",
+          "label": "有库存"
+        },
+        {
+          "field": "isFeatured",
+          "label": "设为特色产品"
+        },
+        {
+          "field": "shortDescription",
+          "label": "简短描述",
+          "placeholder": "请输入简短描述"
+        },
+        {
+          "field": "description",
+          "label": "详细描述"
+        },
+        {
+          "field": "images",
+          "label": "产品图片"
+        },
+        {
+          "field": "thumbnail",
+          "label": "缩略图"
+        },
+        {
+          "field": "categories",
+          "label": "产品分类"
+        },
+        {
+          "field": "specs",
+          "label": "产品规格"
+        },
+        {
+          "field": "seo",
+          "label": "SEO 配置"
+        }
+      ]
     }
   }
 }
