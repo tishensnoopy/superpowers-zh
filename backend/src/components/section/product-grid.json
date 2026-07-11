@@ -1,0 +1,46 @@
+{
+  "kind": "component",
+  "collectionName": "components_section_product_grids",
+  "info": {
+    "singularName": "product-grid",
+    "pluralName": "product-grids",
+    "displayName": "Product Grid",
+    "description": "Display products in grid layout",
+    "icon": "Grid"
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200,
+      "description": "Section title"
+    },
+    "description": {
+      "type": "text",
+      "description": "Section description"
+    },
+    "products": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::product.product",
+      "description": "Related products"
+    },
+    "columns": {
+      "type": "enumeration",
+      "enum": ["2", "3", "4"],
+      "default": "3",
+      "description": "Number of columns"
+    },
+    "showFilter": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show category filter"
+    },
+    "categoryFilter": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::product-category.product-category",
+      "description": "Available categories for filtering"
+    }
+  }
+}

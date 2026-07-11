@@ -10,12 +10,18 @@ export default factories.createCoreController('api::page.page', ({ strapi }) => 
           sections: {
             populate: '*',
           },
-          seo: '*',
-          parent: '*',
-          children: '*',
+          seo: {
+            fields: ['metaTitle', 'metaDescription'],
+          },
         },
       };
       const result = await super.find(ctx);
+      if (result.data && Array.isArray(result.data)) {
+        result.data = result.data.map(item => {
+          const { id, ...attributes } = item;
+          return { id, attributes };
+        });
+      }
       console.log('[Page] find() completed, count:', result.data?.length);
       return result;
     } catch (err) {
@@ -33,13 +39,17 @@ export default factories.createCoreController('api::page.page', ({ strapi }) => 
           sections: {
             populate: '*',
           },
-          seo: '*',
-          parent: '*',
-          children: '*',
+          seo: {
+            fields: ['metaTitle', 'metaDescription'],
+          },
         },
       };
       const result = await super.findOne(ctx);
       console.log('[Page] findOne() completed');
+      if (result.data) {
+        const { id, ...attributes } = result.data;
+        result.data = { id, attributes };
+      }
       return result;
     } catch (err) {
       console.error('[Page] findOne() failed:', err instanceof Error ? err.message : err);
@@ -56,17 +66,18 @@ export default factories.createCoreController('api::page.page', ({ strapi }) => 
           sections: {
             populate: '*',
           },
-          seo: '*',
-          parent: '*',
-          children: '*',
+          seo: {
+            fields: ['metaTitle', 'metaDescription'],
+          },
         },
       });
       if (!page) {
         console.warn('[Page] findBySlug() page not found:', ctx.params.slug);
         return ctx.notFound('Page not found');
       }
+      const { id, ...attributes } = page;
       console.log('[Page] findBySlug() completed, id:', page.id);
-      return { data: page, meta: {} };
+      return { data: { id, attributes }, meta: {} };
     } catch (err) {
       console.error('[Page] findBySlug() failed:', err instanceof Error ? err.message : err);
       throw err;
@@ -78,21 +89,15 @@ export default factories.createCoreController('api::page.page', ({ strapi }) => 
     try {
       const page = await strapi.db.query('api::page.page').findOne({
         where: { isHomepage: true },
-        populate: {
-          sections: {
-            populate: '*',
-          },
-          seo: '*',
-          parent: '*',
-          children: '*',
-        },
+        populate: ['sections'],
       });
       if (!page) {
         console.warn('[Page] getHomepage() homepage not found');
         return ctx.notFound('Homepage not found');
       }
+      const { id, ...attributes } = page;
       console.log('[Page] getHomepage() completed, id:', page.id);
-      return { data: page, meta: {} };
+      return { data: { id, attributes }, meta: {} };
     } catch (err) {
       console.error('[Page] getHomepage() failed:', err instanceof Error ? err.message : err);
       throw err;

@@ -1,0 +1,29 @@
+{
+  "kind": "component",
+  "collectionName": "components_common_gallery_items",
+  "info": {
+    "singularName": "gallery-item",
+    "pluralName": "gallery-items",
+    "displayName": "Gallery Item",
+    "description": "Gallery image item",
+    "icon": "Image"
+  },
+  "attributes": {
+    "image": {
+      "type": "media",
+      "multiple": false,
+      "required": true,
+      "description": "Gallery image"
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Image title"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Image description"
+    }
+  }
+}

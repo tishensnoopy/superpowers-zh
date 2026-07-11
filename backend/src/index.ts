@@ -12,16 +12,26 @@ export default {
 
         const { setStrapi: setDocumentStrapi, processDocument } = await import('./workers/document-processor');
         setDocumentStrapi(strapi);
-        createWorker('document-processing', processDocument, { concurrency: 2 });
-        console.log('[Bootstrap] Document processor worker registered');
+        const documentWorker = createWorker('document-processing', processDocument, { concurrency: 2 });
+        if (documentWorker) {
+          console.log('[Bootstrap] Document processor worker registered');
+        } else {
+          console.log('[Bootstrap] Document processor worker skipped - Redis not available');
+        }
 
         const { setStrapi: setFaqStrapi, processFaqFeedback } = await import('./workers/faq-feedback');
         setFaqStrapi(strapi);
-        createWorker('faq-feedback', processFaqFeedback, { concurrency: 1 });
-        console.log('[Bootstrap] FAQ feedback worker registered');
+        const faqWorker = createWorker('faq-feedback', processFaqFeedback, { concurrency: 1 });
+        if (faqWorker) {
+          console.log('[Bootstrap] FAQ feedback worker registered');
+        } else {
+          console.log('[Bootstrap] FAQ feedback worker skipped - Redis not available');
+        }
       } catch (err) {
         console.warn('[Bootstrap] Queue registration failed:', err instanceof Error ? err.message : err);
       }
+    } else {
+      console.log('[Bootstrap] Queue system disabled - REDIS_HOST not set');
     }
 
     console.log('[Bootstrap] Initializing default global data...');
@@ -29,40 +39,72 @@ export default {
       const siteSettingsService = strapi.service('api::site-settings.site-settings');
       await siteSettingsService.initializeDefaults();
       console.log('[Bootstrap] Site Settings initialized');
+    } catch (err) {
+      console.warn('[Bootstrap] Site Settings initialization failed:', err instanceof Error ? err.message : err);
+    }
 
+    try {
       const navigationService = strapi.service('api::navigation.navigation');
       await navigationService.initializeDefaults();
       console.log('[Bootstrap] Navigation initialized');
+    } catch (err) {
+      console.warn('[Bootstrap] Navigation initialization failed:', err instanceof Error ? err.message : err);
+    }
 
+    try {
       const footerService = strapi.service('api::footer.footer');
       await footerService.initializeDefaults();
       console.log('[Bootstrap] Footer initialized');
+    } catch (err) {
+      console.warn('[Bootstrap] Footer initialization failed:', err instanceof Error ? err.message : err);
+    }
 
+    try {
       const pageService = strapi.service('api::page.page');
       await pageService.initializeDefaults();
       console.log('[Bootstrap] Pages initialized');
+    } catch (err) {
+      console.warn('[Bootstrap] Pages initialization failed:', err instanceof Error ? err.message : err);
+    }
 
+    try {
       const productCategoryService = strapi.service('api::product-category.product-category');
       await productCategoryService.initializeDefaults();
       console.log('[Bootstrap] Product Categories initialized');
+    } catch (err) {
+      console.warn('[Bootstrap] Product Categories initialization failed:', err instanceof Error ? err.message : err);
+    }
 
+    try {
       const productSpecService = strapi.service('api::product-spec.product-spec');
       await productSpecService.initializeDefaults();
       console.log('[Bootstrap] Product Specs initialized');
+    } catch (err) {
+      console.warn('[Bootstrap] Product Specs initialization failed:', err instanceof Error ? err.message : err);
+    }
 
+    try {
       const productService = strapi.service('api::product.product');
       await productService.initializeDefaults();
       console.log('[Bootstrap] Products initialized');
+    } catch (err) {
+      console.warn('[Bootstrap] Products initialization failed:', err instanceof Error ? err.message : err);
+    }
 
+    try {
       const knowledgeBaseService = strapi.service('api::knowledge-base.knowledge-base');
       await knowledgeBaseService.initializeDefaults();
       console.log('[Bootstrap] Knowledge Base initialized');
+    } catch (err) {
+      console.warn('[Bootstrap] Knowledge Base initialization failed:', err instanceof Error ? err.message : err);
+    }
 
+    try {
       const faqItemService = strapi.service('api::faq-item.faq-item');
       await faqItemService.initializeDefaults();
       console.log('[Bootstrap] FAQ Items initialized');
     } catch (err) {
-      console.warn('[Bootstrap] Default data initialization failed:', err instanceof Error ? err.message : err);
+      console.warn('[Bootstrap] FAQ Items initialization failed:', err instanceof Error ? err.message : err);
     }
 
     console.log('[Bootstrap] Initializing RBAC roles...');

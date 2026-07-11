@@ -6,6 +6,12 @@ export default factories.createCoreController('api::navigation.navigation', ({ s
     try {
       const result = await super.find(ctx);
       console.log('[Navigation] find() completed, count:', result.data?.length);
+      if (result.data && Array.isArray(result.data)) {
+        result.data = result.data.map(item => {
+          const { id, ...attributes } = item;
+          return { id, attributes };
+        });
+      }
       return result;
     } catch (err) {
       console.error('[Navigation] find() failed:', err instanceof Error ? err.message : err);
@@ -21,6 +27,34 @@ export default factories.createCoreController('api::navigation.navigation', ({ s
       return result;
     } catch (err) {
       console.error('[Navigation] findOne() failed:', err instanceof Error ? err.message : err);
+      throw err;
+    }
+  },
+
+  async getNavigationTree(ctx) {
+    console.log('[Navigation] getNavigationTree() called');
+    try {
+      const items = await strapi.db.query('api::navigation.navigation').findMany({
+        where: { parent: null },
+        orderBy: { position: 'asc' },
+        populate: {
+          children: {
+            orderBy: { position: 'asc' },
+          },
+        },
+      });
+
+      const formatItem = (item) => {
+        const { id, children, ...attributes } = item;
+        const formattedChildren = children?.map(child => formatItem(child)) || [];
+        return { id, attributes: { ...attributes, children: { data: formattedChildren } } };
+      };
+
+      const formattedItems = items.map(item => formatItem(item));
+      console.log('[Navigation] getNavigationTree() completed, root items:', formattedItems.length);
+      return { data: formattedItems, meta: {} };
+    } catch (err) {
+      console.error('[Navigation] getNavigationTree() failed:', err instanceof Error ? err.message : err);
       throw err;
     }
   },

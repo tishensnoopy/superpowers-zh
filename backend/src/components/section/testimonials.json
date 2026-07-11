@@ -1,0 +1,25 @@
+{
+  "kind": "component",
+  "collectionName": "components_section_testimonials",
+  "info": {
+    "singularName": "testimonials",
+    "pluralName": "testimonials",
+    "displayName": "Testimonials",
+    "description": "Display customer testimonials",
+    "icon": "Quote"
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200,
+      "description": "Section title"
+    },
+    "testimonials": {
+      "type": "component",
+      "component": "common.testimonial",
+      "repeatable": true,
+      "description": "List of testimonials"
+    }
+  }
+}

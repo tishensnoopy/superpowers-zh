@@ -3,7 +3,7 @@
   "collectionName": "site_settings",
   "info": {
     "singularName": "site-settings",
-    "pluralName": "site-settings",
+    "pluralName": "site-settings-global",
     "displayName": "站点设置",
     "description": "全局站点设置和配置",
     "icon": "Settings",
@@ -54,6 +54,16 @@
       "type": "string",
       "maxLength": 100,
       "description": "微信号"
+    },
+    "icp": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "ICP 备案号"
+    },
+    "publicSecurityRecord": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "公安备案号"
     },
     "seo": {
       "type": "component",
@@ -121,6 +131,16 @@
           "field": "wechat",
           "label": "微信号",
           "placeholder": "请输入微信号"
+        },
+        {
+          "field": "icp",
+          "label": "ICP 备案号",
+          "placeholder": "请输入 ICP 备案号"
+        },
+        {
+          "field": "publicSecurityRecord",
+          "label": "公安备案号",
+          "placeholder": "请输入公安备案号"
         },
         {
           "field": "seo",

@@ -16,3 +16,14 @@ site/dist/
 .opencode/skills/
 .qoder/
 .trae/
+
+# 数据库与临时文件
+backend/data.db
+backend/.strapi-updater.json
+backend/.tmp/
+
+# Brainstorming 工作目录
+.superpowers/
+
+# 交换文件脚本
+frontend/add-swap.sh

@@ -29,7 +29,7 @@ export default {
       path: '/product-categories',
       handler: 'api::product-category.product-category.create',
       config: {
-        auth: true,
+        auth: { enabled: true },
       },
     },
     {
@@ -37,7 +37,7 @@ export default {
       path: '/product-categories/:id',
       handler: 'api::product-category.product-category.update',
       config: {
-        auth: true,
+        auth: { enabled: true },
       },
     },
     {
@@ -45,7 +45,7 @@ export default {
       path: '/product-categories/:id',
       handler: 'api::product-category.product-category.delete',
       config: {
-        auth: true,
+        auth: { enabled: true },
       },
     },
   ],

@@ -6,10 +6,7 @@ export default factories.createCoreController('api::knowledge-base.knowledge-bas
     try {
       ctx.query = {
         ...ctx.query,
-        populate: {
-          faqs: '*',
-          seo: '*',
-        },
+        populate: [],
       };
       const result = await super.find(ctx);
       console.log('[KnowledgeBase] find() completed, count:', result.data?.length);
@@ -25,10 +22,7 @@ export default factories.createCoreController('api::knowledge-base.knowledge-bas
     try {
       ctx.query = {
         ...ctx.query,
-        populate: {
-          faqs: '*',
-          seo: '*',
-        },
+        populate: [],
       };
       const result = await super.findOne(ctx);
       console.log('[KnowledgeBase] findOne() completed');
@@ -122,10 +116,6 @@ export default factories.createCoreController('api::knowledge-base.knowledge-bas
             { tags: { $containsi: query } },
           ],
           status: 'ready',
-        },
-        populate: {
-          faqs: '*',
-          seo: '*',
         },
       });
       console.log('[KnowledgeBase] search() completed, count:', results.length);

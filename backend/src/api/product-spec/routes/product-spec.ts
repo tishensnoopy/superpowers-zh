@@ -21,7 +21,7 @@ export default {
       path: '/product-specs',
       handler: 'api::product-spec.product-spec.create',
       config: {
-        auth: true,
+        auth: { enabled: true },
       },
     },
     {
@@ -29,7 +29,7 @@ export default {
       path: '/product-specs/:id',
       handler: 'api::product-spec.product-spec.update',
       config: {
-        auth: true,
+        auth: { enabled: true },
       },
     },
     {
@@ -37,7 +37,7 @@ export default {
       path: '/product-specs/:id',
       handler: 'api::product-spec.product-spec.delete',
       config: {
-        auth: true,
+        auth: { enabled: true },
       },
     },
   ],

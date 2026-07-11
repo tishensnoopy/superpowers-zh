@@ -1,0 +1,29 @@
+{
+  "kind": "component",
+  "collectionName": "components_common_features",
+  "info": {
+    "singularName": "feature",
+    "pluralName": "features",
+    "displayName": "Feature",
+    "description": "A feature item",
+    "icon": "Zap"
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200,
+      "description": "Feature title"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Feature description"
+    },
+    "icon": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "Icon name"
+    }
+  }
+}

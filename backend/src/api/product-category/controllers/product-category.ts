@@ -6,11 +6,7 @@ export default factories.createCoreController('api::product-category.product-cat
     try {
       ctx.query = {
         ...ctx.query,
-        populate: {
-          children: '*',
-          parent: '*',
-          products: '*',
-        },
+        populate: ['children', 'parent'],
       };
       const result = await super.find(ctx);
       console.log('[ProductCategory] find() completed, count:', result.data?.length);
@@ -26,17 +22,34 @@ export default factories.createCoreController('api::product-category.product-cat
     try {
       ctx.query = {
         ...ctx.query,
-        populate: {
-          children: '*',
-          parent: '*',
-          products: '*',
-        },
+        populate: ['children', 'parent'],
       };
       const result = await super.findOne(ctx);
       console.log('[ProductCategory] findOne() completed');
       return result;
     } catch (err) {
       console.error('[ProductCategory] findOne() failed:', err instanceof Error ? err.message : err);
+      throw err;
+    }
+  },
+
+  async getCategoryTree(ctx) {
+    console.log('[ProductCategory] getCategoryTree() called');
+    try {
+      const categories = await strapi.db.query('api::product-category.product-category').findMany({
+        where: { parent: null, isActive: true },
+        orderBy: { position: 'asc' },
+        populate: {
+          children: {
+            where: { isActive: true },
+            orderBy: { position: 'asc' },
+          },
+        },
+      });
+      console.log('[ProductCategory] getCategoryTree() completed, root categories:', categories.length);
+      return { data: categories, meta: {} };
+    } catch (err) {
+      console.error('[ProductCategory] getCategoryTree() failed:', err instanceof Error ? err.message : err);
       throw err;
     }
   },

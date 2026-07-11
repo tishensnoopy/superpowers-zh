@@ -1,0 +1,55 @@
+{
+  "kind": "component",
+  "collectionName": "components_common_seos",
+  "info": {
+    "singularName": "seo",
+    "pluralName": "seos",
+    "displayName": "SEO",
+    "description": "SEO meta tags and structured data",
+    "icon": "Search"
+  },
+  "attributes": {
+    "metaTitle": {
+      "type": "string",
+      "maxLength": 60,
+      "description": "Meta title"
+    },
+    "metaDescription": {
+      "type": "string",
+      "maxLength": 160,
+      "description": "Meta description"
+    },
+    "metaKeywords": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Meta keywords"
+    },
+    "canonicalUrl": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Canonical URL"
+    },
+    "ogTitle": {
+      "type": "string",
+      "maxLength": 60,
+      "description": "Open Graph title"
+    },
+    "ogDescription": {
+      "type": "string",
+      "maxLength": 160,
+      "description": "Open Graph description"
+    },
+    "ogImage": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "description": "Open Graph image"
+    },
+    "ogType": {
+      "type": "enumeration",
+      "enum": ["website", "article", "product"],
+      "default": "website",
+      "description": "Open Graph type"
+    }
+  }
+}

@@ -37,7 +37,7 @@ export default {
       path: '/faq-items',
       handler: 'api::faq-item.faq-item.create',
       config: {
-        auth: true,
+        auth: { enabled: true },
       },
     },
     {
@@ -45,7 +45,7 @@ export default {
       path: '/faq-items/:id',
       handler: 'api::faq-item.faq-item.update',
       config: {
-        auth: true,
+        auth: { enabled: true },
       },
     },
     {
@@ -53,7 +53,7 @@ export default {
       path: '/faq-items/:id',
       handler: 'api::faq-item.faq-item.delete',
       config: {
-        auth: true,
+        auth: { enabled: true },
       },
     },
     {

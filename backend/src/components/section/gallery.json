@@ -1,0 +1,35 @@
+{
+  "kind": "component",
+  "collectionName": "components_section_galleries",
+  "info": {
+    "singularName": "gallery",
+    "pluralName": "galleries",
+    "displayName": "Gallery",
+    "description": "Image gallery section",
+    "icon": "Images"
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200,
+      "description": "Section title"
+    },
+    "description": {
+      "type": "text",
+      "description": "Section description"
+    },
+    "images": {
+      "type": "component",
+      "component": "common.gallery-item",
+      "repeatable": true,
+      "description": "Gallery images"
+    },
+    "columns": {
+      "type": "enumeration",
+      "enum": ["2", "3", "4"],
+      "default": "3",
+      "description": "Number of columns"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "kind": "component",
+  "collectionName": "components_common_quick_links",
+  "info": {
+    "singularName": "quick-link",
+    "pluralName": "quick-links",
+    "displayName": "Quick Link",
+    "description": "Quick navigation link",
+    "icon": "Link"
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200,
+      "description": "Link title"
+    },
+    "url": {
+      "type": "string",
+      "required": true,
+      "maxLength": 500,
+      "description": "Link URL"
+    }
+  }
+}

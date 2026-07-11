@@ -13,7 +13,7 @@ export default {
       path: '/site-settings',
       handler: 'api::site-settings.site-settings.create',
       config: {
-        auth: true,
+        auth: { enabled: true },
       },
     },
     {
@@ -21,7 +21,7 @@ export default {
       path: '/site-settings/:id',
       handler: 'api::site-settings.site-settings.update',
       config: {
-        auth: true,
+        auth: { enabled: true },
       },
     },
     {
@@ -29,7 +29,7 @@ export default {
       path: '/site-settings/:id',
       handler: 'api::site-settings.site-settings.delete',
       config: {
-        auth: true,
+        auth: { enabled: true },
       },
     },
   ],

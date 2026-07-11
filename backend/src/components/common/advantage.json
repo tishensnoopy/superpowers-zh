@@ -1,0 +1,29 @@
+{
+  "kind": "component",
+  "collectionName": "components_common_advantages",
+  "info": {
+    "singularName": "advantage",
+    "pluralName": "advantages",
+    "displayName": "Advantage",
+    "description": "An advantage item",
+    "icon": "Star"
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200,
+      "description": "Advantage title"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Advantage description"
+    },
+    "icon": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "Icon name"
+    }
+  }
+}

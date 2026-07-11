@@ -135,7 +135,7 @@ export default factories.createCoreController('api::product.product', ({ strapi 
       return;
     }
     
-    const idArray = Array.isArray(ids) ? ids : ids.split(',').map((s: string) => s.trim());
+    const idArray = Array.isArray(ids) ? ids : typeof ids === 'string' ? ids.split(',').map((s: string) => s.trim()) : [];
     
     try {
       const products = await strapi.db.query('api::product.product').findMany({

@@ -29,7 +29,7 @@ export default {
       path: '/knowledge-bases',
       handler: 'api::knowledge-base.knowledge-base.create',
       config: {
-        auth: true,
+        auth: { enabled: true },
       },
     },
     {
@@ -37,7 +37,7 @@ export default {
       path: '/knowledge-bases/:id',
       handler: 'api::knowledge-base.knowledge-base.update',
       config: {
-        auth: true,
+        auth: { enabled: true },
       },
     },
     {
@@ -45,7 +45,7 @@ export default {
       path: '/knowledge-bases/:id',
       handler: 'api::knowledge-base.knowledge-base.delete',
       config: {
-        auth: true,
+        auth: { enabled: true },
       },
     },
   ],

@@ -1,6 +1,39 @@
 import { factories } from '@strapi/strapi';
 
 export default factories.createCoreService('api::page.page', ({ strapi }) => ({
+  async findBySlug(params: any) {
+    console.log('[PageService] findBySlug() called, params:', params);
+    try {
+      const slug = params?.slug || '';
+      const page = await strapi.db.query('api::page.page').findOne({
+        where: { slug, publishedAt: { $notNull: true } },
+        populate: ['sections'],
+      });
+
+      console.log('[PageService] findBySlug() completed, found:', !!page);
+      return page;
+    } catch (err) {
+      console.error('[PageService] findBySlug() failed:', err instanceof Error ? err.message : err);
+      throw err;
+    }
+  },
+
+  async getHomepage() {
+    console.log('[PageService] getHomepage() called');
+    try {
+      const page = await strapi.db.query('api::page.page').findOne({
+        where: { isHomepage: true, publishedAt: { $notNull: true } },
+        populate: ['sections'],
+      });
+
+      console.log('[PageService] getHomepage() completed, found:', !!page);
+      return page;
+    } catch (err) {
+      console.error('[PageService] getHomepage() failed:', err instanceof Error ? err.message : err);
+      throw err;
+    }
+  },
+
   async initializeDefaults() {
     console.log('[PageService] initializeDefaults() called');
     try {
@@ -17,7 +50,17 @@ export default factories.createCoreService('api::page.page', ({ strapi }) => ({
             layout: 'full-width',
             showNavigation: true,
             showFooter: true,
-            sections: [],
+            sections: [
+              {
+                __component: 'section.hero',
+                title: '让每个孩子\n自信迈入小学大门',
+                subtitle: '2026年秋季班正在招生 · 名额有限',
+                description: '专注幼小衔接教育8年，科学课程体系 + 专业师资团队，帮助3-6岁儿童在入学前全面准备。',
+                buttonText: '立即预约试听',
+                buttonUrl: '/contact',
+                isFullWidth: true,
+              },
+            ],
           },
           {
             title: 'Products',

@@ -1,0 +1,45 @@
+{
+  "kind": "component",
+  "collectionName": "components_common_form_fields",
+  "info": {
+    "singularName": "form-field",
+    "pluralName": "form-fields",
+    "displayName": "Form Field",
+    "description": "Contact form field",
+    "icon": "FileText"
+  },
+  "attributes": {
+    "label": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100,
+      "description": "Field label"
+    },
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100,
+      "description": "Field name"
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": ["text", "email", "phone", "textarea", "select"],
+      "required": true,
+      "description": "Field type"
+    },
+    "required": {
+      "type": "boolean",
+      "default": false,
+      "description": "Required field"
+    },
+    "placeholder": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Placeholder text"
+    },
+    "options": {
+      "type": "json",
+      "description": "Select options"
+    }
+  }
+}

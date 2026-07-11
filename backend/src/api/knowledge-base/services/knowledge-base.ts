@@ -1,6 +1,30 @@
 import { factories } from '@strapi/strapi';
 
 export default factories.createCoreService('api::knowledge-base.knowledge-base', ({ strapi }) => ({
+  async search(params: any) {
+    console.log('[KnowledgeBaseService] search() called, params:', params);
+    try {
+      const query = params?.query || '';
+      const documents = await strapi.db.query('api::knowledge-base.knowledge-base').findMany({
+        where: {
+          status: 'ready',
+          $or: [
+            { title: { $containsi: query } },
+            { content: { $containsi: query } },
+            { tags: { $containsi: query } },
+          ],
+        },
+        orderBy: { priority: 'desc', createdAt: 'desc' },
+      });
+
+      console.log('[KnowledgeBaseService] search() completed, found:', documents.length);
+      return { data: documents };
+    } catch (err) {
+      console.error('[KnowledgeBaseService] search() failed:', err instanceof Error ? err.message : err);
+      throw err;
+    }
+  },
+
   async updateStatus(documentId: number, status: string, message?: string) {
     console.log('[KnowledgeBaseService] updateStatus() called, documentId:', documentId, 'status:', status);
     try {

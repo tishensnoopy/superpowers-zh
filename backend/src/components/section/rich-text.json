@@ -1,0 +1,29 @@
+{
+  "kind": "component",
+  "collectionName": "components_section_rich_texts",
+  "info": {
+    "singularName": "rich-text",
+    "pluralName": "rich-texts",
+    "displayName": "Rich Text",
+    "description": "Rich text content section",
+    "icon": "AlignLeft"
+  },
+  "attributes": {
+    "content": {
+      "type": "text",
+      "required": true,
+      "description": "Rich text content"
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Section title"
+    },
+    "alignment": {
+      "type": "enumeration",
+      "enum": ["left", "center", "right"],
+      "default": "left",
+      "description": "Content alignment"
+    }
+  }
+}

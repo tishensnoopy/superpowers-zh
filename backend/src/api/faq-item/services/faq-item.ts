@@ -1,6 +1,74 @@
 import { factories } from '@strapi/strapi';
 
 export default factories.createCoreService('api::faq-item.faq-item', ({ strapi }) => ({
+  async findByCategory(params: any) {
+    console.log('[FaqItemService] findByCategory() called, params:', params);
+    try {
+      const category = params?.category || '';
+      const faqs = await strapi.db.query('api::faq-item.faq-item').findMany({
+        where: { category, isActive: true },
+        orderBy: { sortOrder: 'asc' },
+      });
+
+      console.log('[FaqItemService] findByCategory() completed, found:', faqs.length);
+      return { data: faqs };
+    } catch (err) {
+      console.error('[FaqItemService] findByCategory() failed:', err instanceof Error ? err.message : err);
+      throw err;
+    }
+  },
+
+  async search(params: any) {
+    console.log('[FaqItemService] search() called, params:', params);
+    try {
+      const query = params?.query || '';
+      const faqs = await strapi.db.query('api::faq-item.faq-item').findMany({
+        where: {
+          isActive: true,
+          $or: [
+            { question: { $containsi: query } },
+            { answer: { $containsi: query } },
+            { tags: { $containsi: query } },
+          ],
+        },
+        orderBy: { sortOrder: 'asc' },
+      });
+
+      console.log('[FaqItemService] search() completed, found:', faqs.length);
+      return { data: faqs };
+    } catch (err) {
+      console.error('[FaqItemService] search() failed:', err instanceof Error ? err.message : err);
+      throw err;
+    }
+  },
+
+  async submitFeedback(params: any) {
+    console.log('[FaqItemService] submitFeedback() called, params:', params);
+    try {
+      const { id, helpful } = params;
+      const faq = await strapi.db.query('api::faq-item.faq-item').findOne({
+        where: { id },
+      });
+
+      if (!faq) {
+        console.warn('[FaqItemService] submitFeedback() FAQ not found:', id);
+        return { success: false, message: 'FAQ not found' };
+      }
+
+      const updateData = helpful
+        ? { helpfulCount: (faq.helpfulCount || 0) + 1 }
+        : { notHelpfulCount: (faq.notHelpfulCount || 0) + 1 };
+
+      await this.update(id, { data: updateData });
+
+      console.log('[FaqItemService] submitFeedback() completed successfully');
+      return { success: true };
+    } catch (err) {
+      console.error('[FaqItemService] submitFeedback() failed:', err instanceof Error ? err.message : err);
+      throw err;
+    }
+  },
+
   async generateFaqFromDocument(documentId: number) {
     console.log('[FaqItemService] generateFaqFromDocument() called, documentId:', documentId);
     try {

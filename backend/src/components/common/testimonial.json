@@ -1,0 +1,39 @@
+{
+  "kind": "component",
+  "collectionName": "components_common_testimonials",
+  "info": {
+    "singularName": "testimonial",
+    "pluralName": "testimonials",
+    "displayName": "Testimonial",
+    "description": "Customer testimonial",
+    "icon": "MessageSquare"
+  },
+  "attributes": {
+    "content": {
+      "type": "text",
+      "required": true,
+      "description": "Testimonial content"
+    },
+    "author": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200,
+      "description": "Author name"
+    },
+    "position": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Author position"
+    },
+    "company": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Author company"
+    },
+    "avatar": {
+      "type": "media",
+      "multiple": false,
+      "description": "Author photo"
+    }
+  }
+}

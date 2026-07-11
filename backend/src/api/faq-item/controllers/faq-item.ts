@@ -6,9 +6,7 @@ export default factories.createCoreController('api::faq-item.faq-item', ({ strap
     try {
       ctx.query = {
         ...ctx.query,
-        populate: {
-          sourceDocument: '*',
-        },
+        populate: [],
       };
       const result = await super.find(ctx);
       console.log('[FaqItem] find() completed, count:', result.data?.length);
@@ -24,9 +22,7 @@ export default factories.createCoreController('api::faq-item.faq-item', ({ strap
     try {
       ctx.query = {
         ...ctx.query,
-        populate: {
-          sourceDocument: '*',
-        },
+        populate: [],
       };
       const result = await super.findOne(ctx);
       console.log('[FaqItem] findOne() completed');
@@ -43,9 +39,6 @@ export default factories.createCoreController('api::faq-item.faq-item', ({ strap
       const faqs = await strapi.db.query('api::faq-item.faq-item').findMany({
         where: { category: ctx.params.category, isActive: true },
         orderBy: { sortOrder: 'asc' },
-        populate: {
-          sourceDocument: '*',
-        },
       });
       console.log('[FaqItem] findByCategory() completed, count:', faqs.length);
       return { data: faqs, meta: {} };
@@ -69,9 +62,6 @@ export default factories.createCoreController('api::faq-item.faq-item', ({ strap
           isActive: true,
         },
         orderBy: { sortOrder: 'asc' },
-        populate: {
-          sourceDocument: '*',
-        },
       });
       console.log('[FaqItem] search() completed, count:', faqs.length);
       return { data: faqs, meta: {} };

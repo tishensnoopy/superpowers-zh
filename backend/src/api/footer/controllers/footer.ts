@@ -6,6 +6,12 @@ export default factories.createCoreController('api::footer.footer', ({ strapi })
     try {
       const result = await super.find(ctx);
       console.log('[Footer] find() completed successfully');
+      if (result.data && Array.isArray(result.data)) {
+        result.data = result.data.map(item => {
+          const { id, ...attributes } = item;
+          return { id, attributes };
+        });
+      }
       return result;
     } catch (err) {
       console.error('[Footer] find() failed:', err instanceof Error ? err.message : err);

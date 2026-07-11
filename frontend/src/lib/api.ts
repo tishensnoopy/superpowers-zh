@@ -56,8 +56,9 @@ export async function fetchApi<T>(path: string, options: RequestInit = {}): Prom
 
 export async function getSiteSettings() {
   console.log(`${LOG_PREFIX} Fetching site settings...`);
-  const result = await fetchApi<{ data: SiteSettings }>('/api/site-settings');
-  console.log(`${LOG_PREFIX} Site settings loaded: id=${result.data.id}, name=${result.data.attributes.name}`);
+  const result = await fetchApi<{ data: SiteSettings[] }>('/api/site-settings');
+  const item = Array.isArray(result.data) ? result.data[0] : result.data;
+  console.log(`${LOG_PREFIX} Site settings loaded: id=${item?.id}, name=${item?.attributes?.name}`);
   return result;
 }
 
@@ -77,8 +78,9 @@ export async function getNavigationTree() {
 
 export async function getFooter() {
   console.log(`${LOG_PREFIX} Fetching footer...`);
-  const result = await fetchApi<{ data: Footer }>('/api/footer');
-  console.log(`${LOG_PREFIX} Footer loaded: id=${result.data.id}`);
+  const result = await fetchApi<{ data: Footer[] }>('/api/footer');
+  const item = Array.isArray(result.data) ? result.data[0] : result.data;
+  console.log(`${LOG_PREFIX} Footer loaded: id=${item?.id}`);
   return result;
 }
 

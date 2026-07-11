@@ -13,7 +13,7 @@ export default {
       path: '/footer',
       handler: 'api::footer.footer.create',
       config: {
-        auth: true,
+        auth: { enabled: true },
       },
     },
     {
@@ -21,7 +21,7 @@ export default {
       path: '/footer/:id',
       handler: 'api::footer.footer.update',
       config: {
-        auth: true,
+        auth: { enabled: true },
       },
     },
     {
@@ -29,7 +29,7 @@ export default {
       path: '/footer/:id',
       handler: 'api::footer.footer.delete',
       config: {
-        auth: true,
+        auth: { enabled: true },
       },
     },
   ],

@@ -10,8 +10,8 @@ export default {
     },
     {
       method: 'GET',
-      path: '/pages/:id',
-      handler: 'api::page.page.findOne',
+      path: '/pages/homepage',
+      handler: 'api::page.page.getHomepage',
       config: {
         auth: false,
       },
@@ -26,8 +26,8 @@ export default {
     },
     {
       method: 'GET',
-      path: '/pages/homepage',
-      handler: 'api::page.page.getHomepage',
+      path: '/pages/:id',
+      handler: 'api::page.page.findOne',
       config: {
         auth: false,
       },
@@ -37,7 +37,7 @@ export default {
       path: '/pages',
       handler: 'api::page.page.create',
       config: {
-        auth: true,
+        auth: { enabled: true },
       },
     },
     {
@@ -45,7 +45,7 @@ export default {
       path: '/pages/:id',
       handler: 'api::page.page.update',
       config: {
-        auth: true,
+        auth: { enabled: true },
       },
     },
     {
@@ -53,7 +53,7 @@ export default {
       path: '/pages/:id',
       handler: 'api::page.page.delete',
       config: {
-        auth: true,
+        auth: { enabled: true },
       },
     },
   ],
