@@ -60,22 +60,26 @@ export default factories.createCoreController('api::page.page', ({ strapi }) => 
   async findBySlug(ctx) {
     console.log('[Page] findBySlug() called, slug:', ctx.params.slug);
     try {
-      const page = await strapi.db.query('api::page.page').findOne({
-        where: { slug: ctx.params.slug },
+      ctx.query = {
+        ...ctx.query,
+        filters: { slug: ctx.params.slug },
         populate: {
           sections: sectionsPopulate,
           seo: {
             fields: ['metaTitle', 'metaDescription'],
           },
         },
-      });
-      if (!page) {
+      };
+      const result = await super.find(ctx);
+      const item = result.data?.[0];
+      if (!item) {
         console.warn('[Page] findBySlug() page not found:', ctx.params.slug);
         return ctx.notFound('Page not found');
       }
-      const { id, ...attributes } = page;
+      const { id, ...attributes } = item;
+      const page = { id, attributes };
       console.log('[Page] findBySlug() completed, id:', page.id);
-      return { data: { id, attributes }, meta: {} };
+      return { data: page, meta: {} };
     } catch (err) {
       console.error('[Page] findBySlug() failed:', err instanceof Error ? err.message : err);
       throw err;
@@ -85,17 +89,26 @@ export default factories.createCoreController('api::page.page', ({ strapi }) => 
   async getHomepage(ctx) {
     console.log('[Page] getHomepage() called');
     try {
-      const page = await strapi.db.query('api::page.page').findOne({
-        where: { isHomepage: true },
-        populate: ['sections'],
-      });
-      if (!page) {
+      ctx.query = {
+        ...ctx.query,
+        filters: { isHomepage: true },
+        populate: {
+          sections: sectionsPopulate,
+          seo: {
+            fields: ['metaTitle', 'metaDescription'],
+          },
+        },
+      };
+      const result = await super.find(ctx);
+      const item = result.data?.[0];
+      if (!item) {
         console.warn('[Page] getHomepage() homepage not found');
         return ctx.notFound('Homepage not found');
       }
-      const { id, ...attributes } = page;
+      const { id, ...attributes } = item;
+      const page = { id, attributes };
       console.log('[Page] getHomepage() completed, id:', page.id);
-      return { data: { id, attributes }, meta: {} };
+      return { data: page, meta: {} };
     } catch (err) {
       console.error('[Page] getHomepage() failed:', err instanceof Error ? err.message : err);
       throw err;

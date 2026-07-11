@@ -57,8 +57,8 @@ export default function PageRenderer({ slug }: { slug?: string }) {
 
   return (
     <div>
-      {sections.map((section: any) => (
-        <SectionRenderer key={section.id || Math.random()} section={section} />
+      {sections.map((section: any, index: number) => (
+        <SectionRenderer key={`${section.__component}-${section.id}-${index}`} section={section} />
       ))}
     </div>
   );
