@@ -35,7 +35,7 @@ export default function Advantages({ section }: { section: Section }) {
         </div>
 
         <div className="grid grid-cols-12 gap-6">
-          {(advantages?.data || []).map((adv: any) => {
+          {(Array.isArray(advantages) ? advantages : (advantages?.data || [])).map((adv: any) => {
             const advAttrs = adv.attributes || adv;
             const Icon = iconMap[advAttrs.icon] || Award;
             return (

@@ -28,7 +28,7 @@ export default function Team({ section }: { section: Section }) {
         </div>
 
         <div className="grid grid-cols-12 gap-6">
-          {(members?.data || []).map((member: any) => {
+          {(Array.isArray(members) ? members : (members?.data || [])).map((member: any) => {
             const m = member.attributes || member;
             return (
               <div key={member.id} className="col-span-12 sm:col-span-6 lg:col-span-3">
