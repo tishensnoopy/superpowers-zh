@@ -1,5 +1,9 @@
 import { factories } from '@strapi/strapi';
 
+const sectionsPopulate = {
+  populate: '*',
+};
+
 export default factories.createCoreController('api::page.page', ({ strapi }) => ({
   async find(ctx) {
     console.log('[Page] find() called');
@@ -7,9 +11,7 @@ export default factories.createCoreController('api::page.page', ({ strapi }) => 
       ctx.query = {
         ...ctx.query,
         populate: {
-          sections: {
-            populate: '*',
-          },
+          sections: sectionsPopulate,
           seo: {
             fields: ['metaTitle', 'metaDescription'],
           },
@@ -36,9 +38,7 @@ export default factories.createCoreController('api::page.page', ({ strapi }) => 
       ctx.query = {
         ...ctx.query,
         populate: {
-          sections: {
-            populate: '*',
-          },
+          sections: sectionsPopulate,
           seo: {
             fields: ['metaTitle', 'metaDescription'],
           },
@@ -63,9 +63,7 @@ export default factories.createCoreController('api::page.page', ({ strapi }) => 
       const page = await strapi.db.query('api::page.page').findOne({
         where: { slug: ctx.params.slug },
         populate: {
-          sections: {
-            populate: '*',
-          },
+          sections: sectionsPopulate,
           seo: {
             fields: ['metaTitle', 'metaDescription'],
           },
