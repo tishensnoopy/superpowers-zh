@@ -8,5 +8,5 @@ export default factories.createCoreRouter('api::appointment.appointment', {
       middlewares: [],
     },
   },
-  only: ['create', 'find', 'findOne'],
+  only: ['create'],
 });
