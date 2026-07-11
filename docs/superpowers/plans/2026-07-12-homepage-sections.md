@@ -1256,6 +1256,8 @@ cd /home/tishensnoopy/project/superpowers-zh/frontend && npx vitest run
 
 ## 阶段三：预约表单业务逻辑与集成（串行）
 
+> **✅ 阶段三完成（2026-07-12）：** 3 个任务全部完成，34 个测试通过。ContactForm 组件含表单验证、提交、成功反馈。端到端验证：浏览器填写表单 → 提交 → API 返回 201 → 显示"预约成功"消息，控制台无报错。
+
 ### 任务 11：添加 createAppointment API 函数
 
 **文件：**
