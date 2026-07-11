@@ -344,3 +344,23 @@ export interface Pagination {
   pageCount: number;
   total: number;
 }
+
+export interface AppointmentData {
+  childName: string;
+  parentName: string;
+  phone: string;
+  age?: string;
+  course?: string;
+  preferredTimeSlot?: string;
+  message?: string;
+}
+
+export async function createAppointment(data: AppointmentData) {
+  console.log(`${LOG_PREFIX} Creating appointment...`);
+  const result = await fetchApi<{ data: any }>('/api/appointments', {
+    method: 'POST',
+    body: JSON.stringify({ data }),
+  });
+  console.log(`${LOG_PREFIX} Appointment created: id=${result.data?.id}`);
+  return result;
+}
