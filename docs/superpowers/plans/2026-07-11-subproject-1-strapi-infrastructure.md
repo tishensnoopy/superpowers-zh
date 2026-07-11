@@ -222,7 +222,7 @@ git commit -m "feat: add docker compose base config with postgres redis meilisea
     "styled-components": "^6.1.0"
   },
   "devDependencies": {
-    "@strapi/ts-config": "5",
+    "@strapi/typescript-utils": "5",
     "@types/node": "^22.0.0",
     "typescript": "^5.5.0"
   },
@@ -235,9 +235,11 @@ git commit -m "feat: add docker compose base config with postgres redis meilisea
 
 - [ ] **步骤 2：创建 tsconfig.json**
 
+> **重要说明：** Strapi v5 使用 `@strapi/typescript-utils` 而非 `@strapi/ts-config`，tsconfig 需继承 `@strapi/typescript-utils/tsconfigs/server`。
+
 ```json
 {
-  "extends": "@strapi/ts-config",
+  "extends": "@strapi/typescript-utils/tsconfigs/server",
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": ".",
@@ -247,7 +249,7 @@ git commit -m "feat: add docker compose base config with postgres redis meilisea
     }
   },
   "include": ["src", "config", "types"],
-  "exclude": ["node_modules", "dist", "build"]
+  "exclude": ["node_modules", "dist", "build", ".strapi", ".tmp", ".cache", "src/admin", "**/*.test.ts", "src/plugins/**", "types/generated/**"]
 }
 ```
 
