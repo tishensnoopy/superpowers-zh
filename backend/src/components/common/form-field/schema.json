@@ -1,0 +1,43 @@
+{
+  "kind": "component",
+  "collectionName": "components_common_form_fields",
+  "info": {
+    "displayName": "Form Field",
+    "description": "Single form field",
+    "icon": "FileText"
+  },
+  "attributes": {
+    "label": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100,
+      "description": "Field label"
+    },
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100,
+      "description": "Field name (for form submission)"
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": ["text", "email", "phone", "textarea", "select"],
+      "required": true,
+      "description": "Field type"
+    },
+    "required": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this field is required"
+    },
+    "placeholder": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Placeholder text"
+    },
+    "options": {
+      "type": "string",
+      "description": "Select options (comma separated)"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "kind": "component",
+  "collectionName": "components_section_teams",
+  "info": {
+    "displayName": "Team",
+    "description": "Display team members",
+    "icon": "Users"
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200,
+      "description": "Section title"
+    },
+    "description": {
+      "type": "text",
+      "description": "Section description"
+    },
+    "members": {
+      "type": "component",
+      "component": "common.team-member",
+      "repeatable": true,
+      "description": "Team members"
+    }
+  }
+}

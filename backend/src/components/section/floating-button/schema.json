@@ -1,0 +1,43 @@
+{
+  "kind": "component",
+  "collectionName": "components_section_floating_buttons",
+  "info": {
+    "displayName": "Floating Button",
+    "description": "Floating action button for consultation",
+    "icon": "Phone"
+  },
+  "attributes": {
+    "icon": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "Button icon"
+    },
+    "label": {
+      "type": "string",
+      "maxLength": 50,
+      "description": "Button text"
+    },
+    "action": {
+      "type": "enumeration",
+      "enum": ["contact", "chat", "phone", "callback"],
+      "default": "contact",
+      "description": "Action type"
+    },
+    "phone": {
+      "type": "string",
+      "maxLength": 50,
+      "description": "Phone number"
+    },
+    "wechat": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "WeChat ID"
+    },
+    "position": {
+      "type": "enumeration",
+      "enum": ["bottom-right", "bottom-left"],
+      "default": "bottom-right",
+      "description": "Button position"
+    }
+  }
+}

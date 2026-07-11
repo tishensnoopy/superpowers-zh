@@ -37,6 +37,10 @@ export default {
       const footerService = strapi.service('api::footer.footer');
       await footerService.initializeDefaults();
       console.log('[Bootstrap] Footer initialized');
+
+      const pageService = strapi.service('api::page.page');
+      await pageService.initializeDefaults();
+      console.log('[Bootstrap] Pages initialized');
     } catch (err) {
       console.warn('[Bootstrap] Default data initialization failed:', err instanceof Error ? err.message : err);
     }

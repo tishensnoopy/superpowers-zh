@@ -1,0 +1,89 @@
+{
+  "kind": "contentType",
+  "collectionName": "pages",
+  "info": {
+    "singularName": "page",
+    "pluralName": "pages",
+    "displayName": "Page",
+    "description": "Dynamic page with sections",
+    "icon": "FileText",
+    "draftAndPublish": true
+  },
+  "options": {
+    "draftAndPublish": true,
+    "singleton": false
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200,
+      "description": "Page title"
+    },
+    "slug": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "maxLength": 200,
+      "description": "Page URL path"
+    },
+    "isHomepage": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is the homepage"
+    },
+    "sections": {
+      "type": "dynamiczone",
+      "components": [
+        "section.hero",
+        "section.advantages",
+        "section.rich-text",
+        "section.product-grid",
+        "section.product-comparison",
+        "section.features",
+        "section.team",
+        "section.testimonials",
+        "section.contact-form",
+        "section.faq",
+        "section.gallery",
+        "section.floating-button"
+      ],
+      "description": "Page sections (drag and drop)"
+    },
+    "seo": {
+      "type": "component",
+      "component": "common.seo",
+      "description": "SEO configuration"
+    },
+    "parent": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::page.page",
+      "inversedBy": "children",
+      "description": "Parent page"
+    },
+    "children": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::page.page",
+      "mappedBy": "parent",
+      "description": "Child pages"
+    },
+    "layout": {
+      "type": "enumeration",
+      "enum": ["full-width", "boxed", "sidebar-left", "sidebar-right"],
+      "default": "full-width",
+      "description": "Page layout"
+    },
+    "showNavigation": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show navigation bar"
+    },
+    "showFooter": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show footer"
+    }
+  }
+}

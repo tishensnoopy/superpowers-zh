@@ -1,0 +1,28 @@
+{
+  "kind": "component",
+  "collectionName": "components_section_faqs",
+  "info": {
+    "displayName": "FAQ",
+    "description": "Frequently asked questions",
+    "icon": "HelpCircle"
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200,
+      "description": "Section title"
+    },
+    "faqs": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::faq-item.faq-item",
+      "description": "Related FAQ items"
+    },
+    "showSearch": {
+      "type": "boolean",
+      "default": true,
+      "description": "Show search box"
+    }
+  }
+}
