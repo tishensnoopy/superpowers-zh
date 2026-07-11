@@ -732,6 +732,8 @@ git commit -m "chore(frontend): 安装 vitest 测试框架"
 
 > **并行执行说明：** 这三个任务满足并行条件——各自修改独立的组件文件、无数据依赖、复杂度相近、有独立验证方式。使用 `dispatching-parallel-agents` skill 分发给 3 个子代理执行。
 
+> **✅ 阶段二完成（2026-07-12）：** 三个组件 TDD 全部完成，14 个测试通过。修复了 Strapi v5 repeatable component 返回直接数组格式（非 `{data: [...]}`）的兼容性问题。浏览器验证 5 个区块全部正常渲染。
+
 ---
 
 ### 任务 7：Advantages 组件 TDD（并行）
