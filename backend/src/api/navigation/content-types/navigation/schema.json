@@ -1,0 +1,64 @@
+{
+  "kind": "contentType",
+  "collectionName": "navigations",
+  "info": {
+    "singularName": "navigation",
+    "pluralName": "navigations",
+    "displayName": "Navigation",
+    "description": "Site navigation menu items",
+    "icon": "Menu",
+    "draftAndPublish": false
+  },
+  "options": {
+    "draftAndPublish": false,
+    "singleton": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100,
+      "description": "Navigation item name"
+    },
+    "url": {
+      "type": "string",
+      "required": true,
+      "maxLength": 500,
+      "description": "Target URL (can be internal path or external URL)"
+    },
+    "icon": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "Icon name (from icon library)"
+    },
+    "position": {
+      "type": "integer",
+      "default": 0,
+      "description": "Sort order (lower = earlier)"
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this navigation item is active"
+    },
+    "children": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::navigation.navigation",
+      "mappedBy": "parent",
+      "description": "Child navigation items (dropdown menu)"
+    },
+    "parent": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::navigation.navigation",
+      "inversedBy": "children",
+      "description": "Parent navigation item"
+    },
+    "isExternal": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is an external link"
+    }
+  }
+}

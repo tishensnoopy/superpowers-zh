@@ -1,0 +1,64 @@
+{
+  "kind": "contentType",
+  "collectionName": "site_settings",
+  "info": {
+    "singularName": "site-settings",
+    "pluralName": "site-settings",
+    "displayName": "Site Settings",
+    "description": "Global site settings and configuration",
+    "icon": "Settings",
+    "draftAndPublish": false
+  },
+  "options": {
+    "draftAndPublish": false,
+    "singleton": true
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 255,
+      "minLength": 1,
+      "description": "Site name / brand name"
+    },
+    "slogan": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Site slogan or tagline"
+    },
+    "logo": {
+      "type": "media",
+      "description": "Site logo image",
+      "multiple": false
+    },
+    "favicon": {
+      "type": "media",
+      "description": "Website favicon",
+      "multiple": false
+    },
+    "phone": {
+      "type": "string",
+      "maxLength": 50,
+      "description": "Contact phone number"
+    },
+    "email": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "Contact email address"
+    },
+    "address": {
+      "type": "text",
+      "description": "Company address"
+    },
+    "wechat": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "WeChat ID"
+    },
+    "seo": {
+      "type": "component",
+      "component": "common.seo",
+      "description": "SEO configuration"
+    }
+  }
+}

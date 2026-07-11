@@ -24,6 +24,23 @@ export default {
       }
     }
 
+    console.log('[Bootstrap] Initializing default global data...');
+    try {
+      const siteSettingsService = strapi.service('api::site-settings.site-settings');
+      await siteSettingsService.initializeDefaults();
+      console.log('[Bootstrap] Site Settings initialized');
+
+      const navigationService = strapi.service('api::navigation.navigation');
+      await navigationService.initializeDefaults();
+      console.log('[Bootstrap] Navigation initialized');
+
+      const footerService = strapi.service('api::footer.footer');
+      await footerService.initializeDefaults();
+      console.log('[Bootstrap] Footer initialized');
+    } catch (err) {
+      console.warn('[Bootstrap] Default data initialization failed:', err instanceof Error ? err.message : err);
+    }
+
     console.log('[Bootstrap] Startup complete');
   },
 

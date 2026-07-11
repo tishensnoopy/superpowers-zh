@@ -1,0 +1,62 @@
+{
+  "kind": "component",
+  "collectionName": "components_common_seos",
+  "info": {
+    "displayName": "SEO",
+    "description": "SEO meta tags and structured data",
+    "icon": "Search"
+  },
+  "attributes": {
+    "metaTitle": {
+      "type": "string",
+      "maxLength": 60,
+      "description": "Meta title (max 60 chars)"
+    },
+    "metaDescription": {
+      "type": "string",
+      "maxLength": 160,
+      "description": "Meta description (max 160 chars)"
+    },
+    "metaKeywords": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "Meta keywords (comma separated)"
+    },
+    "canonicalUrl": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Canonical URL"
+    },
+    "openGraphTitle": {
+      "type": "string",
+      "maxLength": 60,
+      "description": "Open Graph title"
+    },
+    "openGraphDescription": {
+      "type": "string",
+      "maxLength": 160,
+      "description": "Open Graph description"
+    },
+    "openGraphImage": {
+      "type": "media",
+      "description": "Open Graph image (1200x630 recommended)",
+      "multiple": false
+    },
+    "openGraphType": {
+      "type": "enumeration",
+      "enum": ["website", "article", "product"],
+      "default": "website",
+      "description": "Open Graph type"
+    },
+    "twitterCard": {
+      "type": "enumeration",
+      "enum": ["summary", "summary_large_image"],
+      "default": "summary",
+      "description": "Twitter card type"
+    },
+    "structuredData": {
+      "type": "json",
+      "description": "JSON-LD structured data"
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "kind": "contentType",
+  "collectionName": "footers",
+  "info": {
+    "singularName": "footer",
+    "pluralName": "footers",
+    "displayName": "Footer",
+    "description": "Site footer configuration",
+    "icon": "Footer",
+    "draftAndPublish": false
+  },
+  "options": {
+    "draftAndPublish": false,
+    "singleton": true
+  },
+  "attributes": {
+    "copyright": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Copyright text"
+    },
+    "socialLinks": {
+      "type": "component",
+      "component": "common.social-link",
+      "repeatable": true,
+      "description": "Social media links"
+    },
+    "quickLinks": {
+      "type": "component",
+      "component": "common.quick-link",
+      "repeatable": true,
+      "description": "Quick navigation links"
+    },
+    "aboutText": {
+      "type": "text",
+      "description": "About company text in footer"
+    },
+    "seo": {
+      "type": "component",
+      "component": "common.seo",
+      "description": "SEO configuration"
+    }
+  }
+}
