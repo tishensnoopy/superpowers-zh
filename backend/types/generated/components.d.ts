@@ -10,6 +10,16 @@ export interface CommonAdvantage extends Struct.ComponentSchema {
     singularName: 'advantage';
   };
   attributes: {
+    bgColor: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 20;
+      }> &
+      Schema.Attribute.DefaultTo<'#FFF3E5'>;
+    color: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 20;
+      }> &
+      Schema.Attribute.DefaultTo<'#F5851F'>;
     description: Schema.Attribute.String &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 500;
