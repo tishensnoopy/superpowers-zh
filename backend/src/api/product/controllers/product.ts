@@ -267,4 +267,47 @@ export default factories.createCoreController('api::product.product', ({ strapi 
       };
     }
   },
+
+  async findBySlug(ctx) {
+    const { slug } = ctx.params;
+    
+    console.log('[Product findBySlug] Request:', { slug });
+    
+    if (!slug) {
+      ctx.status = 400;
+      ctx.body = { error: '请提供课程 slug' };
+      return;
+    }
+    
+    try {
+      const product = await strapi.db.query('api::product.product').findOne({
+        where: { slug, publishedAt: { $notNull: true } },
+        populate: ['thumbnail', 'images', 'categories', 'objectives', 'outline', 'testimonials'],
+      });
+      
+      if (!product) {
+        ctx.status = 404;
+        ctx.body = { error: '课程不存在' };
+        return;
+      }
+      
+      console.log('[Product findBySlug] Found:', product.name);
+      
+      ctx.body = {
+        data: {
+          id: product.id,
+          documentId: product.documentId,
+          ...product,
+        },
+        meta: {},
+      };
+    } catch (error) {
+      console.error('[Product findBySlug] Error:', error);
+      ctx.status = 500;
+      ctx.body = {
+        error: '获取课程失败',
+        details: error instanceof Error ? error.message : String(error),
+      };
+    }
+  },
 }));

@@ -42,5 +42,13 @@ export default {
         auth: false,
       },
     },
+    {
+      method: 'GET',
+      path: '/products/slug/:slug',
+      handler: 'product.findBySlug',
+      config: {
+        auth: false,
+      },
+    },
   ],
 };
