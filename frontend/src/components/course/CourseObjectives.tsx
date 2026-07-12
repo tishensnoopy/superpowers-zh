@@ -2,7 +2,7 @@ import { Target } from 'lucide-react';
 import type { CourseObjective } from '../../lib/api';
 
 export default function CourseObjectives({ objectives }: { objectives?: CourseObjective[] }) {
-  if (!objectives || objectives.length === 0) return null;
+  const hasData = objectives && objectives.length > 0;
 
   return (
     <section className="py-16 bg-background">
@@ -22,25 +22,32 @@ export default function CourseObjectives({ objectives }: { objectives?: CourseOb
             学习目标
           </h2>
         </div>
-        <div className="grid grid-cols-12 gap-6">
-          {objectives.map((obj, index) => (
-            <div key={obj.id} className="col-span-12 sm:col-span-6 lg:col-span-4">
-              <div className="h-full bg-card rounded-2xl p-6 border border-border shadow-sm flex gap-4">
-                <div
-                  className="flex-shrink-0 w-10 h-10 rounded-full bg-[#F5851F] text-white flex items-center justify-center font-bold"
-                >
-                  {index + 1}
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-base font-bold text-[#1C2B3A] mb-2">{obj.title}</h3>
-                  {obj.description && (
-                    <p className="text-sm text-muted-foreground leading-relaxed">{obj.description}</p>
-                  )}
+        {hasData ? (
+          <div className="grid grid-cols-12 gap-6">
+            {objectives!.map((obj, index) => (
+              <div key={obj.id} className="col-span-12 sm:col-span-6 lg:col-span-4">
+                <div className="h-full bg-card rounded-2xl p-6 border border-border shadow-sm flex gap-4">
+                  <div
+                    className="flex-shrink-0 w-10 h-10 rounded-full bg-[#F5851F] text-white flex items-center justify-center font-bold"
+                  >
+                    {index + 1}
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-bold text-[#1C2B3A] mb-2">{obj.title}</h3>
+                    {obj.description && (
+                      <p className="text-sm text-muted-foreground leading-relaxed">{obj.description}</p>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 text-muted-foreground bg-muted/20 rounded-2xl border border-dashed border-border">
+            <Target size={32} className="mx-auto mb-3 opacity-40" />
+            <p>学习目标内容更新中，敬请期待</p>
+          </div>
+        )}
       </div>
     </section>
   );

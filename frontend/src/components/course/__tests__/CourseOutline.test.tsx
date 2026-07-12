@@ -33,14 +33,15 @@ describe('CourseOutline 组件', () => {
     expect(screen.getByText('通过绘本认识基础汉字和词语')).toBeInTheDocument();
   });
 
-  it('空数组时不渲染区块', () => {
-    const { container } = render(<CourseOutline outline={[]} />);
-    expect(container.firstChild).toBeNull();
+  it('空数组时显示空状态占位符', () => {
+    render(<CourseOutline outline={[]} />);
+    expect(screen.getByText('课程大纲内容更新中，敬请期待')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '课程大纲' })).toBeInTheDocument();
   });
 
-  it('outline 为 undefined 时不崩溃', () => {
-    const { container } = render(<CourseOutline outline={undefined as any} />);
-    expect(container.firstChild).toBeNull();
+  it('outline 为 undefined 时显示空状态占位符', () => {
+    render(<CourseOutline outline={undefined as any} />);
+    expect(screen.getByText('课程大纲内容更新中，敬请期待')).toBeInTheDocument();
   });
 
   it('lessonCount 为 0 时不显示课时数', () => {

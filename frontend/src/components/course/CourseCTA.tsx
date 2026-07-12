@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 export default function CourseCTA({ courseName }: { courseName: string }) {
   return (
-    <section className="py-16 bg-gradient-to-r from-[#F5851F] to-[#FF8C00]">
+    <section className="py-16" style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}>
       <div className="max-w-[1400px] mx-auto px-8 text-center">
         <h2
           className="text-white mb-4"

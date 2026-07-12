@@ -26,14 +26,15 @@ describe('CourseObjectives 组件', () => {
     expect(screen.getByText('通过绘本和游戏积累基础词汇')).toBeInTheDocument();
   });
 
-  it('空数组时不渲染区块', () => {
-    const { container } = render(<CourseObjectives objectives={[]} />);
-    expect(container.firstChild).toBeNull();
+  it('空数组时显示空状态占位符', () => {
+    render(<CourseObjectives objectives={[]} />);
+    expect(screen.getByText('学习目标内容更新中，敬请期待')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '学习目标' })).toBeInTheDocument();
   });
 
-  it('objectives 为 undefined 时不崩溃', () => {
-    const { container } = render(<CourseObjectives objectives={undefined as any} />);
-    expect(container.firstChild).toBeNull();
+  it('objectives 为 undefined 时显示空状态占位符', () => {
+    render(<CourseObjectives objectives={undefined as any} />);
+    expect(screen.getByText('学习目标内容更新中，敬请期待')).toBeInTheDocument();
   });
 
   it('目标项无 description 时不崩溃', () => {

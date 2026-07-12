@@ -18,7 +18,7 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export default function CourseTestimonials({ testimonials }: { testimonials?: CourseTestimonial[] }) {
-  if (!testimonials || testimonials.length === 0) return null;
+  const hasData = testimonials && testimonials.length > 0;
 
   return (
     <section className="py-16 bg-background">
@@ -38,22 +38,29 @@ export default function CourseTestimonials({ testimonials }: { testimonials?: Co
             家长评价
           </h2>
         </div>
-        <div className="grid grid-cols-12 gap-6">
-          {testimonials.map((t) => (
-            <div key={t.id} className="col-span-12 sm:col-span-6 lg:col-span-4">
-              <div className="h-full bg-card rounded-2xl p-6 border border-border shadow-sm">
-                <StarRating rating={t.rating || 5} />
-                <p className="text-sm text-muted-foreground leading-relaxed my-4">{t.content}</p>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-[#FFF3E5] flex items-center justify-center text-[#F5851F] font-bold text-sm">
-                    {t.parentName.charAt(0)}
+        {hasData ? (
+          <div className="grid grid-cols-12 gap-6">
+            {testimonials!.map((t) => (
+              <div key={t.id} className="col-span-12 sm:col-span-6 lg:col-span-4">
+                <div className="h-full bg-card rounded-2xl p-6 border border-border shadow-sm">
+                  <StarRating rating={t.rating || 5} />
+                  <p className="text-sm text-muted-foreground leading-relaxed my-4">{t.content}</p>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-[#FFF3E5] flex items-center justify-center text-[#F5851F] font-bold text-sm">
+                      {t.parentName.charAt(0)}
+                    </div>
+                    <span className="text-sm font-medium text-[#1C2B3A]">{t.parentName}</span>
                   </div>
-                  <span className="text-sm font-medium text-[#1C2B3A]">{t.parentName}</span>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 text-muted-foreground bg-muted/20 rounded-2xl border border-dashed border-border">
+            <MessageSquare size={32} className="mx-auto mb-3 opacity-40" />
+            <p>家长评价内容更新中，敬请期待</p>
+          </div>
+        )}
       </div>
     </section>
   );

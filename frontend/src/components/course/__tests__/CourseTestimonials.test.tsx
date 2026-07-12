@@ -32,14 +32,15 @@ describe('CourseTestimonials 组件', () => {
     expect(fiveStarItems.length).toBeGreaterThanOrEqual(5);
   });
 
-  it('空数组时不渲染区块', () => {
-    const { container } = render(<CourseTestimonials testimonials={[]} />);
-    expect(container.firstChild).toBeNull();
+  it('空数组时显示空状态占位符', () => {
+    render(<CourseTestimonials testimonials={[]} />);
+    expect(screen.getByText('家长评价内容更新中，敬请期待')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '家长评价' })).toBeInTheDocument();
   });
 
-  it('testimonials 为 undefined 时不崩溃', () => {
-    const { container } = render(<CourseTestimonials testimonials={undefined as any} />);
-    expect(container.firstChild).toBeNull();
+  it('testimonials 为 undefined 时显示空状态占位符', () => {
+    render(<CourseTestimonials testimonials={undefined as any} />);
+    expect(screen.getByText('家长评价内容更新中，敬请期待')).toBeInTheDocument();
   });
 
   it('无 rating 时默认 5 星', () => {

@@ -223,3 +223,61 @@ testimonials: []         → 字段存在，空数组 ✅
 4. **视觉验证** — TRAE 内建浏览器验证页面布局
 
 进入 writing-plans 技能创建详细实现计划。
+
+## Strapi v5 踩坑记录（实施阶段）
+
+在子代理驱动执行实施计划过程中，发现两个 Strapi v5 关键陷阱，已修复并固化到 `project_memory.md`。
+
+### 陷阱 1：自定义路由路径双 `/api` 前缀
+
+**现象：** 在 `backend/src/api/product/routes/custom.ts` 中定义路由 `path: '/api/products/slug/:slug'`，Strapi v5 实际注册的路由变成 `/api/api/products/slug/:slug`（双 `/api` 前缀），导致前端 404。
+
+**根因：** Strapi v5 会自动为自定义路由路径添加 `/api` 前缀。
+
+**修复：** `custom.ts` 中的 path **不应**包含 `/api` 前缀。
+- 错误：`path: '/api/products/slug/:slug'` → 实际注册为 `/api/api/products/slug/:slug`
+- 正确：`path: '/products/slug/:slug'` → 实际注册为 `/api/products/slug/:slug`
+
+**影响文件：** `backend/src/api/product/routes/custom.ts`
+
+### 陷阱 2：自定义控制器返回格式不匹配
+
+**现象：** 课程详情页显示"课程不存在"，但 API 实际返回了数据。前端 `product.attributes.name` 为 `undefined`。
+
+**根因：** 自定义 `findBySlug` 控制器直接展开返回扁平格式 `{ data: { id, ...product } }`，但前端期望 Strapi v4 风格的 `{ data: { id, attributes: {...} } }` 格式（字段包裹在 `attributes` 中）。
+
+**修复：** 在控制器中手动将字段拆分到 `attributes`：
+
+```typescript
+const { id, documentId, ...attributes } = product;
+ctx.body = {
+  data: {
+    id,
+    documentId,
+    attributes,
+  },
+  meta: {},
+};
+```
+
+直接 `...product` 展开会返回扁平格式，导致前端 `product.attributes.name` 为 undefined。
+
+**影响文件：** `backend/src/api/product/controllers/product.ts`（`findBySlug` 方法，约 294-305 行）
+
+### 陷阱 3：`--no-open` 选项不被 Strapi v5 CLI 识别
+
+**现象：** 启动 Strapi 时尝试用 `strapi develop --no-open` 禁止自动打开浏览器，报错 `error: unknown option '--no-open'`。
+
+**根因：** Strapi v5 CLI 的 `--open` 选项默认为 `true`，取反语法是 `--open false` 而非 `--no-open`。
+
+**修复：** `backend/package.json` 中 `"develop": "strapi develop --open false"`
+
+### 经验总结
+
+这三个陷阱都是 Strapi v5 与 v4 的行为差异，且文档中不明显。核心教训：
+
+1. **自定义路由 path 不要加 `/api` 前缀** — Strapi v5 自动添加
+2. **自定义控制器要手动包装 `attributes`** — 如果前端期望 v4 格式
+3. **`--open false` 而非 `--no-open`** — Strapi v5 CLI 选项语法
+
+所有经验已同步到 `project_memory.md` 的 "Lessons Learned" 和 "Strapi 后端启动配置" 章节。

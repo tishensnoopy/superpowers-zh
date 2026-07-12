@@ -47,4 +47,32 @@ describe('CourseHeader 组件', () => {
     render(<CourseHeader product={noDesc as any} />);
     expect(screen.getByRole('heading', { name: '无描述课程' })).toBeInTheDocument();
   });
+
+  it('渲染价格和原价（含删除线）', () => {
+    const withPrice = {
+      id: 4,
+      attributes: {
+        name: '带价格课程',
+        slug: 'priced',
+        price: 2999,
+        originalPrice: 3999,
+      },
+    };
+    render(<CourseHeader product={withPrice as any} />);
+    expect(screen.getByText('¥2999')).toBeInTheDocument();
+    expect(screen.getByText('¥3999')).toBeInTheDocument();
+  });
+
+  it('仅渲染价格无原价时不显示删除线', () => {
+    const onlyPrice = {
+      id: 5,
+      attributes: {
+        name: '仅价格课程',
+        slug: 'only-price',
+        price: 1999,
+      },
+    };
+    render(<CourseHeader product={onlyPrice as any} />);
+    expect(screen.getByText('¥1999')).toBeInTheDocument();
+  });
 });
