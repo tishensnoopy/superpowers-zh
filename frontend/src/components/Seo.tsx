@@ -36,7 +36,7 @@ export default function Seo({
 
   const ogTitle = seo?.ogTitle ?? resolvedTitle;
   const ogDescription = seo?.ogDescription ?? resolvedDescription;
-  const ogImage = resolveImageUrl(seo?.ogImage?.data?.attributes?.url) ?? image;
+  const ogImage = resolveImageUrl(seo?.ogImage?.url) ?? image;
   const ogType = type ?? seo?.ogType ?? 'website';
 
   const fullTitle = resolvedTitle ? `${resolvedTitle} | ${siteName}` : siteName;

@@ -23,7 +23,7 @@ const platformColors: Record<string, string> = {
 };
 
 const renderSocialLink = (social: any) => {
-  const socialAttrs = social.attributes || social;
+  const socialAttrs = social;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=64x64&data=${encodeURIComponent(socialAttrs.url)}`;
 
   return (
@@ -93,8 +93,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     setDropdownOpen(null);
   }, [location.pathname]);
 
-  const settings = siteSettings?.attributes || {};
-  const footerAttrs = footer?.attributes || {};
+  const settings = siteSettings || {};
+  const footerAttrs = footer || {};
 
   const isActive = (url: string) => {
     if (url === '/') {
@@ -142,8 +142,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
           <nav className="hidden lg:flex items-center gap-1">
             {navigation.map((item: any) => {
-              const itemAttrs = item.attributes || item;
-              const hasChildren = itemAttrs.children?.data?.length > 0;
+              const itemAttrs = item;
+              const hasChildren = itemAttrs.children?.length > 0;
               const active = isActive(itemAttrs.url);
 
               if (hasChildren) {
@@ -168,8 +168,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     {dropdownOpen === item.id && (
                       <div className="absolute top-full left-0 pt-1 min-w-[180px] z-50">
                         <div className="bg-white rounded-xl shadow-xl border border-border py-2 animate-in fade-in slide-in-from-top-2 duration-150">
-                          {itemAttrs.children.data.map((child: any) => {
-                            const childAttrs = child.attributes || child;
+                          {itemAttrs.children.map((child: any) => {
+                            const childAttrs = child;
                             return (
                               <Link
                                 key={child.id}
@@ -236,8 +236,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {mobileMenuOpen && (
           <div className="lg:hidden bg-white border-t border-border px-8 py-4 flex flex-col gap-1">
             {navigation.map((item: any) => {
-              const itemAttrs = item.attributes || item;
-              const hasChildren = itemAttrs.children?.data?.length > 0;
+              const itemAttrs = item;
+              const hasChildren = itemAttrs.children?.length > 0;
               const active = isActive(itemAttrs.url);
 
               if (hasChildren) {
@@ -254,8 +254,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     </button>
                     {dropdownOpen === item.id && (
                       <div className="pl-6 mt-1 space-y-1">
-                        {itemAttrs.children.data.map((child: any) => {
-                          const childAttrs = child.attributes || child;
+                        {itemAttrs.children.map((child: any) => {
+                          const childAttrs = child;
                           return (
                             <button
                               key={child.id}
@@ -386,7 +386,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
 
             {(() => {
-              const socialData = footerAttrs.socialLinks?.data || footerAttrs.socialLinks;
+              const socialData = footerAttrs.socialLinks;
               const links = (socialData && socialData.length > 0) ? socialData : DEFAULT_SOCIAL_LINKS;
               return links.length > 0 && (
                 <div className="col-span-12 lg:col-span-2">

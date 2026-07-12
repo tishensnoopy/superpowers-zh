@@ -25,7 +25,7 @@ const mockSeo: SeoData = {
   canonicalUrl: 'https://example.com/courses/language',
   ogTitle: 'OG 分享标题',
   ogDescription: 'OG 分享描述',
-  ogImage: { data: { attributes: { url: '/uploads/og-image.jpg' } } },
+  ogImage: { url: '/uploads/og-image.jpg' },
 };
 
 beforeEach(() => {
@@ -112,7 +112,7 @@ describe('Seo 组件', () => {
   it('ogImage 绝对 URL 直接使用', () => {
     const seoWithAbsoluteImage: SeoData = {
       ...mockSeo,
-      ogImage: { data: { attributes: { url: 'https://cdn.example.com/image.png' } } },
+      ogImage: { url: 'https://cdn.example.com/image.png' },
     };
     renderWithProvider(<Seo seo={seoWithAbsoluteImage} />);
     expect(getOgMeta('og:image')).toBe('https://cdn.example.com/image.png');

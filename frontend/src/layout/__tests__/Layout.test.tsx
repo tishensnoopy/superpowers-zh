@@ -16,23 +16,19 @@ vi.mock('../../lib/api', () => ({
 describe('Footer Social Links', () => {
   beforeEach(() => {
     mockGetSiteSettings.mockResolvedValue({
-      data: [{ attributes: { name: 'Test', phone: '400-123-4567' } }],
+      data: [{ name: 'Test', phone: '400-123-4567' }],
     });
     mockGetNavigationTree.mockResolvedValue({ data: [] });
     mockGetFooter.mockResolvedValue({
       data: {
-        attributes: {
-          copyright: '© 2026 Test',
-          socialLinks: {
-            data: [
-              { id: 1, attributes: { platform: 'wechat', url: '#', label: '微信' } },
-              { id: 2, attributes: { platform: 'weibo', url: '#', label: '微博' } },
-              { id: 3, attributes: { platform: 'douyin', url: '#', label: '抖音' } },
-              { id: 4, attributes: { platform: 'qq', url: '#', label: 'QQ' } },
-            ],
-          },
-          quickLinks: { data: [] },
-        },
+        copyright: '© 2026 Test',
+        socialLinks: [
+          { id: 1, platform: 'wechat', url: '#', label: '微信' },
+          { id: 2, platform: 'weibo', url: '#', label: '微博' },
+          { id: 3, platform: 'douyin', url: '#', label: '抖音' },
+          { id: 4, platform: 'qq', url: '#', label: 'QQ' },
+        ],
+        quickLinks: [],
       },
     });
   });
@@ -90,7 +86,7 @@ describe('Footer Social Links', () => {
 
   it('renders default social links when API returns empty array', async () => {
     mockGetFooter.mockResolvedValue({
-      data: [{ attributes: { socialLinks: { data: [] }, quickLinks: { data: [] } } }],
+      data: [{ socialLinks: [], quickLinks: [] }],
     });
 
     render(
@@ -110,35 +106,29 @@ describe('Footer Social Links', () => {
 describe('Navigation Dropdown', () => {
   beforeEach(() => {
     mockGetSiteSettings.mockResolvedValue({
-      data: [{ attributes: { name: 'Test' } }],
+      data: [{ name: 'Test' }],
     });
     mockGetNavigationTree.mockResolvedValue({
       data: [
         {
           id: 1,
-          attributes: {
-            name: '课程体系',
-            url: '/courses',
-            children: {
-              data: [
-                { id: 11, attributes: { name: '语言启蒙', url: '/courses/language' } },
-                { id: 12, attributes: { name: '数学思维', url: '/courses/math' } },
-              ],
-            },
-          },
+          name: '课程体系',
+          url: '/courses',
+          children: [
+            { id: 11, name: '语言启蒙', url: '/courses/language' },
+            { id: 12, name: '数学思维', url: '/courses/math' },
+          ],
         },
         {
           id: 2,
-          attributes: {
-            name: '首页',
-            url: '/',
-            children: { data: [] },
-          },
+          name: '首页',
+          url: '/',
+          children: [],
         },
       ],
     });
     mockGetFooter.mockResolvedValue({
-      data: [{ attributes: { socialLinks: { data: [] }, quickLinks: { data: [] } } }],
+      data: [{ socialLinks: [], quickLinks: [] }],
     });
   });
 
