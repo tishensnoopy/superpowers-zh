@@ -27,3 +27,12 @@ backend/.tmp/
 
 # 交换文件脚本
 frontend/add-swap.sh
+
+# Playwright 测试产物（运行时自动生成，勿提交）
+frontend/playwright-report/
+frontend/test-results/
+frontend/e2e/test-results/
+
+# 构建产物和覆盖率报告（运行时自动生成，勿提交）
+frontend/dist/
+frontend/coverage/
