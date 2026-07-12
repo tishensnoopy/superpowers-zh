@@ -4,18 +4,16 @@ import { AppointmentData } from '@/lib/api';
 describe('预约数据格式验证', () => {
   it('AppointmentData 接口包含所有必要字段', () => {
     const data: AppointmentData = {
-      childName: '小明',
-      parentName: '王先生',
+      name: '小明',
       phone: '13800138000',
+      campus: 'chaoyang',
       age: '6',
       course: 'language',
-      campus: 'chaoyang',
       preferredTimeSlot: 'morning',
       message: '测试备注',
     };
 
-    expect(data.childName).toBeTypeOf('string');
-    expect(data.parentName).toBeTypeOf('string');
+    expect(data.name).toBeTypeOf('string');
     expect(data.phone).toBeTypeOf('string');
     expect(data.phone).toMatch(/^1[3-9]\d{9}$/);
     expect(data.campus).toBeTypeOf('string');
@@ -42,7 +40,7 @@ describe('预约数据格式验证', () => {
   });
 
   it('必填字段不能为空', () => {
-    const requiredFields = ['childName', 'parentName', 'phone'] as const;
+    const requiredFields = ['name', 'phone', 'campus'] as const;
 
     requiredFields.forEach(field => {
       expect(field).toBeTruthy();
@@ -50,24 +48,16 @@ describe('预约数据格式验证', () => {
   });
 
   it('提交给后端的数据结构应为嵌套在 data 字段中', () => {
-    const testData: AppointmentData = {
-      childName: '小明',
-      parentName: '王先生',
-      phone: '13800138000',
-      campus: 'chaoyang',
-    };
-
     const expectedBody = {
       data: {
-        childName: '小明',
-        parentName: '王先生',
+        name: '小明',
         phone: '13800138000',
         campus: 'chaoyang',
       },
     };
 
     expect(JSON.stringify(expectedBody)).toContain('"data":');
-    expect(JSON.stringify(expectedBody)).toContain('"childName":"小明"');
+    expect(JSON.stringify(expectedBody)).toContain('"name":"小明"');
     expect(JSON.stringify(expectedBody)).toContain('"campus":"chaoyang"');
   });
 });
