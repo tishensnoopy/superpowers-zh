@@ -2,7 +2,7 @@
 
 **日期：** 2026-07-12
 **阶段：** Phase 4 — 内容页面填充（第一个子项目）
-**状态：** 设计已确认，TDD 评估完成，待用户审查
+**状态：** 设计已确认，schema 迁移已完成并验证，待 writing-plans 细化实施计划
 
 ## 背景
 
@@ -178,3 +178,48 @@
 6. 集成到 CourseDetail 页面
 7. 路由注册
 8. 视觉验证（TRAE 内建浏览器）
+
+## Schema 迁移完成记录
+
+### 迁移文件
+
+| 文件 | 类型 | 状态 |
+|------|------|------|
+| `backend/src/components/course/objective.json` | 新建 component | ✅ 已创建 |
+| `backend/src/components/course/module.json` | 新建 component | ✅ 已创建 |
+| `backend/src/components/course/testimonial.json` | 新建 component | ✅ 已创建 |
+| `backend/src/api/product/content-types/product/schema.json` | 更新 product schema | ✅ 已添加 4 个字段 + admin 面板配置 |
+
+### 迁移 TDD 合规检查
+
+| 迁移项 | 能否 TDD | 原因 | 处理方式 |
+|--------|---------|------|---------|
+| 3 个 component JSON 文件 | ❌ 不能 | JSON schema 是数据定义，不是可执行逻辑 | 创建后验证 Strapi 能正常加载 |
+| product schema 4 个新字段 | ❌ 不能 | 字段声明而非行为逻辑 | 通过 API 调用验证字段存在 |
+| admin 面板配置 | ❌ 不能 | UI 配置，非逻辑代码 | 在 Strapi 后台手动确认 |
+
+**结论：** Schema 迁移属于基础设施层，无法 TDD。但迁移结果通过 API 验证确认成功。
+
+### 迁移验证证据
+
+**API 调用：** `GET /api/products?populate=*`
+
+**验证结果（语言启蒙课程）：**
+```
+teachingMethod: None     → 字段存在，暂无数据 ✅
+objectives: []           → 字段存在，空数组 ✅
+outline: []              → 字段存在，空数组 ✅
+testimonials: []         → 字段存在，空数组 ✅
+```
+
+**所有字段在 `populate=*` 时正确返回。** Strapi v5 对 repeatable component 默认返回空数组，符合预期。
+
+### 下一步
+
+按照 TDD 实施顺序，下一步是：
+1. **API 层 TDD** — 先写测试验证 `getProductBySlug` 返回新字段（需检查前端 api.ts 的 populate 配置）
+2. **组件 TDD** — 6 个组件先写测试再实现
+3. **集成与路由** — 注册 `/courses/:slug` 路由
+4. **视觉验证** — TRAE 内建浏览器验证页面布局
+
+进入 writing-plans 技能创建详细实现计划。
