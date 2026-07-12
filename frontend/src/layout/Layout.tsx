@@ -1,7 +1,54 @@
 import { useState, useEffect } from 'react';
 import { Phone, Menu, X, MapPin, Mail, ChevronDown } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { getSiteSettings, getNavigation, getFooter } from '../lib/api';
+import { getSiteSettings, getNavigationTree, getFooter } from '../lib/api';
+
+const DEFAULT_SOCIAL_LINKS = [
+  { id: 'default-wechat', platform: 'wechat', url: 'https://wechat.example.com', label: '微信' },
+  { id: 'default-weibo', platform: 'weibo', url: 'https://weibo.example.com', label: '微博' },
+  { id: 'default-douyin', platform: 'douyin', url: 'https://douyin.example.com', label: '抖音' },
+  { id: 'default-qq', platform: 'qq', url: 'https://qq.example.com', label: 'QQ' },
+];
+
+const platformColors: Record<string, string> = {
+  wechat: 'bg-[#07C160]',
+  weibo: 'bg-[#E6162D]',
+  douyin: 'bg-[#FE2C55]',
+  qq: 'bg-[#12B7F5]',
+  linkedin: 'bg-[#0077B5]',
+  twitter: 'bg-[#1DA1F2]',
+  facebook: 'bg-[#1877F2]',
+  instagram: 'bg-gradient-to-br from-[#405DE6] via-[#5851DB] to-[#833AB4]',
+  youtube: 'bg-[#FF0000]',
+};
+
+const renderSocialLink = (social: any) => {
+  const socialAttrs = social.attributes || social;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=64x64&data=${encodeURIComponent(socialAttrs.url)}`;
+
+  return (
+    <a
+      key={social.id || socialAttrs.id || Math.random()}
+      href={socialAttrs.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex flex-col items-center gap-1.5 group"
+      title={socialAttrs.label}
+    >
+      <div className="w-16 h-16 bg-white rounded-lg p-0.5 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg">
+        <img
+          src={qrCodeUrl}
+          alt={`${socialAttrs.label}二维码`}
+          className="w-full h-full rounded-md"
+          loading="lazy"
+        />
+      </div>
+      <span className="text-white/60 text-xs group-hover:text-white transition-colors">
+        {socialAttrs.label}
+      </span>
+    </a>
+  );
+};
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -26,7 +73,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       try {
         const [settingsRes, navRes, footerRes] = await Promise.all([
           getSiteSettings(),
-          getNavigation(),
+          getNavigationTree(),
           getFooter(),
         ]);
         setSiteSettings(Array.isArray(settingsRes.data) ? settingsRes.data[0] : settingsRes.data);
@@ -119,23 +166,25 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       <ChevronDown size={14} className={`transition-transform duration-200 ${dropdownOpen === item.id ? 'rotate-180' : ''}`} />
                     </button>
                     {dropdownOpen === item.id && (
-                      <div className="absolute top-full left-0 mt-1 bg-white rounded-xl shadow-xl border border-border py-2 min-w-[180px] z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                        {itemAttrs.children.data.map((child: any) => {
-                          const childAttrs = child.attributes || child;
-                          return (
-                            <Link
-                              key={child.id}
-                              to={childAttrs.url}
-                              className={`block px-4 py-2.5 text-sm transition-all duration-200 ${
-                                isActive(childAttrs.url)
-                                  ? 'text-[#F5851F] bg-[#FFF3E5]'
-                                  : 'text-[#4A5568] hover:text-[#F5851F] hover:bg-[#FFF3E5]'
-                              }`}
-                            >
-                              {childAttrs.name}
-                            </Link>
-                          );
-                        })}
+                      <div className="absolute top-full left-0 pt-1 min-w-[180px] z-50">
+                        <div className="bg-white rounded-xl shadow-xl border border-border py-2 animate-in fade-in slide-in-from-top-2 duration-150">
+                          {itemAttrs.children.data.map((child: any) => {
+                            const childAttrs = child.attributes || child;
+                            return (
+                              <Link
+                                key={child.id}
+                                to={childAttrs.url}
+                                className={`block px-4 py-2.5 text-sm transition-all duration-200 ${
+                                  isActive(childAttrs.url)
+                                    ? 'text-[#F5851F] bg-[#FFF3E5]'
+                                    : 'text-[#4A5568] hover:text-[#F5851F] hover:bg-[#FFF3E5]'
+                                }`}
+                              >
+                                {childAttrs.name}
+                              </Link>
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -298,50 +347,58 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </div>
             </div>
 
-            {(footerAttrs.quickLinks?.data || []).map((group: any) => (
-              <div key={group.id} className="col-span-6 sm:col-span-4 lg:col-span-2">
-                <h4 className="text-white font-bold text-sm mb-5 pb-2 border-b border-white/10">
-                  {group.name || '链接'}
-                </h4>
-                <ul className="space-y-3">
-                  {group.links?.map((link: any) => (
-                    <li key={link.name}>
-                      <a href={link.url} className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">
-                        {link.name}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-
-            <div className="col-span-12 lg:col-span-2">
-              <h4 className="text-white font-bold text-sm mb-5 pb-2 border-b border-white/10">
-                关注我们
-              </h4>
-              <div data-testid="social-links" className="flex items-center gap-4">
-                <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/70 hover:text-[#F5851F] hover:bg-white/20 transition-all duration-300 hover:scale-110">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 01.213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 00.167-.054l1.903-1.114a.864.864 0 01.717-.098 10.16 10.16 0 002.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178A1.17 1.17 0 014.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 01-1.162 1.178 1.17 1.17 0 01-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 01.598.082l1.584.926a.272.272 0 00.14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.322-1.223a.49.49 0 01.177-.554C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.269-.03-.407-.032zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 01-.969.983.976.976 0 01-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 01-.969.983.976.976 0 01-.969-.983c0-.542.434-.982.969-.982z"/>
-                  </svg>
-                </a>
-                <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/70 hover:text-[#F5851F] hover:bg-white/20 transition-all duration-300 hover:scale-110">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.989C18.343 21.129 22 16.99 22 12c0-5.523-4.477-10-10-10z"/>
-                  </svg>
-                </a>
-                <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/70 hover:text-[#F5851F] hover:bg-white/20 transition-all duration-300 hover:scale-110">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
-                  </svg>
-                </a>
-                <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/70 hover:text-[#F5851F] hover:bg-white/20 transition-all duration-300 hover:scale-110">
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
-                  </svg>
-                </a>
+            <div className="col-span-12 lg:col-span-6">
+              <div className="flex flex-wrap gap-8">
+                <div className="flex-1 min-w-[120px]">
+                  <h4 className="text-white font-bold text-sm mb-5 pb-2 border-b border-white/10">
+                    课程体系
+                  </h4>
+                  <ul className="space-y-3">
+                    <li><a href="/courses/language" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">语言启蒙</a></li>
+                    <li><a href="/courses/math" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">数学思维</a></li>
+                    <li><a href="/courses/english" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">英语口语</a></li>
+                    <li><a href="/courses/comprehensive" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">综合素养</a></li>
+                  </ul>
+                </div>
+                <div className="flex-1 min-w-[120px]">
+                  <h4 className="text-white font-bold text-sm mb-5 pb-2 border-b border-white/10">
+                    关于我们
+                  </h4>
+                  <ul className="space-y-3">
+                    <li><a href="/about/school" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">学校介绍</a></li>
+                    <li><a href="/about/philosophy" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">办学理念</a></li>
+                    <li><a href="/team" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">师资团队</a></li>
+                    <li><a href="/campuses" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">校区环境</a></li>
+                  </ul>
+                </div>
+                <div className="flex-1 min-w-[120px]">
+                  <h4 className="text-white font-bold text-sm mb-5 pb-2 border-b border-white/10">
+                    帮助中心
+                  </h4>
+                  <ul className="space-y-3">
+                    <li><a href="#" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">常见问题</a></li>
+                    <li><a href="#" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">预约流程</a></li>
+                    <li><a href="#" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">退费政策</a></li>
+                    <li><a href="/contact" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">联系客服</a></li>
+                  </ul>
+                </div>
               </div>
             </div>
+
+            {(() => {
+              const socialData = footerAttrs.socialLinks?.data || footerAttrs.socialLinks;
+              const links = (socialData && socialData.length > 0) ? socialData : DEFAULT_SOCIAL_LINKS;
+              return links.length > 0 && (
+                <div className="col-span-12 lg:col-span-2">
+                  <h4 className="text-white font-bold text-sm mb-5 pb-2 border-b border-white/10">
+                    关注我们
+                  </h4>
+                  <div data-testid="social-links" className="flex flex-wrap gap-3">
+                    {links.map(renderSocialLink)}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
