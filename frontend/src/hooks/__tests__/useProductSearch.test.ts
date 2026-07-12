@@ -330,6 +330,8 @@ describe('useProductSearch race condition', () => {
   });
 
   it('组件卸载时取消进行中的请求，旧结果不应用', async () => {
+    const abortSpy = vi.spyOn(AbortController.prototype, 'abort');
+
     let resolvePending!: (value: any) => void;
     const pendingPromise = new Promise((resolve) => {
       resolvePending = resolve;
@@ -358,10 +360,16 @@ describe('useProductSearch race condition', () => {
 
     expect(searchProducts).toHaveBeenCalledTimes(1);
 
+    // 重置 spy 调用记录，精确断言卸载触发的 abort
+    abortSpy.mockClear();
+
     // 卸载组件（应 abort 进行中的请求）
     act(() => {
       unmount();
     });
+
+    // 验证卸载时 AbortController.abort 被调用
+    expect(abortSpy).toHaveBeenCalled();
 
     // 卸载后完成请求，不应抛错也不应影响已卸载组件
     await act(async () => {
@@ -372,7 +380,6 @@ describe('useProductSearch race condition', () => {
       await Promise.resolve();
     });
 
-    // 测试通过的条件：卸载后 resolve 不抛错（requestId/abort 检查阻止状态更新）
-    expect(true).toBe(true);
+    abortSpy.mockRestore();
   });
 });
