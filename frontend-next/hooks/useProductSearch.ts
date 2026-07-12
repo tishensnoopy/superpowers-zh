@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { searchProducts } from '@/lib/api';
 import type { Product } from '@/lib/api';
+import * as Sentry from '@sentry/nextjs';
 
 export function useProductSearch(initialLimit = 12) {
   const [query, setQueryState] = useState('');
@@ -56,6 +57,11 @@ export function useProductSearch(initialLimit = 12) {
       }
       if (currentRequestId !== requestIdRef.current) {
         return;
+      }
+      if (!(err instanceof Error && err.name.includes('Abort'))) {
+        Sentry.captureException(err, {
+          tags: { section: 'product-search', query, category },
+        });
       }
       setError(err instanceof Error ? err.message : String(err));
     } finally {

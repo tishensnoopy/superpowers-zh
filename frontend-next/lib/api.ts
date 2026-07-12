@@ -1,3 +1,5 @@
+import * as Sentry from '@sentry/nextjs';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
 
 const LOG_PREFIX = '[API]';
@@ -37,6 +39,14 @@ export async function fetchApi<T>(path: string, options: RequestInit = {}): Prom
       const errorText = await res.text().catch(() => '');
       const error = new Error(`API request failed: ${res.status} ${res.statusText}${errorText ? ' - ' + errorText : ''}`);
       logError(path, error, duration);
+      Sentry.captureException(error, {
+        tags: { api: path, status: res.status.toString() },
+        extra: {
+          method: options.method || 'GET',
+          duration,
+          responseBody: errorText.substring(0, 500),
+        },
+      });
       throw error;
     }
 
@@ -49,6 +59,11 @@ export async function fetchApi<T>(path: string, options: RequestInit = {}): Prom
       logError(path, err, duration);
     } else {
       logError(path, new Error(String(err)), duration);
+    }
+    if (!(err instanceof Error && err.message.includes('API request failed'))) {
+      Sentry.captureException(err, {
+        tags: { api: path, type: 'network-error' },
+      });
     }
     throw err;
   }
