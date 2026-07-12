@@ -1019,6 +1019,17 @@ git add frontend-next/components/
 git commit -m "feat(frontend-next): 移植 SectionRenderer + 12 个 section 组件 + StrapiImage"
 ```
 
+> **任务 5 执行勘误与 Follow-up（代码质量审查记录）**
+>
+> 1. **测试文件数量勘误**：规格步骤 4 写"9 个测试文件"，实际源项目 `frontend/src/components/sections/__tests__/` 只有 5 个（Advantages/ContactForm/Features/ProductGrid/Team），按真实情况移植。
+> 2. **'use client' 勘误**：规格步骤 3 将 FloatingButton 列为需要 'use client'，但源码组件无任何 hook/浏览器 API，应为 Server Component（已修复）。
+> 3. **ContactForm → appointment-success 数据传递丢失（Important，任务 8 必须解决）**：源码用 `navigate('/appointment-success', { state: { appointment } })` 传递预约数据，Next.js `router.push` 不支持 state。任务 8 步骤 9 创建 `app/appointment-success/page.tsx` 时必须明确替代方案，可选：
+>    - `router.push({ pathname: '/appointment-success', query: { id: result.data.id } })` + 成功页按 id 查询
+>    - `sessionStorage.setItem('lastAppointment', JSON.stringify(submitData))` 再 push
+>    - 在 ContactForm 提交成功后直接展示成功态（不跳转），避免跨页传参
+> 4. **StrapiImage 未被使用（Important，任务 6+ 解决）**：StrapiImage 组件已创建但未在任何 section 中应用，Hero/Team/Testimonials/Gallery 仍用原生 `<img>`（7 个 `no-img-element` lint 警告）。任务 6+ 移植课程/校区组件时统一改用 StrapiImage 并清零警告。
+> 5. **Gallery Tailwind 动态 class 已修复（Minor）**：源码 `col-span-12 md:${colClasses[columns]}` 动态拼接会被 Tailwind purge 误删，已改为完整 class 字符串映射。
+
 ---
 
 ## 任务 6：课程组件与搜索 hook 移植
