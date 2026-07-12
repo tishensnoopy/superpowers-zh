@@ -12,6 +12,9 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    watch: {
+      ignored: ['**/playwright-report/**', '**/test-results/**', '**/e2e/**'],
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:1337',
