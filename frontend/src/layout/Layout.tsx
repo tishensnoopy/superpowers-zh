@@ -378,7 +378,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   <ul className="space-y-3">
                     <li><a href="#" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">常见问题</a></li>
                     <li><a href="#" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">预约流程</a></li>
-                    <li><a href="#" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">退费政策</a></li>
+                    <li><a href="/refund-policy" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">退费政策</a></li>
                     <li><a href="/contact" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">联系客服</a></li>
                   </ul>
                 </div>
@@ -410,8 +410,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               {settings.publicSecurityRecord && <span>{settings.publicSecurityRecord}</span>}
             </p>
             <div className="flex items-center gap-6 text-white/35 text-sm">
-              <a href="#" className="hover:text-white/60 transition-colors">隐私政策</a>
-              <a href="#" className="hover:text-white/60 transition-colors">用户协议</a>
+              <a href="/privacy-policy" className="hover:text-white/60 transition-colors">隐私政策</a>
+              <a href="/user-agreement" className="hover:text-white/60 transition-colors">用户协议</a>
               <a href="#" className="hover:text-white/60 transition-colors">举报中心</a>
             </div>
           </div>
