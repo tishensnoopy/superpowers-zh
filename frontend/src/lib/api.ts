@@ -145,6 +145,38 @@ export async function getProductCategoryTree() {
   return result;
 }
 
+// === News Article API ===
+
+const categoryLabels: Record<string, string> = {
+  company_news: '公司动态',
+  industry_news: '行业资讯',
+  event_notice: '活动通知',
+};
+
+export function getNewsCategoryLabel(category: string): string {
+  return categoryLabels[category] || category;
+}
+
+export async function getNews(category?: string) {
+  console.log(`${LOG_PREFIX} Fetching news${category ? ` (category: ${category})` : ''}...`);
+  const params = new URLSearchParams();
+  if (category) {
+    params.set('category', category);
+  }
+  params.set('sort', 'publishedAt:desc');
+  const query = params.toString();
+  const result = await fetchApi<{ data: NewsArticle[] }>(`/api/news-articles${query ? `?${query}` : ''}`);
+  console.log(`${LOG_PREFIX} News loaded: ${result.data.length} items`);
+  return result;
+}
+
+export async function getNewsBySlug(slug: string) {
+  console.log(`${LOG_PREFIX} Fetching news by slug: ${slug}...`);
+  const result = await fetchApi<{ data: NewsArticle }>(`/api/news-articles/slug/${slug}`);
+  console.log(`${LOG_PREFIX} News loaded: ${result.data.attributes.title}`);
+  return result;
+}
+
 export async function getProductSpecs() {
   console.log(`${LOG_PREFIX} Fetching product specs...`);
   const result = await fetchApi<{ data: ProductSpec[] }>('/api/product-specs');
@@ -348,6 +380,22 @@ export interface FaqItem {
     isActive?: boolean;
     helpfulCount?: number;
     notHelpfulCount?: number;
+  };
+}
+
+export interface NewsArticle {
+  id: number;
+  documentId?: string;
+  attributes: {
+    title: string;
+    slug: string;
+    excerpt?: string;
+    content?: string;
+    coverImage?: { data?: { attributes: { url: string } } };
+    category?: 'company_news' | 'industry_news' | 'event_notice';
+    isFeatured?: boolean;
+    publishedAt?: string;
+    viewCount?: number;
   };
 }
 
