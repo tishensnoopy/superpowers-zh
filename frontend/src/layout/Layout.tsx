@@ -23,28 +23,27 @@ const platformColors: Record<string, string> = {
 };
 
 const renderSocialLink = (social: any) => {
-  const socialAttrs = social;
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=64x64&data=${encodeURIComponent(socialAttrs.url)}`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=64x64&data=${encodeURIComponent(social.url)}`;
 
   return (
     <a
-      key={social.id || socialAttrs.id || Math.random()}
-      href={socialAttrs.url}
+      key={social.id || Math.random()}
+      href={social.url}
       target="_blank"
       rel="noopener noreferrer"
       className="flex flex-col items-center gap-1.5 group"
-      title={socialAttrs.label}
+      title={social.label}
     >
       <div className="w-16 h-16 bg-white rounded-lg p-0.5 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg">
         <img
           src={qrCodeUrl}
-          alt={`${socialAttrs.label}二维码`}
+          alt={`${social.label}二维码`}
           className="w-full h-full rounded-md"
           loading="lazy"
         />
       </div>
       <span className="text-white/60 text-xs group-hover:text-white transition-colors">
-        {socialAttrs.label}
+        {social.label}
       </span>
     </a>
   );
@@ -142,9 +141,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
           <nav className="hidden lg:flex items-center gap-1">
             {navigation.map((item: any) => {
-              const itemAttrs = item;
-              const hasChildren = itemAttrs.children?.length > 0;
-              const active = isActive(itemAttrs.url);
+              const hasChildren = item.children?.length > 0;
+              const active = isActive(item.url);
 
               if (hasChildren) {
                 return (
@@ -162,25 +160,24 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       }`}
                       onClick={() => handleDropdownToggle(item.id)}
                     >
-                      {itemAttrs.name}
+                      {item.name}
                       <ChevronDown size={14} className={`transition-transform duration-200 ${dropdownOpen === item.id ? 'rotate-180' : ''}`} />
                     </button>
                     {dropdownOpen === item.id && (
                       <div className="absolute top-full left-0 pt-1 min-w-[180px] z-50">
                         <div className="bg-white rounded-xl shadow-xl border border-border py-2 animate-in fade-in slide-in-from-top-2 duration-150">
-                          {itemAttrs.children.map((child: any) => {
-                            const childAttrs = child;
+                          {item.children.map((child: any) => {
                             return (
                               <Link
                                 key={child.id}
-                                to={childAttrs.url}
+                                to={child.url}
                                 className={`block px-4 py-2.5 text-sm transition-all duration-200 ${
-                                  isActive(childAttrs.url)
+                                  isActive(child.url)
                                     ? 'text-[#F5851F] bg-[#FFF3E5]'
                                     : 'text-[#4A5568] hover:text-[#F5851F] hover:bg-[#FFF3E5]'
                                 }`}
                               >
-                                {childAttrs.name}
+                                {child.name}
                               </Link>
                             );
                           })}
@@ -194,14 +191,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               return (
                 <Link
                   key={item.id}
-                  to={itemAttrs.url}
+                  to={item.url}
                   className={`px-4 py-2 text-sm rounded-lg transition-all duration-200 ${
                     active
                       ? 'text-[#F5851F] bg-[#FFF3E5] font-medium'
                       : 'text-[#4A5568] hover:text-[#F5851F] hover:bg-[#FFF3E5]'
                   }`}
                 >
-                  {itemAttrs.name}
+                  {item.name}
                 </Link>
               );
             })}
@@ -236,9 +233,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {mobileMenuOpen && (
           <div className="lg:hidden bg-white border-t border-border px-8 py-4 flex flex-col gap-1">
             {navigation.map((item: any) => {
-              const itemAttrs = item;
-              const hasChildren = itemAttrs.children?.length > 0;
-              const active = isActive(itemAttrs.url);
+              const hasChildren = item.children?.length > 0;
+              const active = isActive(item.url);
 
               if (hasChildren) {
                 return (
@@ -249,24 +245,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       }`}
                       onClick={() => handleDropdownToggle(item.id)}
                     >
-                      <span>{itemAttrs.name}</span>
+                      <span>{item.name}</span>
                       <ChevronDown size={16} className={`transition-transform duration-200 ${dropdownOpen === item.id ? 'rotate-180' : ''}`} />
                     </button>
                     {dropdownOpen === item.id && (
                       <div className="pl-6 mt-1 space-y-1">
-                        {itemAttrs.children.map((child: any) => {
-                          const childAttrs = child;
+                        {item.children.map((child: any) => {
                           return (
                             <button
                               key={child.id}
-                              onClick={() => handleMobileNavClick(childAttrs.url)}
+                              onClick={() => handleMobileNavClick(child.url)}
                               className={`block w-full text-left py-2 text-sm transition-colors ${
-                                isActive(childAttrs.url)
+                                isActive(child.url)
                                   ? 'text-[#F5851F] font-medium'
                                   : 'text-muted-foreground hover:text-[#F5851F]'
                               }`}
                             >
-                              {childAttrs.name}
+                              {child.name}
                             </button>
                           );
                         })}
@@ -279,12 +274,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               return (
                 <button
                   key={item.id}
-                  onClick={() => handleMobileNavClick(itemAttrs.url)}
+                  onClick={() => handleMobileNavClick(item.url)}
                   className={`block w-full text-left py-2.5 text-sm transition-colors ${
                     active ? 'text-[#F5851F] font-medium' : 'text-foreground hover:text-[#F5851F]'
                   }`}
                 >
-                  {itemAttrs.name}
+                  {item.name}
                 </button>
               );
             })}

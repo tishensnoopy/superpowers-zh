@@ -20,7 +20,9 @@ describe('Footer Social Links', () => {
     });
     mockGetNavigationTree.mockResolvedValue({ data: [] });
     mockGetFooter.mockResolvedValue({
-      data: {
+      data: [{
+        id: 1,
+        documentId: 'abc',
         copyright: '© 2026 Test',
         socialLinks: [
           { id: 1, platform: 'wechat', url: '#', label: '微信' },
@@ -29,7 +31,7 @@ describe('Footer Social Links', () => {
           { id: 4, platform: 'qq', url: '#', label: 'QQ' },
         ],
         quickLinks: [],
-      },
+      }],
     });
   });
 
