@@ -55,7 +55,7 @@ export default {
         sort: sortArr as any,
         limit,
         start,
-        populate: { campus: true, avatar: true },
+        populate: { campus: true, avatar: true, seo: true },
         status: 'published',
       }),
       strapi.documents(UID).count({
@@ -83,7 +83,7 @@ export default {
     const { id } = ctx.params;
     const teacher = await strapi.documents(UID).findOne({
       documentId: id,
-      populate: { campus: true, avatar: true },
+      populate: { campus: true, avatar: true, seo: true },
       status: 'published',
     });
 

@@ -74,6 +74,11 @@
       "type": "integer",
       "default": 0,
       "description": "排序"
+    },
+    "seo": {
+      "type": "component",
+      "component": "common.seo",
+      "description": "SEO 配置"
     }
   }
 }

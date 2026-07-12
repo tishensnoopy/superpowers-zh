@@ -556,6 +556,7 @@ export interface ApiCampusCampus extends Struct.CollectionTypeSchema {
         maxLength: 50;
       }>;
     publishedAt: Schema.Attribute.DateTime;
+    seo: Schema.Attribute.Component<'common.seo', false>;
     slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
     sortOrder: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     teachers: Schema.Attribute.Relation<'oneToMany', 'api::teacher.teacher'>;
@@ -808,6 +809,7 @@ export interface ApiNewsArticleNewsArticle extends Struct.CollectionTypeSchema {
     > &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
+    seo: Schema.Attribute.Component<'common.seo', false>;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     sortOrder: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     title: Schema.Attribute.String &
@@ -1168,6 +1170,7 @@ export interface ApiTeacherTeacher extends Struct.CollectionTypeSchema {
         maxLength: 100;
       }>;
     publishedAt: Schema.Attribute.DateTime;
+    seo: Schema.Attribute.Component<'common.seo', false>;
     slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
     sortOrder: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     subject: Schema.Attribute.Enumeration<

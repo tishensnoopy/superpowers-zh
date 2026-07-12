@@ -40,7 +40,7 @@ export default {
         sort: sortArr as any,
         limit,
         start,
-        populate: { coverImage: true },
+        populate: { coverImage: true, seo: true },
         status: 'published',
       }),
       strapi.documents(UID).count({
@@ -85,7 +85,7 @@ export default {
 
     const articles = await strapi.documents(UID).findMany({
       filters: { slug: { $eq: slug } },
-      populate: { coverImage: true },
+      populate: { coverImage: true, seo: true },
       status: 'published',
       limit: 1,
     });

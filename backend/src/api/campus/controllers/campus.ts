@@ -70,6 +70,7 @@ export default {
         teachers: {
           populate: { avatar: true },
         },
+        seo: true,
       },
       status: 'published',
     });
@@ -99,6 +100,7 @@ export default {
         teachers: {
           populate: { avatar: true },
         },
+        seo: true,
       },
       status: 'published',
     });
