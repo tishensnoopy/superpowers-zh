@@ -20,12 +20,6 @@ export default factories.createCoreController('api::page.page', ({ strapi }) => 
         },
       };
       const result = await super.find(ctx);
-      if (result.data && Array.isArray(result.data)) {
-        result.data = result.data.map(item => {
-          const { id, ...attributes } = item;
-          return { id, attributes };
-        });
-      }
       console.log('[Page] find() completed, count:', result.data?.length);
       return result;
     } catch (err) {
@@ -46,10 +40,6 @@ export default factories.createCoreController('api::page.page', ({ strapi }) => 
       };
       const result = await super.findOne(ctx);
       console.log('[Page] findOne() completed');
-      if (result.data) {
-        const { id, ...attributes } = result.data;
-        result.data = { id, attributes };
-      }
       return result;
     } catch (err) {
       console.error('[Page] findOne() failed:', err instanceof Error ? err.message : err);
@@ -74,10 +64,8 @@ export default factories.createCoreController('api::page.page', ({ strapi }) => 
         console.warn('[Page] findBySlug() page not found:', ctx.params.slug);
         return ctx.notFound('Page not found');
       }
-      const { id, ...attributes } = item;
-      const page = { id, attributes };
-      console.log('[Page] findBySlug() completed, id:', page.id);
-      return { data: page, meta: {} };
+      console.log('[Page] findBySlug() completed, id:', item.id);
+      return { data: item, meta: {} };
     } catch (err) {
       console.error('[Page] findBySlug() failed:', err instanceof Error ? err.message : err);
       throw err;
@@ -101,10 +89,8 @@ export default factories.createCoreController('api::page.page', ({ strapi }) => 
         console.warn('[Page] getHomepage() homepage not found');
         return ctx.notFound('Homepage not found');
       }
-      const { id, ...attributes } = item;
-      const page = { id, attributes };
-      console.log('[Page] getHomepage() completed, id:', page.id);
-      return { data: page, meta: {} };
+      console.log('[Page] getHomepage() completed, id:', item.id);
+      return { data: item, meta: {} };
     } catch (err) {
       console.error('[Page] getHomepage() failed:', err instanceof Error ? err.message : err);
       throw err;
