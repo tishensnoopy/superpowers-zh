@@ -1,5 +1,3 @@
-'use client';
-
 import { MessageCircle, Phone, Send, ArrowUpRight } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { Section } from '@/lib/api';

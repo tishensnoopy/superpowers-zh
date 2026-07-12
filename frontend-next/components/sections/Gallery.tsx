@@ -5,9 +5,9 @@ export default function Gallery({ section }: { section: Section }) {
   const { title, description, images, columns = '3' } = section;
 
   const colClasses: Record<string, string> = {
-    '2': 'col-span-6',
-    '3': 'col-span-4',
-    '4': 'col-span-3',
+    '2': 'col-span-12 md:col-span-6 h-[196px]',
+    '3': 'col-span-12 md:col-span-4 h-[196px]',
+    '4': 'col-span-12 md:col-span-3 h-[196px]',
   };
 
   return (
@@ -38,8 +38,9 @@ export default function Gallery({ section }: { section: Section }) {
             <div
               key={img.id || i}
               className={`group relative overflow-hidden rounded-2xl bg-muted ${
-                i === 0 ? 'col-span-12 md:col-span-6 row-span-2 h-[400px]' :
-                `col-span-12 md:${colClasses[columns] || colClasses['3']} h-[196px]`
+                i === 0
+                  ? 'col-span-12 md:col-span-6 row-span-2 h-[400px]'
+                  : colClasses[columns] || colClasses['3']
               }`}
             >
               <img
