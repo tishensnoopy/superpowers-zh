@@ -1,0 +1,11 @@
+node_modules/
+.next/
+out/
+build/
+.env*.local
+.lighthouse-ci/
+coverage/
+*.log
+.DS_Store
+.vscode/
+.idea/
