@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { BookOpen, CheckCircle, Clock } from 'lucide-react';
 import type { Section } from '../../lib/api';
 import { getProducts } from '../../lib/api';
@@ -85,9 +86,12 @@ export default function ProductGrid({ section }: { section: Section }) {
                         </ul>
                       )}
                       <div className="mt-6 flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Link
+                          to={`/courses/${p.slug}`}
+                          className="text-xs text-muted-foreground hover:text-[#2563EB] flex items-center gap-1 transition-colors"
+                        >
                           <Clock size={12} /> 查看详情
-                        </span>
+                        </Link>
                       </div>
                     </div>
                   </div>
