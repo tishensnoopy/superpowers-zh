@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "Strapi v5 backend for enterprise website mother station",
   "scripts": {
-    "develop": "strapi develop",
+    "develop": "strapi develop --open false",
     "start": "strapi start",
     "build": "strapi build",
     "strapi": "strapi",
