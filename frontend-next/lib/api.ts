@@ -255,6 +255,8 @@ export interface SiteSettings {
   email?: string;
   address?: string;
   wechat?: string;
+  icp?: string;
+  publicSecurityRecord?: string;
   seo?: Seo;
   fontSettings?: FontSettings;
 }
@@ -284,6 +286,7 @@ export interface SocialLink {
   platform: string;
   url: string;
   icon?: string;
+  label?: string;
 }
 
 export interface QuickLink {
