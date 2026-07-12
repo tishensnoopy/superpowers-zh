@@ -11,44 +11,34 @@ import { getCampusBySlug } from '../lib/api';
 
 const mockCampus = {
   id: 1,
-  attributes: {
-    name: '朝阳校区',
-    slug: 'chaoyang',
-    address: '建国路88号 SOHO现代城A座3层',
-    phone: '010-8888-0001',
-    businessHours: '周一至周日 9:00-21:00',
-    transportation: '地铁1号线大望路站C口出，步行300米',
-    area: '800㎡',
-    description: '位于CBD核心区，交通便利，环境优雅。',
-    gallery: {
-      data: [
-        { attributes: { url: '/uploads/gallery-1.jpg' } },
-        { attributes: { url: '/uploads/gallery-2.jpg' } },
-      ],
+  name: '朝阳校区',
+  slug: 'chaoyang',
+  address: '建国路88号 SOHO现代城A座3层',
+  phone: '010-8888-0001',
+  businessHours: '周一至周日 9:00-21:00',
+  transportation: '地铁1号线大望路站C口出，步行300米',
+  area: '800㎡',
+  description: '位于CBD核心区，交通便利，环境优雅。',
+  gallery: [
+    { url: '/uploads/gallery-1.jpg' },
+    { url: '/uploads/gallery-2.jpg' },
+  ],
+  teachers: [
+    {
+      id: 10,
+      name: '王老师',
+      slug: 'wang',
+      title: '高级教师',
+      avatar: { url: '/uploads/wang.jpg' },
     },
-    teachers: {
-      data: [
-        {
-          id: 10,
-          attributes: {
-            name: '王老师',
-            slug: 'wang',
-            title: '高级教师',
-            avatar: { data: { attributes: { url: '/uploads/wang.jpg' } } },
-          },
-        },
-        {
-          id: 11,
-          attributes: {
-            name: '李老师',
-            slug: 'li',
-            title: '特级教师',
-            avatar: { data: { attributes: { url: '/uploads/li.jpg' } } },
-          },
-        },
-      ],
+    {
+      id: 11,
+      name: '李老师',
+      slug: 'li',
+      title: '特级教师',
+      avatar: { url: '/uploads/li.jpg' },
     },
-  },
+  ],
 };
 
 function renderWithSlug(slug: string) {
@@ -161,11 +151,9 @@ describe('CampusDetailPage 页面', () => {
   it('无教师时不崩溃且显示空状态', async () => {
     const noTeachers = {
       id: 2,
-      attributes: {
-        name: '海淀校区',
-        slug: 'haidian',
-        address: '中关村大街1号 海龙大厦5层',
-      },
+      name: '海淀校区',
+      slug: 'haidian',
+      address: '中关村大街1号 海龙大厦5层',
     };
     vi.mocked(getCampusBySlug).mockResolvedValueOnce({ data: noTeachers } as any);
     renderWithSlug('haidian');

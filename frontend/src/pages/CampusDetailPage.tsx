@@ -58,11 +58,9 @@ export default function CampusDetailPage() {
     );
   }
 
-  const { attributes } = campus;
-
   return (
     <div className="pt-[120px] pb-16">
-      <Seo seo={attributes.seo} title={attributes.name} description={attributes.address} />
+      <Seo seo={campus.seo} title={campus.name} description={campus.address} />
       <div className="max-w-[1400px] mx-auto px-8">
         <CampusDetailHeader campus={campus} />
 
@@ -76,7 +74,7 @@ export default function CampusDetailPage() {
           </div>
         </section>
 
-        <CampusTeachers teachers={attributes.teachers} />
+        <CampusTeachers teachers={campus.teachers} />
       </div>
     </div>
   );

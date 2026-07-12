@@ -512,6 +512,7 @@ export interface Campus {
   mapEmbed?: string;
   sortOrder?: number;
   teachers?: Teacher[];
+  seo?: Seo;
 }
 
 export async function getCampuses() {

@@ -35,7 +35,7 @@ export default function FaqPage() {
 
   // 从 FAQ 数据中提取唯一分类
   const categories = Array.from(
-    new Set(faqs.map((f) => f.attributes.category).filter(Boolean))
+    new Set(faqs.map((f) => f.category).filter(Boolean))
   ) as string[];
 
   if (loading) {
@@ -135,7 +135,7 @@ export default function FaqPage() {
                       className="text-[#1C2B3A] font-semibold"
                       style={{ fontSize: '16px' }}
                     >
-                      {faq.attributes.question}
+                      {faq.question}
                     </span>
                     <ChevronDown
                       size={20}
@@ -147,7 +147,7 @@ export default function FaqPage() {
                   {isExpanded && (
                     <div className="px-5 pb-5">
                       <p className="text-[#6B7280]" style={{ fontSize: '15px', lineHeight: 1.7 }}>
-                        {faq.attributes.answer}
+                        {faq.answer}
                       </p>
                     </div>
                   )}

@@ -12,33 +12,27 @@ import { getFaqItems } from '../../lib/api';
 const mockFaqs = [
   {
     id: 1,
-    attributes: {
-      question: '你们提供哪些课程？',
-      answer: '我们提供语言启蒙、数学思维、英语口语和综合素养四大课程体系。',
-      category: '课程相关',
-      isActive: true,
-      sortOrder: 1,
-    },
+    question: '你们提供哪些课程？',
+    answer: '我们提供语言启蒙、数学思维、英语口语和综合素养四大课程体系。',
+    category: '课程相关',
+    isActive: true,
+    sortOrder: 1,
   },
   {
     id: 2,
-    attributes: {
-      question: '如何预约参观校区？',
-      answer: '您可以通过联系我们页面填写预约表单，或直接拨打校区电话预约。',
-      category: '报名咨询',
-      isActive: true,
-      sortOrder: 2,
-    },
+    question: '如何预约参观校区？',
+    answer: '您可以通过联系我们页面填写预约表单，或直接拨打校区电话预约。',
+    category: '报名咨询',
+    isActive: true,
+    sortOrder: 2,
   },
   {
     id: 3,
-    attributes: {
-      question: '学费是多少？',
-      answer: '学费因课程和校区不同而异，请咨询具体校区获取详细价格。',
-      category: '课程相关',
-      isActive: true,
-      sortOrder: 3,
-    },
+    question: '学费是多少？',
+    answer: '学费因课程和校区不同而异，请咨询具体校区获取详细价格。',
+    category: '课程相关',
+    isActive: true,
+    sortOrder: 3,
   },
 ];
 

@@ -12,21 +12,17 @@ import { getCampuses } from '../lib/api';
 const mockCampuses = [
   {
     id: 1,
-    attributes: {
-      name: '朝阳校区',
-      slug: 'chaoyang',
-      address: '建国路88号 SOHO现代城A座3层',
-      phone: '010-8888-0001',
-    },
+    name: '朝阳校区',
+    slug: 'chaoyang',
+    address: '建国路88号 SOHO现代城A座3层',
+    phone: '010-8888-0001',
   },
   {
     id: 2,
-    attributes: {
-      name: '海淀校区',
-      slug: 'haidian',
-      address: '中关村大街1号 海龙大厦5层',
-      phone: '010-8888-0002',
-    },
+    name: '海淀校区',
+    slug: 'haidian',
+    address: '中关村大街1号 海龙大厦5层',
+    phone: '010-8888-0002',
   },
 ];
 
