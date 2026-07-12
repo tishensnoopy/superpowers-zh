@@ -1,0 +1,23 @@
+{
+  "kind": "component",
+  "collectionName": "components_course_objectives",
+  "info": {
+    "singularName": "objective",
+    "pluralName": "objectives",
+    "displayName": "学习目标",
+    "description": "课程学习目标项",
+    "icon": "Target"
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100,
+      "description": "目标标题"
+    },
+    "description": {
+      "type": "text",
+      "description": "目标详细说明"
+    }
+  }
+}

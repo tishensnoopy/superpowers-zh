@@ -102,6 +102,28 @@
     "specValues": {
       "type": "json",
       "description": "规格值（键值对）"
+    },
+    "teachingMethod": {
+      "type": "richtext",
+      "description": "教学方法描述"
+    },
+    "objectives": {
+      "type": "component",
+      "component": "course.objective",
+      "repeatable": true,
+      "description": "学习目标列表"
+    },
+    "outline": {
+      "type": "component",
+      "component": "course.module",
+      "repeatable": true,
+      "description": "课程大纲分阶段"
+    },
+    "testimonials": {
+      "type": "component",
+      "component": "course.testimonial",
+      "repeatable": true,
+      "description": "家长评价"
     }
   },
   "admin": {
@@ -226,6 +248,23 @@
         {
           "field": "seo",
           "label": "SEO 配置"
+        },
+        {
+          "field": "teachingMethod",
+          "label": "教学方法",
+          "placeholder": "请输入教学方法描述"
+        },
+        {
+          "field": "objectives",
+          "label": "学习目标"
+        },
+        {
+          "field": "outline",
+          "label": "课程大纲"
+        },
+        {
+          "field": "testimonials",
+          "label": "家长评价"
         }
       ]
     }

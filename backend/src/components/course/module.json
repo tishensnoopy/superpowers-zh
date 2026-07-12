@@ -1,0 +1,28 @@
+{
+  "kind": "component",
+  "collectionName": "components_course_modules",
+  "info": {
+    "singularName": "module",
+    "pluralName": "modules",
+    "displayName": "课程模块",
+    "description": "课程大纲分阶段模块",
+    "icon": "BookOpen"
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100,
+      "description": "阶段标题"
+    },
+    "description": {
+      "type": "text",
+      "description": "阶段内容描述"
+    },
+    "lessonCount": {
+      "type": "integer",
+      "default": 0,
+      "description": "该阶段课时数"
+    }
+  }
+}
