@@ -2,25 +2,6 @@ import type { Core } from '@strapi/strapi';
 
 const UID = 'api::news-article.news-article';
 
-function wrapMedia(media: any) {
-  if (!media) return { data: null };
-  const { id, documentId, ...attributes } = media;
-  return { data: { id, documentId, attributes } };
-}
-
-function transformArticle(article: any) {
-  if (!article) return null;
-  const { id, documentId, coverImage, ...rest } = article;
-  const attributes: any = { ...rest };
-  if (coverImage !== undefined) {
-    attributes.coverImage = wrapMedia(coverImage);
-  }
-  if (attributes.seo?.ogImage !== undefined) {
-    attributes.seo.ogImage = wrapMedia(attributes.seo.ogImage);
-  }
-  return { id, documentId, attributes };
-}
-
 export default {
   async find(ctx) {
     const { category, sort, page, pageSize } = ctx.query as any;
@@ -52,7 +33,7 @@ export default {
       }),
     ]);
 
-    const data = (articles || []).map(transformArticle);
+    const data = articles || [];
 
     ctx.body = {
       data,
@@ -80,7 +61,7 @@ export default {
       return;
     }
 
-    ctx.body = { data: transformArticle(article), meta: {} };
+    ctx.body = { data: article, meta: {} };
   },
 
   async findBySlug(ctx) {
@@ -99,6 +80,6 @@ export default {
       return;
     }
 
-    ctx.body = { data: transformArticle(article), meta: {} };
+    ctx.body = { data: article, meta: {} };
   },
 } satisfies Core.Controller;
