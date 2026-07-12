@@ -1,20 +1,18 @@
 import type { NextConfig } from 'next';
 import { withSentryConfig } from '@sentry/nextjs';
 
+const cmsUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
+const cmsParsedUrl = new URL(cmsUrl);
+
 const nextConfig: NextConfig = {
   output: 'standalone',
 
   images: {
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '1337',
-        pathname: '/uploads/**',
-      },
-      {
-        protocol: 'https',
-        hostname: '**',
+        protocol: cmsParsedUrl.protocol.replace(':', '') as 'http' | 'https',
+        hostname: cmsParsedUrl.hostname,
+        port: cmsParsedUrl.port || undefined,
         pathname: '/uploads/**',
       },
     ],

@@ -1,10 +1,11 @@
 @import "tailwindcss";
 
-:root {
+@theme {
   --color-primary: #F5851F;
   --color-primary-dark: #FF6B35;
+  --font-sans: var(--font-default), var(--font-custom), sans-serif;
 }
 
 body {
-  font-family: var(--font-default), var(--font-custom), sans-serif;
+  font-family: var(--font-sans);
 }
