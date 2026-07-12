@@ -5,6 +5,7 @@ import CourseSearchPanel from '@/components/course/CourseSearchPanel';
 vi.mock('@/lib/api', () => ({
   searchProducts: vi.fn(),
   getProductCategories: vi.fn(),
+  getImageUrl: vi.fn(() => null),
 }));
 
 import { searchProducts, getProductCategories } from '@/lib/api';

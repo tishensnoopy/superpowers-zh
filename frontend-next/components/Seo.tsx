@@ -1,8 +1,9 @@
 'use client';
 
+import { getImageUrl } from '@/lib/api';
 import type { Seo as SeoData } from '@/lib/api';
 
-const DEFAULT_SITE_NAME = '幼小衔接教育';
+const DEFAULT_SITE_NAME = '启航幼小教育';
 
 export interface SeoProps {
   seo?: SeoData;
@@ -30,7 +31,7 @@ export default function Seo({
 
   const ogTitle = seo?.ogTitle ?? resolvedTitle;
   const ogDescription = seo?.ogDescription ?? resolvedDescription;
-  const ogImage = image;
+  const ogImage = getImageUrl(seo?.ogImage) ?? image;
   const ogType = type ?? seo?.ogType ?? 'website';
 
   const fullTitle = resolvedTitle ? `${resolvedTitle} | ${siteName}` : siteName;

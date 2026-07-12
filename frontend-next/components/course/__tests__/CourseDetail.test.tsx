@@ -4,6 +4,7 @@ import CourseDetail from '@/components/course/CourseDetail';
 
 vi.mock('@/lib/api', () => ({
   getProductBySlug: vi.fn(),
+  getImageUrl: vi.fn(() => null),
 }));
 
 import { getProductBySlug } from '@/lib/api';
@@ -38,10 +39,6 @@ describe('CourseDetail 页面', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     document.head.innerHTML = '';
-    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => {
-      cb(0);
-      return 0;
-    });
   });
 
   afterEach(() => {

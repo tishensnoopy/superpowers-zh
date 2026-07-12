@@ -1115,6 +1115,14 @@ git add frontend-next/hooks/ frontend-next/components/course/
 git commit -m "feat(frontend-next): 移植 useProductSearch hook + 12 个课程组件（含竞态修复）"
 ```
 
+> **任务 6 执行勘误与 Follow-up（代码质量审查记录）**
+>
+> 1. **SearchResultsGrid 需要 'use client'**：计划步骤 4 标为 Server Component，但源码 `frontend/src/components/course/SearchResultsGrid.tsx:62-68` 有 `<button onClick={onRetry}>` 重试按钮，必须是 Client Component。
+> 2. **CourseDetail 需要 'use client'**：计划步骤 4 标为 Server Component，但源码 `frontend/src/components/course/CourseDetail.tsx` 使用 `useState`/`useEffect` 自己 fetch 数据。任务 8 步骤 3 会将其重构为接收 `product` prop 的 Server Component。
+> 3. **新增 Seo.tsx 组件（计划外）**：CourseDetail 和 CourseSearchPanel 依赖 Seo 组件（原 react-helmet-async 不兼容 App Router）。**任务 8/9 路线决策**：任务 8 会用 `generateMetadata` + `buildMetadata`（来自 `lib/seo.ts`）替代 Seo.tsx，届时删除 Seo.tsx 并重构 CourseDetail 为 Server Component。当前保留 Seo.tsx 作为临时方案，已修复 og:image 解析逻辑（使用 `getImageUrl`）。
+> 4. **StrapiImage 仍未被使用**：课程组件无图片引用，StrapiImage 的实际应用留给任务 7（校区/教师/新闻组件）或任务 8（页面路由）。
+> 5. **CourseSearchPanel 测试 act 警告**：异步搜索 hook 的防抖触发导致测试中产生 act 警告（仅警告，测试全部通过）。任务 11 全量验证前用 fake timers 优化。
+
 ---
 
 ## 任务 7：其他组件移植（校区/教师/新闻）
