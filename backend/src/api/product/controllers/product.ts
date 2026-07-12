@@ -292,12 +292,14 @@ export default factories.createCoreController('api::product.product', ({ strapi 
       }
       
       console.log('[Product findBySlug] Found:', product.name);
-      
+
+      const { id, documentId, ...attributes } = product;
+
       ctx.body = {
         data: {
-          id: product.id,
-          documentId: product.documentId,
-          ...product,
+          id,
+          documentId,
+          attributes,
         },
         meta: {},
       };
