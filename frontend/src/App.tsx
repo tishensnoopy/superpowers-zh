@@ -11,6 +11,7 @@ import FaqPage from './pages/FaqPage';
 import TeamPage from './components/team/TeamPage';
 import CampusOverviewPage from './pages/CampusOverviewPage';
 import CampusDetailPage from './pages/CampusDetailPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 export default function App() {
   return (
@@ -25,8 +26,9 @@ export default function App() {
         <Route path="/news" element={<Layout><NewsListPage /></Layout>} />
         <Route path="/news/:slug" element={<Layout><NewsDetailPage /></Layout>} />
         <Route path="/faq" element={<Layout><FaqPage /></Layout>} />
-        <Route path="/:slug" element={<Layout><PageRendererWithSlug /></Layout>} />
         <Route path="/appointment-success" element={<AppointmentSuccess />} />
+        <Route path="/:slug" element={<Layout><PageRendererWithSlug /></Layout>} />
+        <Route path="*" element={<Layout><NotFoundPage /></Layout>} />
       </Routes>
     </BrowserRouter>
   );
