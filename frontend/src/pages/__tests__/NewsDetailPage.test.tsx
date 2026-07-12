@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderWithProviders as render, screen, waitFor } from '../../test/test-utils';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import NewsDetailPage from '../NewsDetailPage';
@@ -31,12 +31,23 @@ const mockNews = {
     category: 'company_news',
     publishedAt: '2026-07-10T10:00:00.000Z',
     viewCount: 1234,
+    seo: {
+      metaTitle: '2026幼小衔接教育峰会专题报道',
+      metaDescription: '全国200余位教育专家齐聚北京',
+      ogTitle: '2026年幼小衔接教育峰会圆满举办',
+      ogDescription: '本次峰会汇聚了全国200余位教育专家',
+    },
   },
 };
 
 describe('NewsDetailPage 页面', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    document.head.innerHTML = '';
+    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => {
+      cb(0);
+      return 0;
+    });
     vi.mocked(getNewsCategoryLabel).mockImplementation((cat: string) => {
       const labels: Record<string, string> = {
         company_news: '公司动态',
@@ -45,6 +56,10 @@ describe('NewsDetailPage 页面', () => {
       };
       return labels[cat] || cat;
     });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('加载中显示 loading', () => {
@@ -130,5 +145,24 @@ describe('NewsDetailPage 页面', () => {
     await waitFor(() => {
       expect(screen.getByText(/1,234|1234/)).toBeInTheDocument();
     });
+  });
+
+  it('渲染 SEO meta 标签和 NewsArticle 结构化数据', async () => {
+    vi.mocked(getNewsBySlug).mockResolvedValueOnce({ data: mockNews } as any);
+    renderWithRouter();
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /2026年幼小衔接教育峰会/ })).toBeInTheDocument();
+    });
+    const titleEl = document.querySelector('title');
+    expect(titleEl?.textContent).toContain('2026幼小衔接教育峰会专题报道');
+    const metaDesc = document.querySelector('meta[name="description"]');
+    expect(metaDesc?.getAttribute('content')).toBe('全国200余位教育专家齐聚北京');
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    expect(ogTitle?.getAttribute('content')).toBe('2026年幼小衔接教育峰会圆满举办');
+    const jsonLd = document.querySelector('script[type="application/ld+json"]');
+    expect(jsonLd).toBeTruthy();
+    const parsed = JSON.parse(jsonLd!.textContent || '{}');
+    expect(parsed['@type']).toBe('NewsArticle');
+    expect(parsed.headline).toBe('2026年幼小衔接教育峰会圆满举办');
   });
 });

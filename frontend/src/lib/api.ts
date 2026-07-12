@@ -302,10 +302,6 @@ export interface Seo {
   ogDescription?: string;
   ogImage?: { data?: { attributes: { url: string } } };
   ogType?: string;
-  twitterTitle?: string;
-  twitterDescription?: string;
-  twitterImage?: { data?: { attributes: { url: string } } };
-  structuredData?: string;
 }
 
 export interface CourseObjective {

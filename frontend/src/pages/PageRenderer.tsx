@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getPageBySlug, getHomepage } from '../lib/api';
 import SectionRenderer from '../components/SectionRenderer';
 import Seo from '../components/Seo';
+import NotFoundPage from './NotFoundPage';
 import type { Page } from '../lib/api';
 
 export default function PageRenderer({ slug }: { slug?: string }) {
@@ -38,20 +39,7 @@ export default function PageRenderer({ slug }: { slug?: string }) {
   }
 
   if (error || !page) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-muted-foreground text-lg mb-4">{error || '页面不存在'}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-6 py-2 rounded-lg text-white font-semibold"
-            style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
-          >
-            刷新页面
-          </button>
-        </div>
-      </div>
-    );
+    return <NotFoundPage />;
   }
 
   const sections = page.attributes.sections || [];

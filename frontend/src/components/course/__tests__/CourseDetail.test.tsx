@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderWithProviders as render, screen, waitFor } from '../../../test/test-utils';
 import { MemoryRouter } from 'react-router-dom';
 import CourseDetail from '../CourseDetail';
@@ -27,12 +27,27 @@ const mockProduct = {
     testimonials: [
       { id: 1, parentName: '张妈妈', content: '效果很好！', rating: 5 },
     ],
+    seo: {
+      metaTitle: '语言启蒙课程 - 专业幼儿语言开发',
+      metaDescription: '专为4-6岁儿童设计的语言启蒙课程',
+      ogTitle: '语言启蒙课程',
+      ogDescription: '培养孩子语言表达能力与阅读兴趣',
+    },
   },
 };
 
 describe('CourseDetail 页面', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    document.head.innerHTML = '';
+    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => {
+      cb(0);
+      return 0;
+    });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('加载中显示 loading', () => {
@@ -127,5 +142,28 @@ describe('CourseDetail 页面', () => {
     await waitFor(() => {
       expect(screen.getByText(/课程不存在|找不到/)).toBeInTheDocument();
     });
+  });
+
+  it('渲染 SEO meta 标签和 Course 结构化数据', async () => {
+    vi.mocked(getProductBySlug).mockResolvedValueOnce({ data: mockProduct } as any);
+    render(
+      <MemoryRouter>
+        <CourseDetail slug="language" />
+      </MemoryRouter>
+    );
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: '语言启蒙' })).toBeInTheDocument();
+    });
+    const titleEl = document.querySelector('title');
+    expect(titleEl?.textContent).toContain('语言启蒙课程 - 专业幼儿语言开发');
+    const metaDesc = document.querySelector('meta[name="description"]');
+    expect(metaDesc?.getAttribute('content')).toBe('专为4-6岁儿童设计的语言启蒙课程');
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    expect(ogTitle?.getAttribute('content')).toBe('语言启蒙课程');
+    const jsonLd = document.querySelector('script[type="application/ld+json"]');
+    expect(jsonLd).toBeTruthy();
+    const parsed = JSON.parse(jsonLd!.textContent || '{}');
+    expect(parsed['@type']).toBe('Course');
+    expect(parsed.name).toBe('语言启蒙');
   });
 });

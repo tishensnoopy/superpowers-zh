@@ -24,6 +24,9 @@ function transformTeacher(teacher: any) {
   if (campus !== undefined) {
     attributes.campus = campus ? { data: wrapItem(campus) } : { data: null };
   }
+  if (attributes.seo?.ogImage !== undefined) {
+    attributes.seo.ogImage = wrapMedia(attributes.seo.ogImage);
+  }
   return { id, documentId, attributes };
 }
 

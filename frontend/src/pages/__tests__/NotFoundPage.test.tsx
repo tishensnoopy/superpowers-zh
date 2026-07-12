@@ -1,17 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import { HelmetProvider } from 'react-helmet-async';
-import { render } from '../../test/test-utils';
+import { renderWithProviders as render, screen } from '../../test/test-utils';
 import NotFoundPage from '../NotFoundPage';
 
 function renderPage() {
   return render(
-    <HelmetProvider>
-      <MemoryRouter>
-        <NotFoundPage />
-      </MemoryRouter>
-    </HelmetProvider>
+    <MemoryRouter>
+      <NotFoundPage />
+    </MemoryRouter>
   );
 }
 

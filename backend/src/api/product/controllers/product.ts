@@ -1,6 +1,12 @@
 import { factories } from '@strapi/strapi';
 import { searchProducts, syncAllProducts, ProductDocument } from '../../../utils/meilisearch';
 
+function wrapMedia(media: any) {
+  if (!media) return { data: null };
+  const { id, documentId, ...attributes } = media;
+  return { data: { id, documentId, attributes } };
+}
+
 export default factories.createCoreController('api::product.product', ({ strapi }) => ({
   async search(ctx) {
     const { query, categories, categorySlugs, priceMin, priceMax, isFeatured, isInStock, sort, limit, page } = ctx.query;
@@ -294,6 +300,10 @@ export default factories.createCoreController('api::product.product', ({ strapi 
       console.log('[Product findBySlug] Found:', product.name);
 
       const { id, documentId, ...attributes } = product;
+
+      if (attributes.seo?.ogImage) {
+        attributes.seo.ogImage = wrapMedia(attributes.seo.ogImage);
+      }
 
       ctx.body = {
         data: {

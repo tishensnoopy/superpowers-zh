@@ -67,7 +67,7 @@ export default function Seo({
       {ogImage && <meta name="twitter:image" content={ogImage} />}
       {structuredData && (
         <script type="application/ld+json">
-          {JSON.stringify(structuredData)}
+          {JSON.stringify(structuredData).replace(/</g, '\\u003c')}
         </script>
       )}
     </Helmet>

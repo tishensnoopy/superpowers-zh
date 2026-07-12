@@ -45,6 +45,9 @@ function transformCampus(campus: any) {
       attributes.teachers = { data: [] };
     }
   }
+  if (attributes.seo?.ogImage !== undefined) {
+    attributes.seo.ogImage = wrapMedia(attributes.seo.ogImage);
+  }
   return { id, documentId, attributes };
 }
 

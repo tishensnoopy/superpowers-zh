@@ -62,7 +62,7 @@ export default function CampusDetailPage() {
 
   return (
     <div className="pt-[120px] pb-16">
-      <Seo title={attributes.name} description={attributes.address} />
+      <Seo seo={attributes.seo} title={attributes.name} description={attributes.address} />
       <div className="max-w-[1400px] mx-auto px-8">
         <CampusDetailHeader campus={campus} />
 

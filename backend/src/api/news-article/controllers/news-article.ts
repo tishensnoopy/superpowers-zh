@@ -15,6 +15,9 @@ function transformArticle(article: any) {
   if (coverImage !== undefined) {
     attributes.coverImage = wrapMedia(coverImage);
   }
+  if (attributes.seo?.ogImage !== undefined) {
+    attributes.seo.ogImage = wrapMedia(attributes.seo.ogImage);
+  }
   return { id, documentId, attributes };
 }
 
@@ -68,7 +71,7 @@ export default {
     const { id } = ctx.params;
     const article = await strapi.documents(UID).findOne({
       documentId: id,
-      populate: { coverImage: true },
+      populate: { coverImage: true, seo: true },
       status: 'published',
     });
 

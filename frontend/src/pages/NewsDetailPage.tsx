@@ -80,6 +80,7 @@ export default function NewsDetailPage() {
   return (
     <div className="pt-[72px] pb-16 min-h-screen" style={{ background: '#FAFAFA' }}>
       <Seo
+        seo={attributes.seo}
         title={attributes.title}
         description={attributes.excerpt}
         image={fullCoverUrl || undefined}
