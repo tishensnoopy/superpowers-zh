@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { renderWithProviders as render, screen, waitFor } from '../../test/test-utils';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import NewsDetailPage from '../NewsDetailPage';
 

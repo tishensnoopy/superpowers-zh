@@ -282,7 +282,7 @@ export default factories.createCoreController('api::product.product', ({ strapi 
     try {
       const product = await strapi.db.query('api::product.product').findOne({
         where: { slug, publishedAt: { $notNull: true } },
-        populate: ['thumbnail', 'images', 'categories', 'objectives', 'outline', 'testimonials'],
+        populate: ['thumbnail', 'images', 'categories', 'objectives', 'outline', 'testimonials', 'seo'],
       });
       
       if (!product) {

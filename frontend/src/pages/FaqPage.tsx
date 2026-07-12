@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { getFaqItems, type FaqItem } from '../lib/api';
+import Seo from '../components/Seo';
 
 export default function FaqPage() {
   const [faqs, setFaqs] = useState<FaqItem[]>([]);
@@ -56,6 +57,7 @@ export default function FaqPage() {
 
   return (
     <div className="pt-[72px] pb-16 min-h-screen" style={{ background: '#FAFAFA' }}>
+      <Seo title="常见问题" description="幼小衔接课程常见问题解答，帮助您了解入学流程、课程安排等。" />
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* 页面标题 */}

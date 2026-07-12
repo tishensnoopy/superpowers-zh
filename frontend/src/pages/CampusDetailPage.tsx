@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { getCampusBySlug, type Campus } from '../lib/api';
+import Seo from '../components/Seo';
 import CampusDetailHeader from '../components/campus/CampusDetailHeader';
 import CampusGallery from '../components/campus/CampusGallery';
 import CampusInfoCard from '../components/campus/CampusInfoCard';
@@ -61,6 +62,7 @@ export default function CampusDetailPage() {
 
   return (
     <div className="pt-[120px] pb-16">
+      <Seo title={attributes.name} description={attributes.address} />
       <div className="max-w-[1400px] mx-auto px-8">
         <CampusDetailHeader campus={campus} />
 

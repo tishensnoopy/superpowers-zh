@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getNews, type NewsArticle } from '../lib/api';
 import NewsCard from '../components/news/NewsCard';
+import Seo from '../components/Seo';
 
 const CATEGORIES = [
   { value: '', label: '全部' },
@@ -57,6 +58,7 @@ export default function NewsListPage() {
 
   return (
     <div className="pt-[72px] pb-16 min-h-screen" style={{ background: '#FAFAFA' }}>
+      <Seo title="新闻动态" description="了解我们的最新动态、行业资讯和活动通知。" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* 页面标题 */}

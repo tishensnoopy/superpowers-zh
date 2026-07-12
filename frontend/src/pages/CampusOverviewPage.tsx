@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { getCampuses, type Campus } from '../lib/api';
 import CampusHeader from '../components/campus/CampusHeader';
 import CampusGrid from '../components/campus/CampusGrid';
+import Seo from '../components/Seo';
 
 export default function CampusOverviewPage() {
   const [campuses, setCampuses] = useState<Campus[]>([]);
@@ -36,6 +37,7 @@ export default function CampusOverviewPage() {
       className="pt-[120px] pb-16 min-h-screen"
       style={{ background: 'linear-gradient(to bottom, #FFF3E5, #ffffff)' }}
     >
+      <Seo title="校区分布" description="查看我们的各校区地址和联系方式，欢迎就近选择。" />
       <div className="max-w-[1400px] mx-auto px-8">
         <CampusHeader />
 

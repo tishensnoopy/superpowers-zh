@@ -4,6 +4,10 @@ const sectionsPopulate = {
   populate: '*',
 };
 
+const seoPopulate = {
+  populate: '*',
+};
+
 export default factories.createCoreController('api::page.page', ({ strapi }) => ({
   async find(ctx) {
     console.log('[Page] find() called');
@@ -12,9 +16,7 @@ export default factories.createCoreController('api::page.page', ({ strapi }) => 
         ...ctx.query,
         populate: {
           sections: sectionsPopulate,
-          seo: {
-            fields: ['metaTitle', 'metaDescription'],
-          },
+          seo: seoPopulate,
         },
       };
       const result = await super.find(ctx);
@@ -39,9 +41,7 @@ export default factories.createCoreController('api::page.page', ({ strapi }) => 
         ...ctx.query,
         populate: {
           sections: sectionsPopulate,
-          seo: {
-            fields: ['metaTitle', 'metaDescription'],
-          },
+          seo: seoPopulate,
         },
       };
       const result = await super.findOne(ctx);
@@ -65,9 +65,7 @@ export default factories.createCoreController('api::page.page', ({ strapi }) => 
         filters: { slug: ctx.params.slug },
         populate: {
           sections: sectionsPopulate,
-          seo: {
-            fields: ['metaTitle', 'metaDescription'],
-          },
+          seo: seoPopulate,
         },
       };
       const result = await super.find(ctx);
@@ -94,9 +92,7 @@ export default factories.createCoreController('api::page.page', ({ strapi }) => 
         filters: { isHomepage: true },
         populate: {
           sections: sectionsPopulate,
-          seo: {
-            fields: ['metaTitle', 'metaDescription'],
-          },
+          seo: seoPopulate,
         },
       };
       const result = await super.find(ctx);

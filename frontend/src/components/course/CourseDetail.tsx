@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getProductBySlug, type Product } from '../../lib/api';
+import Seo from '../Seo';
 import CourseHeader from './CourseHeader';
 import CourseObjectives from './CourseObjectives';
 import CourseOutline from './CourseOutline';
@@ -51,8 +52,22 @@ export default function CourseDetail({ slug }: { slug: string }) {
 
   const { attributes } = product;
 
+  const courseStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'Course',
+    name: attributes.name,
+    description: attributes.description || attributes.shortDescription || '',
+  };
+
   return (
     <>
+      <Seo
+        seo={attributes.seo}
+        title={attributes.name}
+        description={attributes.shortDescription || attributes.description}
+        type="product"
+        structuredData={courseStructuredData}
+      />
       <CourseHeader product={product} />
 
       {attributes.description && (

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Calendar, Eye, ArrowLeft, Home } from 'lucide-react';
 import { getNewsBySlug, getNewsCategoryLabel, type NewsArticle } from '../lib/api';
+import Seo from '../components/Seo';
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
@@ -68,8 +69,23 @@ export default function NewsDetailPage() {
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337';
   const fullCoverUrl = coverUrl ? `${apiUrl}${coverUrl}` : null;
 
+  const articleStructuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: attributes.title,
+    datePublished: attributes.publishedAt,
+    image: fullCoverUrl,
+  };
+
   return (
     <div className="pt-[72px] pb-16 min-h-screen" style={{ background: '#FAFAFA' }}>
+      <Seo
+        title={attributes.title}
+        description={attributes.excerpt}
+        image={fullCoverUrl || undefined}
+        type="article"
+        structuredData={articleStructuredData}
+      />
       <div className="max-w-[800px] mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* 面包屑导航 */}

@@ -297,9 +297,11 @@ export interface Seo {
   metaTitle?: string;
   metaDescription?: string;
   metaKeywords?: string;
+  canonicalUrl?: string;
   ogTitle?: string;
   ogDescription?: string;
   ogImage?: { data?: { attributes: { url: string } } };
+  ogType?: string;
   twitterTitle?: string;
   twitterDescription?: string;
   twitterImage?: { data?: { attributes: { url: string } } };
@@ -346,6 +348,7 @@ export interface Product {
     objectives?: CourseObjective[];
     outline?: CourseModule[];
     testimonials?: CourseTestimonial[];
+    seo?: Seo;
     createdAt?: string;
     updatedAt?: string;
   };

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getPageBySlug, getHomepage } from '../lib/api';
 import SectionRenderer from '../components/SectionRenderer';
+import Seo from '../components/Seo';
 import type { Page } from '../lib/api';
 
 export default function PageRenderer({ slug }: { slug?: string }) {
@@ -54,9 +55,12 @@ export default function PageRenderer({ slug }: { slug?: string }) {
   }
 
   const sections = page.attributes.sections || [];
+  const seo = page.attributes.seo;
+  const pageTitle = page.attributes.title;
 
   return (
     <div>
+      <Seo seo={seo} title={pageTitle} />
       {sections.map((section: any, index: number) => (
         <SectionRenderer key={`${section.__component}-${section.id}-${index}`} section={section} />
       ))}
