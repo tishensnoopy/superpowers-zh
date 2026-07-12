@@ -29,10 +29,9 @@ export default function Features({ section }: { section: Section }) {
 
         <div className="grid grid-cols-12 gap-6">
           {(Array.isArray(features) ? features : (features?.data || [])).map((feature: any) => {
-            const featureAttrs = feature.attributes || feature;
             return (
               <div key={feature.id} className="col-span-12 sm:col-span-6 lg:col-span-3">
-                <div className={`h-full bg-card rounded-2xl p-8 border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col ${featureAttrs.isHighlighted ? 'ring-2 ring-[#F5851F]' : ''}`}>
+                <div className={`h-full bg-card rounded-2xl p-8 border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col ${feature.isHighlighted ? 'ring-2 ring-[#F5851F]' : ''}`}>
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center mb-5"
                     style={{ background: '#EFF6FF' }}
@@ -43,9 +42,9 @@ export default function Features({ section }: { section: Section }) {
                     className="text-lg font-bold text-[#1C2B3A] mb-3"
                     style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}
                   >
-                    {featureAttrs.title}
+                    {feature.title}
                   </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed flex-1">{featureAttrs.description}</p>
+                  <p className="text-muted-foreground text-sm leading-relaxed flex-1">{feature.description}</p>
                 </div>
               </div>
             );

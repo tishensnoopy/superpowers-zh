@@ -7,9 +7,9 @@ export default function Hero({ section }: { section: Section }) {
   return (
     <section className="relative pt-[72px] min-h-screen flex items-center overflow-hidden">
       <div className="absolute inset-0 bg-[#1C2B3A]">
-        {backgroundImage?.data?.attributes?.url ? (
+        {backgroundImage?.url ? (
           <img
-            src={backgroundImage.data.attributes.url}
+            src={backgroundImage.url}
             alt=""
             className="w-full h-full object-cover opacity-30"
           />

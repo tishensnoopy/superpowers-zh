@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import Team from '../Team';
 
-// {data: [...]} 格式（Strapi v4 / 旧格式）
+// {data: [...]} 格式（Strapi v4 / 旧格式）— v5 扁平化后 items 不再带 attributes 包裹
 const mockSectionV4 = {
   __component: 'section.team',
   id: 1,
@@ -10,8 +10,8 @@ const mockSectionV4 = {
   description: '8年沉淀，打造出一支专业教师队伍',
   members: {
     data: [
-      { id: 1, attributes: { name: '王老师', position: '教学总监', bio: '北京师范大学学前教育硕士' } },
-      { id: 2, attributes: { name: '李老师', position: '语言启蒙组组长', bio: '8年儿童语言教学经验' } },
+      { id: 1, name: '王老师', position: '教学总监', bio: '北京师范大学学前教育硕士' },
+      { id: 2, name: '李老师', position: '语言启蒙组组长', bio: '8年儿童语言教学经验' },
     ],
   },
 };

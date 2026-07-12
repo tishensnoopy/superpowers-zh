@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import Advantages from '../Advantages';
 
-// {data: [...]} 格式（Strapi v4 / 旧格式）
+// {data: [...]} 格式（Strapi v4 / 旧格式）— v5 扁平化后 items 不再带 attributes 包裹
 const mockSectionV4 = {
   __component: 'section.advantages',
   id: 1,
@@ -10,10 +10,10 @@ const mockSectionV4 = {
   description: '我们深知每位家长对孩子教育的期望与用心',
   advantages: {
     data: [
-      { id: 1, attributes: { title: '专业师资', description: '8年幼小衔接教学经验', icon: 'GraduationCap', color: '#F5851F', bgColor: '#FFF3E5' } },
-      { id: 2, attributes: { title: '科学课程', description: '对标小学课程标准', icon: 'BookOpen', color: '#2563EB', bgColor: '#EFF6FF' } },
-      { id: 3, attributes: { title: '安全环境', description: '全程监控覆盖', icon: 'Shield', color: '#059669', bgColor: '#ECFDF5' } },
-      { id: 4, attributes: { title: '小班教学', description: '每班不超过12人', icon: 'Users', color: '#7C3AED', bgColor: '#F5F3FF' } },
+      { id: 1, title: '专业师资', description: '8年幼小衔接教学经验', icon: 'GraduationCap', color: '#F5851F', bgColor: '#FFF3E5' },
+      { id: 2, title: '科学课程', description: '对标小学课程标准', icon: 'BookOpen', color: '#2563EB', bgColor: '#EFF6FF' },
+      { id: 3, title: '安全环境', description: '全程监控覆盖', icon: 'Shield', color: '#059669', bgColor: '#ECFDF5' },
+      { id: 4, title: '小班教学', description: '每班不超过12人', icon: 'Users', color: '#7C3AED', bgColor: '#F5F3FF' },
     ],
   },
 };

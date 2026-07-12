@@ -42,9 +42,9 @@ export default function PageRenderer({ slug }: { slug?: string }) {
     return <NotFoundPage />;
   }
 
-  const sections = page.attributes.sections || [];
-  const seo = page.attributes.seo;
-  const pageTitle = page.attributes.title;
+  const sections = page.sections || [];
+  const seo = page.seo;
+  const pageTitle = page.title;
 
   return (
     <div>

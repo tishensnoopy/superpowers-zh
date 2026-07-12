@@ -37,7 +37,7 @@ export default function Testimonials({ section }: { section: Section }) {
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full overflow-hidden bg-muted">
                     <img
-                      src={testimonial.avatar?.data?.attributes?.url || testimonial.avatar}
+                      src={testimonial.avatar?.url || testimonial.avatar}
                       alt={testimonial.author}
                       className="w-full h-full object-cover"
                     />

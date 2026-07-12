@@ -56,10 +56,9 @@ export default function ProductGrid({ section }: { section: Section }) {
         ) : (
           <div className="grid grid-cols-12 gap-6">
             {products.map((product: any) => {
-              const p = product.attributes || product;
-              const specValues = p.specValues || {};
+              const specValues = product.specValues || {};
               return (
-                <div key={product.id || p.id} className="col-span-12 sm:col-span-6 lg:col-span-3">
+                <div key={product.id} className="col-span-12 sm:col-span-6 lg:col-span-3">
                   <div className="h-full bg-card rounded-2xl overflow-hidden border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
                     <div className="p-6 border-b border-border" style={{ background: '#EFF6FF' }}>
                       <div className="text-4xl mb-4">📚</div>
@@ -67,13 +66,13 @@ export default function ProductGrid({ section }: { section: Section }) {
                         className="text-xl font-bold text-[#1C2B3A]"
                         style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}
                       >
-                        {p.name}
+                        {product.name}
                       </h3>
                     </div>
 
                     <div className="p-6 flex-1 flex flex-col">
                       <p className="text-muted-foreground text-sm leading-relaxed mb-5">
-                        {p.shortDescription || p.description}
+                        {product.shortDescription || product.description}
                       </p>
                       {specValues && Object.keys(specValues).length > 0 && (
                         <ul className="space-y-2 flex-1">
@@ -87,7 +86,7 @@ export default function ProductGrid({ section }: { section: Section }) {
                       )}
                       <div className="mt-6 flex items-center justify-between">
                         <Link
-                          to={`/courses/${p.slug}`}
+                          to={`/courses/${product.slug}`}
                           className="text-xs text-muted-foreground hover:text-[#2563EB] flex items-center gap-1 transition-colors"
                         >
                           <Clock size={12} /> 查看详情

@@ -29,13 +29,12 @@ export default function Team({ section }: { section: Section }) {
 
         <div className="grid grid-cols-12 gap-6">
           {(Array.isArray(members) ? members : (members?.data || [])).map((member: any) => {
-            const m = member.attributes || member;
             return (
               <div key={member.id} className="col-span-12 sm:col-span-6 lg:col-span-3">
                 <div className="h-full bg-card rounded-2xl overflow-hidden border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                   <div className="aspect-square bg-[#F5F3FF] flex items-center justify-center">
-                    {m.avatar ? (
-                      <img src={m.avatar} alt={m.name} className="w-full h-full object-cover" />
+                    {member.avatar ? (
+                      <img src={member.avatar} alt={member.name} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center">
                         <User size={48} className="text-[#7C3AED]" />
@@ -47,10 +46,10 @@ export default function Team({ section }: { section: Section }) {
                       className="text-xl font-bold text-[#1C2B3A] mb-1"
                       style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}
                     >
-                      {m.name}
+                      {member.name}
                     </h3>
-                    <p className="text-[#7C3AED] text-sm font-medium mb-3">{m.position}</p>
-                    <p className="text-muted-foreground text-sm leading-relaxed">{m.bio}</p>
+                    <p className="text-[#7C3AED] text-sm font-medium mb-3">{member.position}</p>
+                    <p className="text-muted-foreground text-sm leading-relaxed">{member.bio}</p>
                   </div>
                 </div>
               </div>

@@ -43,7 +43,7 @@ export default function Gallery({ section }: { section: Section }) {
               }`}
             >
               <img
-                src={img.image?.data?.attributes?.url || img.url}
+                src={img.image?.url || img.url}
                 alt={img.alt || img.caption || ''}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
