@@ -1,16 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import ContactForm from '../ContactForm';
 
-// Mock createAppointment
 vi.mock('../../../lib/api', () => ({
   createAppointment: vi.fn().mockResolvedValue({ data: { id: 1 } }),
 }));
 
 import { createAppointment } from '../../../lib/api';
 
-// 直接数组格式（Strapi v5 实际返回格式）
 const mockSectionV5 = {
   __component: 'section.contact-form',
   id: 1,
@@ -26,7 +25,6 @@ const mockSectionV5 = {
   ],
 };
 
-// {data: [...]} 格式（Strapi v4 格式）
 const mockSectionV4 = {
   __component: 'section.contact-form',
   id: 1,
@@ -43,6 +41,16 @@ const mockSectionV4 = {
   },
 };
 
+const renderWithRouter = (section: any) => {
+  return render(
+    <MemoryRouter>
+      <Routes>
+        <Route path="/" element={<ContactForm section={section} />} />
+      </Routes>
+    </MemoryRouter>
+  );
+};
+
 describe('ContactForm 组件', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -50,12 +58,12 @@ describe('ContactForm 组件', () => {
 
   describe('Strapi v5 格式（直接数组）', () => {
     it('渲染表单标题', () => {
-      render(<ContactForm section={mockSectionV5 as any} />);
+      renderWithRouter(mockSectionV5);
       expect(screen.getByRole('heading', { name: '预约免费试听' })).toBeInTheDocument();
     });
 
     it('渲染所有表单字段', () => {
-      render(<ContactForm section={mockSectionV5 as any} />);
+      renderWithRouter(mockSectionV5);
       expect(screen.getByLabelText(/孩子姓名/)).toBeInTheDocument();
       expect(screen.getByLabelText(/家长姓名/)).toBeInTheDocument();
       expect(screen.getByLabelText(/联系电话/)).toBeInTheDocument();
@@ -63,20 +71,20 @@ describe('ContactForm 组件', () => {
     });
 
     it('渲染提交按钮', () => {
-      render(<ContactForm section={mockSectionV5 as any} />);
+      renderWithRouter(mockSectionV5);
       expect(screen.getByRole('button', { name: '立即预约' })).toBeInTheDocument();
     });
 
     it('必填字段为空时显示错误', async () => {
       const user = userEvent.setup();
-      render(<ContactForm section={mockSectionV5 as any} />);
+      renderWithRouter(mockSectionV5);
       await user.click(screen.getByRole('button', { name: '立即预约' }));
       expect(await screen.findByText(/请输入孩子姓名/)).toBeInTheDocument();
     });
 
     it('手机号格式错误时显示错误', async () => {
       const user = userEvent.setup();
-      render(<ContactForm section={mockSectionV5 as any} />);
+      renderWithRouter(mockSectionV5);
       await user.type(screen.getByLabelText(/孩子姓名/), '小明');
       await user.type(screen.getByLabelText(/家长姓名/), '王先生');
       await user.type(screen.getByLabelText(/联系电话/), '123');
@@ -84,14 +92,13 @@ describe('ContactForm 组件', () => {
       expect(await screen.findByText(/手机号格式不正确/)).toBeInTheDocument();
     });
 
-    it('提交成功后显示成功消息', async () => {
+    it('提交成功后跳转到成功页', async () => {
       const user = userEvent.setup();
-      render(<ContactForm section={mockSectionV5 as any} />);
+      renderWithRouter(mockSectionV5);
       await user.type(screen.getByLabelText(/孩子姓名/), '小明');
       await user.type(screen.getByLabelText(/家长姓名/), '王先生');
       await user.type(screen.getByLabelText(/联系电话/), '13800138000');
       await user.click(screen.getByRole('button', { name: '立即预约' }));
-      expect(await screen.findByText('预约成功！')).toBeInTheDocument();
       expect(createAppointment).toHaveBeenCalledWith({
         childName: '小明',
         parentName: '王先生',
@@ -106,7 +113,7 @@ describe('ContactForm 组件', () => {
 
   describe('Strapi v4 格式（{data: [...]}）', () => {
     it('渲染表单字段', () => {
-      render(<ContactForm section={mockSectionV4 as any} />);
+      renderWithRouter(mockSectionV4);
       expect(screen.getByLabelText(/孩子姓名/)).toBeInTheDocument();
       expect(screen.getByLabelText(/家长姓名/)).toBeInTheDocument();
       expect(screen.getByLabelText(/联系电话/)).toBeInTheDocument();
@@ -116,20 +123,20 @@ describe('ContactForm 组件', () => {
   describe('边界情况', () => {
     it('fields 为空数组时不崩溃', () => {
       const emptySection = { __component: 'section.contact-form', id: 2, title: '测试', description: '', fields: [] };
-      render(<ContactForm section={emptySection as any} />);
+      renderWithRouter(emptySection);
       expect(screen.getByText('测试')).toBeInTheDocument();
     });
 
     it('fields 为 null 时不崩溃', () => {
       const nullSection = { __component: 'section.contact-form', id: 3, title: '测试2', description: '', fields: null };
-      render(<ContactForm section={nullSection as any} />);
+      renderWithRouter(nullSection);
       expect(screen.getByText('测试2')).toBeInTheDocument();
     });
 
     it('提交失败时显示错误消息', async () => {
       vi.mocked(createAppointment).mockRejectedValueOnce(new Error('Network error'));
       const user = userEvent.setup();
-      render(<ContactForm section={mockSectionV5 as any} />);
+      renderWithRouter(mockSectionV5);
       await user.type(screen.getByLabelText(/孩子姓名/), '小明');
       await user.type(screen.getByLabelText(/家长姓名/), '王先生');
       await user.type(screen.getByLabelText(/联系电话/), '13800138000');

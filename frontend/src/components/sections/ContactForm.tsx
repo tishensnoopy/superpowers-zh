@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Calendar, Send } from 'lucide-react';
 import type { Section } from '../../lib/api';
 import { createAppointment } from '../../lib/api';
@@ -9,6 +10,7 @@ export default function ContactForm({ section }: { section: Section }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const fieldList = Array.isArray(fields) ? fields : (fields?.data || []);
 
@@ -58,8 +60,17 @@ export default function ContactForm({ section }: { section: Section }) {
         preferredTimeSlot: values.preferredTimeSlot,
         message: values.message,
       });
-      setSuccess(true);
-      setValues({});
+      navigate('/appointment-success', {
+        state: {
+          appointment: {
+            childName: values.childName || '',
+            parentName: values.parentName || '',
+            phone: values.phone || '',
+            age: values.age,
+            course: values.course || '',
+          },
+        },
+      });
     } catch (err) {
       setErrors({ submit: '提交失败，请稍后重试' });
     } finally {
