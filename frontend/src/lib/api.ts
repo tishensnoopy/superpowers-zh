@@ -8,9 +8,9 @@ function logRequest(path: string, options: RequestInit = {}) {
   console.log(`${LOG_PREFIX} ${method} ${path}${hasBody}`);
 }
 
-function logResponse(path: string, status: number, duration: number, data?: any) {
-  const dataSize = data ? JSON.stringify(data).length : 0;
-  console.log(`${LOG_PREFIX} Response ${path}: status=${status}, duration=${duration}ms, size=${dataSize} bytes`);
+function logResponse(path: string, status: number, duration: number, contentLength?: string | null) {
+  const sizeStr = contentLength ? `, size=${contentLength} bytes` : '';
+  console.log(`${LOG_PREFIX} Response ${path}: status=${status}, duration=${duration}ms${sizeStr}`);
 }
 
 function logError(path: string, error: Error, duration?: number) {
@@ -41,7 +41,7 @@ export async function fetchApi<T>(path: string, options: RequestInit = {}): Prom
     }
 
     const data = await res.json();
-    logResponse(path, res.status, duration, data);
+    logResponse(path, res.status, duration, res.headers.get('content-length'));
     return data;
   } catch (err) {
     const duration = Math.round(performance.now() - startTime);
@@ -58,7 +58,7 @@ export async function getSiteSettings() {
   console.log(`${LOG_PREFIX} Fetching site settings...`);
   const result = await fetchApi<{ data: SiteSettings[] }>('/api/site-settings');
   const item = Array.isArray(result.data) ? result.data[0] : result.data;
-  console.log(`${LOG_PREFIX} Site settings loaded: id=${item?.id}, name=${item?.attributes?.name}`);
+  console.log(`${LOG_PREFIX} Site settings loaded: id=${item?.id}, name=${item?.name}`);
   return result;
 }
 
@@ -95,14 +95,14 @@ export async function getPages(locale?: string) {
 export async function getHomepage() {
   console.log(`${LOG_PREFIX} Fetching homepage...`);
   const result = await fetchApi<{ data: Page }>('/api/pages/homepage');
-  console.log(`${LOG_PREFIX} Homepage loaded: id=${result.data.id}, title=${result.data.attributes.title}, sections=${result.data.attributes.sections?.length || 0}`);
+  console.log(`${LOG_PREFIX} Homepage loaded: id=${result.data.id}, title=${result.data.title}, sections=${result.data.sections?.length || 0}`);
   return result;
 }
 
 export async function getPageBySlug(slug: string) {
   console.log(`${LOG_PREFIX} Fetching page by slug: ${slug}...`);
   const result = await fetchApi<{ data: Page }>(`/api/pages/slug/${slug}`);
-  console.log(`${LOG_PREFIX} Page loaded: id=${result.data.id}, title=${result.data.attributes.title}`);
+  console.log(`${LOG_PREFIX} Page loaded: id=${result.data.id}, title=${result.data.title}`);
   return result;
 }
 
@@ -127,7 +127,7 @@ export async function getFeaturedProducts() {
 export async function getProductBySlug(slug: string) {
   console.log(`${LOG_PREFIX} Fetching product by slug: ${slug}...`);
   const result = await fetchApi<{ data: Product }>(`/api/products/slug/${slug}`);
-  console.log(`${LOG_PREFIX} Product loaded: id=${result.data.id}, name=${result.data.attributes.name}`);
+  console.log(`${LOG_PREFIX} Product loaded: id=${result.data.id}, name=${result.data.name}`);
   return result;
 }
 
@@ -173,7 +173,7 @@ export async function getNews(category?: string) {
 export async function getNewsBySlug(slug: string) {
   console.log(`${LOG_PREFIX} Fetching news by slug: ${slug}...`);
   const result = await fetchApi<{ data: NewsArticle }>(`/api/news-articles/slug/${slug}`);
-  console.log(`${LOG_PREFIX} News loaded: ${result.data.attributes.title}`);
+  console.log(`${LOG_PREFIX} News loaded: ${result.data.title}`);
   return result;
 }
 
@@ -225,66 +225,60 @@ export async function searchKnowledgeBases(query: string) {
 
 export interface SiteSettings {
   id: number;
-  attributes: {
-    name: string;
-    slogan?: string;
-    logo?: { data?: { attributes: { url: string } } };
-    favicon?: { data?: { attributes: { url: string } } };
-    phone?: string;
-    email?: string;
-    address?: string;
-    wechat?: string;
-    seo?: Seo;
-  };
+  documentId?: string;
+  name: string;
+  slogan?: string;
+  logo?: { url: string; alternativeText?: string } | null;
+  favicon?: { url: string; alternativeText?: string } | null;
+  phone?: string;
+  email?: string;
+  address?: string;
+  wechat?: string;
+  seo?: Seo;
 }
 
 export interface NavigationItem {
   id: number;
-  attributes: {
-    name: string;
-    url: string;
-    icon?: string;
-    position: number;
-    isActive: boolean;
-    children?: { data: NavigationItem[] };
-  };
+  documentId?: string;
+  name: string;
+  url: string;
+  icon?: string;
+  position: number;
+  isActive: boolean;
+  children?: NavigationItem[];
 }
 
 export interface Footer {
   id: number;
-  attributes: {
-    copyright?: string;
-    socialLinks?: { data: SocialLink[] };
-    quickLinks?: { data: QuickLink[] };
-  };
+  documentId?: string;
+  copyright?: string;
+  socialLinks?: SocialLink[];
+  quickLinks?: QuickLink[];
 }
 
 export interface SocialLink {
   id: number;
-  attributes: {
-    platform: string;
-    url: string;
-    icon?: string;
-  };
+  documentId?: string;
+  platform: string;
+  url: string;
+  icon?: string;
 }
 
 export interface QuickLink {
   id: number;
-  attributes: {
-    name: string;
-    url: string;
-  };
+  documentId?: string;
+  name: string;
+  url: string;
 }
 
 export interface Page {
   id: number;
-  attributes: {
-    title: string;
-    slug: string;
-    isHomepage: boolean;
-    sections: Section[];
-    seo?: Seo;
-  };
+  documentId?: string;
+  title: string;
+  slug: string;
+  isHomepage: boolean;
+  sections: Section[];
+  seo?: Seo;
 }
 
 export interface Section {
@@ -300,7 +294,7 @@ export interface Seo {
   canonicalUrl?: string;
   ogTitle?: string;
   ogDescription?: string;
-  ogImage?: { data?: { attributes: { url: string } } };
+  ogImage?: { url: string; alternativeText?: string } | null;
   ogType?: string;
 }
 
@@ -326,88 +320,82 @@ export interface CourseTestimonial {
 
 export interface Product {
   id: number;
-  attributes: {
-    name: string;
-    slug: string;
-    description?: string;
-    shortDescription?: string;
-    price?: number;
-    originalPrice?: number;
-    image?: { data?: { attributes: { url: string } } };
-    images?: { data: { attributes: { url: string } }[] };
-    isFeatured?: boolean;
-    isNew?: boolean;
-    categories?: { data: ProductCategory[] };
-    specs?: { data: ProductSpec[] };
-    specValues?: Record<string, string>;
-    teachingMethod?: string;
-    objectives?: CourseObjective[];
-    outline?: CourseModule[];
-    testimonials?: CourseTestimonial[];
-    seo?: Seo;
-    createdAt?: string;
-    updatedAt?: string;
-  };
+  documentId?: string;
+  name: string;
+  slug: string;
+  description?: string;
+  shortDescription?: string;
+  price?: number;
+  originalPrice?: number;
+  image?: { url: string; alternativeText?: string } | null;
+  images?: { url: string; alternativeText?: string }[];
+  thumbnail?: { url: string; alternativeText?: string } | null;
+  isFeatured?: boolean;
+  isNew?: boolean;
+  categories?: ProductCategory[];
+  specs?: ProductSpec[];
+  specValues?: Record<string, string>;
+  teachingMethod?: string;
+  objectives?: CourseObjective[];
+  outline?: CourseModule[];
+  testimonials?: CourseTestimonial[];
+  seo?: Seo;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ProductCategory {
   id: number;
-  attributes: {
-    name: string;
-    slug: string;
-    description?: string;
-    parent?: { data?: ProductCategory };
-    children?: { data: ProductCategory[] };
-  };
+  documentId?: string;
+  name: string;
+  slug: string;
+  description?: string;
+  parent?: ProductCategory | null;
+  children?: ProductCategory[];
 }
 
 export interface ProductSpec {
   id: number;
-  attributes: {
-    name: string;
-    value: string;
-    unit?: string;
-  };
+  documentId?: string;
+  name: string;
+  value: string;
+  unit?: string;
 }
 
 export interface FaqItem {
   id: number;
-  attributes: {
-    question: string;
-    answer: string;
-    category?: string;
-    isActive?: boolean;
-    helpfulCount?: number;
-    notHelpfulCount?: number;
-  };
+  documentId?: string;
+  question: string;
+  answer: string;
+  category?: string;
+  isActive?: boolean;
+  helpfulCount?: number;
+  notHelpfulCount?: number;
 }
 
 export interface NewsArticle {
   id: number;
   documentId?: string;
-  attributes: {
-    title: string;
-    slug: string;
-    excerpt?: string;
-    content?: string;
-    coverImage?: { data?: { attributes: { url: string } } };
-    category?: 'company_news' | 'industry_news' | 'event_notice';
-    isFeatured?: boolean;
-    publishedAt?: string;
-    viewCount?: number;
-  };
+  title: string;
+  slug: string;
+  excerpt?: string;
+  content?: string;
+  coverImage?: { url: string; alternativeText?: string } | null;
+  category?: 'company_news' | 'industry_news' | 'event_notice';
+  isFeatured?: boolean;
+  publishedAt?: string;
+  viewCount?: number;
 }
 
 export interface KnowledgeBase {
   id: number;
-  attributes: {
-    title: string;
-    content: string;
-    sourceType?: string;
-    status?: string;
-    statusMessage?: string;
-    createdAt?: string;
-  };
+  documentId?: string;
+  title: string;
+  content: string;
+  sourceType?: string;
+  status?: string;
+  statusMessage?: string;
+  createdAt?: string;
 }
 
 export interface Pagination {
@@ -462,37 +450,6 @@ export async function createAppointment(data: AppointmentData) {
 
     throw error;
   }
-}
-
-// === Strapi v5 → v4 格式转换 ===
-// Strapi v5 默认返回扁平格式（字段直接在顶层），前端组件期望 v4 的 attributes 格式
-
-function toV4Item(item: any): any {
-  if (!item || typeof item !== 'object' || Array.isArray(item)) return item;
-  const { id, documentId, ...rest } = item;
-  if (id === undefined && documentId === undefined) return item;
-  const attributes: Record<string, any> = {};
-  for (const [key, value] of Object.entries(rest)) {
-    attributes[key] = toV4Value(value);
-  }
-  return { id, documentId, attributes };
-}
-
-function toV4Value(value: any): any {
-  if (value === null || value === undefined) return value;
-  if (Array.isArray(value)) {
-    if (value.length > 0 && typeof value[0] === 'object' && value[0]?.id !== undefined) {
-      return { data: value.map(toV4Item) };
-    }
-    return value;
-  }
-  if (typeof value === 'object') {
-    if (value.id !== undefined || value.documentId !== undefined) {
-      return { data: toV4Item(value) };
-    }
-    return value;
-  }
-  return value;
 }
 
 // === Teacher 接口与 API ===
