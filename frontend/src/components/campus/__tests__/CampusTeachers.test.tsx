@@ -3,28 +3,22 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import CampusTeachers from '../CampusTeachers';
 
-const mockTeachers = {
-  data: [
-    {
-      id: 10,
-      attributes: {
-        name: '王老师',
-        slug: 'wang',
-        title: '高级教师',
-        avatar: { data: { attributes: { url: '/uploads/wang.jpg' } } },
-      },
-    },
-    {
-      id: 11,
-      attributes: {
-        name: '李老师',
-        slug: 'li',
-        title: '特级教师',
-        avatar: { data: null },
-      },
-    },
-  ],
-};
+const mockTeachers = [
+  {
+    id: 10,
+    name: '王老师',
+    slug: 'wang',
+    title: '高级教师',
+    avatar: { url: '/uploads/wang.jpg' },
+  },
+  {
+    id: 11,
+    name: '李老师',
+    slug: 'li',
+    title: '特级教师',
+    avatar: null,
+  },
+];
 
 describe('CampusTeachers 组件', () => {
   it('渲染区块标题"本校教师"', () => {
@@ -70,7 +64,7 @@ describe('CampusTeachers 组件', () => {
   it('教师列表为空数组时显示空状态', () => {
     render(
       <MemoryRouter>
-        <CampusTeachers teachers={{ data: [] } as any} />
+        <CampusTeachers teachers={[]} />
       </MemoryRouter>
     );
     expect(screen.getByText(/暂无|更新中|没有/)).toBeInTheDocument();

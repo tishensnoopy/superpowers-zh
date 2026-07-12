@@ -4,17 +4,15 @@ import TeacherDetail from '../TeacherDetail';
 
 const mockTeacher = {
   id: 1,
-  attributes: {
-    name: '张老师',
-    slug: 'zhang-laoshi',
-    title: '高级教师',
-    subject: 'pinyin',
-    teachingYears: 10,
-    education: '北京师范大学教育学硕士',
-    teachingFeatures: '擅长拼音启蒙，善于用游戏化教学激发孩子兴趣',
-    achievements: ['北京市优秀教师', '拼音教学大赛一等奖', '骨干教师称号'],
-    campus: { data: { id: 1, attributes: { name: '朝阳校区', slug: 'chaoyang' } } },
-  },
+  name: '张老师',
+  slug: 'zhang-laoshi',
+  title: '高级教师',
+  subject: 'pinyin',
+  teachingYears: 10,
+  education: '北京师范大学教育学硕士',
+  teachingFeatures: '擅长拼音启蒙，善于用游戏化教学激发孩子兴趣',
+  achievements: ['北京市优秀教师', '拼音教学大赛一等奖', '骨干教师称号'],
+  campus: { id: 1, name: '朝阳校区', slug: 'chaoyang' },
 };
 
 describe('TeacherDetail 组件', () => {
@@ -52,11 +50,8 @@ describe('TeacherDetail 组件', () => {
 
   it('有头像时渲染大头像图片', () => {
     const withAvatar = {
-      id: 2,
-      attributes: {
-        ...mockTeacher.attributes,
-        avatar: { data: { attributes: { url: '/uploads/big-avatar.jpg' } } },
-      },
+      ...mockTeacher,
+      avatar: { url: '/uploads/big-avatar.jpg' },
     };
     render(<TeacherDetail teacher={withAvatar as any} onClose={() => {}} />);
     const img = screen.getByRole('img', { name: '张老师' });
@@ -90,7 +85,9 @@ describe('TeacherDetail 组件', () => {
   it('缺失教育背景时不崩溃', () => {
     const noEdu = {
       id: 3,
-      attributes: { name: '李老师', slug: 'li', title: '教师' },
+      name: '李老师',
+      slug: 'li',
+      title: '教师',
     };
     render(<TeacherDetail teacher={noEdu as any} onClose={() => {}} />);
     expect(screen.getByText('李老师')).toBeInTheDocument();
@@ -99,7 +96,9 @@ describe('TeacherDetail 组件', () => {
   it('缺失教学特色时不崩溃', () => {
     const noFeatures = {
       id: 4,
-      attributes: { name: '王老师', slug: 'wang', title: '教师' },
+      name: '王老师',
+      slug: 'wang',
+      title: '教师',
     };
     render(<TeacherDetail teacher={noFeatures as any} onClose={() => {}} />);
     expect(screen.getByText('王老师')).toBeInTheDocument();
@@ -108,7 +107,9 @@ describe('TeacherDetail 组件', () => {
   it('缺失荣誉成就时不崩溃', () => {
     const noAch = {
       id: 5,
-      attributes: { name: '赵老师', slug: 'zhao', title: '教师' },
+      name: '赵老师',
+      slug: 'zhao',
+      title: '教师',
     };
     render(<TeacherDetail teacher={noAch as any} onClose={() => {}} />);
     expect(screen.getByText('赵老师')).toBeInTheDocument();
@@ -116,8 +117,8 @@ describe('TeacherDetail 组件', () => {
 
   it('空荣誉成就数组时不崩溃', () => {
     const emptyAch = {
-      id: 6,
-      attributes: { ...mockTeacher.attributes, achievements: [] },
+      ...mockTeacher,
+      achievements: [],
     };
     render(<TeacherDetail teacher={emptyAch as any} onClose={() => {}} />);
     expect(screen.getByText('张老师')).toBeInTheDocument();
@@ -125,8 +126,8 @@ describe('TeacherDetail 组件', () => {
 
   it('非数组荣誉成就时不崩溃', () => {
     const weirdAch = {
-      id: 7,
-      attributes: { ...mockTeacher.attributes, achievements: '不是数组' as any },
+      ...mockTeacher,
+      achievements: '不是数组' as any,
     };
     render(<TeacherDetail teacher={weirdAch as any} onClose={() => {}} />);
     expect(screen.getByText('张老师')).toBeInTheDocument();

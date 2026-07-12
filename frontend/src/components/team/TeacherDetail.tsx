@@ -15,9 +15,9 @@ export default function TeacherDetail({ teacher, onClose }: TeacherDetailProps) 
     education,
     teachingFeatures,
     achievements,
-  } = teacher.attributes;
+  } = teacher;
 
-  const avatarUrl = avatar?.data?.attributes?.url;
+  const avatarUrl = avatar?.url;
   const initial = name ? name.charAt(0) : '';
   const achievementList = Array.isArray(achievements) ? achievements : [];
 

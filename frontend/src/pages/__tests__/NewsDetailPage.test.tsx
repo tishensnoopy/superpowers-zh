@@ -22,21 +22,19 @@ function renderWithRouter(slug = 'test-article') {
 
 const mockNews = {
   id: 1,
-  attributes: {
-    title: '2026年幼小衔接教育峰会圆满举办',
-    slug: 'education-summit-2026',
-    excerpt: '本次峰会汇聚了全国200余位教育专家',
-    content: '<p>7月10日，2026年幼小衔接教育峰会在北京国际会议中心圆满举办。</p><h2>峰会亮点</h2><p>本次峰会设置了主题演讲、圆桌论坛等环节。</p>',
-    coverImage: { data: { attributes: { url: '/uploads/news-cover.jpg' } } },
-    category: 'company_news',
-    publishedAt: '2026-07-10T10:00:00.000Z',
-    viewCount: 1234,
-    seo: {
-      metaTitle: '2026幼小衔接教育峰会专题报道',
-      metaDescription: '全国200余位教育专家齐聚北京',
-      ogTitle: '2026年幼小衔接教育峰会圆满举办',
-      ogDescription: '本次峰会汇聚了全国200余位教育专家',
-    },
+  title: '2026年幼小衔接教育峰会圆满举办',
+  slug: 'education-summit-2026',
+  excerpt: '本次峰会汇聚了全国200余位教育专家',
+  content: '<p>7月10日，2026年幼小衔接教育峰会在北京国际会议中心圆满举办。</p><h2>峰会亮点</h2><p>本次峰会设置了主题演讲、圆桌论坛等环节。</p>',
+  coverImage: { url: '/uploads/news-cover.jpg' },
+  category: 'company_news',
+  publishedAt: '2026-07-10T10:00:00.000Z',
+  viewCount: 1234,
+  seo: {
+    metaTitle: '2026幼小衔接教育峰会专题报道',
+    metaDescription: '全国200余位教育专家齐聚北京',
+    ogTitle: '2026年幼小衔接教育峰会圆满举办',
+    ogDescription: '本次峰会汇聚了全国200余位教育专家',
   },
 };
 

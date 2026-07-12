@@ -4,15 +4,13 @@ import CampusInfoCard from '../CampusInfoCard';
 
 const mockCampus = {
   id: 1,
-  attributes: {
-    name: '朝阳校区',
-    slug: 'chaoyang',
-    address: '建国路88号 SOHO现代城A座3层',
-    phone: '010-8888-0001',
-    businessHours: '周一至周日 9:00-21:00',
-    transportation: '地铁1号线大望路站C口出，步行300米',
-    area: '800㎡',
-  },
+  name: '朝阳校区',
+  slug: 'chaoyang',
+  address: '建国路88号 SOHO现代城A座3层',
+  phone: '010-8888-0001',
+  businessHours: '周一至周日 9:00-21:00',
+  transportation: '地铁1号线大望路站C口出，步行300米',
+  area: '800㎡',
 };
 
 describe('CampusInfoCard 组件', () => {
@@ -49,11 +47,9 @@ describe('CampusInfoCard 组件', () => {
   it('缺失可选字段时不显示对应行', () => {
     const partial = {
       id: 2,
-      attributes: {
-        name: '海淀校区',
-        slug: 'haidian',
-        address: '中关村大街1号 海龙大厦5层',
-      },
+      name: '海淀校区',
+      slug: 'haidian',
+      address: '中关村大街1号 海龙大厦5层',
     };
     render(<CampusInfoCard campus={partial as any} />);
     expect(screen.getByText('中关村大街1号 海龙大厦5层')).toBeInTheDocument();
@@ -66,11 +62,9 @@ describe('CampusInfoCard 组件', () => {
   it('所有可选字段缺失时仅显示地址', () => {
     const minimal = {
       id: 3,
-      attributes: {
-        name: '西城校区',
-        slug: 'xicheng',
-        address: '西单北大街110号 西单大悦城6层',
-      },
+      name: '西城校区',
+      slug: 'xicheng',
+      address: '西单北大街110号 西单大悦城6层',
     };
     render(<CampusInfoCard campus={minimal as any} />);
     expect(screen.getByText('西单北大街110号 西单大悦城6层')).toBeInTheDocument();

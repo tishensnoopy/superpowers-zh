@@ -11,9 +11,9 @@ function getImageUrl(url?: string): string | null {
 }
 
 export default function CampusGallery({ campus }: { campus: Campus }) {
-  const galleryData = campus.attributes.gallery?.data ?? [];
+  const galleryData = campus.gallery ?? [];
   const images = galleryData
-    .map((item) => getImageUrl(item.attributes?.url))
+    .map((item) => getImageUrl(item.url))
     .filter((url): url is string => !!url);
 
   const [activeIndex, setActiveIndex] = useState(0);

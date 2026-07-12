@@ -14,10 +14,10 @@ interface TeacherCardProps {
 }
 
 export default function TeacherCard({ teacher, isSelected, onSelect }: TeacherCardProps) {
-  const { name, title, avatar, campus, subject, teachingYears } = teacher.attributes;
+  const { name, title, avatar, campus, subject, teachingYears } = teacher;
 
-  const avatarUrl = avatar?.data?.attributes?.url;
-  const campusName = campus?.data?.attributes?.name;
+  const avatarUrl = avatar?.url;
+  const campusName = campus?.name;
   const subjectLabel = subject ? subjectLabels[subject] : null;
   const initial = name ? name.charAt(0) : '';
 

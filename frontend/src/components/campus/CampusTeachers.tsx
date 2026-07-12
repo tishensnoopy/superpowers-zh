@@ -11,12 +11,12 @@ function getAvatarUrl(url?: string): string | null {
 }
 
 interface CampusTeachersProps {
-  teachers?: { data: Teacher[] };
+  teachers?: Teacher[];
 }
 
 // 校区详情页教师列表：4 列迷你卡片
 export default function CampusTeachers({ teachers }: CampusTeachersProps) {
-  const list = teachers?.data ?? [];
+  const list = teachers ?? [];
 
   return (
     <section className="py-8">
@@ -39,18 +39,19 @@ export default function CampusTeachers({ teachers }: CampusTeachersProps) {
       {list.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {list.map((teacher: Teacher) => {
-            const avatarUrl = getAvatarUrl(teacher.attributes.avatar?.data?.attributes?.url);
+            const { avatar, slug, name, title } = teacher;
+            const avatarUrl = getAvatarUrl(avatar?.url);
             return (
               <Link
                 key={teacher.id}
-                to={`/teachers/${teacher.attributes.slug}`}
+                to={`/teachers/${slug}`}
                 className="bg-card rounded-2xl p-5 border border-border shadow-sm text-center hover:-translate-y-1 hover:border-[#F5851F] hover:shadow-md transition-all duration-300"
               >
                 <div className="w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden bg-muted">
                   {avatarUrl ? (
                     <img
                       src={avatarUrl}
-                      alt={teacher.attributes.name}
+                      alt={name}
                       className="w-full h-full object-cover"
                     />
                   ) : (
@@ -58,13 +59,13 @@ export default function CampusTeachers({ teachers }: CampusTeachersProps) {
                       className="w-full h-full flex items-center justify-center text-white text-2xl font-bold"
                       style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
                     >
-                      {teacher.attributes.name.charAt(0)}
+                      {name.charAt(0)}
                     </div>
                   )}
                 </div>
-                <div className="font-bold text-[#1C2B3A] mb-1">{teacher.attributes.name}</div>
-                {teacher.attributes.title && (
-                  <div className="text-sm text-muted-foreground">{teacher.attributes.title}</div>
+                <div className="font-bold text-[#1C2B3A] mb-1">{name}</div>
+                {title && (
+                  <div className="text-sm text-muted-foreground">{title}</div>
                 )}
               </Link>
             );

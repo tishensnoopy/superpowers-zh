@@ -5,12 +5,10 @@ import CampusDetailHeader from '../CampusDetailHeader';
 
 const mockCampus = {
   id: 1,
-  attributes: {
-    name: '朝阳校区',
-    slug: 'chaoyang',
-    address: '建国路88号 SOHO现代城A座3层',
-    description: '位于CBD核心区域，交通便利，环境优美',
-  },
+  name: '朝阳校区',
+  slug: 'chaoyang',
+  address: '建国路88号 SOHO现代城A座3层',
+  description: '位于CBD核心区域，交通便利，环境优美',
 };
 
 describe('CampusDetailHeader 组件', () => {
@@ -68,11 +66,9 @@ describe('CampusDetailHeader 组件', () => {
   it('缺失简介时不崩溃', () => {
     const noDesc = {
       id: 2,
-      attributes: {
-        name: '海淀校区',
-        slug: 'haidian',
-        address: '中关村大街1号 海龙大厦5层',
-      },
+      name: '海淀校区',
+      slug: 'haidian',
+      address: '中关村大街1号 海龙大厦5层',
     };
     render(
       <MemoryRouter>

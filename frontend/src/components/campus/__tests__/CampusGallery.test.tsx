@@ -4,17 +4,13 @@ import CampusGallery from '../CampusGallery';
 
 const mockGallery = {
   id: 1,
-  attributes: {
-    name: '朝阳校区',
-    slug: 'chaoyang',
-    gallery: {
-      data: [
-        { attributes: { url: '/uploads/gallery-1.jpg' } },
-        { attributes: { url: '/uploads/gallery-2.jpg' } },
-        { attributes: { url: '/uploads/gallery-3.jpg' } },
-      ],
-    },
-  },
+  name: '朝阳校区',
+  slug: 'chaoyang',
+  gallery: [
+    { url: '/uploads/gallery-1.jpg' },
+    { url: '/uploads/gallery-2.jpg' },
+    { url: '/uploads/gallery-3.jpg' },
+  ],
 };
 
 describe('CampusGallery 组件', () => {
@@ -54,10 +50,8 @@ describe('CampusGallery 组件', () => {
   it('无图集时显示占位符', () => {
     const noGallery = {
       id: 2,
-      attributes: {
-        name: '海淀校区',
-        slug: 'haidian',
-      },
+      name: '海淀校区',
+      slug: 'haidian',
     };
     render(<CampusGallery campus={noGallery as any} />);
     expect(screen.getByText(/暂无校区环境图片|图片更新中/)).toBeInTheDocument();
@@ -67,11 +61,9 @@ describe('CampusGallery 组件', () => {
   it('图集为空数组时显示占位符', () => {
     const emptyGallery = {
       id: 3,
-      attributes: {
-        name: '西城校区',
-        slug: 'xicheng',
-        gallery: { data: [] },
-      },
+      name: '西城校区',
+      slug: 'xicheng',
+      gallery: [],
     };
     render(<CampusGallery campus={emptyGallery as any} />);
     expect(screen.getByText(/暂无校区环境图片|图片更新中/)).toBeInTheDocument();
@@ -80,13 +72,9 @@ describe('CampusGallery 组件', () => {
   it('单张图时不显示小图缩略图列表', () => {
     const singleImage = {
       id: 4,
-      attributes: {
-        name: '丰台校区',
-        slug: 'fengtai',
-        gallery: {
-          data: [{ attributes: { url: '/uploads/single.jpg' } }],
-        },
-      },
+      name: '丰台校区',
+      slug: 'fengtai',
+      gallery: [{ url: '/uploads/single.jpg' }],
     };
     render(<CampusGallery campus={singleImage as any} />);
     const mainImage = screen.getByAltText('校区环境图片 1');

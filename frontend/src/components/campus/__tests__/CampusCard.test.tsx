@@ -5,19 +5,11 @@ import CampusCard from '../CampusCard';
 
 const mockCampus = {
   id: 1,
-  attributes: {
-    name: '朝阳校区',
-    slug: 'chaoyang',
-    address: '建国路88号 SOHO现代城A座3层',
-    phone: '010-8888-0001',
-    coverImage: {
-      data: {
-        attributes: {
-          url: '/uploads/chaoyang.jpg',
-        },
-      },
-    },
-  },
+  name: '朝阳校区',
+  slug: 'chaoyang',
+  address: '建国路88号 SOHO现代城A座3层',
+  phone: '010-8888-0001',
+  coverImage: { url: '/uploads/chaoyang.jpg' },
 };
 
 describe('CampusCard 组件', () => {
@@ -72,12 +64,10 @@ describe('CampusCard 组件', () => {
   it('无封面图时不崩溃（显示占位）', () => {
     const noImage = {
       id: 2,
-      attributes: {
-        name: '海淀校区',
-        slug: 'haidian',
-        address: '中关村大街1号 海龙大厦5层',
-        phone: '010-8888-0002',
-      },
+      name: '海淀校区',
+      slug: 'haidian',
+      address: '中关村大街1号 海龙大厦5层',
+      phone: '010-8888-0002',
     };
     render(
       <MemoryRouter>
@@ -91,11 +81,9 @@ describe('CampusCard 组件', () => {
   it('缺失电话时不崩溃', () => {
     const noPhone = {
       id: 3,
-      attributes: {
-        name: '西城校区',
-        slug: 'xicheng',
-        address: '西单北大街110号 西单大悦城6层',
-      },
+      name: '西城校区',
+      slug: 'xicheng',
+      address: '西单北大街110号 西单大悦城6层',
     };
     render(
       <MemoryRouter>

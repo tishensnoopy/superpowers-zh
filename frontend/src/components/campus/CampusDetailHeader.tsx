@@ -4,7 +4,7 @@ import type { Campus } from '../../lib/api';
 
 // 校区详情页头部：面包屑 + 校区名 + 简介
 export default function CampusDetailHeader({ campus }: { campus: Campus }) {
-  const { name, description } = campus.attributes;
+  const { name, description } = campus;
 
   return (
     <>

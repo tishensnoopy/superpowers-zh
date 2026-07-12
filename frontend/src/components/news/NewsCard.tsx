@@ -12,15 +12,15 @@ interface NewsCardProps {
 }
 
 export default function NewsCard({ news }: NewsCardProps) {
-  const { attributes } = news;
-  const categoryLabel = attributes.category ? getNewsCategoryLabel(attributes.category) : '';
-  const coverUrl = attributes.coverImage?.data?.attributes?.url;
+  const { category, coverImage, slug, title, excerpt, publishedAt } = news;
+  const categoryLabel = category ? getNewsCategoryLabel(category) : '';
+  const coverUrl = coverImage?.url;
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337';
   const fullCoverUrl = coverUrl ? `${apiUrl}${coverUrl}` : null;
 
   return (
     <Link
-      to={`/news/${attributes.slug}`}
+      to={`/news/${slug}`}
       className="group block bg-white rounded-2xl overflow-hidden shadow-sm border border-[#E5E7EB] transition-all hover:shadow-lg hover:-translate-y-1"
     >
       {/* 封面图 */}
@@ -28,7 +28,7 @@ export default function NewsCard({ news }: NewsCardProps) {
         <div className="w-full aspect-[16/9] overflow-hidden bg-gray-100">
           <img
             src={fullCoverUrl}
-            alt={attributes.title}
+            alt={title}
             className="w-full h-full object-cover transition-transform group-hover:scale-105"
           />
         </div>
@@ -45,10 +45,10 @@ export default function NewsCard({ news }: NewsCardProps) {
               {categoryLabel}
             </span>
           )}
-          {attributes.publishedAt && (
+          {publishedAt && (
             <span className="flex items-center gap-1 text-xs text-[#9CA3AF]">
               <Calendar size={12} />
-              {formatDate(attributes.publishedAt)}
+              {formatDate(publishedAt)}
             </span>
           )}
         </div>
@@ -58,13 +58,13 @@ export default function NewsCard({ news }: NewsCardProps) {
           className="text-[#1C2B3A] font-bold mb-2 line-clamp-2 transition-colors group-hover:text-[#F5851F]"
           style={{ fontSize: '18px', lineHeight: 1.5 }}
         >
-          {attributes.title}
+          {title}
         </h3>
 
         {/* 摘要 */}
-        {attributes.excerpt && (
+        {excerpt && (
           <p className="text-[#6B7280] text-sm line-clamp-2" style={{ lineHeight: 1.6 }}>
-            {attributes.excerpt}
+            {excerpt}
           </p>
         )}
       </div>

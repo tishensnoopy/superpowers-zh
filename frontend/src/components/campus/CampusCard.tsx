@@ -11,8 +11,8 @@ function getImageUrl(url?: string): string | null {
 }
 
 export default function CampusCard({ campus }: { campus: Campus }) {
-  const { name, slug, address, phone, coverImage } = campus.attributes;
-  const imageUrl = getImageUrl(coverImage?.data?.attributes?.url);
+  const { name, slug, address, phone, coverImage } = campus;
+  const imageUrl = getImageUrl(coverImage?.url);
 
   return (
     <Link

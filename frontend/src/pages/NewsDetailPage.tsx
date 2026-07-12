@@ -63,26 +63,28 @@ export default function NewsDetailPage() {
     );
   }
 
-  const { attributes } = news;
-  const categoryLabel = attributes.category ? getNewsCategoryLabel(attributes.category) : '';
-  const coverUrl = attributes.coverImage?.data?.attributes?.url;
+  const { title, excerpt, content, coverImage, category, publishedAt, viewCount } = news;
+  const categoryLabel = category ? getNewsCategoryLabel(category) : '';
+  const coverUrl = coverImage?.url;
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337';
   const fullCoverUrl = coverUrl ? `${apiUrl}${coverUrl}` : null;
+  // seo 字段后端会返回，但 NewsArticle 接口尚未包含，先用 any 访问
+  const seo = (news as any).seo;
 
   const articleStructuredData = {
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
-    headline: attributes.title,
-    datePublished: attributes.publishedAt,
+    headline: title,
+    datePublished: publishedAt,
     image: fullCoverUrl,
   };
 
   return (
     <div className="pt-[72px] pb-16 min-h-screen" style={{ background: '#FAFAFA' }}>
       <Seo
-        seo={attributes.seo}
-        title={attributes.title}
-        description={attributes.excerpt}
+        seo={seo}
+        title={title}
+        description={excerpt}
         image={fullCoverUrl || undefined}
         type="article"
         structuredData={articleStructuredData}
@@ -116,7 +118,7 @@ export default function NewsDetailPage() {
               fontWeight: 800,
             }}
           >
-            {attributes.title}
+            {title}
           </h1>
 
           {/* 2. 元信息区 */}
@@ -129,16 +131,16 @@ export default function NewsDetailPage() {
                 {categoryLabel}
               </span>
             )}
-            {attributes.publishedAt && (
+            {publishedAt && (
               <span className="flex items-center gap-1.5 text-sm text-[#9CA3AF]">
                 <Calendar size={14} />
-                {formatDate(attributes.publishedAt)}
+                {formatDate(publishedAt)}
               </span>
             )}
-            {attributes.viewCount !== undefined && (
+            {viewCount !== undefined && (
               <span className="flex items-center gap-1.5 text-sm text-[#9CA3AF]">
                 <Eye size={14} />
-                {formatViewCount(attributes.viewCount)} 次阅读
+                {formatViewCount(viewCount)} 次阅读
               </span>
             )}
           </div>
@@ -148,7 +150,7 @@ export default function NewsDetailPage() {
             <div className="w-full mb-8 overflow-hidden rounded-2xl">
               <img
                 src={fullCoverUrl}
-                alt={attributes.title}
+                alt={title}
                 className="w-full h-auto object-cover"
                 style={{ maxHeight: '400px' }}
               />
@@ -156,11 +158,11 @@ export default function NewsDetailPage() {
           )}
 
           {/* 4. 正文内容 */}
-          {attributes.content && (
+          {content && (
             <div
               className="text-[#374151] leading-relaxed prose prose-lg max-w-none"
               style={{ fontSize: '16px', lineHeight: 1.8 }}
-              dangerouslySetInnerHTML={{ __html: attributes.content }}
+              dangerouslySetInnerHTML={{ __html: content }}
             />
           )}
 

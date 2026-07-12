@@ -17,15 +17,13 @@ vi.mock('../../../lib/api', () => ({
 
 const mockNews: NewsArticle = {
   id: 1,
-  attributes: {
-    title: '2026年教育峰会圆满举办',
-    slug: 'education-summit-2026',
-    excerpt: '本次峰会汇聚了全国200余位教育专家',
-    coverImage: { data: { attributes: { url: '/uploads/cover.jpg' } } },
-    category: 'company_news',
-    publishedAt: '2026-07-10T10:00:00.000Z',
-    viewCount: 1234,
-  },
+  title: '2026年教育峰会圆满举办',
+  slug: 'education-summit-2026',
+  excerpt: '本次峰会汇聚了全国200余位教育专家',
+  coverImage: { url: '/uploads/cover.jpg' },
+  category: 'company_news',
+  publishedAt: '2026-07-10T10:00:00.000Z',
+  viewCount: 1234,
 };
 
 describe('NewsCard 组件', () => {
@@ -89,7 +87,7 @@ describe('NewsCard 组件', () => {
   it('无封面图时不渲染图片', () => {
     const noCover: NewsArticle = {
       ...mockNews,
-      attributes: { ...mockNews.attributes, coverImage: undefined },
+      coverImage: undefined,
     };
     render(
       <MemoryRouter>
@@ -102,7 +100,7 @@ describe('NewsCard 组件', () => {
   it('无摘要不渲染摘要区域', () => {
     const noExcerpt: NewsArticle = {
       ...mockNews,
-      attributes: { ...mockNews.attributes, excerpt: undefined },
+      excerpt: undefined,
     };
     render(
       <MemoryRouter>

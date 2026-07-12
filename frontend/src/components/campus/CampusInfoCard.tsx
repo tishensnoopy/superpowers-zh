@@ -8,7 +8,7 @@ interface InfoRow {
 }
 
 export default function CampusInfoCard({ campus }: { campus: Campus }) {
-  const { address, phone, businessHours, transportation, area } = campus.attributes;
+  const { address, phone, businessHours, transportation, area } = campus;
 
   const rows: InfoRow[] = [
     { icon: MapPin, label: '地址', value: address },
