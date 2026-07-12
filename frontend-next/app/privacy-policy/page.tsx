@@ -1,3 +1,4 @@
+import { notFound } from 'next/navigation';
 import { getPageBySlug } from '@/lib/api';
 import { buildMetadata } from '@/lib/seo';
 import SectionRenderer from '@/components/SectionRenderer';
@@ -16,7 +17,14 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PrivacyPolicyPage() {
-  const { data: page } = await getPageBySlug('privacy-policy');
+  const { data: page } = await getPageBySlug('privacy-policy').catch(() => ({
+    data: null,
+  }));
+
+  if (!page) {
+    notFound();
+  }
+
   const sections = page.sections || [];
 
   return (

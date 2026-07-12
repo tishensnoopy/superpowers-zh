@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { getTeachers, type Teacher } from '@/lib/api';
-import Seo from '@/components/Seo';
 import TeamHeader from './TeamHeader';
 import TeamFilter from './TeamFilter';
 import TeamGrid from './TeamGrid';
@@ -63,7 +62,6 @@ export default function TeamPage() {
 
   return (
     <div style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}>
-      <Seo title="师资团队" description="认识我们的资深教师团队，所有教师均持有教师资格证，拥有丰富的幼小衔接教学经验。" />
       <TeamHeader />
 
       <section className="py-12 bg-background">
