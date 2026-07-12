@@ -274,6 +274,26 @@ export interface Seo {
   structuredData?: string;
 }
 
+export interface CourseObjective {
+  id: number;
+  title: string;
+  description?: string;
+}
+
+export interface CourseModule {
+  id: number;
+  title: string;
+  description?: string;
+  lessonCount?: number;
+}
+
+export interface CourseTestimonial {
+  id: number;
+  parentName: string;
+  content: string;
+  rating?: number;
+}
+
 export interface Product {
   id: number;
   attributes: {
@@ -289,6 +309,11 @@ export interface Product {
     isNew?: boolean;
     categories?: { data: ProductCategory[] };
     specs?: { data: ProductSpec[] };
+    specValues?: Record<string, string>;
+    teachingMethod?: string;
+    objectives?: CourseObjective[];
+    outline?: CourseModule[];
+    testimonials?: CourseTestimonial[];
     createdAt?: string;
     updatedAt?: string;
   };
