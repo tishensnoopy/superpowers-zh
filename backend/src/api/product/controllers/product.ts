@@ -1,5 +1,5 @@
 import { factories } from '@strapi/strapi';
-import { searchProducts, syncAllProducts, ProductDocument } from '../../../utils/meilisearch';
+import { searchProducts, syncAllProducts, ProductDocument, isMeiliAvailable } from '../../../utils/meilisearch';
 
 function wrapMedia(media: any) {
   if (!media) return { data: null };
@@ -7,10 +7,97 @@ function wrapMedia(media: any) {
   return { data: { id, documentId, attributes } };
 }
 
+async function searchProductsViaDb(
+  strapi: any,
+  params: {
+    query: string;
+    categorySlugs?: string[];
+    isFeatured?: boolean;
+    isInStock?: boolean;
+    priceMin?: number;
+    priceMax?: number;
+    sort?: string[];
+    limit: number;
+    offset: number;
+  }
+) {
+  const where: any = { publishedAt: { $notNull: true } };
+
+  if (params.query) {
+    where.$or = [
+      { name: { $containsi: params.query } },
+      { shortDescription: { $containsi: params.query } },
+      { description: { $containsi: params.query } },
+    ];
+  }
+
+  if (params.categorySlugs?.length) {
+    where.categories = { slug: { $in: params.categorySlugs } };
+  }
+  if (params.isFeatured !== undefined) {
+    where.isFeatured = params.isFeatured;
+  }
+  if (params.isInStock !== undefined) {
+    where.isInStock = params.isInStock;
+  }
+  if (params.priceMin !== undefined) {
+    where.price = { $gte: params.priceMin };
+  }
+  if (params.priceMax !== undefined) {
+    where.price = where.price
+      ? { ...where.price, $lte: params.priceMax }
+      : { $lte: params.priceMax };
+  }
+
+  let orderBy: any = { createdAt: 'desc' };
+  if (params.sort?.length) {
+    const firstSort = params.sort[0];
+    const [field, direction] = firstSort.split(':');
+    if (field && direction) {
+      orderBy = { [field]: direction.toLowerCase() };
+    }
+  }
+
+  const products = await strapi.db.query('api::product.product').findMany({
+    where,
+    orderBy,
+    limit: params.limit,
+    offset: params.offset,
+    populate: ['categories', 'thumbnail'],
+  });
+
+  const total = await strapi.db.query('api::product.product').count({ where });
+
+  const hits = products.map((p: any) => ({
+    id: p.id.toString(),
+    documentId: p.documentId,
+    name: p.name,
+    slug: p.slug,
+    description: p.description || '',
+    shortDescription: p.shortDescription || '',
+    price: p.price,
+    originalPrice: p.originalPrice,
+    sku: p.sku || '',
+    categories: p.categories?.map((c: any) => c.name) || [],
+    categorySlugs: p.categories?.map((c: any) => c.slug) || [],
+    isFeatured: p.isFeatured || false,
+    isInStock: p.isInStock || false,
+    createdAt: p.createdAt?.toISOString?.() || '',
+  }));
+
+  return {
+    hits,
+    total,
+    page: Math.floor(params.offset / params.limit) + 1,
+    pageSize: params.limit,
+    pageCount: Math.ceil(total / params.limit),
+  };
+}
+
 export default factories.createCoreController('api::product.product', ({ strapi }) => ({
   async search(ctx) {
     const { query, categories, categorySlugs, priceMin, priceMax, isFeatured, isInStock, sort, limit, page } = ctx.query;
-    
+
     console.log('[Product Search] Request received:', {
       query,
       categories,
@@ -22,10 +109,11 @@ export default factories.createCoreController('api::product.product', ({ strapi 
       sort,
       limit,
       page,
+      meiliAvailable: isMeiliAvailable(),
     });
-    
+
     const filters: Parameters<typeof searchProducts>[1] = {};
-    
+
     if (categories) {
       filters.categories = Array.isArray(categories) ? categories : [categories];
     }
@@ -44,28 +132,46 @@ export default factories.createCoreController('api::product.product', ({ strapi 
     if (isInStock !== undefined && isInStock !== '') {
       filters.isInStock = isInStock === 'true';
     }
-    
+
     const sortArray = sort ? (Array.isArray(sort) ? sort : [sort]) : undefined;
     const pageNum = parseInt(page as string) || 1;
     const limitNum = parseInt(limit as string) || 20;
     const offset = (pageNum - 1) * limitNum;
-    
+
     try {
-      const results = await searchProducts(
-        query as string || '',
-        filters,
-        sortArray,
-        limitNum,
-        offset
-      );
-      
+      let results;
+
+      if (isMeiliAvailable()) {
+        results = await searchProducts(
+          query as string || '',
+          filters,
+          sortArray,
+          limitNum,
+          offset
+        );
+      } else {
+        console.log('[Product Search] MeiliSearch unavailable, falling back to DB query');
+        results = await searchProductsViaDb(strapi, {
+          query: (query as string) || '',
+          categorySlugs: filters.categorySlugs,
+          isFeatured: filters.isFeatured,
+          isInStock: filters.isInStock,
+          priceMin: filters.priceMin,
+          priceMax: filters.priceMax,
+          sort: sortArray,
+          limit: limitNum,
+          offset,
+        });
+      }
+
       console.log('[Product Search] Results:', {
         query,
         total: results.total,
         page: results.page,
         pageCount: results.pageCount,
+        source: isMeiliAvailable() ? 'meilisearch' : 'database',
       });
-      
+
       ctx.body = {
         data: results.hits,
         meta: {

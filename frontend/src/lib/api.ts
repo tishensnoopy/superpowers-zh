@@ -577,3 +577,41 @@ export async function getCampusBySlug(slug: string) {
   console.log(`${LOG_PREFIX} Campus loaded:`, result.data[0]?.attributes?.name);
   return result;
 }
+
+// === MeiliSearch 产品搜索 API ===
+
+export async function searchProducts(params: {
+  query?: string;
+  categorySlugs?: string[];
+  sort?: string[];
+  page?: number;
+  limit?: number;
+}): Promise<{ data: Product[]; meta: { total: number; page: number; pageSize: number; pageCount: number } }> {
+  console.log(`${LOG_PREFIX} Searching products...`, params);
+  const urlParams = new URLSearchParams();
+  if (params.query) {
+    urlParams.set('query', params.query);
+  }
+  if (params.categorySlugs && params.categorySlugs.length > 0) {
+    params.categorySlugs.forEach((slug) => {
+      urlParams.append('categorySlugs', slug);
+    });
+  }
+  if (params.sort && params.sort.length > 0) {
+    params.sort.forEach((s) => {
+      urlParams.append('sort', s);
+    });
+  }
+  if (params.page !== undefined) {
+    urlParams.set('page', String(params.page));
+  }
+  if (params.limit !== undefined) {
+    urlParams.set('limit', String(params.limit));
+  }
+  const queryString = urlParams.toString();
+  const result = await fetchApi<{ data: Product[]; meta: { total: number; page: number; pageSize: number; pageCount: number } }>(
+    `/api/products/search${queryString ? `?${queryString}` : ''}`
+  );
+  console.log(`${LOG_PREFIX} Search results: ${result.data.length} products, total=${result.meta.total}`);
+  return result;
+}
