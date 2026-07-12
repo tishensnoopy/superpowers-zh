@@ -349,6 +349,10 @@ export interface AppointmentData {
   name: string;
   phone: string;
   campus: string;
+  age?: string;
+  course?: string;
+  preferredTimeSlot?: string;
+  message?: string;
 }
 
 export async function createAppointment(data: AppointmentData) {

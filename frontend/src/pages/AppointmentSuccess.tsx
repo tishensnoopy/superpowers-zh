@@ -113,6 +113,54 @@ export default function AppointmentSuccess() {
                   </p>
                 </div>
               </div>
+              {appointmentData.age && (
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#FEF3C7] flex items-center justify-center">
+                    <span className="text-[#D97706] text-sm font-bold">📅</span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">孩子年龄</p>
+                    <p className="font-semibold text-[#1C2B3A]">{appointmentData.age} 岁</p>
+                  </div>
+                </div>
+              )}
+              {appointmentData.course && (
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#FCE7F3] flex items-center justify-center">
+                    <span className="text-[#DB2777] text-sm font-bold">📚</span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">意向课程</p>
+                    <p className="font-semibold text-[#1C2B3A]">
+                      {{ language: '语言启蒙', math: '数学思维', english: '英语口语', comprehensive: '综合素养' }[appointmentData.course] || appointmentData.course}
+                    </p>
+                  </div>
+                </div>
+              )}
+              {appointmentData.preferredTimeSlot && (
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#E0F2FE] flex items-center justify-center">
+                    <span className="text-[#0284C7] text-sm font-bold">⏰</span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">期望时段</p>
+                    <p className="font-semibold text-[#1C2B3A]">
+                      {{ morning: '上午', afternoon: '下午', evening: '晚上' }[appointmentData.preferredTimeSlot] || appointmentData.preferredTimeSlot}
+                    </p>
+                  </div>
+                </div>
+              )}
+              {appointmentData.message && (
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#F1F5F9] flex items-center justify-center flex-shrink-0">
+                    <span className="text-[#475569] text-sm font-bold">📝</span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">备注</p>
+                    <p className="font-semibold text-[#1C2B3A]">{appointmentData.message}</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

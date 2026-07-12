@@ -30,6 +30,24 @@
       "maxLength": 100,
       "description": "选择校区"
     },
+    "age": {
+      "type": "integer",
+      "description": "孩子年龄（选填）"
+    },
+    "course": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "意向课程（选填）"
+    },
+    "preferredTimeSlot": {
+      "type": "enumeration",
+      "enum": ["morning", "afternoon", "evening"],
+      "description": "期望时段（选填）"
+    },
+    "message": {
+      "type": "text",
+      "description": "备注（选填）"
+    },
     "status": {
       "type": "enumeration",
       "enum": ["pending", "confirmed", "completed", "cancelled"],

@@ -12,6 +12,19 @@ const CAMPUSES = [
   { value: 'fengtai', label: '丰台校区' },
 ];
 
+const COURSES = [
+  { value: 'language', label: '语言启蒙' },
+  { value: 'math', label: '数学思维' },
+  { value: 'english', label: '英语口语' },
+  { value: 'comprehensive', label: '综合素养' },
+];
+
+const TIME_SLOTS = [
+  { value: 'morning', label: '上午' },
+  { value: 'afternoon', label: '下午' },
+  { value: 'evening', label: '晚上' },
+];
+
 function log(stage: string, message: string, data?: unknown) {
   const timestamp = new Date().toISOString();
   if (data !== undefined) {
@@ -120,6 +133,10 @@ export default function ContactForm({ section }: { section: Section }) {
       name: values.name || '',
       phone: values.phone || '',
       campus: values.campus || '',
+      age: values.age || undefined,
+      course: values.course || undefined,
+      preferredTimeSlot: values.preferredTimeSlot || undefined,
+      message: values.message || undefined,
     };
 
     const payloadSize = JSON.stringify(submitData).length;
@@ -141,6 +158,10 @@ export default function ContactForm({ section }: { section: Section }) {
             name: values.name || '',
             phone: values.phone || '',
             campus: values.campus || '',
+            age: values.age || undefined,
+            course: values.course || undefined,
+            preferredTimeSlot: values.preferredTimeSlot || undefined,
+            message: values.message || undefined,
           },
         },
       });
@@ -320,6 +341,74 @@ export default function ContactForm({ section }: { section: Section }) {
                     ))}
                   </select>
                   {errors.campus && <p className="text-[#DC2626] text-xs mt-1">{errors.campus}</p>}
+                </div>
+
+                <div>
+                  <label htmlFor="age" className="block text-gray-800 text-sm font-semibold mb-2">
+                    孩子年龄
+                  </label>
+                  <input
+                    id="age"
+                    type="number"
+                    min="3"
+                    max="12"
+                    value={values.age || ''}
+                    onChange={(e) => handleFieldChange('age', e.target.value)}
+                    placeholder="选填"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
+                    style={{ borderColor: 'rgba(0,0,0,0.1)' }}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="course" className="block text-gray-800 text-sm font-semibold mb-2">
+                    意向课程
+                  </label>
+                  <select
+                    id="course"
+                    value={values.course || ''}
+                    onChange={(e) => handleFieldChange('course', e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
+                    style={{ borderColor: 'rgba(0,0,0,0.1)' }}
+                  >
+                    <option value="">选填</option>
+                    {COURSES.map((course) => (
+                      <option key={course.value} value={course.value}>{course.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="preferredTimeSlot" className="block text-gray-800 text-sm font-semibold mb-2">
+                    期望时段
+                  </label>
+                  <select
+                    id="preferredTimeSlot"
+                    value={values.preferredTimeSlot || ''}
+                    onChange={(e) => handleFieldChange('preferredTimeSlot', e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
+                    style={{ borderColor: 'rgba(0,0,0,0.1)' }}
+                  >
+                    <option value="">选填</option>
+                    {TIME_SLOTS.map((slot) => (
+                      <option key={slot.value} value={slot.value}>{slot.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="md:col-span-2">
+                  <label htmlFor="message" className="block text-gray-800 text-sm font-semibold mb-2">
+                    备注
+                  </label>
+                  <textarea
+                    id="message"
+                    value={values.message || ''}
+                    onChange={(e) => handleFieldChange('message', e.target.value)}
+                    placeholder="选填，如有特殊需求请在此说明"
+                    rows={2}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
+                    style={{ borderColor: 'rgba(0,0,0,0.1)' }}
+                  />
                 </div>
               </div>
 

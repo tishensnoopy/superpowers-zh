@@ -40,11 +40,19 @@ describe('ContactForm 组件', () => {
     expect(screen.getByRole('heading', { name: '预约免费试听' })).toBeInTheDocument();
   });
 
-  it('渲染所有表单字段', () => {
+  it('渲染 3 个必填字段', () => {
     renderWithRouter(mockSection);
     expect(screen.getByLabelText(/预约姓名/)).toBeInTheDocument();
     expect(screen.getByLabelText(/预约电话/)).toBeInTheDocument();
     expect(screen.getByLabelText(/选择校区/)).toBeInTheDocument();
+  });
+
+  it('渲染 4 个选填字段', () => {
+    renderWithRouter(mockSection);
+    expect(screen.getByLabelText(/孩子年龄/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/意向课程/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/期望时段/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/备注/)).toBeInTheDocument();
   });
 
   it('渲染提交按钮', () => {
@@ -75,7 +83,7 @@ describe('ContactForm 组件', () => {
     expect(await screen.findByText(/手机号格式不正确/)).toBeInTheDocument();
   });
 
-  it('提交成功后跳转到成功页', async () => {
+  it('只填必填字段可以提交成功', async () => {
     const user = userEvent.setup();
     renderWithRouter(mockSection);
     await user.type(screen.getByLabelText(/预约姓名/), '小明');
@@ -86,6 +94,32 @@ describe('ContactForm 组件', () => {
       name: '小明',
       phone: '13800138000',
       campus: 'chaoyang',
+      age: undefined,
+      course: undefined,
+      preferredTimeSlot: undefined,
+      message: undefined,
+    });
+  });
+
+  it('填写选填字段后一起提交', async () => {
+    const user = userEvent.setup();
+    renderWithRouter(mockSection);
+    await user.type(screen.getByLabelText(/预约姓名/), '小明');
+    await user.type(screen.getByLabelText(/预约电话/), '13800138000');
+    await user.selectOptions(screen.getByLabelText(/选择校区/), 'chaoyang');
+    await user.type(screen.getByLabelText(/孩子年龄/), '5');
+    await user.selectOptions(screen.getByLabelText(/意向课程/), 'math');
+    await user.selectOptions(screen.getByLabelText(/期望时段/), 'morning');
+    await user.type(screen.getByLabelText(/备注/), '有特殊需求');
+    await user.click(screen.getByRole('button', { name: '立即预约' }));
+    expect(createAppointment).toHaveBeenCalledWith({
+      name: '小明',
+      phone: '13800138000',
+      campus: 'chaoyang',
+      age: '5',
+      course: 'math',
+      preferredTimeSlot: 'morning',
+      message: '有特殊需求',
     });
   });
 
