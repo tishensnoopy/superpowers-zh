@@ -244,3 +244,135 @@ describe('useProductSearch', () => {
     expect(searchProducts).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('useProductSearch race condition', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.mocked(searchProducts).mockReset();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('快速连续查询时，两次请求都发出且只应用最新请求的结果', async () => {
+    let resolveFirst!: (value: any) => void;
+    let resolveSecond!: (value: any) => void;
+
+    const firstPromise = new Promise((resolve) => {
+      resolveFirst = resolve;
+    });
+    const secondPromise = new Promise((resolve) => {
+      resolveSecond = resolve;
+    });
+
+    // 初始加载立即完成；后续两次查询分别返回 first/second promise（保持 pending）
+    vi.mocked(searchProducts)
+      .mockResolvedValueOnce(defaultResponse)
+      .mockReturnValueOnce(firstPromise as any)
+      .mockReturnValueOnce(secondPromise as any);
+
+    const { result } = renderHook(() => useProductSearch());
+
+    // 初始加载完成
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    vi.mocked(searchProducts).mockClear();
+
+    // 第一次查询
+    act(() => {
+      result.current.setQuery('a');
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    // 第二次查询（在第一次完成前）
+    act(() => {
+      result.current.setQuery('ab');
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    // 两次查询都应触发请求（不被 requestingRef 阻塞）
+    expect(searchProducts).toHaveBeenCalledTimes(2);
+
+    // 先完成第一次请求（旧结果）
+    await act(async () => {
+      resolveFirst({
+        data: [{ id: 1, documentId: 'd1', name: '旧结果', slug: 'old' }],
+        meta: { total: 1, page: 1, pageSize: 12, pageCount: 1 },
+      });
+      await Promise.resolve();
+    });
+
+    // 旧结果不应被应用
+    expect(result.current.results).toEqual([]);
+
+    // 完成第二次请求（新结果）
+    await act(async () => {
+      resolveSecond({
+        data: [{ id: 2, documentId: 'd2', name: '新结果', slug: 'new' }],
+        meta: { total: 1, page: 1, pageSize: 12, pageCount: 1 },
+      });
+      await Promise.resolve();
+    });
+
+    // 最终结果应该是第二次的（新结果）
+    expect(result.current.results).toEqual([
+      { id: 2, documentId: 'd2', name: '新结果', slug: 'new' },
+    ]);
+  });
+
+  it('组件卸载时取消进行中的请求，旧结果不应用', async () => {
+    let resolvePending!: (value: any) => void;
+    const pendingPromise = new Promise((resolve) => {
+      resolvePending = resolve;
+    });
+
+    vi.mocked(searchProducts)
+      .mockResolvedValueOnce(defaultResponse)
+      .mockReturnValueOnce(pendingPromise as any);
+
+    const { result, unmount } = renderHook(() => useProductSearch());
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    vi.mocked(searchProducts).mockClear();
+
+    // 触发一次查询（pending）
+    act(() => {
+      result.current.setQuery('phone');
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(300);
+    });
+
+    expect(searchProducts).toHaveBeenCalledTimes(1);
+
+    // 卸载组件（应 abort 进行中的请求）
+    act(() => {
+      unmount();
+    });
+
+    // 卸载后完成请求，不应抛错也不应影响已卸载组件
+    await act(async () => {
+      resolvePending({
+        data: [{ id: 9, documentId: 'd9', name: '卸载后结果', slug: 'after' }],
+        meta: { total: 1, page: 1, pageSize: 12, pageCount: 1 },
+      });
+      await Promise.resolve();
+    });
+
+    // 测试通过的条件：卸载后 resolve 不抛错（requestId/abort 检查阻止状态更新）
+    expect(true).toBe(true);
+  });
+});

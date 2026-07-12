@@ -14,14 +14,22 @@ export function useProductSearch(initialLimit = 12) {
   const [pageCount, setPageCount] = useState(0);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const requestingRef = useRef(false);
   const skipDebounceRef = useRef(true);
   const limitRef = useRef(initialLimit);
   limitRef.current = initialLimit;
 
+  const requestIdRef = useRef(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const doSearch = useCallback(async () => {
-    if (requestingRef.current) return;
-    requestingRef.current = true;
+    const currentRequestId = ++requestIdRef.current;
+
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     setLoading(true);
     setError(null);
     try {
@@ -32,14 +40,26 @@ export function useProductSearch(initialLimit = 12) {
         page,
         limit: limitRef.current,
       });
+
+      if (currentRequestId !== requestIdRef.current || controller.signal.aborted) {
+        return;
+      }
+
       setResults(response.data);
       setTotal(response.meta.total);
       setPageCount(response.meta.pageCount);
     } catch (err) {
+      if (controller.signal.aborted) {
+        return;
+      }
+      if (currentRequestId !== requestIdRef.current) {
+        return;
+      }
       setError(err instanceof Error ? err.message : String(err));
     } finally {
-      setLoading(false);
-      requestingRef.current = false;
+      if (currentRequestId === requestIdRef.current && !controller.signal.aborted) {
+        setLoading(false);
+      }
     }
   }, [query, category, sort, page]);
 
@@ -65,6 +85,17 @@ export function useProductSearch(initialLimit = 12) {
       }
     };
   }, [doSearch]);
+
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
 
   const setQuery = useCallback((q: string) => {
     setQueryState(q);
