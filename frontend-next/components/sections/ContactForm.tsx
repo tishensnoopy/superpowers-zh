@@ -152,8 +152,12 @@ export default function ContactForm({ section }: { section: Section }) {
       const duration = Math.round(performance.now() - startTime);
 
       log('api', `API 调用成功, 耗时: ${duration}ms`, result);
-      log('navigation', '准备跳转到成功页');
+      log('navigation', '准备跳转到成功页，写入 sessionStorage');
 
+      // 将预约数据存入 sessionStorage，供成功页读取
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('lastAppointment', JSON.stringify(submitData));
+      }
       router.push('/appointment-success');
 
       log('submit', '✅ 提交流程完成 (成功)');

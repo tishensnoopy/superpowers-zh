@@ -2,6 +2,30 @@ import type { Metadata } from 'next';
 import type { Seo as SeoData } from './api';
 import { getImageUrl } from './api';
 
+// Next.js Metadata API 仅接受以下 OpenGraph 类型
+// 详见 https://nextjs.org/docs/app/api-reference/functions/generate-metadata#opengraph
+const VALID_OG_TYPES = [
+  'website',
+  'article',
+  'book',
+  'profile',
+  'music.song',
+  'music.album',
+  'music.playlist',
+  'music.radio_station',
+  'video.movie',
+  'video.episode',
+  'video.tv_show',
+  'video.other',
+] as const;
+
+function resolveOgType(ogType: string | undefined): (typeof VALID_OG_TYPES)[number] {
+  if (ogType && (VALID_OG_TYPES as readonly string[]).includes(ogType)) {
+    return ogType as (typeof VALID_OG_TYPES)[number];
+  }
+  return 'website';
+}
+
 export function buildMetadata(
   seo: SeoData | undefined,
   fallback: { title: string; description?: string }
@@ -21,7 +45,7 @@ export function buildMetadata(
       title: seo?.ogTitle ?? title,
       description: seo?.ogDescription ?? description,
       images: ogImage ? [{ url: ogImage }] : undefined,
-      type: (seo?.ogType as any) ?? 'website',
+      type: resolveOgType(seo?.ogType),
     },
     twitter: {
       card: 'summary_large_image',
