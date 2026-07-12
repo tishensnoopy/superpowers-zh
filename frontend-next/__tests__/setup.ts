@@ -17,3 +17,8 @@ vi.mock('next/link', () => ({
   default: ({ children, href, ...props }: any) =>
     createElement('a', { href, ...props }, children),
 }));
+
+vi.mock('next/image', () => ({
+  default: ({ src, alt, fill, width, height, priority, className, sizes, ...props }: any) =>
+    createElement('img', { src, alt, width, height, className, ...props }),
+}));
