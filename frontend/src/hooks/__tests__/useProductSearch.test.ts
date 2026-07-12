@@ -9,8 +9,8 @@ vi.mock('../../lib/api', () => ({
 }));
 
 const mockProducts: Product[] = [
-  { id: 1, attributes: { name: 'Product 1', slug: 'p1' } },
-  { id: 2, attributes: { name: 'Product 2', slug: 'p2' } },
+  { id: 1, documentId: 'doc1', name: 'Product 1', slug: 'p1' },
+  { id: 2, documentId: 'doc2', name: 'Product 2', slug: 'p2' },
 ];
 
 const defaultResponse = {
