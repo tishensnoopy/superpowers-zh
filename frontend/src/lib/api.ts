@@ -78,7 +78,7 @@ export async function getNavigationTree() {
 
 export async function getFooter() {
   console.log(`${LOG_PREFIX} Fetching footer...`);
-  const result = await fetchApi<{ data: Footer[] }>('/api/footer');
+  const result = await fetchApi<{ data: Footer[] }>('/api/footer?populate=socialLinks&populate=quickLinks');
   const item = Array.isArray(result.data) ? result.data[0] : result.data;
   console.log(`${LOG_PREFIX} Footer loaded: id=${item?.id}`);
   return result;
@@ -346,21 +346,44 @@ export interface Pagination {
 }
 
 export interface AppointmentData {
-  childName: string;
-  parentName: string;
+  name: string;
   phone: string;
-  age?: string;
-  course?: string;
-  preferredTimeSlot?: string;
-  message?: string;
+  campus: string;
 }
 
 export async function createAppointment(data: AppointmentData) {
   console.log(`${LOG_PREFIX} Creating appointment...`);
-  const result = await fetchApi<{ data: any }>('/api/appointments', {
-    method: 'POST',
-    body: JSON.stringify({ data }),
-  });
-  console.log(`${LOG_PREFIX} Appointment created: id=${result.data?.id}`);
-  return result;
+  console.log(`${LOG_PREFIX} Request data:`, JSON.stringify(data, null, 2));
+  
+  const requiredFields = ['name', 'phone', 'campus'];
+  const missingFields = requiredFields.filter(field => !data[field as keyof AppointmentData]);
+  if (missingFields.length > 0) {
+    console.warn(`${LOG_PREFIX} WARNING: Missing required fields: ${missingFields.join(', ')}`);
+  }
+  
+  try {
+    const result = await fetchApi<{ data: any }>('/api/appointments', {
+      method: 'POST',
+      body: JSON.stringify({ data }),
+    });
+    
+    console.log(`${LOG_PREFIX} ✅ Appointment created successfully!`);
+    console.log(`${LOG_PREFIX} Response data:`, JSON.stringify(result, null, 2));
+    console.log(`${LOG_PREFIX} Appointment ID: ${result.data?.id}`);
+    console.log(`${LOG_PREFIX} Status: ${result.data?.status || 'pending'}`);
+    
+    return result;
+  } catch (error) {
+    console.error(`${LOG_PREFIX} ❌ Appointment creation failed!`);
+    console.error(`${LOG_PREFIX} Error details:`, error);
+    
+    if (error instanceof Error) {
+      console.error(`${LOG_PREFIX} Error message: ${error.message}`);
+      console.error(`${LOG_PREFIX} Error stack:`, error.stack);
+    }
+    
+    console.error(`${LOG_PREFIX} Request data that failed:`, JSON.stringify(data, null, 2));
+    
+    throw error;
+  }
 }

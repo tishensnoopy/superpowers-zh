@@ -10,35 +10,13 @@ vi.mock('../../../lib/api', () => ({
 
 import { createAppointment } from '../../../lib/api';
 
-const mockSectionV5 = {
+const mockSection = {
   __component: 'section.contact-form',
   id: 1,
   title: '预约免费试听',
   description: '填写下方表单，我们将尽快联系您',
   submitText: '立即预约',
   successMessage: '预约成功！',
-  fields: [
-    { id: 1, label: '孩子姓名', name: 'childName', type: 'text', required: true, placeholder: '请输入孩子姓名', options: null },
-    { id: 2, label: '家长姓名', name: 'parentName', type: 'text', required: true, placeholder: '请输入家长姓名', options: null },
-    { id: 3, label: '联系电话', name: 'phone', type: 'phone', required: true, placeholder: '请输入手机号码', options: null },
-    { id: 4, label: '感兴趣的课程', name: 'course', type: 'select', required: false, placeholder: '请选择', options: JSON.stringify(['语言启蒙', '数学思维']) },
-  ],
-};
-
-const mockSectionV4 = {
-  __component: 'section.contact-form',
-  id: 1,
-  title: '预约免费试听',
-  description: '填写下方表单，我们将尽快联系您',
-  submitText: '立即预约',
-  successMessage: '预约成功！',
-  fields: {
-    data: [
-      { id: 1, attributes: { label: '孩子姓名', name: 'childName', type: 'text', required: true, placeholder: '请输入孩子姓名', options: null } },
-      { id: 2, attributes: { label: '家长姓名', name: 'parentName', type: 'text', required: true, placeholder: '请输入家长姓名', options: null } },
-      { id: 3, attributes: { label: '联系电话', name: 'phone', type: 'phone', required: true, placeholder: '请输入手机号码', options: null } },
-    ],
-  },
 };
 
 const renderWithRouter = (section: any) => {
@@ -46,6 +24,7 @@ const renderWithRouter = (section: any) => {
     <MemoryRouter>
       <Routes>
         <Route path="/" element={<ContactForm section={section} />} />
+        <Route path="/appointment-success" element={<div>Success</div>} />
       </Routes>
     </MemoryRouter>
   );
@@ -56,92 +35,83 @@ describe('ContactForm 组件', () => {
     vi.clearAllMocks();
   });
 
-  describe('Strapi v5 格式（直接数组）', () => {
-    it('渲染表单标题', () => {
-      renderWithRouter(mockSectionV5);
-      expect(screen.getByRole('heading', { name: '预约免费试听' })).toBeInTheDocument();
-    });
+  it('渲染表单标题', () => {
+    renderWithRouter(mockSection);
+    expect(screen.getByRole('heading', { name: '预约免费试听' })).toBeInTheDocument();
+  });
 
-    it('渲染所有表单字段', () => {
-      renderWithRouter(mockSectionV5);
-      expect(screen.getByLabelText(/孩子姓名/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/家长姓名/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/联系电话/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/感兴趣的课程/)).toBeInTheDocument();
-    });
+  it('渲染所有表单字段', () => {
+    renderWithRouter(mockSection);
+    expect(screen.getByLabelText(/预约姓名/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/预约电话/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/选择校区/)).toBeInTheDocument();
+  });
 
-    it('渲染提交按钮', () => {
-      renderWithRouter(mockSectionV5);
-      expect(screen.getByRole('button', { name: '立即预约' })).toBeInTheDocument();
-    });
+  it('渲染提交按钮', () => {
+    renderWithRouter(mockSection);
+    expect(screen.getByRole('button', { name: '立即预约' })).toBeInTheDocument();
+  });
 
-    it('必填字段为空时显示错误', async () => {
-      const user = userEvent.setup();
-      renderWithRouter(mockSectionV5);
-      await user.click(screen.getByRole('button', { name: '立即预约' }));
-      expect(await screen.findByText(/请输入孩子姓名/)).toBeInTheDocument();
-    });
-
-    it('手机号格式错误时显示错误', async () => {
-      const user = userEvent.setup();
-      renderWithRouter(mockSectionV5);
-      await user.type(screen.getByLabelText(/孩子姓名/), '小明');
-      await user.type(screen.getByLabelText(/家长姓名/), '王先生');
-      await user.type(screen.getByLabelText(/联系电话/), '123');
-      await user.click(screen.getByRole('button', { name: '立即预约' }));
-      expect(await screen.findByText(/手机号格式不正确/)).toBeInTheDocument();
-    });
-
-    it('提交成功后跳转到成功页', async () => {
-      const user = userEvent.setup();
-      renderWithRouter(mockSectionV5);
-      await user.type(screen.getByLabelText(/孩子姓名/), '小明');
-      await user.type(screen.getByLabelText(/家长姓名/), '王先生');
-      await user.type(screen.getByLabelText(/联系电话/), '13800138000');
-      await user.click(screen.getByRole('button', { name: '立即预约' }));
-      expect(createAppointment).toHaveBeenCalledWith({
-        childName: '小明',
-        parentName: '王先生',
-        phone: '13800138000',
-        age: undefined,
-        course: '',
-        preferredTimeSlot: undefined,
-        message: undefined,
-      });
+  it('必填字段为空时显示错误', async () => {
+    const user = userEvent.setup();
+    renderWithRouter(mockSection);
+    await user.click(screen.getByRole('button', { name: '立即预约' }));
+    expect(await screen.findByText(/请输入预约姓名/)).toBeInTheDocument();
+    expect(await screen.findByText(/请输入预约电话/)).toBeInTheDocument();
+    await waitFor(() => {
+      const errorElements = screen.getAllByText(/请选择校区/);
+      const errorParagraph = errorElements.find(el => el.tagName === 'P');
+      expect(errorParagraph).toBeInTheDocument();
     });
   });
 
-  describe('Strapi v4 格式（{data: [...]}）', () => {
-    it('渲染表单字段', () => {
-      renderWithRouter(mockSectionV4);
-      expect(screen.getByLabelText(/孩子姓名/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/家长姓名/)).toBeInTheDocument();
-      expect(screen.getByLabelText(/联系电话/)).toBeInTheDocument();
+  it('手机号格式错误时显示错误', async () => {
+    const user = userEvent.setup();
+    renderWithRouter(mockSection);
+    await user.type(screen.getByLabelText(/预约姓名/), '小明');
+    await user.type(screen.getByLabelText(/预约电话/), '123');
+    await user.selectOptions(screen.getByLabelText(/选择校区/), 'chaoyang');
+    await user.click(screen.getByRole('button', { name: '立即预约' }));
+    expect(await screen.findByText(/手机号格式不正确/)).toBeInTheDocument();
+  });
+
+  it('提交成功后跳转到成功页', async () => {
+    const user = userEvent.setup();
+    renderWithRouter(mockSection);
+    await user.type(screen.getByLabelText(/预约姓名/), '小明');
+    await user.type(screen.getByLabelText(/预约电话/), '13800138000');
+    await user.selectOptions(screen.getByLabelText(/选择校区/), 'chaoyang');
+    await user.click(screen.getByRole('button', { name: '立即预约' }));
+    expect(createAppointment).toHaveBeenCalledWith({
+      name: '小明',
+      phone: '13800138000',
+      campus: 'chaoyang',
     });
   });
 
-  describe('边界情况', () => {
-    it('fields 为空数组时不崩溃', () => {
-      const emptySection = { __component: 'section.contact-form', id: 2, title: '测试', description: '', fields: [] };
-      renderWithRouter(emptySection);
-      expect(screen.getByText('测试')).toBeInTheDocument();
+  it('校区字段为空时显示错误', async () => {
+    const user = userEvent.setup();
+    renderWithRouter(mockSection);
+    await user.type(screen.getByLabelText(/预约姓名/), '小明');
+    await user.type(screen.getByLabelText(/预约电话/), '13800138000');
+    await user.click(screen.getByRole('button', { name: '立即预约' }));
+    await waitFor(() => {
+      const errorElements = screen.getAllByText(/请选择校区/);
+      const errorParagraph = errorElements.find(el => el.tagName === 'P');
+      expect(errorParagraph).toBeInTheDocument();
     });
+  });
 
-    it('fields 为 null 时不崩溃', () => {
-      const nullSection = { __component: 'section.contact-form', id: 3, title: '测试2', description: '', fields: null };
-      renderWithRouter(nullSection);
-      expect(screen.getByText('测试2')).toBeInTheDocument();
-    });
-
-    it('提交失败时显示错误消息', async () => {
-      vi.mocked(createAppointment).mockRejectedValueOnce(new Error('Network error'));
-      const user = userEvent.setup();
-      renderWithRouter(mockSectionV5);
-      await user.type(screen.getByLabelText(/孩子姓名/), '小明');
-      await user.type(screen.getByLabelText(/家长姓名/), '王先生');
-      await user.type(screen.getByLabelText(/联系电话/), '13800138000');
-      await user.click(screen.getByRole('button', { name: '立即预约' }));
-      expect(await screen.findByText(/提交失败/)).toBeInTheDocument();
+  it('提交失败时显示错误消息', async () => {
+    vi.mocked(createAppointment).mockRejectedValueOnce(new Error('Network error'));
+    const user = userEvent.setup();
+    renderWithRouter(mockSection);
+    await user.type(screen.getByLabelText(/预约姓名/), '小明');
+    await user.type(screen.getByLabelText(/预约电话/), '13800138000');
+    await user.selectOptions(screen.getByLabelText(/选择校区/), 'chaoyang');
+    await user.click(screen.getByRole('button', { name: '立即预约' }));
+    await waitFor(() => {
+      expect(screen.getByText(/网络连接失败/)).toBeInTheDocument();
     });
   });
 });

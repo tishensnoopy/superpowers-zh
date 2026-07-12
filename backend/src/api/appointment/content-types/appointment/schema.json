@@ -12,50 +12,23 @@
     "draftAndPublish": false
   },
   "attributes": {
-    "childName": {
+    "name": {
       "type": "string",
       "required": true,
       "maxLength": 100,
-      "description": "孩子姓名"
-    },
-    "parentName": {
-      "type": "string",
-      "required": true,
-      "maxLength": 100,
-      "description": "家长姓名"
+      "description": "预约姓名"
     },
     "phone": {
       "type": "string",
       "required": true,
       "maxLength": 20,
-      "description": "联系电话"
-    },
-    "age": {
-      "type": "integer",
-      "description": "孩子年龄"
-    },
-    "course": {
-      "type": "string",
-      "maxLength": 100,
-      "description": "感兴趣的课程"
-    },
-    "preferredDate": {
-      "type": "date",
-      "description": "期望日期"
-    },
-    "preferredTimeSlot": {
-      "type": "enumeration",
-      "enum": ["morning", "afternoon", "evening"],
-      "description": "期望时段"
+      "description": "预约电话"
     },
     "campus": {
       "type": "string",
+      "required": true,
       "maxLength": 100,
-      "description": "期望校区"
-    },
-    "message": {
-      "type": "text",
-      "description": "备注"
+      "description": "选择校区"
     },
     "status": {
       "type": "enumeration",
