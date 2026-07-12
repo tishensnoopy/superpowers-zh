@@ -2,12 +2,6 @@ import { factories } from '@strapi/strapi';
 
 const UID = 'api::faq-item.faq-item';
 
-function wrapItem(item: any) {
-  if (!item) return null;
-  const { id, documentId, ...rest } = item;
-  return { id, documentId, attributes: rest };
-}
-
 export default factories.createCoreController('api::faq-item.faq-item', ({ strapi }) => ({
   async find(ctx) {
     console.log('[FaqItem] find() called');
@@ -23,7 +17,7 @@ export default factories.createCoreController('api::faq-item.faq-item', ({ strap
         sort: { sortOrder: 'asc' },
       });
 
-      const data = (faqs || []).map(wrapItem);
+      const data = faqs || [];
       console.log('[FaqItem] find() completed, count:', data.length);
       return { data, meta: { pagination: { page: 1, pageSize: data.length, pageCount: 1, total: data.length } } };
     } catch (err) {
@@ -44,7 +38,7 @@ export default factories.createCoreController('api::faq-item.faq-item', ({ strap
       }
 
       console.log('[FaqItem] findOne() completed');
-      return { data: wrapItem(faq), meta: {} };
+      return { data: faq, meta: {} };
     } catch (err) {
       console.error('[FaqItem] findOne() failed:', err instanceof Error ? err.message : err);
       throw err;
@@ -58,7 +52,7 @@ export default factories.createCoreController('api::faq-item.faq-item', ({ strap
         filters: { category: { $eq: ctx.params.category }, isActive: true },
         sort: { sortOrder: 'asc' },
       });
-      const data = (faqs || []).map(wrapItem);
+      const data = faqs || [];
       console.log('[FaqItem] findByCategory() completed, count:', data.length);
       return { data, meta: {} };
     } catch (err) {
@@ -82,7 +76,7 @@ export default factories.createCoreController('api::faq-item.faq-item', ({ strap
         },
         sort: { sortOrder: 'asc' },
       });
-      const data = (faqs || []).map(wrapItem);
+      const data = faqs || [];
       console.log('[FaqItem] search() completed, count:', data.length);
       return { data, meta: {} };
     } catch (err) {
