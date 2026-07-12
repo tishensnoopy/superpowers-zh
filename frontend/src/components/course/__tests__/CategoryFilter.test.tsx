@@ -3,9 +3,9 @@ import { renderWithProviders as render, screen, fireEvent } from '../../../test/
 import CategoryFilter from '../CategoryFilter';
 
 const mockCategories = [
-  { id: 1, attributes: { slug: 'pinyin', name: '拼音' } },
-  { id: 2, attributes: { slug: 'math', name: '数学' } },
-  { id: 3, attributes: { slug: 'english', name: '英语' } },
+  { id: 1, slug: 'pinyin', name: '拼音' },
+  { id: 2, slug: 'math', name: '数学' },
+  { id: 3, slug: 'english', name: '英语' },
 ];
 
 describe('CategoryFilter 组件', () => {

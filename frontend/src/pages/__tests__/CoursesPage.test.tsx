@@ -11,12 +11,12 @@ vi.mock('../../lib/api', () => ({
 import { searchProducts, getProductCategories } from '../../lib/api';
 
 const mockCategories = [
-  { id: 1, attributes: { slug: 'language', name: '语言启蒙' } },
+  { id: 1, slug: 'language', name: '语言启蒙' },
 ];
 
 const mockResults = {
   data: [
-    { id: 1, attributes: { name: '拼音启蒙班', slug: 'pinyin-starter', shortDescription: '系统学习汉语拼音', specValues: {} } },
+    { id: 1, documentId: 'doc-1', name: '拼音启蒙班', slug: 'pinyin-starter', shortDescription: '系统学习汉语拼音', specValues: {} },
   ],
   meta: { total: 1, page: 1, pageSize: 12, pageCount: 1 },
 };

@@ -50,27 +50,25 @@ export default function CourseDetail({ slug }: { slug: string }) {
     );
   }
 
-  const { attributes } = product;
-
   const courseStructuredData = {
     '@context': 'https://schema.org',
     '@type': 'Course',
-    name: attributes.name,
-    description: attributes.description || attributes.shortDescription || '',
+    name: product.name,
+    description: product.description || product.shortDescription || '',
   };
 
   return (
     <>
       <Seo
-        seo={attributes.seo}
-        title={attributes.name}
-        description={attributes.shortDescription || attributes.description}
+        seo={product.seo}
+        title={product.name}
+        description={product.shortDescription || product.description}
         type="product"
         structuredData={courseStructuredData}
       />
       <CourseHeader product={product} />
 
-      {attributes.description && (
+      {product.description && (
         <section className="py-16 bg-background">
           <div className="max-w-[1400px] mx-auto px-8">
             <h2
@@ -84,16 +82,16 @@ export default function CourseDetail({ slug }: { slug: string }) {
               课程介绍
             </h2>
             <div className="prose prose-lg max-w-none text-muted-foreground leading-relaxed">
-              {attributes.description}
+              {product.description}
             </div>
           </div>
         </section>
       )}
 
-      <CourseObjectives objectives={attributes.objectives} />
-      <CourseOutline outline={attributes.outline} />
+      <CourseObjectives objectives={product.objectives} />
+      <CourseOutline outline={product.outline} />
 
-      {attributes.teachingMethod && (
+      {product.teachingMethod && (
         <section className="py-16 bg-muted/30">
           <div className="max-w-[1400px] mx-auto px-8">
             <h2
@@ -107,14 +105,14 @@ export default function CourseDetail({ slug }: { slug: string }) {
               教学方法
             </h2>
             <div className="prose prose-lg max-w-none text-muted-foreground leading-relaxed">
-              {attributes.teachingMethod}
+              {product.teachingMethod}
             </div>
           </div>
         </section>
       )}
 
-      <CourseTestimonials testimonials={attributes.testimonials} />
-      <CourseCTA courseName={attributes.name} />
+      <CourseTestimonials testimonials={product.testimonials} />
+      <CourseCTA courseName={product.name} />
     </>
   );
 }

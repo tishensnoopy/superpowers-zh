@@ -9,7 +9,7 @@ const specConfig: Record<string, { label: string; icon: React.ComponentType<{ si
 };
 
 export default function CourseHeader({ product }: { product: Product }) {
-  const { name, shortDescription, specValues, price, originalPrice } = product.attributes;
+  const { name, shortDescription, specValues, price, originalPrice } = product;
 
   return (
     <section className="pt-[120px] pb-16 bg-gradient-to-b from-[#FFF3E5] to-background">

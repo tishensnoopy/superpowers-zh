@@ -1,14 +1,7 @@
 interface CategoryFilterProps {
-  categories: { id: number; attributes?: { slug: string; name: string }; slug?: string; name?: string }[];
+  categories: { id: number; slug: string; name: string }[];
   selected: string | null;
   onChange: (slug: string | null) => void;
-}
-
-function normalizeCategory(cat: CategoryFilterProps['categories'][number]) {
-  if (cat.attributes) {
-    return { id: cat.id, slug: cat.attributes.slug, name: cat.attributes.name };
-  }
-  return { id: cat.id, slug: cat.slug!, name: cat.name! };
 }
 
 export default function CategoryFilter({ categories, selected, onChange }: CategoryFilterProps) {
@@ -38,17 +31,16 @@ export default function CategoryFilter({ categories, selected, onChange }: Categ
         全部
       </button>
       {categories.map((cat) => {
-        const { id, slug, name } = normalizeCategory(cat);
-        const isActive = selected === slug;
+        const isActive = selected === cat.slug;
         return (
           <button
-            key={id}
+            key={cat.id}
             type="button"
             className={chipClass(isActive)}
             style={activeStyle(isActive)}
-            onClick={() => onChange(slug)}
+            onClick={() => onChange(cat.slug)}
           >
-            {name}
+            {cat.name}
           </button>
         );
       })}

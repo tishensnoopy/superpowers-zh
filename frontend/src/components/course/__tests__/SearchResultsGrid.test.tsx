@@ -6,13 +6,12 @@ import type { Product } from '../../../lib/api';
 
 const makeProduct = (id: number, name: string): Product => ({
   id,
-  attributes: {
-    name,
-    slug: `course-${id}`,
-    shortDescription: `${name}的简介`,
-    description: `${name}的详细描述`,
-    specValues: { course_hours: '48课时', class_size: '小班12人' },
-  },
+  documentId: `doc-${id}`,
+  name,
+  slug: `course-${id}`,
+  shortDescription: `${name}的简介`,
+  description: `${name}的详细描述`,
+  specValues: { course_hours: '48课时', class_size: '小班12人' },
 });
 
 const mockResults: Product[] = [

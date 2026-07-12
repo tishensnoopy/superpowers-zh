@@ -11,28 +11,27 @@ import { getProductBySlug } from '../../../lib/api';
 
 const mockProduct = {
   id: 1,
-  attributes: {
-    name: '语言启蒙',
-    slug: 'language',
-    description: '通过绘本阅读、儿歌律动等方式培养语言能力。',
-    shortDescription: '培养孩子语言表达能力与阅读兴趣',
-    specValues: { course_hours: '48课时', class_size: '小班12人', age_range: '4-6岁', duration: '6个月' },
-    teachingMethod: '采用沉浸式教学法，结合绘本和游戏。',
-    objectives: [
-      { id: 1, title: '掌握 500+ 词汇量', description: '通过绘本积累词汇' },
-    ],
-    outline: [
-      { id: 1, title: '第 1-12 课：基础词汇', description: '认识基础汉字', lessonCount: 12 },
-    ],
-    testimonials: [
-      { id: 1, parentName: '张妈妈', content: '效果很好！', rating: 5 },
-    ],
-    seo: {
-      metaTitle: '语言启蒙课程 - 专业幼儿语言开发',
-      metaDescription: '专为4-6岁儿童设计的语言启蒙课程',
-      ogTitle: '语言启蒙课程',
-      ogDescription: '培养孩子语言表达能力与阅读兴趣',
-    },
+  documentId: 'abc123',
+  name: '语言启蒙',
+  slug: 'language',
+  description: '通过绘本阅读、儿歌律动等方式培养语言能力。',
+  shortDescription: '培养孩子语言表达能力与阅读兴趣',
+  specValues: { course_hours: '48课时', class_size: '小班12人', age_range: '4-6岁', duration: '6个月' },
+  teachingMethod: '采用沉浸式教学法，结合绘本和游戏。',
+  objectives: [
+    { id: 1, title: '掌握 500+ 词汇量', description: '通过绘本积累词汇' },
+  ],
+  outline: [
+    { id: 1, title: '第 1-12 课：基础词汇', description: '认识基础汉字', lessonCount: 12 },
+  ],
+  testimonials: [
+    { id: 1, parentName: '张妈妈', content: '效果很好！', rating: 5 },
+  ],
+  seo: {
+    metaTitle: '语言启蒙课程 - 专业幼儿语言开发',
+    metaDescription: '专为4-6岁儿童设计的语言启蒙课程',
+    ogTitle: '语言启蒙课程',
+    ogDescription: '培养孩子语言表达能力与阅读兴趣',
   },
 };
 
