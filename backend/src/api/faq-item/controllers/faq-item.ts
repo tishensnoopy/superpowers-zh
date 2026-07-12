@@ -1,16 +1,31 @@
 import { factories } from '@strapi/strapi';
 
+const UID = 'api::faq-item.faq-item';
+
+function wrapItem(item: any) {
+  if (!item) return null;
+  const { id, documentId, ...rest } = item;
+  return { id, documentId, attributes: rest };
+}
+
 export default factories.createCoreController('api::faq-item.faq-item', ({ strapi }) => ({
   async find(ctx) {
     console.log('[FaqItem] find() called');
     try {
-      ctx.query = {
-        ...ctx.query,
-        populate: [],
-      };
-      const result = await super.find(ctx);
-      console.log('[FaqItem] find() completed, count:', result.data?.length);
-      return result;
+      const { category } = ctx.query as any;
+      const entityFilters: any = { isActive: true };
+      if (category) {
+        entityFilters.category = { $eq: category };
+      }
+
+      const faqs = await strapi.documents(UID).findMany({
+        filters: entityFilters,
+        sort: { sortOrder: 'asc' },
+      });
+
+      const data = (faqs || []).map(wrapItem);
+      console.log('[FaqItem] find() completed, count:', data.length);
+      return { data, meta: { pagination: { page: 1, pageSize: data.length, pageCount: 1, total: data.length } } };
     } catch (err) {
       console.error('[FaqItem] find() failed:', err instanceof Error ? err.message : err);
       throw err;
@@ -20,13 +35,16 @@ export default factories.createCoreController('api::faq-item.faq-item', ({ strap
   async findOne(ctx) {
     console.log('[FaqItem] findOne() called, id:', ctx.params.id);
     try {
-      ctx.query = {
-        ...ctx.query,
-        populate: [],
-      };
-      const result = await super.findOne(ctx);
+      const faq = await strapi.documents(UID).findOne({
+        documentId: ctx.params.id,
+      });
+
+      if (!faq) {
+        return ctx.notFound('FAQ not found');
+      }
+
       console.log('[FaqItem] findOne() completed');
-      return result;
+      return { data: wrapItem(faq), meta: {} };
     } catch (err) {
       console.error('[FaqItem] findOne() failed:', err instanceof Error ? err.message : err);
       throw err;
@@ -36,12 +54,13 @@ export default factories.createCoreController('api::faq-item.faq-item', ({ strap
   async findByCategory(ctx) {
     console.log('[FaqItem] findByCategory() called, category:', ctx.params.category);
     try {
-      const faqs = await strapi.db.query('api::faq-item.faq-item').findMany({
-        where: { category: ctx.params.category, isActive: true },
-        orderBy: { sortOrder: 'asc' },
+      const faqs = await strapi.documents(UID).findMany({
+        filters: { category: { $eq: ctx.params.category }, isActive: true },
+        sort: { sortOrder: 'asc' },
       });
-      console.log('[FaqItem] findByCategory() completed, count:', faqs.length);
-      return { data: faqs, meta: {} };
+      const data = (faqs || []).map(wrapItem);
+      console.log('[FaqItem] findByCategory() completed, count:', data.length);
+      return { data, meta: {} };
     } catch (err) {
       console.error('[FaqItem] findByCategory() failed:', err instanceof Error ? err.message : err);
       throw err;
@@ -51,9 +70,9 @@ export default factories.createCoreController('api::faq-item.faq-item', ({ strap
   async search(ctx) {
     console.log('[FaqItem] search() called, query:', ctx.query.q);
     try {
-      const query = ctx.query.q || '';
-      const faqs = await strapi.db.query('api::faq-item.faq-item').findMany({
-        where: {
+      const query = (ctx.query as any).q || '';
+      const faqs = await strapi.documents(UID).findMany({
+        filters: {
           $or: [
             { question: { $containsi: query } },
             { answer: { $containsi: query } },
@@ -61,10 +80,11 @@ export default factories.createCoreController('api::faq-item.faq-item', ({ strap
           ],
           isActive: true,
         },
-        orderBy: { sortOrder: 'asc' },
+        sort: { sortOrder: 'asc' },
       });
-      console.log('[FaqItem] search() completed, count:', faqs.length);
-      return { data: faqs, meta: {} };
+      const data = (faqs || []).map(wrapItem);
+      console.log('[FaqItem] search() completed, count:', data.length);
+      return { data, meta: {} };
     } catch (err) {
       console.error('[FaqItem] search() failed:', err instanceof Error ? err.message : err);
       throw err;
