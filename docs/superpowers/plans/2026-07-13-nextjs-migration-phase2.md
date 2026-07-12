@@ -109,12 +109,15 @@
 - 创建：`frontend-next/package.json`
 - 创建：`frontend-next/tsconfig.json`
 - 创建：`frontend-next/next.config.ts`
-- 创建：`frontend-next/tailwind.config.ts`
 - 创建：`frontend-next/postcss.config.js`
 - 创建：`frontend-next/vitest.config.ts`
 - 创建：`frontend-next/.env.local`
 - 创建：`frontend-next/.env.example`
 - 创建：`frontend-next/app/globals.css`
+- 创建：`frontend-next/__tests__/setup.ts`
+- 创建：`frontend-next/.eslintrc.json`
+
+> **注意：** Tailwind v4 使用 CSS-first 配置，不需要 `tailwind.config.ts`。主题在 `globals.css` 中通过 `@theme` 指令声明。
 
 - [ ] **步骤 1：创建 Next.js 项目骨架**
 
@@ -156,7 +159,8 @@ cd frontend-next
     "tailwindcss": "^4.0.0",
     "@tailwindcss/postcss": "^4.0.0",
     "postcss": "^8.4.49",
-    "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^15.1.0",
     "vitest": "^2.1.0",
     "@testing-library/react": "^16.1.0",
     "@testing-library/jest-dom": "^6.6.0",
@@ -187,6 +191,9 @@ npm install
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
@@ -210,20 +217,18 @@ npm install
 import type { NextConfig } from 'next';
 import { withSentryConfig } from '@sentry/nextjs';
 
+const cmsUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
+const cmsParsedUrl = new URL(cmsUrl);
+
 const nextConfig: NextConfig = {
   output: 'standalone',
-  
+
   images: {
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '1337',
-        pathname: '/uploads/**',
-      },
-      {
-        protocol: 'https',
-        hostname: '**',
+        protocol: cmsParsedUrl.protocol.replace(':', '') as 'http' | 'https',
+        hostname: cmsParsedUrl.hostname,
+        port: cmsParsedUrl.port || undefined,
         pathname: '/uploads/**',
       },
     ],
@@ -274,46 +279,19 @@ export default withSentryConfig(
 );
 ```
 
-- [ ] **步骤 5：创建 `tailwind.config.ts`**
+- [ ] **步骤 5：创建 `postcss.config.js`**
 
-```typescript
-import type { Config } from 'tailwindcss';
-
-export default {
-  content: [
-    './app/**/*.{ts,tsx}',
-    './components/**/*.{ts,tsx}',
-    './lib/**/*.{ts,tsx}',
-  ],
-  theme: {
-    extend: {
-      colors: {
-        primary: {
-          DEFAULT: '#F5851F',
-          dark: '#FF6B35',
-        },
-      },
-      fontFamily: {
-        sans: ['var(--font-default)', 'var(--font-custom)', 'sans-serif'],
-      },
-    },
-  },
-  plugins: [],
-} satisfies Config;
-```
-
-- [ ] **步骤 6：创建 `postcss.config.js`**
+> **注意：** Tailwind v4 不需要 `tailwind.config.ts`，也不需要 `autoprefixer`（`@tailwindcss/postcss` 已内置）。主题在步骤 9 的 `globals.css` 中通过 `@theme` 指令声明。
 
 ```javascript
 module.exports = {
   plugins: {
     '@tailwindcss/postcss': {},
-    autoprefixer: {},
   },
 };
 ```
 
-- [ ] **步骤 7：创建 `vitest.config.ts`**
+- [ ] **步骤 6：创建 `vitest.config.ts`**
 
 ```typescript
 import { defineConfig } from 'vitest/config';
@@ -336,7 +314,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **步骤 8：创建 `.env.local` 和 `.env.example`**
+- [ ] **步骤 7：创建 `.env.local` 和 `.env.example`**
 
 `.env.local`:
 ```
@@ -352,22 +330,59 @@ SENTRY_AUTH_TOKEN=
 
 `.env.example`（同上，但提交到 git）
 
-- [ ] **步骤 9：创建 `app/globals.css`**
+- [ ] **步骤 8：创建 `__tests__/setup.ts`**
+
+> vitest.config.ts 引用了此文件，必须在任务 1 中创建（否则第一个测试文件添加时 vitest 会崩溃）。
+
+```typescript
+import { vi } from 'vitest';
+import '@testing-library/jest-dom';
+import { createElement } from 'react';
+
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/',
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
+    refresh: vi.fn(),
+  }),
+  useSearchParams: () => new URLSearchParams(),
+}));
+
+vi.mock('next/link', () => ({
+  default: ({ children, href, ...props }: any) =>
+    createElement('a', { href, ...props }, children),
+}));
+```
+
+- [ ] **步骤 9：创建 `.eslintrc.json`**
+
+```json
+{
+  "extends": "next/core-web-vitals"
+}
+```
+
+- [ ] **步骤 10：创建 `app/globals.css`**
+
+> Tailwind v4 使用 CSS-first 配置。`@theme` 指令声明的变量会自动生成对应的工具类（如 `--color-primary` 生成 `bg-primary`、`text-primary` 等）。
 
 ```css
 @import "tailwindcss";
 
-:root {
+@theme {
   --color-primary: #F5851F;
   --color-primary-dark: #FF6B35;
+  --font-sans: var(--font-default), var(--font-custom), sans-serif;
 }
 
 body {
-  font-family: var(--font-default), var(--font-custom), sans-serif;
+  font-family: var(--font-sans);
 }
 ```
 
-- [ ] **步骤 10：验证项目可启动**
+- [ ] **步骤 11：验证项目可启动**
 
 创建最简 `app/layout.tsx` 和 `app/page.tsx`：
 
@@ -389,15 +404,22 @@ export default function HomePage() {
 }
 ```
 
-运行：
+运行验证：
 ```bash
 cd frontend-next
-npm run dev
+npm run typecheck   # TypeScript 类型检查
+npm run lint        # ESLint 检查
+npm run build       # 生产构建验证
+npm run dev         # 开发服务器
 ```
 
-预期：访问 `http://localhost:3000` 显示 "Next.js 骨架验证"
+预期：
+- `typecheck` 无错误
+- `lint` 无警告或错误
+- `build` 成功生成静态页面
+- 访问 `http://localhost:3000` 显示 "Next.js 骨架验证"
 
-- [ ] **步骤 11：Commit**
+- [ ] **步骤 12：Commit**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh
@@ -537,39 +559,14 @@ git commit -m "feat(frontend-next): 移植 lib/api.ts 并新增 getImageUrl/Font
 
 ---
 
-## 任务 3：测试基础设施与全局 mock
+## 任务 3：测试基础设施验证
+
+> **注意：** `__tests__/setup.ts` 已在任务 1 步骤 8 中创建。本任务验证 setup 生效，确保后续组件测试可以正常运行。
 
 **文件：**
-- 创建：`frontend-next/__tests__/setup.ts`
+- 临时创建并删除：`frontend-next/__tests__/setup.test.ts`（验证用，验证后删除）
 
-- [ ] **步骤 1：创建测试全局 setup**
-
-```typescript
-// frontend-next/__tests__/setup.ts
-import { vi } from 'vitest';
-import '@testing-library/jest-dom';
-
-// mock next/navigation（Client Component 测试用）
-vi.mock('next/navigation', () => ({
-  usePathname: () => '/',
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn(),
-    back: vi.fn(),
-    refresh: vi.fn(),
-  }),
-  useSearchParams: () => new URLSearchParams(),
-}));
-
-// mock next/link（渲染为普通 <a> 标签）
-vi.mock('next/link', () => ({
-  default: ({ children, href, ...props }: any) => (
-    <a href={href} {...props}>{children}</a>
-  ),
-}));
-```
-
-- [ ] **步骤 2：验证 setup 生效**
+- [ ] **步骤 1：验证 setup 生效**
 
 创建临时测试文件 `__tests__/setup.test.ts`：
 
@@ -592,14 +589,13 @@ npx vitest run __tests__/setup.test.ts
 
 预期：通过
 
-- [ ] **步骤 3：删除临时测试文件并 Commit**
+- [ ] **步骤 2：删除临时测试文件**
 
 ```bash
 rm frontend-next/__tests__/setup.test.ts
-cd /home/tishensnoopy/project/superpowers-zh
-git add frontend-next/__tests__/setup.ts
-git commit -m "feat(frontend-next): 创建测试全局 setup（next/navigation + next/link mock）"
 ```
+
+> setup.ts 已在任务 1 中 commit，此处无需再次提交。
 
 ---
 
