@@ -6,12 +6,6 @@ export default factories.createCoreController('api::site-settings.site-settings'
     try {
       const result = await super.find(ctx);
       console.log('[SiteSettings] find() completed successfully');
-      if (result.data && Array.isArray(result.data)) {
-        result.data = result.data.map(item => {
-          const { id, ...attributes } = item;
-          return { id, attributes };
-        });
-      }
       return result;
     } catch (err) {
       console.error('[SiteSettings] find() failed:', err instanceof Error ? err.message : err);
