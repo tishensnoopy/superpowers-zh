@@ -1,12 +1,6 @@
 import { factories } from '@strapi/strapi';
 import { searchProducts, syncAllProducts, ProductDocument, isMeiliAvailable } from '../../../utils/meilisearch';
 
-function wrapMedia(media: any) {
-  if (!media) return { data: null };
-  const { id, documentId, ...attributes } = media;
-  return { data: { id, documentId, attributes } };
-}
-
 async function searchProductsViaDb(
   strapi: any,
   params: {
@@ -27,7 +21,6 @@ async function searchProductsViaDb(
     where.$or = [
       { name: { $containsi: params.query } },
       { shortDescription: { $containsi: params.query } },
-      { description: { $containsi: params.query } },
     ];
   }
 
@@ -63,7 +56,7 @@ async function searchProductsViaDb(
     orderBy,
     limit: params.limit,
     offset: params.offset,
-    populate: ['categories', 'thumbnail'],
+    populate: ['categories'],
   });
 
   const total = await strapi.db.query('api::product.product').count({ where });
@@ -405,18 +398,8 @@ export default factories.createCoreController('api::product.product', ({ strapi 
       
       console.log('[Product findBySlug] Found:', product.name);
 
-      const { id, documentId, ...attributes } = product;
-
-      if (attributes.seo?.ogImage) {
-        attributes.seo.ogImage = wrapMedia(attributes.seo.ogImage);
-      }
-
       ctx.body = {
-        data: {
-          id,
-          documentId,
-          attributes,
-        },
+        data: product,
         meta: {},
       };
     } catch (error) {
