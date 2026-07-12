@@ -385,6 +385,7 @@ export interface NewsArticle {
   isFeatured?: boolean;
   publishedAt?: string;
   viewCount?: number;
+  seo?: Seo;
 }
 
 export interface KnowledgeBase {

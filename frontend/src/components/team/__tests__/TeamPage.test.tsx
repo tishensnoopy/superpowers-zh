@@ -10,17 +10,15 @@ import { getTeachers } from '../../../lib/api';
 
 const makeTeacher = (id: number, name: string) => ({
   id,
-  attributes: {
-    name,
-    slug: `slug-${id}`,
-    title: `${name}职称`,
-    subject: 'pinyin',
-    teachingYears: 10,
-    education: `${name}的教育背景`,
-    teachingFeatures: `${name}的教学特色`,
-    achievements: [`${name}荣誉`],
-    campus: { data: { id, attributes: { name: '朝阳校区', slug: 'chaoyang' } } },
-  },
+  name,
+  slug: `slug-${id}`,
+  title: `${name}职称`,
+  subject: 'pinyin',
+  teachingYears: 10,
+  education: `${name}的教育背景`,
+  teachingFeatures: `${name}的教学特色`,
+  achievements: [`${name}荣誉`],
+  campus: { id, name: '朝阳校区', slug: 'chaoyang' },
 });
 
 describe('TeamPage 页面', () => {

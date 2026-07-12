@@ -68,8 +68,7 @@ export default function NewsDetailPage() {
   const coverUrl = coverImage?.url;
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:1337';
   const fullCoverUrl = coverUrl ? `${apiUrl}${coverUrl}` : null;
-  // seo 字段后端会返回，但 NewsArticle 接口尚未包含，先用 any 访问
-  const seo = (news as any).seo;
+  const seo = news.seo;
 
   const articleStructuredData = {
     '@context': 'https://schema.org',

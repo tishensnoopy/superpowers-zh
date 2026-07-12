@@ -4,17 +4,15 @@ import TeamGrid from '../TeamGrid';
 
 const makeTeacher = (id: number, name: string, subject: string = 'pinyin') => ({
   id,
-  attributes: {
-    name,
-    slug: `slug-${id}`,
-    title: `${name}职称`,
-    subject,
-    teachingYears: id + 5,
-    education: `${name}的教育背景`,
-    teachingFeatures: `${name}的教学特色`,
-    achievements: [`${name}荣誉1`, `${name}荣誉2`],
-    campus: { data: { id, attributes: { name: '朝阳校区', slug: 'chaoyang' } } },
-  },
+  name,
+  slug: `slug-${id}`,
+  title: `${name}职称`,
+  subject,
+  teachingYears: id + 5,
+  education: `${name}的教育背景`,
+  teachingFeatures: `${name}的教学特色`,
+  achievements: [`${name}荣誉1`, `${name}荣誉2`],
+  campus: { id, name: '朝阳校区', slug: 'chaoyang' },
 });
 
 const mockTeachers = [
