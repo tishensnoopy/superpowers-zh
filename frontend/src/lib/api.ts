@@ -457,20 +457,18 @@ export async function createAppointment(data: AppointmentData) {
 export interface Teacher {
   id: number;
   documentId?: string;
-  attributes: {
-    name: string;
-    slug: string;
-    title: string;
-    avatar?: { data?: { attributes: { url: string } } };
-    campus?: { data?: Campus };
-    subject?: 'pinyin' | 'math' | 'english' | 'comprehensive';
-    teachingYears?: number;
-    education?: string;
-    teachingFeatures?: string;
-    achievements?: string[];
-    isFeatured?: boolean;
-    sortOrder?: number;
-  };
+  name: string;
+  slug: string;
+  title: string;
+  avatar?: { url: string; alternativeText?: string } | null;
+  campus?: Campus | null;
+  subject?: 'pinyin' | 'math' | 'english' | 'comprehensive';
+  teachingYears?: number;
+  education?: string;
+  teachingFeatures?: string;
+  achievements?: string[];
+  isFeatured?: boolean;
+  sortOrder?: number;
 }
 
 export async function getTeachers(filters?: {
@@ -500,21 +498,19 @@ export async function getTeachers(filters?: {
 export interface Campus {
   id: number;
   documentId?: string;
-  attributes: {
-    name: string;
-    slug: string;
-    coverImage?: { data?: { attributes: { url: string } } };
-    gallery?: { data: { attributes: { url: string } }[] };
-    address: string;
-    phone?: string;
-    businessHours?: string;
-    transportation?: string;
-    area?: string;
-    description?: string;
-    mapEmbed?: string;
-    sortOrder?: number;
-    teachers?: { data: Teacher[] };
-  };
+  name: string;
+  slug: string;
+  coverImage?: { url: string; alternativeText?: string } | null;
+  gallery?: { url: string; alternativeText?: string }[];
+  address: string;
+  phone?: string;
+  businessHours?: string;
+  transportation?: string;
+  area?: string;
+  description?: string;
+  mapEmbed?: string;
+  sortOrder?: number;
+  teachers?: Teacher[];
 }
 
 export async function getCampuses() {
@@ -531,7 +527,7 @@ export async function getCampusBySlug(slug: string) {
   const params = new URLSearchParams();
   params.set('filters[slug][$eq]', slug);
   const result = await fetchApi<{ data: Campus[] }>(`/api/campuses?${params.toString()}`);
-  console.log(`${LOG_PREFIX} Campus loaded:`, result.data[0]?.attributes?.name);
+  console.log(`${LOG_PREFIX} Campus loaded:`, result.data[0]?.name);
   return result;
 }
 
