@@ -29,7 +29,7 @@ export default {
       path: '/navigation',
       handler: 'api::navigation.navigation.create',
       config: {
-        auth: { enabled: true },
+        auth: false,
       },
     },
     {
@@ -37,7 +37,7 @@ export default {
       path: '/navigation/:id',
       handler: 'api::navigation.navigation.update',
       config: {
-        auth: { enabled: true },
+        auth: false,
       },
     },
     {
@@ -45,7 +45,7 @@ export default {
       path: '/navigation/:id',
       handler: 'api::navigation.navigation.delete',
       config: {
-        auth: { enabled: true },
+        auth: false,
       },
     },
   ],
