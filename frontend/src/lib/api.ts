@@ -412,7 +412,121 @@ export async function createAppointment(data: AppointmentData) {
     }
     
     console.error(`${LOG_PREFIX} Request data that failed:`, JSON.stringify(data, null, 2));
-    
+
     throw error;
   }
+}
+
+// === Strapi v5 → v4 格式转换 ===
+// Strapi v5 默认返回扁平格式（字段直接在顶层），前端组件期望 v4 的 attributes 格式
+
+function toV4Item(item: any): any {
+  if (!item || typeof item !== 'object' || Array.isArray(item)) return item;
+  const { id, documentId, ...rest } = item;
+  if (id === undefined && documentId === undefined) return item;
+  const attributes: Record<string, any> = {};
+  for (const [key, value] of Object.entries(rest)) {
+    attributes[key] = toV4Value(value);
+  }
+  return { id, documentId, attributes };
+}
+
+function toV4Value(value: any): any {
+  if (value === null || value === undefined) return value;
+  if (Array.isArray(value)) {
+    if (value.length > 0 && typeof value[0] === 'object' && value[0]?.id !== undefined) {
+      return { data: value.map(toV4Item) };
+    }
+    return value;
+  }
+  if (typeof value === 'object') {
+    if (value.id !== undefined || value.documentId !== undefined) {
+      return { data: toV4Item(value) };
+    }
+    return value;
+  }
+  return value;
+}
+
+// === Teacher 接口与 API ===
+
+export interface Teacher {
+  id: number;
+  documentId?: string;
+  attributes: {
+    name: string;
+    slug: string;
+    title: string;
+    avatar?: { data?: { attributes: { url: string } } };
+    campus?: { data?: Campus };
+    subject?: 'pinyin' | 'math' | 'english' | 'comprehensive';
+    teachingYears?: number;
+    education?: string;
+    teachingFeatures?: string;
+    achievements?: string[];
+    isFeatured?: boolean;
+    sortOrder?: number;
+  };
+}
+
+export async function getTeachers(filters?: {
+  campusSlug?: string;
+  subject?: string;
+  featured?: boolean;
+}) {
+  console.log(`${LOG_PREFIX} Fetching teachers...`, filters);
+  const params = new URLSearchParams();
+  if (filters?.campusSlug) {
+    params.set('filters[campus][slug][$eq]', filters.campusSlug);
+  }
+  if (filters?.subject) {
+    params.set('filters[subject][$eq]', filters.subject);
+  }
+  if (filters?.featured !== undefined) {
+    params.set('filters[isFeatured][$eq]', String(filters.featured));
+  }
+  params.set('sort', 'sortOrder:asc');
+  const result = await fetchApi<{ data: Teacher[] }>(`/api/teachers?${params.toString()}`);
+  console.log(`${LOG_PREFIX} Teachers loaded: ${result.data.length} items`);
+  return result;
+}
+
+// === Campus 接口与 API ===
+
+export interface Campus {
+  id: number;
+  documentId?: string;
+  attributes: {
+    name: string;
+    slug: string;
+    coverImage?: { data?: { attributes: { url: string } } };
+    gallery?: { data: { attributes: { url: string } }[] };
+    address: string;
+    phone?: string;
+    businessHours?: string;
+    transportation?: string;
+    area?: string;
+    description?: string;
+    mapEmbed?: string;
+    sortOrder?: number;
+    teachers?: { data: Teacher[] };
+  };
+}
+
+export async function getCampuses() {
+  console.log(`${LOG_PREFIX} Fetching campuses...`);
+  const params = new URLSearchParams();
+  params.set('sort', 'sortOrder:asc');
+  const result = await fetchApi<{ data: Campus[] }>(`/api/campuses?${params.toString()}`);
+  console.log(`${LOG_PREFIX} Campuses loaded: ${result.data.length} items`);
+  return result;
+}
+
+export async function getCampusBySlug(slug: string) {
+  console.log(`${LOG_PREFIX} Fetching campus by slug: ${slug}...`);
+  const params = new URLSearchParams();
+  params.set('filters[slug][$eq]', slug);
+  const result = await fetchApi<{ data: Campus[] }>(`/api/campuses?${params.toString()}`);
+  console.log(`${LOG_PREFIX} Campus loaded:`, result.data[0]?.attributes?.name);
+  return result;
 }

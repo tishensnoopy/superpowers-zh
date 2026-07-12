@@ -1,0 +1,86 @@
+{
+  "kind": "collectionType",
+  "collectionName": "campuses",
+  "info": {
+    "singularName": "campus",
+    "pluralName": "campuses",
+    "displayName": "校区",
+    "description": "校区信息",
+    "icon": "MapPin"
+  },
+  "options": {
+    "draftAndPublish": true,
+    "singleton": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100,
+      "description": "校区名称"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name",
+      "required": true,
+      "description": "URL 路径"
+    },
+    "coverImage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"],
+      "description": "校区封面图"
+    },
+    "gallery": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": ["images"],
+      "description": "校区环境图集"
+    },
+    "address": {
+      "type": "string",
+      "required": true,
+      "maxLength": 500,
+      "description": "校区地址"
+    },
+    "phone": {
+      "type": "string",
+      "maxLength": 50,
+      "description": "联系电话"
+    },
+    "businessHours": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "营业时间"
+    },
+    "transportation": {
+      "type": "text",
+      "description": "交通信息"
+    },
+    "area": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "教学面积"
+    },
+    "description": {
+      "type": "text",
+      "description": "校区简介"
+    },
+    "mapEmbed": {
+      "type": "text",
+      "description": "地图嵌入代码"
+    },
+    "sortOrder": {
+      "type": "integer",
+      "default": 0,
+      "description": "排序"
+    },
+    "teachers": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::teacher.teacher",
+      "mappedBy": "campus",
+      "description": "校区教师"
+    }
+  }
+}

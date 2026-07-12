@@ -456,10 +456,6 @@ export interface ApiAppointmentAppointment extends Struct.ContentTypeSchema {
   attributes: {
     age: Schema.Attribute.Integer;
     campus: Schema.Attribute.String &
-      Schema.Attribute.SetMinMaxLength<{
-        maxLength: 100;
-      }>;
-    childName: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
@@ -482,7 +478,7 @@ export interface ApiAppointmentAppointment extends Struct.ContentTypeSchema {
     > &
       Schema.Attribute.Private;
     message: Schema.Attribute.Text;
-    parentName: Schema.Attribute.String &
+    name: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
@@ -492,7 +488,6 @@ export interface ApiAppointmentAppointment extends Struct.ContentTypeSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 20;
       }>;
-    preferredDate: Schema.Attribute.Date;
     preferredTimeSlot: Schema.Attribute.Enumeration<
       ['morning', 'afternoon', 'evening']
     >;
@@ -508,6 +503,66 @@ export interface ApiAppointmentAppointment extends Struct.ContentTypeSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 500;
       }>;
+  };
+}
+
+export interface ApiCampusCampus extends Struct.CollectionTypeSchema {
+  collectionName: 'campuses';
+  info: {
+    description: '\u6821\u533A\u4FE1\u606F';
+    displayName: '\u6821\u533A';
+    icon: 'MapPin';
+    pluralName: 'campuses';
+    singularName: 'campus';
+  };
+  options: {
+    draftAndPublish: true;
+    singleton: false;
+  };
+  attributes: {
+    address: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 500;
+      }>;
+    area: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    businessHours: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 200;
+      }>;
+    coverImage: Schema.Attribute.Media<'images'>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    description: Schema.Attribute.Text;
+    gallery: Schema.Attribute.Media<'images', true>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::campus.campus'
+    > &
+      Schema.Attribute.Private;
+    mapEmbed: Schema.Attribute.Text;
+    name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    phone: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 50;
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
+    sortOrder: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    teachers: Schema.Attribute.Relation<'oneToMany', 'api::teacher.teacher'>;
+    transportation: Schema.Attribute.Text;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
   };
 }
 
@@ -930,7 +985,9 @@ export interface ApiProductProduct extends Struct.ContentTypeSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 200;
       }>;
+    objectives: Schema.Attribute.Component<'course.objective', true>;
     originalPrice: Schema.Attribute.Float;
+    outline: Schema.Attribute.Component<'course.module', true>;
     price: Schema.Attribute.Float;
     publishedAt: Schema.Attribute.DateTime;
     seo: Schema.Attribute.Component<'common.seo', false>;
@@ -956,6 +1013,8 @@ export interface ApiProductProduct extends Struct.ContentTypeSchema {
     >;
     specValues: Schema.Attribute.JSON;
     stock: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    teachingMethod: Schema.Attribute.RichText;
+    testimonials: Schema.Attribute.Component<'course.testimonial', true>;
     thumbnail: Schema.Attribute.Media;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -1025,6 +1084,57 @@ export interface ApiSiteSettingsSiteSettings extends Struct.ContentTypeSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
       }>;
+  };
+}
+
+export interface ApiTeacherTeacher extends Struct.CollectionTypeSchema {
+  collectionName: 'teachers';
+  info: {
+    description: '\u6559\u5E08\u4FE1\u606F';
+    displayName: '\u6559\u5E08';
+    pluralName: 'teachers';
+    singularName: 'teacher';
+  };
+  options: {
+    draftAndPublish: true;
+    singleton: false;
+  };
+  attributes: {
+    achievements: Schema.Attribute.JSON;
+    avatar: Schema.Attribute.Media<'images'>;
+    campus: Schema.Attribute.Relation<'manyToOne', 'api::campus.campus'>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    education: Schema.Attribute.Text;
+    isFeatured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::teacher.teacher'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
+    sortOrder: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    subject: Schema.Attribute.Enumeration<
+      ['pinyin', 'math', 'english', 'comprehensive']
+    >;
+    teachingFeatures: Schema.Attribute.Text;
+    teachingYears: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    title: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 200;
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
   };
 }
 
@@ -1540,6 +1650,7 @@ declare module '@strapi/strapi' {
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
       'api::appointment.appointment': ApiAppointmentAppointment;
+      'api::campus.campus': ApiCampusCampus;
       'api::faq-item.faq-item': ApiFaqItemFaqItem;
       'api::footer.footer': ApiFooterFooter;
       'api::knowledge-base.knowledge-base': ApiKnowledgeBaseKnowledgeBase;
@@ -1549,6 +1660,7 @@ declare module '@strapi/strapi' {
       'api::product-spec.product-spec': ApiProductSpecProductSpec;
       'api::product.product': ApiProductProduct;
       'api::site-settings.site-settings': ApiSiteSettingsSiteSettings;
+      'api::teacher.teacher': ApiTeacherTeacher;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;

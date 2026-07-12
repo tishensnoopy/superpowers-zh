@@ -1,0 +1,79 @@
+{
+  "kind": "collectionType",
+  "collectionName": "teachers",
+  "info": {
+    "singularName": "teacher",
+    "pluralName": "teachers",
+    "displayName": "教师",
+    "description": "教师信息"
+  },
+  "options": {
+    "draftAndPublish": true,
+    "singleton": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100,
+      "description": "教师姓名"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name",
+      "required": true,
+      "description": "URL 路径（由姓名自动生成）"
+    },
+    "title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200,
+      "description": "职称"
+    },
+    "avatar": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"],
+      "description": "教师头像"
+    },
+    "campus": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::campus.campus",
+      "inversedBy": "teachers",
+      "description": "所属校区"
+    },
+    "subject": {
+      "type": "enumeration",
+      "enum": ["pinyin", "math", "english", "comprehensive"],
+      "description": "教授科目"
+    },
+    "teachingYears": {
+      "type": "integer",
+      "default": 0,
+      "description": "教龄（年）"
+    },
+    "education": {
+      "type": "text",
+      "description": "教育背景"
+    },
+    "teachingFeatures": {
+      "type": "text",
+      "description": "教学特色"
+    },
+    "achievements": {
+      "type": "json",
+      "description": "荣誉成就（字符串数组）"
+    },
+    "isFeatured": {
+      "type": "boolean",
+      "default": false,
+      "description": "是否为特色教师"
+    },
+    "sortOrder": {
+      "type": "integer",
+      "default": 0,
+      "description": "排序"
+    }
+  }
+}
