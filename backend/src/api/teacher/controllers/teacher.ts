@@ -2,34 +2,6 @@ import type { Core } from '@strapi/strapi';
 
 const UID = 'api::teacher.teacher';
 
-function wrapItem(item: any) {
-  if (!item) return null;
-  const { id, documentId, ...rest } = item;
-  return { id, documentId, attributes: rest };
-}
-
-function wrapMedia(media: any) {
-  if (!media) return { data: null };
-  const { id, documentId, ...attributes } = media;
-  return { data: { id, documentId, attributes } };
-}
-
-function transformTeacher(teacher: any) {
-  if (!teacher) return null;
-  const { id, documentId, campus, avatar, ...rest } = teacher;
-  const attributes: any = { ...rest };
-  if (avatar !== undefined) {
-    attributes.avatar = wrapMedia(avatar);
-  }
-  if (campus !== undefined) {
-    attributes.campus = campus ? { data: wrapItem(campus) } : { data: null };
-  }
-  if (attributes.seo?.ogImage !== undefined) {
-    attributes.seo.ogImage = wrapMedia(attributes.seo.ogImage);
-  }
-  return { id, documentId, attributes };
-}
-
 export default {
   async find(ctx) {
     const { filters, sort, page, pageSize } = ctx.query as any;
@@ -67,7 +39,7 @@ export default {
       }),
     ]);
 
-    const data = (teachers || []).map(transformTeacher);
+    const data = teachers || [];
 
     ctx.body = {
       data,
@@ -95,6 +67,6 @@ export default {
       return;
     }
 
-    ctx.body = { data: transformTeacher(teacher), meta: {} };
+    ctx.body = { data: teacher, meta: {} };
   },
 } satisfies Core.Controller;
