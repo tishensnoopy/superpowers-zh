@@ -1,6 +1,6 @@
 const stats = [
   { value: '50+', label: '专业教师' },
-  { value: '8', label: '校区覆盖' },
+  { value: '6', label: '校区覆盖' },
   { value: '10年+', label: '平均教龄' },
   { value: '98%', label: '家长好评' },
 ];

@@ -147,7 +147,7 @@ describe('TeamPage 页面', () => {
     render(<TeamPage />);
     await waitFor(() => {
       expect(screen.getByText('50+ 专业教师')).toBeInTheDocument();
-      expect(screen.getByText('8 校区覆盖')).toBeInTheDocument();
+      expect(screen.getByText('6 校区覆盖')).toBeInTheDocument();
       expect(screen.getByText('10年+ 平均教龄')).toBeInTheDocument();
       expect(screen.getByText('98% 家长好评')).toBeInTheDocument();
     });

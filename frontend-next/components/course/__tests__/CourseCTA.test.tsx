@@ -18,10 +18,10 @@ describe('CourseCTA 组件', () => {
     expect(screen.getByRole('link', { name: /立即预约/ })).toBeInTheDocument();
   });
 
-  it('预约按钮链接到首页预约表单', () => {
+  it('预约按钮链接到联系页', () => {
     render(<CourseCTA courseName="语言启蒙" />);
     const link = screen.getByRole('link', { name: /立即预约/ });
-    expect(link).toHaveAttribute('href', '/?course=语言启蒙#appointment');
+    expect(link).toHaveAttribute('href', '/contact');
   });
 
   it('课程名称为空时仍渲染按钮', () => {

@@ -1,4 +1,5 @@
 import { CalendarDays, ChevronRight, Sparkles, Star } from 'lucide-react';
+import Link from 'next/link';
 import type { Section } from '@/lib/api';
 
 export default function Hero({ section }: { section: Section }) {
@@ -76,17 +77,21 @@ export default function Hero({ section }: { section: Section }) {
             </div>
 
             <div className="flex items-center gap-4 flex-wrap">
-              <button
+              <Link
+                href="/contact"
                 className="flex items-center gap-2 px-8 py-4 rounded-xl text-white font-bold text-base shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-[1.03]"
                 style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
               >
                 <CalendarDays size={18} />
                 {buttonText || '立即预约试听'}
-              </button>
-              <button className="flex items-center gap-2 px-8 py-4 rounded-xl font-semibold text-base border border-white/30 text-white hover:bg-white/10 transition-all duration-200">
+              </Link>
+              <Link
+                href="/courses"
+                className="flex items-center gap-2 px-8 py-4 rounded-xl font-semibold text-base border border-white/30 text-white hover:bg-white/10 transition-all duration-200"
+              >
                 了解课程体系
                 <ChevronRight size={18} />
-              </button>
+              </Link>
             </div>
           </div>
 

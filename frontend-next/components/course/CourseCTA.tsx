@@ -19,7 +19,7 @@ export default function CourseCTA({ courseName }: { courseName: string }) {
           立即预约，让孩子体验专业、有趣的课程
         </p>
         <Link
-          href={`/?course=${courseName}#appointment`}
+          href="/contact"
           className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-white text-[#F5851F] font-bold text-base hover:bg-white/90 transition-colors duration-200 shadow-lg"
         >
           <Calendar size={20} />
