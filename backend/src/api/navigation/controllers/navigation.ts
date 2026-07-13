@@ -4,6 +4,10 @@ export default factories.createCoreController('api::navigation.navigation', ({ s
   async find(ctx) {
     console.log('[Navigation] find() called');
     try {
+      ctx.query = {
+        ...ctx.query,
+        populate: ['children'],
+      };
       const result = await super.find(ctx);
       console.log('[Navigation] find() completed, count:', result.data?.length);
       return result;

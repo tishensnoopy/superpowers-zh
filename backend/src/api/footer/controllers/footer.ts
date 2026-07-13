@@ -4,6 +4,10 @@ export default factories.createCoreController('api::footer.footer', ({ strapi })
   async find(ctx) {
     console.log('[Footer] find() called - getting footer settings');
     try {
+      ctx.query = {
+        ...ctx.query,
+        populate: ['socialLinks', 'quickLinks'],
+      };
       const result = await super.find(ctx);
       console.log('[Footer] find() completed successfully');
       return result;

@@ -87,7 +87,57 @@ async function searchProductsViaDb(
   };
 }
 
+const PRODUCT_POPULATE = {
+  thumbnail: true,
+  categories: true,
+  specs: true,
+  objectives: true,
+  outline: true,
+  testimonials: true,
+  seo: true,
+} as const;
+
+const PRODUCT_POPULATE_DETAIL = {
+  ...PRODUCT_POPULATE,
+  images: true,
+} as const;
+
 export default factories.createCoreController('api::product.product', ({ strapi }) => ({
+  async find(ctx) {
+    const products = await strapi.documents('api::product.product').findMany({
+      populate: PRODUCT_POPULATE,
+      status: 'published',
+    });
+
+    const data = products || [];
+    ctx.body = {
+      data,
+      meta: {
+        pagination: {
+          page: 1,
+          pageSize: data.length,
+          pageCount: 1,
+          total: data.length,
+        },
+      },
+    };
+  },
+
+  async findOne(ctx) {
+    const { id } = ctx.params;
+    const product = await strapi.documents('api::product.product').findOne({
+      documentId: id,
+      populate: PRODUCT_POPULATE_DETAIL,
+      status: 'published',
+    });
+
+    if (!product) {
+      ctx.notFound('Product not found');
+      return;
+    }
+    ctx.body = { data: product, meta: {} };
+  },
+
   async search(ctx) {
     const { query, categories, categorySlugs, priceMin, priceMax, isFeatured, isInStock, sort, limit, page } = ctx.query;
 

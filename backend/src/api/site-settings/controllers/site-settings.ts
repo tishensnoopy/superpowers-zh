@@ -4,6 +4,10 @@ export default factories.createCoreController('api::site-settings.site-settings'
   async find(ctx) {
     console.log('[SiteSettings] find() called - getting global site settings');
     try {
+      ctx.query = {
+        ...ctx.query,
+        populate: ['logo', 'favicon', 'seo'],
+      };
       const result = await super.find(ctx);
       console.log('[SiteSettings] find() completed successfully');
       return result;
