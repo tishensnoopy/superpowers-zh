@@ -5,6 +5,7 @@ import CampusDetailHeader from '@/components/campus/CampusDetailHeader';
 import CampusGallery from '@/components/campus/CampusGallery';
 import CampusInfoCard from '@/components/campus/CampusInfoCard';
 import CampusTeachers from '@/components/campus/CampusTeachers';
+import CampusMap from '@/components/campus/CampusMap';
 import type { Metadata } from 'next';
 
 export const revalidate = 300;
@@ -60,6 +61,10 @@ export default async function CampusDetailPage({ params }: PageProps) {
         </section>
 
         <CampusTeachers teachers={campus.teachers} />
+
+        <div className="mt-12">
+          <CampusMap mapEmbed={campus.mapEmbed} />
+        </div>
       </div>
     </div>
   );
