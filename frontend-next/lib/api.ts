@@ -558,6 +558,16 @@ export async function getTeachers(filters?: {
   return result;
 }
 
+export async function getTeacherBySlug(slug: string) {
+  console.log(`${LOG_PREFIX} Fetching teacher by slug: ${slug}...`);
+  const params = new URLSearchParams();
+  params.set('filters[slug][$eq]', slug);
+  params.set('populate', 'avatar,campus');
+  const result = await fetchApi<{ data: Teacher[] }>(`/api/teachers?${params.toString()}`);
+  console.log(`${LOG_PREFIX} Teacher loaded:`, result.data[0]?.name);
+  return result.data[0] || null;
+}
+
 // === Campus 接口与 API ===
 
 export interface Campus {
