@@ -41,12 +41,11 @@ test.describe('关键路径烟雾测试', () => {
     await expect(page.locator('h1').first()).toBeVisible();
   });
 
-  // 已知问题：app/[slug]/page.tsx 动态路由会捕获任意 slug（包括不存在的路径），
-  // 返回 200 状态码并显示"加载中..."，而非触发 Next.js 的 not-found 路由。
-  // 因此 404 页面在运行时无法正确显示。该问题超出本任务范围，待后续修复被测代码后启用。
-  test.fixme('404 页面显示', async ({ page }) => {
+  // Playwright 使用真实浏览器，hydration 后 React 客户端会用 not-found 组件替换
+  // SSR 流式渲染的 loading 态，因此 404 页面可正确显示。
+  test('404 页面显示', async ({ page }) => {
     await page.goto('/this-page-does-not-exist-12345');
-    await expect(page.locator('text=404').or(page.locator('text=页面未找到'))).toBeVisible();
+    await expect(page.locator('text=404').or(page.locator('text=页面未找到')).first()).toBeVisible();
   });
 
   test('sitemap.xml 可访问', async ({ page }) => {
