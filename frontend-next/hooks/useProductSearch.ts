@@ -60,7 +60,8 @@ export function useProductSearch(initialLimit = 12) {
       }
       if (!(err instanceof Error && err.name.includes('Abort'))) {
         Sentry.captureException(err, {
-          tags: { section: 'product-search', query, category },
+          tags: { section: 'product-search', category },
+          extra: { query },
         });
       }
       setError(err instanceof Error ? err.message : String(err));

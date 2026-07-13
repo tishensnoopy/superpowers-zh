@@ -39,12 +39,13 @@ export async function fetchApi<T>(path: string, options: RequestInit = {}): Prom
       const errorText = await res.text().catch(() => '');
       const error = new Error(`API request failed: ${res.status} ${res.statusText}${errorText ? ' - ' + errorText : ''}`);
       logError(path, error, duration);
+      const isSensitiveEndpoint = path.includes('/appointments') || path.includes('/feedback');
       Sentry.captureException(error, {
         tags: { api: path, status: res.status.toString() },
         extra: {
           method: options.method || 'GET',
           duration,
-          responseBody: errorText.substring(0, 500),
+          ...(isSensitiveEndpoint ? {} : { responseBody: errorText.substring(0, 500) }),
         },
       });
       throw error;
