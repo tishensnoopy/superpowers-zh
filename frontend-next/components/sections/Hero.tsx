@@ -1,12 +1,16 @@
 import { CalendarDays, ChevronRight, Sparkles, Star } from 'lucide-react';
 import Link from 'next/link';
 import type { Section } from '@/lib/api';
+import { getImageUrl } from '@/lib/api';
 
 export default function Hero({ section }: { section: Section }) {
-  const { title, subtitle, description, backgroundImage, buttonText, isFullWidth = true } = section;
+  const { title, subtitle, description, backgroundImage, buttonText, isFullWidth = true, image1, image2 } = section;
+
+  const image1Url = getImageUrl(image1) || 'https://images.unsplash.com/photo-1586694680938-9682c9e1f736?w=400&h=480&fit=crop&auto=format';
+  const image2Url = getImageUrl(image2) || 'https://images.unsplash.com/photo-1617117206620-b01f2919ff86?w=340&h=360&fit=crop&auto=format';
 
   return (
-    <section className="relative pt-[72px] min-h-screen flex items-center overflow-hidden">
+    <section className="relative pt-[120px] min-h-screen flex items-center overflow-hidden">
       <div className="absolute inset-0 bg-[#1C2B3A]">
         {backgroundImage?.url ? (
           <img
@@ -99,14 +103,14 @@ export default function Hero({ section }: { section: Section }) {
             <div className="relative h-[520px]">
               <div className="absolute top-0 right-0 w-72 h-80 rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20">
                 <img
-                  src="https://images.unsplash.com/photo-1586694680938-9682c9e1f736?w=400&h=480&fit=crop&auto=format"
+                  src={image1Url}
                   alt="小女孩认真学习写字"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="absolute bottom-10 left-0 w-60 h-64 rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20">
                 <img
-                  src="https://images.unsplash.com/photo-1617117206620-b01f2919ff86?w=340&h=360&fit=crop&auto=format"
+                  src={image2Url}
                   alt="孩子们快乐学习"
                   className="w-full h-full object-cover"
                 />

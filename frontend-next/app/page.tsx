@@ -19,7 +19,7 @@ export default async function HomePage() {
   const page = homepageRes.data;
   if (!page) {
     return (
-      <div className="pt-[72px] min-h-screen flex items-center justify-center">
+      <div className="pt-[120px] min-h-screen flex items-center justify-center">
         <p className="text-gray-500">暂无内容，请先在 Strapi 后台配置首页数据。</p>
       </div>
     );

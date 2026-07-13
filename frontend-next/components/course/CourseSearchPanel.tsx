@@ -31,7 +31,7 @@ export default function CourseSearchPanel({
   }, []);
 
   return (
-    <div className="pt-[72px]">
+    <div className="pt-[120px]">
       <Seo title={title} description={description} />
 
       <section className="py-24" style={{ background: 'linear-gradient(180deg, #F8F9FF 0%, #FFFCF8 100%)' }}>

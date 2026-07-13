@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Noto_Sans_SC } from 'next/font/google';
+import { Noto_Sans_SC, Nunito } from 'next/font/google';
 import { getSiteSettings, getNavigationTree, getFooter, getImageUrl } from '@/lib/api';
 import LayoutShell from '@/components/layout/LayoutShell';
 import Navigation from '@/components/layout/Navigation';
@@ -13,6 +13,14 @@ const notoSansSC = Noto_Sans_SC({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-default',
+  preload: true,
+});
+
+const nunito = Nunito({
+  weight: ['400', '600', '700', '800'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-nunito',
   preload: true,
 });
 
@@ -70,8 +78,8 @@ export default async function RootLayout({
       : '';
 
   const fontFamily = customFontFamily
-    ? `'${customFontFamily}', var(--font-default), sans-serif`
-    : `var(--font-default), sans-serif`;
+    ? `'${customFontFamily}', var(--font-nunito), var(--font-default), sans-serif`
+    : `var(--font-nunito), var(--font-default), sans-serif`;
 
   const cmsUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
   const cmsParsedUrl = new URL(cmsUrl);
@@ -79,7 +87,7 @@ export default async function RootLayout({
   return (
     <html
       lang="zh-CN"
-      className={notoSansSC.variable}
+      className={`${notoSansSC.variable} ${nunito.variable}`}
       style={{ fontFamily }}
     >
       <head>

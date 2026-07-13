@@ -31,7 +31,7 @@ export default async function NewsListPage({ searchParams }: PageProps) {
   const { data: news } = await getNews(activeCategory || undefined).catch(() => ({ data: [] as never[] }));
 
   return (
-    <div className="pt-[72px] pb-16 min-h-screen" style={{ background: '#FAFAFA' }}>
+    <div className="pt-[120px] pb-16 min-h-screen" style={{ background: '#FAFAFA' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* 页面标题 */}
         <div className="py-12 text-center">

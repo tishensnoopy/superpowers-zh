@@ -39,7 +39,7 @@ export default async function FaqPage() {
   };
 
   return (
-    <div className="pt-[72px] min-h-screen" style={{ background: '#FAFAFA' }}>
+    <div className="pt-[120px] min-h-screen" style={{ background: '#FAFAFA' }}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: buildJsonLd(faqJsonLd) }}

@@ -84,7 +84,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
   };
 
   return (
-    <div className="pt-[72px] pb-16 min-h-screen" style={{ background: '#FAFAFA' }}>
+    <div className="pt-[120px] pb-16 min-h-screen" style={{ background: '#FAFAFA' }}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: buildJsonLd(articleJsonLd) }}
