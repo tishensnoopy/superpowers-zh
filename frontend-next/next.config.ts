@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
   output: 'standalone',
 
   images: {
+    // Docker 容器内 /_next/image 代理无法访问 localhost:1337（localhost 指向容器自身）
+    // 改用 unoptimized: true 让 <Image> 直接输出原始 URL，由浏览器直接请求 Strapi
+    // 生产环境用 CDN 时这也是最佳实践
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: cmsParsedUrl.protocol.replace(':', '') as 'http' | 'https',
@@ -16,8 +20,6 @@ const nextConfig: NextConfig = {
         pathname: '/uploads/**',
       },
     ],
-    formats: ['image/avif', 'image/webp'],
-    minimumCacheTTL: 3600,
   },
 
   async headers() {
