@@ -36,3 +36,40 @@ frontend/e2e/test-results/
 # 构建产物和覆盖率报告（运行时自动生成，勿提交）
 frontend/dist/
 frontend/coverage/
+
+# 环境变量（含敏感信息，只提交 .env.example）
+.env
+backend/.env
+frontend-next/.env
+
+# Next.js 构建产物
+frontend-next/.next/
+frontend-next/out/
+
+# 后端构建产物
+backend/dist/
+backend/build/
+
+# Playwright 测试产物（Next.js 版本）
+frontend-next/playwright-report/
+frontend-next/test-results/
+frontend-next/e2e/screenshots/
+
+# Node 包依赖
+**/node_modules/
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 用户提供的原始素材（608M，已通过 seed 上传到 Strapi）
+佑森/
+
+# 旧 Vite 版本的视觉测试快照
+frontend/e2e/visual.spec.ts-snapshots/
