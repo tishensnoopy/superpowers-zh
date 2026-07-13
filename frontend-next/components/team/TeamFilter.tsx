@@ -10,14 +10,12 @@ interface TeamFilterProps {
 }
 
 const campusOptions = [
-  { label: '朝阳', slug: 'chaoyang' },
-  { label: '海淀', slug: 'haidian' },
-  { label: '西城', slug: 'xicheng' },
-  { label: '丰台', slug: 'fengtai' },
-  { label: '东城', slug: 'dongcheng' },
-  { label: '石景山', slug: 'shijingshan' },
-  { label: '通州', slug: 'tongzhou' },
-  { label: '昌平', slug: 'changping' },
+  { label: '百步亭', slug: 'yousen-baibuting' },
+  { label: '三阳路', slug: 'yousen-sanyanglu' },
+  { label: '动物园', slug: 'yousen-dongwuyuan' },
+  { label: '钟家村', slug: 'yousen-zhongjiacun' },
+  { label: '四新', slug: 'yousen-sixin' },
+  { label: '沌口', slug: 'yousen-zhuankou' },
 ];
 
 const subjectOptions = [

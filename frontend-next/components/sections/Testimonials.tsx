@@ -3,6 +3,7 @@ import type { Section } from '@/lib/api';
 
 export default function Testimonials({ section }: { section: Section }) {
   const { title, testimonials } = section;
+  const testimonialList = Array.isArray(testimonials) ? testimonials : testimonials?.data || [];
 
   return (
     <section className="py-24 bg-background">
@@ -25,7 +26,7 @@ export default function Testimonials({ section }: { section: Section }) {
         </div>
 
         <div className="grid grid-cols-12 gap-6">
-          {(testimonials?.data || []).map((testimonial: any) => (
+          {testimonialList.map((testimonial: any) => (
             <div key={testimonial.id} className="col-span-12 md:col-span-4">
               <div className="bg-card rounded-2xl p-8 border border-border shadow-sm hover:shadow-xl transition-all duration-300">
                 <div className="flex items-center gap-1 mb-4">
@@ -35,16 +36,22 @@ export default function Testimonials({ section }: { section: Section }) {
                 </div>
                 <p className="text-muted-foreground text-sm leading-relaxed mb-6">&ldquo;{testimonial.content}&rdquo;</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full overflow-hidden bg-muted">
-                    <img
-                      src={testimonial.avatar?.url || testimonial.avatar}
-                      alt={testimonial.author}
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="w-10 h-10 rounded-full overflow-hidden bg-muted flex items-center justify-center text-[#F5851F] font-bold text-sm shrink-0">
+                    {testimonial.avatar?.url ? (
+                      <img
+                        src={testimonial.avatar.url}
+                        alt={testimonial.author}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      testimonial.author?.[0] || '?'
+                    )}
                   </div>
                   <div>
                     <div className="font-bold text-sm text-[#1C2B3A]">{testimonial.author}</div>
-                    <div className="text-xs text-muted-foreground">{testimonial.role} · {testimonial.company}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {[testimonial.position, testimonial.company].filter(Boolean).join(' · ')}
+                    </div>
                   </div>
                 </div>
               </div>

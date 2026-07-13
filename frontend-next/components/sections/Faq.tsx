@@ -9,12 +9,13 @@ export default function Faq({ section }: { section: Section }) {
   const [openId, setOpenId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredFaqs = faqs?.data?.filter((faq: any) => {
+  const faqList = Array.isArray(faqs) ? faqs : faqs?.data || [];
+  const filteredFaqs = faqList.filter((faq: any) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return faq.question.toLowerCase().includes(query) ||
            faq.answer.toLowerCase().includes(query);
-  }) || [];
+  });
 
   return (
     <section className="py-24 bg-background">

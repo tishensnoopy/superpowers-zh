@@ -8,17 +8,18 @@ import { createAppointment } from '@/lib/api';
 
 const LOG_PREFIX = '[ContactForm]';
 const CAMPUSES = [
-  { value: 'chaoyang', label: '朝阳校区' },
-  { value: 'haidian', label: '海淀校区' },
-  { value: 'xicheng', label: '西城校区' },
-  { value: 'fengtai', label: '丰台校区' },
+  { value: 'yousen-baibuting', label: '百步亭校区' },
+  { value: 'yousen-sanyanglu', label: '三阳路校区' },
+  { value: 'yousen-dongwuyuan', label: '动物园校区' },
+  { value: 'yousen-zhongjiacun', label: '钟家村校区' },
+  { value: 'yousen-sixin', label: '四新校区' },
+  { value: 'yousen-zhuankou', label: '沌口校区' },
 ];
 
 const COURSES = [
-  { value: 'language', label: '语言启蒙' },
-  { value: 'math', label: '数学思维' },
-  { value: 'english', label: '英语口语' },
-  { value: 'comprehensive', label: '综合素养' },
+  { value: 'yousen-youxiao-xianjie', label: '幼小衔接全能班' },
+  { value: 'yousen-kehao-tuoguan', label: '课后托管班' },
+  { value: 'yousen-tuoban', label: '全日制托班' },
 ];
 
 const TIME_SLOTS = [
@@ -216,8 +217,8 @@ export default function ContactForm({ section }: { section: Section }) {
                   <span className="text-2xl">🎓</span>
                 </div>
                 <div>
-                  <h4 className="text-xl font-bold">启航幼小教育</h4>
-                  <p className="text-sm opacity-80">专注幼小衔接8年</p>
+                  <h4 className="text-xl font-bold">佑森小课堂</h4>
+                  <p className="text-sm opacity-80">专注幼小衔接教育8年</p>
                 </div>
               </div>
 
@@ -265,7 +266,7 @@ export default function ContactForm({ section }: { section: Section }) {
                   </div>
                   <div className="w-px bg-white/30" />
                   <div>
-                    <div className="text-2xl font-bold">4</div>
+                    <div className="text-2xl font-bold">6</div>
                     <div className="text-xs opacity-80">校区</div>
                   </div>
                 </div>

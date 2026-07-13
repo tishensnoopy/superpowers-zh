@@ -15,10 +15,10 @@ export default function CampusHeader() {
           fontWeight: 800,
         }}
       >
-        八大校区 任您选择
+        六大校区 任您选择
       </h1>
       <p className="text-muted-foreground text-lg max-w-[640px] mx-auto">
-        遍布北京城八区，就近选择优质教学
+        遍布武汉三镇，就近选择优质教学
       </p>
     </div>
   );

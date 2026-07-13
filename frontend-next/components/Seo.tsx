@@ -3,7 +3,7 @@
 import { getImageUrl } from '@/lib/api';
 import type { Seo as SeoData } from '@/lib/api';
 
-const DEFAULT_SITE_NAME = '启航幼小教育';
+const DEFAULT_SITE_NAME = '佑森小课堂';
 
 export interface SeoProps {
   seo?: SeoData;

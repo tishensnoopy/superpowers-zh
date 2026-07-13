@@ -56,7 +56,7 @@ export default function Navigation({
           {logoUrl ? (
             <img
               src={logoUrl}
-              alt={settings.name || '启航幼小'}
+              alt={settings.name || '佑森小课堂'}
               className="w-10 h-10 rounded-xl object-cover"
             />
           ) : (
@@ -64,7 +64,7 @@ export default function Navigation({
               className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-lg font-black shadow-sm"
               style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
             >
-              {settings.name?.[0] || '启'}
+              {settings.name?.[0] || '佑'}
             </div>
           )}
           <div>
@@ -72,9 +72,9 @@ export default function Navigation({
               className="font-black text-[18px] leading-tight text-[#1C2B3A]"
               style={{ fontFamily: "'Nunito', sans-serif" }}
             >
-              {settings.name || '启航幼小'}
+              {settings.name || '佑森小课堂'}
             </div>
-            <div className="text-[10px] text-muted-foreground tracking-widest">EDUCATION</div>
+            <div className="text-[10px] text-muted-foreground tracking-widest">{settings.slogan || '专注幼小衔接教育8年'}</div>
           </div>
         </div>
 

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Phone, MapPin, Mail } from 'lucide-react';
 import type { Footer as FooterData, SiteSettings, SocialLink } from '@/lib/api';
 
@@ -6,6 +7,19 @@ const DEFAULT_SOCIAL_LINKS: SocialLink[] = [
   { id: 2, platform: 'weibo', url: 'https://weibo.example.com', label: '微博' },
   { id: 3, platform: 'douyin', url: 'https://douyin.example.com', label: '抖音' },
   { id: 4, platform: 'qq', url: 'https://qq.example.com', label: 'QQ' },
+];
+
+const COURSE_LINKS = [
+  { title: '幼小衔接全能班', url: '/courses/yousen-youxiao-xianjie' },
+  { title: '课后托管班', url: '/courses/yousen-kehao-tuoguan' },
+  { title: '全日制托班', url: '/courses/yousen-tuoban' },
+];
+
+const ABOUT_LINKS = [
+  { title: '关于我们', url: '/about' },
+  { title: '师资团队', url: '/teachers' },
+  { title: '校区环境', url: '/campuses' },
+  { title: '新闻资讯', url: '/news' },
 ];
 
 function renderSocialLink(social: SocialLink) {
@@ -46,6 +60,14 @@ export default function Footer({
   const links =
     socialData && socialData.length > 0 ? socialData : DEFAULT_SOCIAL_LINKS;
 
+  const quickLinks = footer.quickLinks && footer.quickLinks.length > 0
+    ? footer.quickLinks
+    : [
+        { title: '常见问题', url: '/faq' },
+        { title: '退费政策', url: '/refund-policy' },
+        { title: '联系客服', url: '/contact' },
+      ];
+
   return (
     <footer className="bg-[#111827] text-white">
       <div className="max-w-[1400px] mx-auto px-8 py-16">
@@ -56,20 +78,20 @@ export default function Footer({
                 className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-lg font-black"
                 style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
               >
-                {settings.name?.[0] || '启'}
+                {settings.name?.[0] || '佑'}
               </div>
               <div>
                 <div
                   className="font-black text-[18px] leading-tight text-white"
                   style={{ fontFamily: "'Nunito', sans-serif" }}
                 >
-                  {settings.name || '启航幼小教育'}
+                  {settings.name || '佑森小课堂'}
                 </div>
-                <div className="text-[10px] text-white/40 tracking-widest">EDUCATION</div>
+                <div className="text-[10px] text-white/40 tracking-widest">{settings.slogan || '专注幼小衔接教育8年'}</div>
               </div>
             </div>
             <p className="text-white/55 text-sm leading-relaxed mb-6 max-w-[300px]">
-              专注幼小衔接教育8年，以专业、安全、温暖的理念陪伴每一个孩子顺利开启人生第一个重要阶段。
+              {footer.aboutText || '武汉佑森小课堂艺术培训学校有限公司，专注幼小衔接教育8年，6大校区遍布武汉三镇。'}
             </p>
             <div className="space-y-3">
               {settings.address && (
@@ -100,10 +122,9 @@ export default function Footer({
                   课程体系
                 </h4>
                 <ul className="space-y-3">
-                  <li><a href="/courses/language" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">语言启蒙</a></li>
-                  <li><a href="/courses/math" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">数学思维</a></li>
-                  <li><a href="/courses/english" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">英语口语</a></li>
-                  <li><a href="/courses/comprehensive" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">综合素养</a></li>
+                  {COURSE_LINKS.map((link) => (
+                    <li key={link.url}><Link href={link.url} className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">{link.title}</Link></li>
+                  ))}
                 </ul>
               </div>
               <div className="flex-1 min-w-[120px]">
@@ -111,10 +132,9 @@ export default function Footer({
                   关于我们
                 </h4>
                 <ul className="space-y-3">
-                  <li><a href="/about/school" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">学校介绍</a></li>
-                  <li><a href="/about/philosophy" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">办学理念</a></li>
-                  <li><a href="/team" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">师资团队</a></li>
-                  <li><a href="/campuses" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">校区环境</a></li>
+                  {ABOUT_LINKS.map((link) => (
+                    <li key={link.url}><Link href={link.url} className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">{link.title}</Link></li>
+                  ))}
                 </ul>
               </div>
               <div className="flex-1 min-w-[120px]">
@@ -122,10 +142,9 @@ export default function Footer({
                   帮助中心
                 </h4>
                 <ul className="space-y-3">
-                  <li><a href="#" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">常见问题</a></li>
-                  <li><a href="#" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">预约流程</a></li>
-                  <li><a href="/refund-policy" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">退费政策</a></li>
-                  <li><a href="/contact" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">联系客服</a></li>
+                  {quickLinks.map((link: any) => (
+                    <li key={link.url}><Link href={link.url} className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">{link.title}</Link></li>
+                  ))}
                 </ul>
               </div>
             </div>
@@ -145,16 +164,15 @@ export default function Footer({
 
         <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-white/35 text-sm">
-            {footer.copyright || '© 2026 启航幼小教育集团'}
+            {footer.copyright || '© 2026 佑森小课堂'}
             {settings.icp && <span className="mx-2">·</span>}
             {settings.icp && <span>{settings.icp}</span>}
             {settings.publicSecurityRecord && <span className="mx-2">·</span>}
             {settings.publicSecurityRecord && <span>{settings.publicSecurityRecord}</span>}
           </p>
           <div className="flex items-center gap-6 text-white/35 text-sm">
-            <a href="/privacy-policy" className="hover:text-white/60 transition-colors">隐私政策</a>
-            <a href="/user-agreement" className="hover:text-white/60 transition-colors">用户协议</a>
-            <a href="#" className="hover:text-white/60 transition-colors">举报中心</a>
+            <Link href="/privacy-policy" className="hover:text-white/60 transition-colors">隐私政策</Link>
+            <Link href="/user-agreement" className="hover:text-white/60 transition-colors">用户协议</Link>
           </div>
         </div>
       </div>
