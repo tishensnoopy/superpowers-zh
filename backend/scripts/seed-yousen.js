@@ -112,7 +112,8 @@ const FOOTER = {
   copyright: '© 2026 佑森小课堂. All rights reserved.',
   aboutText: '武汉佑森小课堂艺术培训学校有限公司，专注幼小衔接教育8年，6大校区遍布武汉三镇。',
   quickLinks: [
-    { title: '预约试听', url: '/contact' },
+    { title: '预约试听', url: '/appointment' },
+    { title: '联系客服', url: '/contact' },
     { title: '退费政策', url: '/refund-policy' },
     { title: '常见问题', url: '/faq' },
     { title: '关于我们', url: '/about' },
