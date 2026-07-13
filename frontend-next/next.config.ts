@@ -42,6 +42,16 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+
+  async redirects() {
+    return [
+      {
+        source: '/team',
+        destination: '/teachers',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 const sentryConfig = {
