@@ -55,6 +55,8 @@ const COURSE_IMG = {
   tuoban:  `${IMG}/课程介绍/5习惯养成.jpg`,
 };
 
+const LOGO_IMG = `${IMG}/LOGO/3FB0E536B592AE2334D3F049ECB0CFEB(1).png`;
+
 const NEWS_IMG = [
   `${IMG}/海报图片/outputs/website-materials-v2/07-品牌故事横幅/A07-Wide_horizontal_bran-720x640.png`,
   `${IMG}/海报图片/outputs/website-materials-v2/05-课程专题横幅/A05-Wide_horizontal_cour-720x640.png`,
@@ -94,10 +96,10 @@ const FOOTER = {
   copyright: '© 2026 佑森小课堂. All rights reserved.',
   aboutText: '武汉佑森小课堂艺术培训学校有限公司，专注幼小衔接教育8年，6大校区遍布武汉三镇。',
   quickLinks: [
-    { title: '预约流程', url: '/appointment' },
+    { title: '预约试听', url: '/contact' },
     { title: '退费政策', url: '/refund-policy' },
     { title: '常见问题', url: '/faq' },
-    { title: '联系客服', url: '/contact' },
+    { title: '关于我们', url: '/about' },
   ],
   socialLinks: [
     { platform: 'wechat', url: '#', label: '微信' },
@@ -413,12 +415,26 @@ async function seedSiteSettings(strapi, force, remove) {
   if (remove) { info('site-settings 是 single type，跳过删除'); return; }
   const uid = 'api::site-settings.site-settings';
   const existing = await strapi.documents(uid).findFirst({});
+
+  // 上传 logo
+  let logoId = null;
+  if (existing?.logo) {
+    info('logo 已存在，保留');
+    logoId = existing.logo.id || existing.logo.documentId;
+  } else {
+    logoId = await uploadImage(strapi, LOGO_IMG);
+    if (logoId) ok(`logo 上传成功 (id=${logoId})`);
+    else warn('logo 上传失败，使用占位');
+  }
+
+  const data = { ...SITE_SETTINGS, ...(logoId ? { logo: logoId } : {}) };
+
   if (existing && !force) { info('已存在，跳过'); return; }
   if (existing && force) {
-    await strapi.documents(uid).update({ documentId: existing.documentId, data: SITE_SETTINGS, status: 'published' });
+    await strapi.documents(uid).update({ documentId: existing.documentId, data, status: 'published' });
     ok('更新成功');
   } else {
-    await strapi.documents(uid).create({ data: SITE_SETTINGS, status: 'published' });
+    await strapi.documents(uid).create({ data, status: 'published' });
     ok('创建成功');
   }
 }
@@ -427,21 +443,21 @@ async function seedNavigation(strapi, force, remove) {
   log('\n=== Navigation ===');
   const uid = 'api::navigation.navigation';
   for (const item of NAVIGATION) {
+    // 用 url 查重（而非 name），避免旧记录未清理时重复
+    const existing = await strapi.documents(uid).findFirst({ filters: { url: { $eq: item.url } } });
     if (remove) {
-      const existing = await strapi.documents(uid).findFirst({ filters: { name: { $eq: item.name } } });
-      if (existing) { await strapi.documents(uid).delete({ documentId: existing.documentId }); ok(`删除成功 (name=${item.name})`); }
-      else { info(`不存在，跳过 (name=${item.name})`); }
+      if (existing) { await strapi.documents(uid).delete({ documentId: existing.documentId }); ok(`删除成功 (url=${item.url})`); }
+      else { info(`不存在，跳过 (url=${item.url})`); }
       continue;
     }
-    const existing = await strapi.documents(uid).findFirst({ filters: { name: { $eq: item.name } } });
     const data = { ...item, isActive: true };
-    if (existing && !force) { info(`已存在，跳过 (name=${item.name})`); continue; }
+    if (existing && !force) { info(`已存在，跳过 (url=${item.url})`); continue; }
     if (existing && force) {
       await strapi.documents(uid).update({ documentId: existing.documentId, data, status: 'published' });
-      ok(`更新成功 (name=${item.name})`);
+      ok(`更新成功 (url=${item.url})`);
     } else {
       await strapi.documents(uid).create({ data, status: 'published' });
-      ok(`创建成功 (name=${item.name})`);
+      ok(`创建成功 (url=${item.url})`);
     }
   }
 }
@@ -663,6 +679,22 @@ async function seedPages(strapi, force, remove) {
     await removeEntity(strapi, uid, 'about');
     await removeEntity(strapi, uid, 'refund-policy');
     return;
+  }
+
+  // 清理其他 isHomepage=true 的页面，避免 controller 返回旧首页
+  const existingHomepages = await strapi.documents(uid).findMany({
+    filters: { isHomepage: true },
+    pagination: { limit: 50 },
+  });
+  for (const hp of existingHomepages) {
+    if (hp.slug !== homepageSlug) {
+      await strapi.documents(uid).update({
+        documentId: hp.documentId,
+        data: { isHomepage: false },
+        status: hp.status || 'published',
+      });
+      warn(`已取消旧首页标记 (slug=${hp.slug}, id=${hp.id})`);
+    }
   }
 
   const allProducts = await strapi.documents(productUid).findMany({ pagination: { limit: 100 } });
