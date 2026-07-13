@@ -82,7 +82,7 @@ export default function Hero({ section }: { section: Section }) {
 
             <div className="flex items-center gap-4 flex-wrap">
               <Link
-                href="/contact"
+                href="/appointment"
                 className="flex items-center gap-2 px-8 py-4 rounded-xl text-white font-bold text-base shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-[1.03]"
                 style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
               >

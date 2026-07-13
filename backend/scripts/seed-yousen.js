@@ -84,12 +84,28 @@ const SITE_SETTINGS = {
 };
 
 const NAVIGATION = [
-  { name: '首页',     url: '/',           position: 1, isExternal: false },
-  { name: '课程体系', url: '/courses',    position: 2, isExternal: false },
-  { name: '校区环境', url: '/campuses',   position: 3, isExternal: false },
-  { name: '师资团队', url: '/teachers',   position: 4, isExternal: false },
-  { name: '关于我们', url: '/about',      position: 5, isExternal: false },
-  { name: '联系我们', url: '/contact',    position: 6, isExternal: false },
+  { name: '首页',     url: '/',           position: 1, isExternal: false, children: [] },
+  { name: '课程体系', url: '/courses',    position: 2, isExternal: false, children: [
+    { name: '幼小衔接全能班', url: '/courses/yousen-youxiao-xianjie', position: 1, isExternal: false },
+    { name: '课后托管班',     url: '/courses/yousen-kehao-tuoguan',    position: 2, isExternal: false },
+    { name: '全日制托班',     url: '/courses/yousen-tuoban',            position: 3, isExternal: false },
+  ]},
+  { name: '校区环境', url: '/campuses',   position: 3, isExternal: false, children: [
+    { name: '百步亭校区', url: '/campuses/yousen-baibuting',   position: 1, isExternal: false },
+    { name: '三阳路校区', url: '/campuses/yousen-sanyanglu',   position: 2, isExternal: false },
+    { name: '动物园校区', url: '/campuses/yousen-dongwuyuan',  position: 3, isExternal: false },
+    { name: '钟家村校区', url: '/campuses/yousen-zhongjiacun', position: 4, isExternal: false },
+    { name: '四新校区',   url: '/campuses/yousen-sixin',        position: 5, isExternal: false },
+    { name: '沌口校区',   url: '/campuses/yousen-zhuankou',     position: 6, isExternal: false },
+  ]},
+  { name: '师资团队', url: '/teachers',   position: 4, isExternal: false, children: [] },
+  { name: '新闻资讯', url: '/news',       position: 5, isExternal: false, children: [
+    { name: '公司动态', url: '/news?category=company_news',   position: 1, isExternal: false },
+    { name: '行业资讯', url: '/news?category=industry_news',  position: 2, isExternal: false },
+    { name: '活动通知', url: '/news?category=event_notice',   position: 3, isExternal: false },
+  ]},
+  { name: '关于我们', url: '/about',      position: 6, isExternal: false, children: [] },
+  { name: '联系我们', url: '/contact',    position: 7, isExternal: false, children: [] },
 ];
 
 const FOOTER = {
@@ -442,22 +458,60 @@ async function seedSiteSettings(strapi, force, remove) {
 async function seedNavigation(strapi, force, remove) {
   log('\n=== Navigation ===');
   const uid = 'api::navigation.navigation';
-  for (const item of NAVIGATION) {
-    // 用 url 查重（而非 name），避免旧记录未清理时重复
-    const existing = await strapi.documents(uid).findFirst({ filters: { url: { $eq: item.url } } });
-    if (remove) {
-      if (existing) { await strapi.documents(uid).delete({ documentId: existing.documentId }); ok(`删除成功 (url=${item.url})`); }
-      else { info(`不存在，跳过 (url=${item.url})`); }
-      continue;
+
+  // 先收集所有已有记录（按 url 索引），便于查重和清理
+  const allExisting = await strapi.documents(uid).findMany({ limit: 100 });
+  const existingByUrl = new Map();
+  for (const e of allExisting) { existingByUrl.set(e.url, e); }
+
+  if (remove) {
+    // 先删子项，再删父项
+    for (const item of NAVIGATION) {
+      for (const child of (item.children || [])) {
+        const ex = existingByUrl.get(child.url);
+        if (ex) { await strapi.documents(uid).delete({ documentId: ex.documentId }); ok(`删除子项 (url=${child.url})`); }
+      }
+      const ex = existingByUrl.get(item.url);
+      if (ex) { await strapi.documents(uid).delete({ documentId: ex.documentId }); ok(`删除父项 (url=${item.url})`); }
     }
-    const data = { ...item, isActive: true };
-    if (existing && !force) { info(`已存在，跳过 (url=${item.url})`); continue; }
-    if (existing && force) {
-      await strapi.documents(uid).update({ documentId: existing.documentId, data, status: 'published' });
-      ok(`更新成功 (url=${item.url})`);
+    return;
+  }
+
+  // 第一遍：创建/更新所有父项，记录 documentId
+  const parentDocIds = new Map(); // url -> documentId
+  for (const item of NAVIGATION) {
+    const { children, ...parentData } = item;
+    const data = { ...parentData, isActive: true };
+    const existing = existingByUrl.get(item.url);
+    let docId;
+    if (existing && !force) { info(`父项已存在，跳过 (url=${item.url})`); docId = existing.documentId; }
+    else if (existing && force) {
+      const updated = await strapi.documents(uid).update({ documentId: existing.documentId, data, status: 'published' });
+      ok(`父项更新成功 (url=${item.url})`);
+      docId = updated.documentId;
     } else {
-      await strapi.documents(uid).create({ data, status: 'published' });
-      ok(`创建成功 (url=${item.url})`);
+      const created = await strapi.documents(uid).create({ data, status: 'published' });
+      ok(`父项创建成功 (url=${item.url})`);
+      docId = created.documentId;
+    }
+    parentDocIds.set(item.url, docId);
+  }
+
+  // 第二遍：创建/更新子项，设置 parent 关系
+  for (const item of NAVIGATION) {
+    if (!item.children || item.children.length === 0) continue;
+    const parentDocId = parentDocIds.get(item.url);
+    for (const child of item.children) {
+      const childData = { name: child.name, url: child.url, position: child.position, isExternal: child.isExternal, isActive: true, parent: parentDocId };
+      const existing = existingByUrl.get(child.url);
+      if (existing && !force) { info(`子项已存在，跳过 (url=${child.url})`); continue; }
+      if (existing && force) {
+        await strapi.documents(uid).update({ documentId: existing.documentId, data: childData, status: 'published' });
+        ok(`子项更新成功 (url=${child.url})`);
+      } else {
+        await strapi.documents(uid).create({ data: childData, status: 'published' });
+        ok(`子项创建成功 (url=${child.url})`);
+      }
     }
   }
 }

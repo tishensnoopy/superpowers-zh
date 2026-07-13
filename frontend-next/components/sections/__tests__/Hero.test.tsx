@@ -36,10 +36,10 @@ describe('Hero 组件', () => {
     expect(screen.getByText('6所')).toBeInTheDocument();
   });
 
-  it('立即预约试听按钮链接到 /contact', () => {
+  it('立即预约试听按钮链接到 /appointment', () => {
     render(<Hero section={mockSection as any} />);
     const link = screen.getByRole('link', { name: /立即预约试听/ });
-    expect(link).toHaveAttribute('href', '/contact');
+    expect(link).toHaveAttribute('href', '/appointment');
   });
 
   it('了解课程体系按钮链接到 /courses', () => {

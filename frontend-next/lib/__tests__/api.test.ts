@@ -6,7 +6,7 @@ describe('预约数据格式验证', () => {
     const data: AppointmentData = {
       name: '小明',
       phone: '13800138000',
-      campus: 'chaoyang',
+      campus: 'yousen-baibuting',
       age: '6',
       course: 'language',
       preferredTimeSlot: 'morning',
@@ -17,12 +17,12 @@ describe('预约数据格式验证', () => {
     expect(data.phone).toBeTypeOf('string');
     expect(data.phone).toMatch(/^1[3-9]\d{9}$/);
     expect(data.campus).toBeTypeOf('string');
-    expect(['chaoyang', 'haidian', 'xicheng', 'fengtai']).toContain(data.campus);
+    expect(['yousen-baibuting', 'yousen-sanyanglu', 'yousen-dongwuyuan', 'yousen-zhongjiacun', 'yousen-sixin', 'yousen-zhuankou']).toContain(data.campus);
     expect(['language', 'math', 'english', 'comprehensive']).toContain(data.course);
   });
 
   it('校区字段值应为小写英文标识', () => {
-    const validCampuses = ['chaoyang', 'haidian', 'xicheng', 'fengtai'];
+    const validCampuses = ['yousen-baibuting', 'yousen-sanyanglu', 'yousen-dongwuyuan', 'yousen-zhongjiacun', 'yousen-sixin', 'yousen-zhuankou'];
 
     validCampuses.forEach(campus => {
       expect(campus).toBe(campus.toLowerCase());
@@ -52,13 +52,13 @@ describe('预约数据格式验证', () => {
       data: {
         name: '小明',
         phone: '13800138000',
-        campus: 'chaoyang',
+        campus: 'yousen-baibuting',
       },
     };
 
     expect(JSON.stringify(expectedBody)).toContain('"data":');
     expect(JSON.stringify(expectedBody)).toContain('"name":"小明"');
-    expect(JSON.stringify(expectedBody)).toContain('"campus":"chaoyang"');
+    expect(JSON.stringify(expectedBody)).toContain('"campus":"yousen-baibuting"');
   });
 });
 
