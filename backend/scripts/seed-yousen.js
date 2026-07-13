@@ -123,6 +123,7 @@ const COURSES = [
   {
     name: '幼小衔接全能班',
     slug: 'yousen-youxiao-xianjie',
+    sku: 'YOUSEN-YOUXIAO-001',
     shortDescription: '5大模块系统课程，帮助孩子顺利过渡到小学',
     description: '覆盖语文素养、数学思维、英语启蒙、学习习惯、社交适应5大核心模块，16-20人小班教学，师资分科教学，室内课堂与户外研学相结合。',
     price: 0,
@@ -154,6 +155,7 @@ const COURSES = [
   {
     name: '课后托管班',
     slug: 'yousen-kehao-tuoguan',
+    sku: 'YOUSEN-KEHAO-002',
     shortDescription: '放学后作业辅导 + 兴趣拓展',
     description: '为已入学小学生提供课后作业辅导、查漏补缺、兴趣培养服务，安全温馨的托管环境。',
     price: 0,
@@ -176,6 +178,7 @@ const COURSES = [
   {
     name: '全日制托班',
     slug: 'yousen-tuoban',
+    sku: 'YOUSEN-TUOBAN-003',
     shortDescription: '3-5岁幼儿全日制托管',
     description: '提供安全、温暖的日间托管环境，含两餐一点、午休、游戏活动、启蒙教育。',
     price: 0,
@@ -345,12 +348,15 @@ async function uploadImage(strapi, filePath) {
   const ext = path.extname(filePath).toLowerCase();
   const mimeMap = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.gif': 'image/gif', '.webp': 'image/webp' };
   const type = mimeMap[ext] || 'image/jpeg';
-  const result = await strapi.upload.upload({
+  // Strapi v5 upload service 期望 formidable 格式的 file 对象
+  // （originalFilename / mimetype / size / filepath，tmpWorkingDirectory 由 service 自动添加）
+  const uploadService = strapi.plugins.upload.services.upload;
+  const result = await uploadService.upload({
     files: {
-      name: path.basename(filePath),
-      path: filePath,
-      type,
+      originalFilename: path.basename(filePath),
+      mimetype: type,
       size: stats.size,
+      filepath: filePath,
     },
     data: {},
   });
@@ -366,6 +372,9 @@ async function findBySlug(strapi, uid, slug) {
 
 async function seedEntity(strapi, uid, slug, data, force) {
   const existing = await findBySlug(strapi, uid, slug);
+  // Strapi v5: status 是 create/update 的顶层参数，不能放在 data 里
+  const { status, ...fields } = data;
+  const publishStatus = status || 'published';
   if (existing && !force) {
     info(`已存在，跳过 (slug=${slug})`);
     return existing;
@@ -373,12 +382,16 @@ async function seedEntity(strapi, uid, slug, data, force) {
   if (existing && force) {
     const updated = await strapi.documents(uid).update({
       documentId: existing.documentId,
-      data,
+      data: fields,
+      status: publishStatus,
     });
     ok(`更新成功 (slug=${slug})`);
     return updated;
   }
-  const created = await strapi.documents(uid).create({ data });
+  const created = await strapi.documents(uid).create({ 
+    data: fields, 
+    status: publishStatus,
+  });
   ok(`创建成功 (slug=${slug})`);
   return created;
 }
@@ -401,12 +414,11 @@ async function seedSiteSettings(strapi, force, remove) {
   const uid = 'api::site-settings.site-settings';
   const existing = await strapi.documents(uid).findFirst({});
   if (existing && !force) { info('已存在，跳过'); return; }
-  const data = { ...SITE_SETTINGS, status: 'published' };
   if (existing && force) {
-    await strapi.documents(uid).update({ documentId: existing.documentId, data });
+    await strapi.documents(uid).update({ documentId: existing.documentId, data: SITE_SETTINGS, status: 'published' });
     ok('更新成功');
   } else {
-    await strapi.documents(uid).create({ data });
+    await strapi.documents(uid).create({ data: SITE_SETTINGS, status: 'published' });
     ok('创建成功');
   }
 }
@@ -422,13 +434,13 @@ async function seedNavigation(strapi, force, remove) {
       continue;
     }
     const existing = await strapi.documents(uid).findFirst({ filters: { name: { $eq: item.name } } });
-    const data = { ...item, isActive: true, status: 'published' };
+    const data = { ...item, isActive: true };
     if (existing && !force) { info(`已存在，跳过 (name=${item.name})`); continue; }
     if (existing && force) {
-      await strapi.documents(uid).update({ documentId: existing.documentId, data });
+      await strapi.documents(uid).update({ documentId: existing.documentId, data, status: 'published' });
       ok(`更新成功 (name=${item.name})`);
     } else {
-      await strapi.documents(uid).create({ data });
+      await strapi.documents(uid).create({ data, status: 'published' });
       ok(`创建成功 (name=${item.name})`);
     }
   }
@@ -440,12 +452,11 @@ async function seedFooter(strapi, force, remove) {
   const uid = 'api::footer.footer';
   const existing = await strapi.documents(uid).findFirst({});
   if (existing && !force) { info('已存在，跳过'); return; }
-  const data = { ...FOOTER, status: 'published' };
   if (existing && force) {
-    await strapi.documents(uid).update({ documentId: existing.documentId, data });
+    await strapi.documents(uid).update({ documentId: existing.documentId, data: FOOTER, status: 'published' });
     ok('更新成功');
   } else {
-    await strapi.documents(uid).create({ data });
+    await strapi.documents(uid).create({ data: FOOTER, status: 'published' });
     ok('创建成功');
   }
 }
@@ -470,13 +481,13 @@ async function seedSpecs(strapi, force, remove) {
       continue;
     }
     const existing = await strapi.documents(uid).findFirst({ filters: { code: { $eq: spec.code } } });
-    const data = { ...spec, status: 'published' };
+    const data = { ...spec };
     if (existing && !force) { info(`已存在，跳过 (code=${spec.code})`); continue; }
     if (existing && force) {
-      await strapi.documents(uid).update({ documentId: existing.documentId, data });
+      await strapi.documents(uid).update({ documentId: existing.documentId, data, status: 'published' });
       ok(`更新成功 (code=${spec.code})`);
     } else {
-      await strapi.documents(uid).create({ data });
+      await strapi.documents(uid).create({ data, status: 'published' });
       ok(`创建成功 (code=${spec.code})`);
     }
   }
@@ -504,6 +515,7 @@ async function seedCourses(strapi, force, remove) {
     const data = {
       name: course.name,
       slug: course.slug,
+      sku: course.sku,
       description: course.description,
       shortDescription: course.shortDescription,
       price: course.price,
@@ -600,7 +612,7 @@ async function seedFaqs(strapi, force, remove) {
       continue;
     }
     const existing = await strapi.documents(uid).findFirst({ filters: { question: { $eq: faq.question } } });
-    const data = { ...faq, isActive: true, status: 'published' };
+    const data = { ...faq, isActive: true };
     if (existing && !force) { info(`已存在，跳过 (Q=${faq.question.substring(0, 20)}...)`); continue; }
     if (existing && force) {
       await strapi.documents(uid).update({ documentId: existing.documentId, data });
