@@ -10,11 +10,12 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildMetadata(undefined, {
     title: '校区分布',
     description: '查看我们的各校区地址和联系方式，欢迎就近选择。',
+    canonicalUrl: '/campuses',
   });
 }
 
 export default async function CampusOverviewPage() {
-  const { data: campuses } = await getCampuses();
+  const { data: campuses } = await getCampuses().catch(() => ({ data: [] as never[] }));
 
   return (
     <div

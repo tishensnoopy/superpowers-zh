@@ -6,17 +6,18 @@ import { CheckCircle, Phone, Calendar, ArrowLeft, AlertCircle } from 'lucide-rea
 import type { AppointmentData } from '@/lib/api';
 
 const CAMPUS_LABELS: Record<string, string> = {
-  chaoyang: '朝阳校区',
-  haidian: '海淀校区',
-  xicheng: '西城校区',
-  fengtai: '丰台校区',
+  'yousen-baibuting': '百步亭校区',
+  'yousen-sanyanglu': '三阳路校区',
+  'yousen-dongwuyuan': '动物园校区',
+  'yousen-zhongjiacun': '钟家村校区',
+  'yousen-sixin': '四新校区',
+  'yousen-zhuankou': '沌口校区',
 };
 
 const COURSE_LABELS: Record<string, string> = {
-  language: '语言启蒙',
-  math: '数学思维',
-  english: '英语口语',
-  comprehensive: '综合素养',
+  'yousen-youxiao-xianjie': '幼小衔接全能班',
+  'yousen-kehao-tuoguan': '课后托管班',
+  'yousen-tuoban': '全日制托班',
 };
 
 const TIME_SLOT_LABELS: Record<string, string> = {
@@ -219,7 +220,7 @@ export default function AppointmentSuccessPage() {
         </div>
 
         <p className="text-center text-muted-foreground text-sm mt-8">
-          © 2026 启航幼小教育集团 · 沪ICP备2024XXXXXXX号
+          © 2026 佑森小课堂
         </p>
       </div>
     </div>

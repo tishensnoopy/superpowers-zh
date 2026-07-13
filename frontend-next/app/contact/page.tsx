@@ -7,7 +7,7 @@ export const revalidate = 300;
 export async function generateMetadata(): Promise<Metadata> {
   return buildMetadata(undefined, {
     title: '联系我们',
-    description: '联系启航幼小教育，预约免费试听课程',
+    description: '联系佑森小课堂，预约免费试听课程',
   });
 }
 

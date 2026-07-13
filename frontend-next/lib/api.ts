@@ -1,6 +1,23 @@
 import * as Sentry from '@sentry/nextjs';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
+const DEFAULT_API_URL = 'http://localhost:1337';
+
+export function getApiBaseUrl(opts: {
+  isServer: boolean;
+  serverUrl?: string;
+  clientUrl?: string;
+}): string {
+  if (opts.isServer && opts.serverUrl) {
+    return opts.serverUrl;
+  }
+  return opts.clientUrl || DEFAULT_API_URL;
+}
+
+const API_BASE_URL = getApiBaseUrl({
+  isServer: typeof window === 'undefined',
+  serverUrl: process.env.STRAPI_API_URL_SSR,
+  clientUrl: process.env.NEXT_PUBLIC_STRAPI_API_URL,
+});
 
 const LOG_PREFIX = '[API]';
 
@@ -77,7 +94,8 @@ export function getImageUrl(
 ): string | null {
   if (!image?.url) return null;
   if (image.url.startsWith('http')) return image.url;
-  return `${API_BASE_URL}${image.url}`;
+  const clientUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || DEFAULT_API_URL;
+  return `${clientUrl}${image.url}`;
 }
 
 export async function getSiteSettings() {
@@ -134,11 +152,12 @@ export async function getPageBySlug(slug: string) {
 
 export async function getProducts(filters?: { category?: string }) {
   console.log(`${LOG_PREFIX} Fetching products${filters?.category ? ` (category: ${filters.category})` : ''}...`);
-  let params = '';
+  const params = new URLSearchParams();
+  params.set('populate', 'thumbnail,categories,specs,objectives,outline,testimonials');
   if (filters?.category) {
-    params = `?category=${filters.category}`;
+    params.set('category', filters.category);
   }
-  const result = await fetchApi<{ data: Product[]; meta: Pagination }>(`/api/products${params}`);
+  const result = await fetchApi<{ data: Product[]; meta: Pagination }>(`/api/products?${params.toString()}`);
   console.log(`${LOG_PREFIX} Products loaded: ${result.data.length} products, total=${result.meta.total}`);
   return result;
 }
@@ -186,12 +205,12 @@ export function getNewsCategoryLabel(category: string): string {
 export async function getNews(category?: string) {
   console.log(`${LOG_PREFIX} Fetching news${category ? ` (category: ${category})` : ''}...`);
   const params = new URLSearchParams();
+  params.set('populate', 'coverImage');
   if (category) {
     params.set('category', category);
   }
   params.set('sort', 'publishedAt:desc');
-  const query = params.toString();
-  const result = await fetchApi<{ data: NewsArticle[] }>(`/api/news-articles${query ? `?${query}` : ''}`);
+  const result = await fetchApi<{ data: NewsArticle[] }>(`/api/news-articles?${params.toString()}`);
   console.log(`${LOG_PREFIX} News loaded: ${result.data.length} items`);
   return result;
 }
@@ -294,6 +313,7 @@ export interface Footer {
   id: number;
   documentId?: string;
   copyright?: string;
+  aboutText?: string;
   socialLinks?: SocialLink[];
   quickLinks?: QuickLink[];
 }
@@ -310,7 +330,7 @@ export interface SocialLink {
 export interface QuickLink {
   id: number;
   documentId?: string;
-  name: string;
+  title: string;
   url: string;
 }
 
@@ -532,6 +552,7 @@ export async function getTeachers(filters?: {
     params.set('filters[isFeatured][$eq]', String(filters.featured));
   }
   params.set('sort', 'sortOrder:asc');
+  params.set('populate', 'avatar,campus');
   const result = await fetchApi<{ data: Teacher[] }>(`/api/teachers?${params.toString()}`);
   console.log(`${LOG_PREFIX} Teachers loaded: ${result.data.length} items`);
   return result;
@@ -562,6 +583,7 @@ export async function getCampuses() {
   console.log(`${LOG_PREFIX} Fetching campuses...`);
   const params = new URLSearchParams();
   params.set('sort', 'sortOrder:asc');
+  params.set('populate', 'coverImage,gallery,teachers');
   const result = await fetchApi<{ data: Campus[] }>(`/api/campuses?${params.toString()}`);
   console.log(`${LOG_PREFIX} Campuses loaded: ${result.data.length} items`);
   return result;

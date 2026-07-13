@@ -28,7 +28,7 @@ function resolveOgType(ogType: string | undefined): (typeof VALID_OG_TYPES)[numb
 
 export function buildMetadata(
   seo: SeoData | undefined,
-  fallback: { title: string; description?: string }
+  fallback: { title: string; description?: string; canonicalUrl?: string }
 ): Metadata {
   const title = seo?.metaTitle ?? fallback.title;
   const description = seo?.metaDescription ?? fallback.description;
@@ -39,7 +39,7 @@ export function buildMetadata(
     description,
     keywords: seo?.metaKeywords,
     alternates: {
-      canonical: seo?.canonicalUrl,
+      canonical: seo?.canonicalUrl || fallback.canonicalUrl,
     },
     openGraph: {
       title: seo?.ogTitle ?? title,

@@ -9,13 +9,14 @@ import CourseCTA from '@/components/course/CourseCTA';
 import type { Metadata } from 'next';
 
 export const revalidate = 300;
+export const dynamicParams = false;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
-  const { data: products } = await getProducts();
+  const { data: products } = await getProducts().catch(() => ({ data: [] }));
   return products.map((product) => ({ slug: product.slug }));
 }
 
@@ -27,11 +28,12 @@ export async function generateMetadata({
     data: null,
   }));
   if (!product) {
-    return buildMetadata(undefined, { title: '课程详情' });
+    return buildMetadata(undefined, { title: '课程详情', canonicalUrl: `/courses/${slug}` });
   }
   return buildMetadata(product.seo, {
     title: product.name,
     description: product.shortDescription || product.description,
+    canonicalUrl: `/courses/${slug}`,
   });
 }
 

@@ -18,15 +18,15 @@ const notoSansSC = Noto_Sans_SC({
 
 export const metadata: Metadata = {
   title: {
-    default: '启航幼小教育 | 专注幼小衔接8年',
-    template: '%s | 启航幼小教育',
+    default: '佑森小课堂 | 专注幼小衔接教育8年',
+    template: '%s | 佑森小课堂',
   },
   description: '专注幼小衔接教育8年，科学课程体系+专业师资团队',
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
   openGraph: {
     type: 'website',
     locale: 'zh_CN',
-    siteName: '启航幼小教育',
+    siteName: '佑森小课堂',
   },
   robots: { index: true, follow: true },
 };

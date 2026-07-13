@@ -15,23 +15,23 @@ export async function GET() {
     : settingsRes.data;
   const products = productsRes.data;
 
-  const content = `# ${settings?.name || '启航幼小教育'}
+  const content = `# ${settings?.name || '佑森小课堂'}
 
 > ${settings?.slogan || '专注幼小衔接教育8年'}
 
 ## 关于我们
-- 学校介绍: ${baseUrl}/about-school
-- 办学理念: ${baseUrl}/about-philosophy
-- 资质荣誉: ${baseUrl}/about-honors
+- 关于我们: ${baseUrl}/about
+- 师资团队: ${baseUrl}/teachers
+- 校区环境: ${baseUrl}/campuses
 
 ## 课程体系
 ${products.map((p) => `- ${p.name}: ${baseUrl}/courses/${p.slug}`).join('\n')}
 
-## 师资团队
-- ${baseUrl}/teachers
-
 ## 常见问题
 - ${baseUrl}/faq
+
+## 退费政策
+- ${baseUrl}/refund-policy
 
 ## 联系方式
 ${settings?.phone ? `- 电话: ${settings.phone}` : ''}

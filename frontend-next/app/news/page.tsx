@@ -21,13 +21,14 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildMetadata(undefined, {
     title: '新闻动态',
     description: '了解我们的最新动态、行业资讯和活动通知。',
+    canonicalUrl: '/news',
   });
 }
 
 export default async function NewsListPage({ searchParams }: PageProps) {
   const { category } = await searchParams;
   const activeCategory = category || '';
-  const { data: news } = await getNews(activeCategory || undefined);
+  const { data: news } = await getNews(activeCategory || undefined).catch(() => ({ data: [] as never[] }));
 
   return (
     <div className="pt-[72px] pb-16 min-h-screen" style={{ background: '#FAFAFA' }}>

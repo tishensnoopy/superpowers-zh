@@ -7,6 +7,7 @@ import StrapiImage from '@/components/ui/StrapiImage';
 import type { Metadata } from 'next';
 
 export const revalidate = 300;
+export const dynamicParams = false;
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
@@ -22,7 +23,7 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  const { data: newsList } = await getNews();
+  const { data: newsList } = await getNews().catch(() => ({ data: [] }));
   return newsList.map((news) => ({ slug: news.slug }));
 }
 
@@ -32,12 +33,13 @@ export async function generateMetadata({
   const { slug } = await params;
   const { data: news } = await getNewsBySlugSafe(slug);
   if (!news) {
-    return buildMetadata(undefined, { title: '新闻动态' });
+    return buildMetadata(undefined, { title: '新闻动态', canonicalUrl: `/news/${slug}` });
   }
 
   const metadata = buildMetadata(news.seo, {
     title: news.title,
     description: news.excerpt,
+    canonicalUrl: `/news/${slug}`,
   });
 
   const coverUrl = getImageUrl(news.coverImage);

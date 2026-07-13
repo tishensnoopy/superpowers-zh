@@ -5,13 +5,14 @@ import SectionRenderer from '@/components/SectionRenderer';
 import type { Metadata } from 'next';
 
 export const revalidate = 300;
+export const dynamicParams = false;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
-  const { data: pages } = await getPages();
+  const { data: pages } = await getPages().catch(() => ({ data: [] }));
   const staticSlugs = ['refund-policy', 'privacy-policy', 'user-agreement', 'contact'];
   return pages
     .filter((page) => !page.isHomepage && !staticSlugs.includes(page.slug))
@@ -26,9 +27,9 @@ export async function generateMetadata({
     data: null,
   }));
   if (!page) {
-    return buildMetadata(undefined, { title: '页面' });
+    return buildMetadata(undefined, { title: '页面', canonicalUrl: `/${slug}` });
   }
-  return buildMetadata(page.seo, { title: page.title });
+  return buildMetadata(page.seo, { title: page.title, canonicalUrl: `/${slug}` });
 }
 
 export default async function DynamicPage({ params }: PageProps) {

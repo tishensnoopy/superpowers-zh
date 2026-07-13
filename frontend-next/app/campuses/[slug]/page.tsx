@@ -8,13 +8,14 @@ import CampusTeachers from '@/components/campus/CampusTeachers';
 import type { Metadata } from 'next';
 
 export const revalidate = 300;
+export const dynamicParams = false;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
-  const { data: campuses } = await getCampuses();
+  const { data: campuses } = await getCampuses().catch(() => ({ data: [] }));
   return campuses.map((campus) => ({ slug: campus.slug }));
 }
 
@@ -25,11 +26,12 @@ export async function generateMetadata({
   const { data } = await getCampusBySlug(slug).catch(() => ({ data: [] }));
   const campus = Array.isArray(data) ? data[0] : data;
   if (!campus) {
-    return buildMetadata(undefined, { title: '校区详情' });
+    return buildMetadata(undefined, { title: '校区详情', canonicalUrl: `/campuses/${slug}` });
   }
   return buildMetadata(campus.seo, {
     title: campus.name,
     description: campus.address,
+    canonicalUrl: `/campuses/${slug}`,
   });
 }
 
