@@ -14,9 +14,20 @@
   "attributes": {
     "name": {
       "type": "string",
+      "maxLength": 100,
+      "description": "预约姓名（向后兼容，新数据用 parentName）"
+    },
+    "childName": {
+      "type": "string",
       "required": true,
       "maxLength": 100,
-      "description": "预约姓名"
+      "description": "孩子姓名"
+    },
+    "parentName": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100,
+      "description": "家长姓名"
     },
     "phone": {
       "type": "string",
@@ -39,6 +50,10 @@
       "maxLength": 100,
       "description": "意向课程（选填）"
     },
+    "preferredDate": {
+      "type": "date",
+      "description": "期望试听日期（选填）"
+    },
     "preferredTimeSlot": {
       "type": "enumeration",
       "enum": ["morning", "afternoon", "evening"],
@@ -53,6 +68,11 @@
       "enum": ["pending", "confirmed", "completed", "cancelled"],
       "default": "pending",
       "description": "预约状态"
+    },
+    "sourcePage": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "提交来源页面"
     },
     "ipAddress": {
       "type": "string",

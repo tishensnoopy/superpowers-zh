@@ -88,14 +88,20 @@ export default function ContactForm({ section }: { section: Section }) {
   };
 
   const validate = (): boolean => {
-    log('validate', '开始表单校验', { name: !!values.name, phone: !!values.phone, campus: !!values.campus });
+    log('validate', '开始表单校验', { childName: !!values.childName, parentName: !!values.parentName, phone: !!values.phone, campus: !!values.campus });
 
     const newErrors: Record<string, string> = {};
     let valid = true;
 
-    if (!values.name) {
-      newErrors.name = '请输入预约姓名';
-      log('validate', '校验失败: name 为空');
+    if (!values.childName) {
+      newErrors.childName = '请输入孩子姓名';
+      log('validate', '校验失败: childName 为空');
+      valid = false;
+    }
+
+    if (!values.parentName) {
+      newErrors.parentName = '请输入家长姓名';
+      log('validate', '校验失败: parentName 为空');
       valid = false;
     }
 
@@ -133,13 +139,17 @@ export default function ContactForm({ section }: { section: Section }) {
     log('submit', '校验通过，准备提交');
 
     const submitData = {
-      name: values.name || '',
+      childName: values.childName || '',
+      parentName: values.parentName || '',
+      name: values.parentName || '',
       phone: values.phone || '',
       campus: values.campus || '',
       age: values.age || undefined,
       course: values.course || undefined,
+      preferredDate: values.preferredDate || undefined,
       preferredTimeSlot: values.preferredTimeSlot || undefined,
       message: values.message || undefined,
+      sourcePage: typeof window !== 'undefined' ? window.location.pathname : '',
     };
 
     const payloadSize = JSON.stringify(submitData).length;
@@ -288,19 +298,35 @@ export default function ContactForm({ section }: { section: Section }) {
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="name" className="block text-gray-800 text-sm font-semibold mb-2">
-                    预约姓名 <span className="text-[#F5851F] ml-1">*</span>
+                  <label htmlFor="childName" className="block text-gray-800 text-sm font-semibold mb-2">
+                    孩子姓名 <span className="text-[#F5851F] ml-1">*</span>
                   </label>
                   <input
-                    id="name"
+                    id="childName"
                     type="text"
-                    value={values.name || ''}
-                    onChange={(e) => handleFieldChange('name', e.target.value)}
-                    placeholder="请输入预约姓名"
+                    value={values.childName || ''}
+                    onChange={(e) => handleFieldChange('childName', e.target.value)}
+                    placeholder="请输入孩子姓名"
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
-                    style={{ borderColor: errors.name ? '#DC2626' : 'rgba(0,0,0,0.1)' }}
+                    style={{ borderColor: errors.childName ? '#DC2626' : 'rgba(0,0,0,0.1)' }}
                   />
-                  {errors.name && <p className="text-[#DC2626] text-xs mt-1">{errors.name}</p>}
+                  {errors.childName && <p className="text-[#DC2626] text-xs mt-1">{errors.childName}</p>}
+                </div>
+
+                <div>
+                  <label htmlFor="parentName" className="block text-gray-800 text-sm font-semibold mb-2">
+                    家长姓名 <span className="text-[#F5851F] ml-1">*</span>
+                  </label>
+                  <input
+                    id="parentName"
+                    type="text"
+                    value={values.parentName || ''}
+                    onChange={(e) => handleFieldChange('parentName', e.target.value)}
+                    placeholder="请输入家长姓名"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
+                    style={{ borderColor: errors.parentName ? '#DC2626' : 'rgba(0,0,0,0.1)' }}
+                  />
+                  {errors.parentName && <p className="text-[#DC2626] text-xs mt-1">{errors.parentName}</p>}
                 </div>
 
                 <div>
@@ -371,6 +397,20 @@ export default function ContactForm({ section }: { section: Section }) {
                       <option key={course.value} value={course.value}>{course.label}</option>
                     ))}
                   </select>
+                </div>
+
+                <div>
+                  <label htmlFor="preferredDate" className="block text-gray-800 text-sm font-semibold mb-2">
+                    期望试听日期
+                  </label>
+                  <input
+                    id="preferredDate"
+                    type="date"
+                    value={values.preferredDate || ''}
+                    onChange={(e) => handleFieldChange('preferredDate', e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
+                    style={{ borderColor: 'rgba(0,0,0,0.1)' }}
+                  />
                 </div>
 
                 <div>
