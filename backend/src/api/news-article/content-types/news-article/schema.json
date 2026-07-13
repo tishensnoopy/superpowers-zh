@@ -60,6 +60,10 @@
       "default": 0,
       "description": "排序"
     },
+    "tags": {
+      "type": "string",
+      "description": "逗号分隔的标签"
+    },
     "seo": {
       "type": "component",
       "component": "common.seo",
