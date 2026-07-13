@@ -6,7 +6,12 @@ node_modules
 .env*.local
 Dockerfile
 .dockerignore
+docker-compose.yml
 __tests__
+e2e
+e2e-report
+test-results
 coverage
 .vscode
 .idea
+playwright-report
