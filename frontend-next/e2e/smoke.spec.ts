@@ -20,7 +20,6 @@ test.describe('关键路径烟雾测试', () => {
 
   test('课程搜索功能', async ({ page }) => {
     await page.goto('/courses');
-    await page.waitForLoadState('networkidle');
     const searchInput = page.locator('input[type="text"], input[type="search"]').first();
     if (await searchInput.isVisible()) {
       await searchInput.fill('语言');
@@ -37,7 +36,6 @@ test.describe('关键路径烟雾测试', () => {
   test('预约表单页面访问', async ({ page }) => {
     await page.goto('/contact');
     // ContactForm 为客户端组件，需等待 hydration 完成后 h1 才会出现在可见 a11y 树中。
-    await page.waitForLoadState('networkidle');
     await expect(page.locator('h1').first()).toBeVisible();
   });
 

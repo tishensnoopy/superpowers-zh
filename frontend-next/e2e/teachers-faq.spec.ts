@@ -3,7 +3,6 @@ import { test, expect } from '@playwright/test';
 test.describe('教师列表页', () => {
   test('页面加载并显示标题', async ({ page }) => {
     await page.goto('/teachers');
-    await page.waitForLoadState('networkidle');
     // app/teachers/page.tsx 渲染 TeamPage 客户端组件，TeamHeader 恒定渲染 h1 "师资团队"（见 components/team/TeamHeader.tsx）。
     // 教师卡片（TeacherCard）依赖 Strapi getTeachers() 返回数据，可能为空（TeamGrid 显示"暂无教师数据"），
     // 因此此处断言恒定渲染的 h1 可见作为基线加载验证。
@@ -28,11 +27,10 @@ test.describe('教师列表页', () => {
 test.describe('FAQ 页面', () => {
   test('页面加载', async ({ page }) => {
     await page.goto('/faq');
-    await page.waitForLoadState('networkidle');
-    // app/faq/page.tsx 渲染 Faq 组件（components/sections/Faq.tsx），Faq 组件恒定渲染 h2 "{title || '常见问题'}"（此处 title='常见问题'），
-    // 但不渲染 h1。FAQ 项依赖 Strapi getFaqItems() 返回数据，可能为空。
-    // 由于无恒定 h1，此处保留 body 可见断言作为基线加载验证（参考 courses.spec.ts 中"页面加载并显示搜索界面"的相同模式）。
-    await expect(page.locator('body')).toBeVisible();
+    // app/faq/page.tsx 渲染 Faq 组件（components/sections/Faq.tsx），并添加了 h1 "常见问题" 作为页面主标题。
+    // Faq 组件恒定渲染 h2 "{title || '常见问题'}"（此处 title='常见问题'），FAQ 项依赖 Strapi getFaqItems() 返回数据。
+    // 此处断言页面级 h1 可见作为基线加载验证。
+    await expect(page.locator('h1').first()).toBeVisible();
   });
 
   test('FAQ meta 标签', async ({ page }) => {
@@ -44,7 +42,6 @@ test.describe('FAQ 页面', () => {
 
   test('FAQ 分类筛选', async ({ page }) => {
     await page.goto('/faq');
-    await page.waitForLoadState('networkidle');
     // 注意：Next.js 版 Faq 组件（components/sections/Faq.tsx）与 Vite 版 FaqPage.tsx 不同——
     // Next.js 复用首页的 Faq section 组件，仅渲染搜索框 + FAQ 项手风琴，无独立的分类筛选按钮区域。
     // 此处的 button/a 匹配实际命中的是 FAQ 项的 <button>（问题文本），其文案（如"入学流程是什么？"）取决于 Strapi 数据。

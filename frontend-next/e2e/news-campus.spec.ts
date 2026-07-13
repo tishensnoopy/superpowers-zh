@@ -3,7 +3,6 @@ import { test, expect } from '@playwright/test';
 test.describe('新闻列表页', () => {
   test('页面加载并显示标题', async ({ page }) => {
     await page.goto('/news');
-    await page.waitForLoadState('networkidle');
     // app/news/page.tsx 是 Server Component，恒定渲染 body 与 h1 "新闻动态"。
     // 新闻卡片（NewsCard）依赖 Strapi getNews() 返回数据，可能为空（页面显示"暂无新闻内容"），
     // 因此此处断言恒定渲染的 h1 可见作为基线加载验证。
@@ -21,7 +20,6 @@ test.describe('新闻列表页', () => {
 test.describe('新闻详情页', () => {
   test('新闻详情页面加载', async ({ page }) => {
     await page.goto('/news');
-    await page.waitForLoadState('networkidle');
     // NewsCard 渲染 <a href="/news/{slug}">，slug 来自 Strapi getNews() 返回的新闻列表。
     // 当 Strapi 不可达或无新闻数据时，列表页显示"暂无新闻内容"，此处链接不存在，
     // 因此保留条件断言——仅在有新闻数据时才验证详情页加载。
@@ -37,8 +35,7 @@ test.describe('新闻详情页', () => {
 test.describe('校区列表页', () => {
   test('页面加载并显示标题', async ({ page }) => {
     await page.goto('/campuses');
-    await page.waitForLoadState('networkidle');
-    // app/campuses/page.tsx 恒定渲染 CampusHeader（含 h1 "八大校区 任您选择"）。
+    // app/campuses/page.tsx 恒定渲染 CampusHeader（含 h1 "六大校区 任您选择"）。
     // CampusGrid 在无数据时显示"校区信息更新中"，有数据时渲染 CampusCard。
     // 此处断言恒定渲染的 h1 可见作为基线加载验证。
     await expect(page.locator('h1').first()).toBeVisible();

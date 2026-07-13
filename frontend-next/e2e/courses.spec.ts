@@ -3,13 +3,11 @@ import { test, expect } from '@playwright/test';
 test.describe('课程搜索页', () => {
   test('页面加载并显示搜索界面', async ({ page }) => {
     await page.goto('/courses');
-    await page.waitForLoadState('networkidle');
     await expect(page.locator('body')).toBeVisible();
   });
 
   test('搜索输入功能', async ({ page }) => {
     await page.goto('/courses');
-    await page.waitForLoadState('networkidle');
     // CourseSearchPanel 恒定渲染 SearchBar 组件（见 components/course/CourseSearchPanel.tsx），
     // SearchBar 输出 <input type="text">（见 components/course/SearchBar.tsx），不依赖 Strapi 数据，
     // 因此可以直接断言输入框存在。
@@ -26,7 +24,6 @@ test.describe('课程搜索页', () => {
 
   test('分类筛选功能', async ({ page }) => {
     await page.goto('/courses');
-    await page.waitForLoadState('networkidle');
     // CategoryFilter 仅在 getProductCategories() 返回非空数组时渲染（见 CourseSearchPanel.tsx 第 62 行）。
     // 筛选按钮文案（语言/数学/英语/综合）取决于 Strapi 后端配置的分类名称，非前端可控。
     // 当 Strapi 不可达或未配置分类时，该组件不会渲染，因此保留条件断言。
@@ -43,7 +40,6 @@ test.describe('课程搜索页', () => {
 
   test('竞态修复验证——快速连续输入', async ({ page }) => {
     await page.goto('/courses');
-    await page.waitForLoadState('networkidle');
     // SearchBar 恒定渲染（见上「搜索输入功能」测试中的说明），可以直接断言。
     const searchInput = page.locator('input[type="text"], input[type="search"]').first();
     await expect(searchInput).toBeVisible();
