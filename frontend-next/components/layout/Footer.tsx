@@ -65,6 +65,8 @@ export default function Footer({
     : [
         { title: '常见问题', url: '/faq' },
         { title: '退费政策', url: '/refund-policy' },
+        { title: '隐私政策', url: '/privacy-policy' },
+        { title: '用户协议', url: '/user-agreement' },
         { title: '联系客服', url: '/contact' },
       ];
 
