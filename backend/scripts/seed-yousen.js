@@ -850,10 +850,37 @@ async function seedPages(strapi, force, remove) {
     isHomepage: false,
     sections: [
       {
+        __component: 'section.advantages',
+        title: '8年深耕，匠心育人',
+        description: '用数据和成绩说话，每一个数字背后都是家长的信任与孩子的成长',
+        advantages: [
+          { title: '8年+',        description: '专注幼小衔接教育8年，深耕武汉市场',           icon: 'award',   color: '#3b82f6', bgColor: '#eff6ff' },
+          { title: '3000+',       description: '累计服务超过3000个家庭，口碑传承',           icon: 'users',   color: '#10b981', bgColor: '#ecfdf5' },
+          { title: '6大校区',     description: '遍布武汉三镇，就近选择优质教学',             icon: 'map-pin', color: '#8b5cf6', bgColor: '#f5f3ff' },
+          { title: '98% 满意度',  description: '连续5年家长满意度调研达98%以上',             icon: 'heart',   color: '#f59e0b', bgColor: '#fffbeb' },
+        ],
+      },
+      {
         __component: 'section.rich-text',
         title: '关于佑森小课堂',
         alignment: 'left',
-        content: '<p>武汉佑森小课堂艺术培训学校有限公司，成立于2018年，是一家专注幼小衔接教育的专业培训机构。</p><p>8年来，我们从1个校区发展到6大校区，累计服务超过3000个家庭，98%的家长满意度是我们最引以为豪的成绩。</p><p><strong>办学理念</strong></p><p>我们相信，幼小衔接不只是知识的衔接，更是习惯、能力和心理的衔接。佑森坚持"科学衔接、快乐成长"的理念，通过5大核心模块（语文素养、数学思维、英语启蒙、学习习惯、社交适应），帮助孩子顺利过渡到小学生活。</p><p><strong>师资力量</strong></p><p>14位认证教师，平均教龄7年，全部本科及以上学历。师资分科教学，每个学科由专业教师授课，确保教学深度和专业性。</p><p><strong>教学特色</strong></p><p>16-20人小班教学、室内课堂与户外研学相结合、师资分科教学。我们不仅教知识，更培养习惯和能力。</p>',
+        content: '<p>武汉佑森小课堂艺术培训学校有限公司，成立于2018年，是一家专注幼小衔接教育的专业培训机构。</p><p>8年来，我们从1个校区发展到6大校区，遍布武汉三镇（江岸区、汉阳区、经开区），累计服务超过3000个家庭，98%的家长满意度是我们最引以为豪的成绩。</p><p>作为武汉本土幼小衔接教育品牌，我们深知从幼儿园到小学这一关键过渡期的重要性。佑森小课堂以"科学衔接、快乐成长"为宗旨，致力于帮助3-6岁儿童在入学前做好知识、习惯、能力和心理的全面准备。</p>',
+      },
+      {
+        __component: 'section.rich-text',
+        title: '办学理念与师资力量',
+        alignment: 'left',
+        content: '<p><strong>办学理念</strong></p><p>我们相信，幼小衔接不只是知识的衔接，更是习惯、能力和心理的衔接。佑森坚持"科学衔接、快乐成长"的理念，通过5大核心模块（语文素养、数学思维、英语启蒙、学习习惯、社交适应），帮助孩子顺利过渡到小学生活。</p><p><strong>师资力量</strong></p><p>14位认证教师，平均教龄7年，全部本科及以上学历。师资分科教学，每个学科由专业教师授课，确保教学深度和专业性。教师团队定期参加教研培训，持续提升教学水平。</p><p><strong>教学特色</strong></p><p>16-20人小班教学、室内课堂与户外研学相结合、师资分科教学。我们不仅教知识，更培养习惯和能力，让每个孩子都能自信迈入小学大门。</p>',
+      },
+      {
+        __component: 'section.features',
+        title: '资质荣誉',
+        description: '专业资质认证，值得家长信赖',
+        features: [
+          { title: '办学许可证',   description: '武汉市教育局批准的正规艺术培训学校，持证办学，合规合法', icon: 'shield' },
+          { title: 'ISO质量认证',  description: '通过ISO9001质量管理体系认证，教学服务流程标准化',     icon: 'award' },
+          { title: '家长信赖品牌', description: '连续5年荣获武汉家长推荐幼小衔接教育品牌',             icon: 'heart' },
+        ],
       },
     ],
     layout: 'boxed',
