@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+*.md
+.env.local
+.env*.local
+Dockerfile
+.dockerignore
+__tests__
+coverage
+.vscode
+.idea
