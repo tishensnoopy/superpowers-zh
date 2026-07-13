@@ -5,6 +5,11 @@ build/
 .env*.local
 .lighthouse-ci/
 coverage/
+e2e-report/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
 *.log
 .DS_Store
 .vscode/
