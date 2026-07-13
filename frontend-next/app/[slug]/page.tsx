@@ -12,9 +12,9 @@ interface PageProps {
 
 export async function generateStaticParams() {
   const { data: pages } = await getPages();
-  // 排除首页（isHomepage=true 的页面），首页由 app/page.tsx 处理
+  const staticSlugs = ['refund-policy', 'privacy-policy', 'user-agreement', 'contact'];
   return pages
-    .filter((page) => !page.isHomepage)
+    .filter((page) => !page.isHomepage && !staticSlugs.includes(page.slug))
     .map((page) => ({ slug: page.slug }));
 }
 

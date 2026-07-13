@@ -16,6 +16,7 @@ export default function Error({
   const router = useRouter();
 
   useEffect(() => {
+    if (error.message.includes('API request failed')) return;
     Sentry.captureException(error, {
       tags: { section: 'route-error', digest: error.digest },
     });
