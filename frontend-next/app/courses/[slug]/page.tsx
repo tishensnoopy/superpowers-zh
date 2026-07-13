@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { getProducts, getProductBySlug } from '@/lib/api';
 import { buildMetadata, buildJsonLd } from '@/lib/seo';
 import CourseHeader from '@/components/course/CourseHeader';
+import CourseSpecs from '@/components/course/CourseSpecs';
 import CourseObjectives from '@/components/course/CourseObjectives';
 import CourseOutline from '@/components/course/CourseOutline';
 import CourseTestimonials from '@/components/course/CourseTestimonials';
@@ -61,6 +62,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: buildJsonLd(courseJsonLd) }}
       />
       <CourseHeader product={product} />
+      <CourseSpecs product={product} />
 
       {product.description && (
         <section className="py-16 bg-background">
