@@ -9,7 +9,7 @@ const mockTeacher = {
   title: '高级教师',
   subject: 'pinyin',
   teachingYears: 10,
-  campus: { id: 1, name: '朝阳校区', slug: 'chaoyang' },
+  campus: { id: 1, name: '百步亭校区', slug: 'yousen-baibuting' },
 };
 
 describe('TeacherCard 组件', () => {
@@ -30,7 +30,7 @@ describe('TeacherCard 组件', () => {
 
   it('渲染校区名称', () => {
     render(<TeacherCard teacher={mockTeacher as any} />);
-    expect(screen.getByText('朝阳校区')).toBeInTheDocument();
+    expect(screen.getByText('百步亭校区')).toBeInTheDocument();
   });
 
   it('渲染教龄', () => {

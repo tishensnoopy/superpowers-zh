@@ -12,7 +12,7 @@ const makeTeacher = (id: number, name: string, subject: string = 'pinyin') => ({
   education: `${name}的教育背景`,
   teachingFeatures: `${name}的教学特色`,
   achievements: [`${name}荣誉1`, `${name}荣誉2`],
-  campus: { id, name: '朝阳校区', slug: 'chaoyang' },
+  campus: { id, name: '百步亭校区', slug: 'yousen-baibuting' },
 });
 
 const mockTeachers = [

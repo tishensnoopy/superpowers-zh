@@ -19,7 +19,7 @@ const makeTeacher = (id: number, name: string) => ({
   education: `${name}的教育背景`,
   teachingFeatures: `${name}的教学特色`,
   achievements: [`${name}荣誉`],
-  campus: { id, name: '朝阳校区', slug: 'chaoyang' },
+  campus: { id, name: '百步亭校区', slug: 'yousen-baibuting' },
 });
 
 describe('TeamPage 页面', () => {
@@ -98,11 +98,11 @@ describe('TeamPage 页面', () => {
     vi.mocked(getTeachers).mockResolvedValueOnce({
       data: [makeTeacher(2, '李老师')],
     } as any);
-    fireEvent.click(screen.getByText('海淀'));
+    fireEvent.click(screen.getByText('三阳路'));
 
     await waitFor(() => {
       expect(getTeachers).toHaveBeenLastCalledWith(
-        expect.objectContaining({ campusSlug: 'haidian' })
+        expect.objectContaining({ campusSlug: 'yousen-sanyanglu' })
       );
     });
   });

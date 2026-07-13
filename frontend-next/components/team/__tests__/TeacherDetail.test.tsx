@@ -9,10 +9,10 @@ const mockTeacher = {
   title: '高级教师',
   subject: 'pinyin',
   teachingYears: 10,
-  education: '北京师范大学教育学硕士',
+  education: '华中师范大学教育学硕士',
   teachingFeatures: '擅长拼音启蒙，善于用游戏化教学激发孩子兴趣',
-  achievements: ['北京市优秀教师', '拼音教学大赛一等奖', '骨干教师称号'],
-  campus: { id: 1, name: '朝阳校区', slug: 'chaoyang' },
+  achievements: ['武汉市优秀教师', '拼音教学大赛一等奖', '骨干教师称号'],
+  campus: { id: 1, name: '百步亭校区', slug: 'yousen-baibuting' },
 };
 
 describe('TeacherDetail 组件', () => {
@@ -28,7 +28,7 @@ describe('TeacherDetail 组件', () => {
 
   it('渲染教育背景', () => {
     render(<TeacherDetail teacher={mockTeacher as any} onClose={() => {}} />);
-    expect(screen.getByText(/北京师范大学教育学硕士/)).toBeInTheDocument();
+    expect(screen.getByText(/华中师范大学教育学硕士/)).toBeInTheDocument();
   });
 
   it('渲染教学特色', () => {
@@ -38,7 +38,7 @@ describe('TeacherDetail 组件', () => {
 
   it('渲染荣誉成就标签', () => {
     render(<TeacherDetail teacher={mockTeacher as any} onClose={() => {}} />);
-    expect(screen.getByText('北京市优秀教师')).toBeInTheDocument();
+    expect(screen.getByText('武汉市优秀教师')).toBeInTheDocument();
     expect(screen.getByText('拼音教学大赛一等奖')).toBeInTheDocument();
     expect(screen.getByText('骨干教师称号')).toBeInTheDocument();
   });

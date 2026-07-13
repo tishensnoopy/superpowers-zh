@@ -13,21 +13,19 @@ describe('TeamFilter 组件', () => {
     expect(screen.getAllByText('全部').length).toBeGreaterThanOrEqual(2);
   });
 
-  it('渲染 8 个校区选项', () => {
+  it('渲染 6 个校区选项', () => {
     render(
       <TeamFilter
         onCampusChange={() => {}}
         onSubjectChange={() => {}}
       />
     );
-    expect(screen.getByText('朝阳')).toBeInTheDocument();
-    expect(screen.getByText('海淀')).toBeInTheDocument();
-    expect(screen.getByText('西城')).toBeInTheDocument();
-    expect(screen.getByText('丰台')).toBeInTheDocument();
-    expect(screen.getByText('东城')).toBeInTheDocument();
-    expect(screen.getByText('石景山')).toBeInTheDocument();
-    expect(screen.getByText('通州')).toBeInTheDocument();
-    expect(screen.getByText('昌平')).toBeInTheDocument();
+    expect(screen.getByText('百步亭')).toBeInTheDocument();
+    expect(screen.getByText('三阳路')).toBeInTheDocument();
+    expect(screen.getByText('动物园')).toBeInTheDocument();
+    expect(screen.getByText('钟家村')).toBeInTheDocument();
+    expect(screen.getByText('四新')).toBeInTheDocument();
+    expect(screen.getByText('沌口')).toBeInTheDocument();
   });
 
   it('渲染 4 个科目选项', () => {
@@ -51,15 +49,15 @@ describe('TeamFilter 组件', () => {
         onSubjectChange={() => {}}
       />
     );
-    fireEvent.click(screen.getByText('海淀'));
-    expect(onCampusChange).toHaveBeenCalledWith('haidian');
+    fireEvent.click(screen.getByText('三阳路'));
+    expect(onCampusChange).toHaveBeenCalledWith('yousen-sanyanglu');
   });
 
   it('点击"全部"校区触发 onCampusChange(null)', () => {
     const onCampusChange = vi.fn();
     render(
       <TeamFilter
-        campusSlug="chaoyang"
+        campusSlug="yousen-baibuting"
         onCampusChange={onCampusChange}
         onSubjectChange={() => {}}
       />
@@ -98,12 +96,12 @@ describe('TeamFilter 组件', () => {
   it('选中校区有选中样式', () => {
     render(
       <TeamFilter
-        campusSlug="chaoyang"
+        campusSlug="yousen-baibuting"
         onCampusChange={() => {}}
         onSubjectChange={() => {}}
       />
     );
-    const chip = screen.getByText('朝阳');
+    const chip = screen.getByText('百步亭');
     expect(chip).toHaveClass('bg-[#F5851F]');
     expect(chip).toHaveClass('text-white');
   });
@@ -124,7 +122,7 @@ describe('TeamFilter 组件', () => {
   it('未选中的"全部"校区有默认样式', () => {
     render(
       <TeamFilter
-        campusSlug="chaoyang"
+        campusSlug="yousen-baibuting"
         onCampusChange={() => {}}
         onSubjectChange={() => {}}
       />
