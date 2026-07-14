@@ -142,4 +142,118 @@ describe('lib/api locale support', () => {
     expect(result.data).toEqual([]);
     expect(mockFetch).toHaveBeenCalledTimes(1);
   });
+
+  it('getTeacherBySlug falls back to zh-CN when en-US returns empty array', async () => {
+    const teacherObj = { id: 1, name: '测试老师', slug: 'test-teacher', title: '测试标题' };
+    const mockFetch = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: [] }),
+        headers: { get: () => null },
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: [teacherObj] }),
+        headers: { get: () => null },
+      });
+    vi.stubGlobal('fetch', mockFetch);
+
+    const { getTeacherBySlug } = await import('../api');
+    const result = await getTeacherBySlug('test-teacher', 'en-US');
+    expect(result).toMatchObject(teacherObj);
+    expect(result?._i18nFallback).toBe(true);
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('getTeacherBySlug returns null when both en-US and zh-CN return empty', async () => {
+    const mockFetch = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: [] }),
+        headers: { get: () => null },
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: [] }),
+        headers: { get: () => null },
+      });
+    vi.stubGlobal('fetch', mockFetch);
+
+    const { getTeacherBySlug } = await import('../api');
+    const result = await getTeacherBySlug('test-teacher', 'en-US');
+    expect(result).toBeNull();
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('getTeacherBySlug does NOT fallback when locale is zh-CN', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ data: [] }),
+      headers: { get: () => null },
+    });
+    vi.stubGlobal('fetch', mockFetch);
+
+    const { getTeacherBySlug } = await import('../api');
+    const result = await getTeacherBySlug('test-teacher', 'zh-CN');
+    expect(result).toBeNull();
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('getCampusBySlug falls back to zh-CN when en-US returns empty array', async () => {
+    const campusObj = { id: 1, name: '测试校区', slug: 'test-campus', address: '测试地址' };
+    const mockFetch = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: [] }),
+        headers: { get: () => null },
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: [campusObj] }),
+        headers: { get: () => null },
+      });
+    vi.stubGlobal('fetch', mockFetch);
+
+    const { getCampusBySlug } = await import('../api');
+    const result = await getCampusBySlug('test-campus', 'en-US');
+    expect(result.data[0]).toMatchObject(campusObj);
+    expect(result._i18nFallback).toBe(true);
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('getCampusBySlug does NOT mark _i18nFallback when zh-CN fallback also empty', async () => {
+    const mockFetch = vi.fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: [] }),
+        headers: { get: () => null },
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve({ data: [] }),
+        headers: { get: () => null },
+      });
+    vi.stubGlobal('fetch', mockFetch);
+
+    const { getCampusBySlug } = await import('../api');
+    const result = await getCampusBySlug('test-campus', 'en-US');
+    expect(result.data).toEqual([]);
+    expect(result._i18nFallback).toBeUndefined();
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('getProductBySlug rethrows non-404 errors', async () => {
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      statusText: 'Internal Server Error',
+      text: () => Promise.resolve('server error'),
+      headers: { get: () => null },
+    });
+    vi.stubGlobal('fetch', mockFetch);
+
+    const { getProductBySlug } = await import('../api');
+    await expect(getProductBySlug('test-slug', 'en-US')).rejects.toThrow(/500/);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
 });

@@ -562,7 +562,7 @@ export async function getTeachers(
   return result;
 }
 
-export async function getTeacherBySlug(slug: string, locale: Locale = 'zh-CN') {
+export async function getTeacherBySlug(slug: string, locale: Locale = 'zh-CN'): Promise<(Teacher & { _i18nFallback?: boolean }) | null> {
   console.log(`${LOG_PREFIX} Fetching teacher by slug: ${slug} (locale: ${locale})...`);
   const params = new URLSearchParams();
   params.set('filters[slug][$eq]', slug);
@@ -579,7 +579,7 @@ export async function getTeacherBySlug(slug: string, locale: Locale = 'zh-CN') {
     const fallbackResult = await fetchApi<{ data: Teacher[] }>(`/api/teachers?${fallbackParams.toString()}`);
     const teacher = fallbackResult.data[0] || null;
     console.log(`${LOG_PREFIX} Teacher loaded:`, teacher?.name);
-    return teacher ? { ...teacher, _i18nFallback: true } as Teacher & { _i18nFallback?: boolean } : null;
+    return teacher ? { ...teacher, _i18nFallback: true } : null;
   }
 
   console.log(`${LOG_PREFIX} Teacher loaded:`, result.data[0]?.name);
@@ -618,7 +618,7 @@ export async function getCampuses(locale: Locale = 'zh-CN') {
   return result;
 }
 
-export async function getCampusBySlug(slug: string, locale: Locale = 'zh-CN') {
+export async function getCampusBySlug(slug: string, locale: Locale = 'zh-CN'): Promise<{ data: Campus[]; _i18nFallback?: boolean }> {
   console.log(`${LOG_PREFIX} Fetching campus by slug: ${slug} (locale: ${locale})...`);
   const params = new URLSearchParams();
   params.set('filters[slug][$eq]', slug);
@@ -632,7 +632,10 @@ export async function getCampusBySlug(slug: string, locale: Locale = 'zh-CN') {
     fallbackParams.set('locale', 'zh-CN');
     const fallbackResult = await fetchApi<{ data: Campus[] }>(`/api/campuses?${fallbackParams.toString()}`);
     console.log(`${LOG_PREFIX} Campus loaded:`, fallbackResult.data[0]?.name);
-    return { ...fallbackResult, _i18nFallback: true } as { data: Campus[]; _i18nFallback: boolean };
+    if (fallbackResult.data.length === 0) {
+      return fallbackResult;
+    }
+    return { ...fallbackResult, _i18nFallback: true };
   }
 
   console.log(`${LOG_PREFIX} Campus loaded:`, result.data[0]?.name);

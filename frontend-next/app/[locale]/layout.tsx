@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Noto_Sans_SC, Nunito } from 'next/font/google';
 import { setRequestLocale, getMessages } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
-import { getSiteSettings, getNavigationTree, getFooter, getImageUrl } from '@/lib/api';
+import { getSiteSettings, getNavigationTree, getFooter, getImageUrl, type Locale } from '@/lib/api';
 import { routing } from '@/i18n/routing';
 import LayoutShell from '@/components/layout/LayoutShell';
 import Navigation from '@/components/layout/Navigation';
@@ -74,9 +74,9 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
 
   const [settingsRes, navRes, footerRes, messages] = await Promise.all([
-    getSiteSettings(),
-    getNavigationTree(),
-    getFooter(),
+    getSiteSettings(locale as Locale),
+    getNavigationTree(locale as Locale),
+    getFooter(locale as Locale),
     getMessages(),
   ]);
 
