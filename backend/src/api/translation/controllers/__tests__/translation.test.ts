@@ -159,8 +159,9 @@ describe('POST /api/translation/assist', () => {
     }));
     vi.stubGlobal('strapi', {
       documents: vi.fn().mockReturnValue({
-        findOne: vi.fn().mockResolvedValue({ documentId: 'doc1', name: '中文名' }),
+        findOne: vi.fn().mockResolvedValue({ documentId: 'doc1', name: '中文名', description: '中文描述' }),
       }),
+      log: { error: vi.fn() },
     });
 
     const ctx = buildCtx({

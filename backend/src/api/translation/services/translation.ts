@@ -35,6 +35,7 @@ export async function translateDocument(opts: TranslateOptions): Promise<Record<
           { role: 'user', content: JSON.stringify(opts.fields) },
         ],
         temperature: 0.3,
+        response_format: { type: 'json_object' },
       }),
       signal: controller.signal,
     });
@@ -53,7 +54,10 @@ export async function translateDocument(opts: TranslateOptions): Promise<Record<
     // Strip markdown code fences if present
     const cleaned = content.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
     const parsed = JSON.parse(cleaned);
-    return parsed;
+    if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      throw new Error('AI_RESPONSE_PARSE_ERROR: response is not a JSON object');
+    }
+    return parsed as Record<string, string>;
   } finally {
     clearTimeout(timeout);
   }

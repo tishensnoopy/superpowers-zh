@@ -52,6 +52,10 @@ export default {
       ctx.throw(400, JSON.stringify({ error: { code: 'INVALID_PARAMS', message: 'fields must be non-empty array' } }));
       return;
     }
+    if (targetLocale && targetLocale !== 'en-US') {
+      ctx.throw(400, JSON.stringify({ error: { code: 'INVALID_PARAMS', message: 'targetLocale currently only supports en-US' } }));
+      return;
+    }
 
     // 3. Read source document
     const uid = CONTENT_TYPE_UIDS[contentType];
@@ -109,9 +113,9 @@ export default {
     }
 
     // 6. Field completeness check
-    const missingFields = fields.filter(f => !(f in translations));
+    const missingFields = Object.keys(fieldsToTranslate).filter(f => !(f in translations));
     if (missingFields.length > 0) {
-      console.error(`[translation] AI response missing fields: ${missingFields.join(', ')}`);
+      strapi.log.error(`[translation] AI response missing fields: ${missingFields.join(', ')}`);
       ctx.throw(502, JSON.stringify({ error: { code: 'AI_RESPONSE_INCOMPLETE', message: `Missing: ${missingFields.join(', ')}` } }));
       return;
     }
