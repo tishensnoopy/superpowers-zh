@@ -1,5 +1,7 @@
 import * as Sentry from '@sentry/nextjs';
 
+export type Locale = 'zh-CN' | 'en-US';
+
 const DEFAULT_API_URL = 'http://localhost:1337';
 
 export function getApiBaseUrl(opts: {
@@ -98,38 +100,48 @@ export function getImageUrl(
   return `${clientUrl}${image.url}`;
 }
 
-export async function getSiteSettings() {
-  return fetchApi<{ data: SiteSettings[] }>('/api/site-settings');
+export async function getSiteSettings(locale: Locale = 'zh-CN') {
+  return fetchApi<{ data: SiteSettings[] }>(`/api/site-settings?locale=${locale}`);
 }
 
 export async function getNavigation() {
   return fetchApi<{ data: NavigationItem[] }>('/api/navigation');
 }
 
-export async function getNavigationTree() {
-  return fetchApi<{ data: NavigationItem[] }>('/api/navigation/tree');
+export async function getNavigationTree(locale: Locale = 'zh-CN') {
+  return fetchApi<{ data: NavigationItem[] }>(`/api/navigation/tree?locale=${locale}`);
 }
 
-export async function getFooter() {
-  return fetchApi<{ data: Footer[] }>('/api/footer?populate=socialLinks&populate=quickLinks');
+export async function getFooter(locale: Locale = 'zh-CN') {
+  return fetchApi<{ data: Footer[] }>(`/api/footer?populate=socialLinks&populate=quickLinks&locale=${locale}`);
 }
 
-export async function getPages(locale?: string) {
+export async function getPages(locale: Locale = 'zh-CN') {
   const params = locale ? `?locale=${locale}` : '';
   return fetchApi<{ data: Page[]; meta: Pagination }>(`/api/pages${params}`);
 }
 
-export async function getHomepage() {
-  return fetchApi<{ data: Page }>('/api/pages/homepage');
+export async function getHomepage(locale: Locale = 'zh-CN') {
+  return fetchApi<{ data: Page }>(`/api/pages/homepage?locale=${locale}`);
 }
 
-export async function getPageBySlug(slug: string) {
-  return fetchApi<{ data: Page }>(`/api/pages/slug/${slug}`);
+export async function getPageBySlug(slug: string, locale: Locale = 'zh-CN'): Promise<{ data: Page; _i18nFallback?: boolean }> {
+  try {
+    return await fetchApi<{ data: Page }>(`/api/pages/slug/${slug}?locale=${locale}`);
+  } catch (err) {
+    if (locale !== 'zh-CN' && err instanceof Error && err.message.includes('404')) {
+      console.warn(`[i18n] ${locale} missing, fallback to zh-CN: pages/${slug}`);
+      const result = await fetchApi<{ data: Page }>(`/api/pages/slug/${slug}?locale=zh-CN`);
+      return { ...result, _i18nFallback: true };
+    }
+    throw err;
+  }
 }
 
-export async function getProducts(filters?: { category?: string }) {
+export async function getProducts(locale: Locale = 'zh-CN', filters?: { category?: string }) {
   const params = new URLSearchParams();
   params.set('populate', 'thumbnail,categories,specs,objectives,outline,testimonials');
+  params.set('locale', locale);
   if (filters?.category) {
     params.set('category', filters.category);
   }
@@ -140,8 +152,17 @@ export async function getFeaturedProducts() {
   return fetchApi<{ data: Product[] }>('/api/products/featured');
 }
 
-export async function getProductBySlug(slug: string) {
-  return fetchApi<{ data: Product }>(`/api/products/slug/${slug}`);
+export async function getProductBySlug(slug: string, locale: Locale = 'zh-CN'): Promise<{ data: Product; _i18nFallback?: boolean }> {
+  try {
+    return await fetchApi<{ data: Product }>(`/api/products/slug/${slug}?locale=${locale}`);
+  } catch (err) {
+    if (locale !== 'zh-CN' && err instanceof Error && err.message.includes('404')) {
+      console.warn(`[i18n] ${locale} missing, fallback to zh-CN: products/${slug}`);
+      const result = await fetchApi<{ data: Product }>(`/api/products/slug/${slug}?locale=zh-CN`);
+      return { ...result, _i18nFallback: true };
+    }
+    throw err;
+  }
 }
 
 export async function getProductCategories() {
@@ -164,10 +185,11 @@ export function getNewsCategoryLabel(category: string): string {
   return categoryLabels[category] || category;
 }
 
-export async function getNews(category?: string) {
+export async function getNews(locale: Locale = 'zh-CN', category?: string) {
   console.log(`${LOG_PREFIX} Fetching news${category ? ` (category: ${category})` : ''}...`);
   const params = new URLSearchParams();
   params.set('populate', 'coverImage');
+  params.set('locale', locale);
   if (category) {
     params.set('category', category);
   }
@@ -177,11 +199,21 @@ export async function getNews(category?: string) {
   return result;
 }
 
-export async function getNewsBySlug(slug: string) {
+export async function getNewsBySlug(slug: string, locale: Locale = 'zh-CN'): Promise<{ data: NewsArticle; _i18nFallback?: boolean }> {
   console.log(`${LOG_PREFIX} Fetching news by slug: ${slug}...`);
-  const result = await fetchApi<{ data: NewsArticle }>(`/api/news-articles/slug/${slug}`);
-  console.log(`${LOG_PREFIX} News loaded: ${result.data.title}`);
-  return result;
+  try {
+    const result = await fetchApi<{ data: NewsArticle }>(`/api/news-articles/slug/${slug}?locale=${locale}`);
+    console.log(`${LOG_PREFIX} News loaded: ${result.data.title}`);
+    return result;
+  } catch (err) {
+    if (locale !== 'zh-CN' && err instanceof Error && err.message.includes('404')) {
+      console.warn(`[i18n] ${locale} missing, fallback to zh-CN: news-articles/${slug}`);
+      const result = await fetchApi<{ data: NewsArticle }>(`/api/news-articles/slug/${slug}?locale=zh-CN`);
+      console.log(`${LOG_PREFIX} News loaded: ${result.data.title}`);
+      return { ...result, _i18nFallback: true };
+    }
+    throw err;
+  }
 }
 
 export async function getProductSpecs() {
@@ -191,10 +223,14 @@ export async function getProductSpecs() {
   return result;
 }
 
-export async function getFaqItems(category?: string) {
+export async function getFaqItems(locale: Locale = 'zh-CN', category?: string) {
   console.log(`${LOG_PREFIX} Fetching FAQ items${category ? ` (category: ${category})` : ''}...`);
-  const params = category ? `?category=${category}` : '';
-  const result = await fetchApi<{ data: FaqItem[] }>(`/api/faq-items${params}`);
+  const params = new URLSearchParams();
+  params.set('locale', locale);
+  if (category) {
+    params.set('category', category);
+  }
+  const result = await fetchApi<{ data: FaqItem[] }>(`/api/faq-items?${params.toString()}`);
   console.log(`${LOG_PREFIX} FAQ items loaded: ${result.data.length} items`);
   return result;
 }
@@ -499,13 +535,17 @@ export interface Teacher {
   sortOrder?: number;
 }
 
-export async function getTeachers(filters?: {
-  campusSlug?: string;
-  subject?: string;
-  featured?: boolean;
-}) {
+export async function getTeachers(
+  locale: Locale = 'zh-CN',
+  filters?: {
+    campusSlug?: string;
+    subject?: string;
+    featured?: boolean;
+  }
+) {
   console.log(`${LOG_PREFIX} Fetching teachers...`, filters);
   const params = new URLSearchParams();
+  params.set('locale', locale);
   if (filters?.campusSlug) {
     params.set('filters[campus][slug][$eq]', filters.campusSlug);
   }
@@ -522,12 +562,26 @@ export async function getTeachers(filters?: {
   return result;
 }
 
-export async function getTeacherBySlug(slug: string) {
-  console.log(`${LOG_PREFIX} Fetching teacher by slug: ${slug}...`);
+export async function getTeacherBySlug(slug: string, locale: Locale = 'zh-CN') {
+  console.log(`${LOG_PREFIX} Fetching teacher by slug: ${slug} (locale: ${locale})...`);
   const params = new URLSearchParams();
   params.set('filters[slug][$eq]', slug);
   params.set('populate', 'avatar,campus');
+  params.set('locale', locale);
   const result = await fetchApi<{ data: Teacher[] }>(`/api/teachers?${params.toString()}`);
+
+  if (result.data.length === 0 && locale !== 'zh-CN') {
+    console.warn(`[i18n] ${locale} missing, fallback to zh-CN: teachers/${slug}`);
+    const fallbackParams = new URLSearchParams();
+    fallbackParams.set('filters[slug][$eq]', slug);
+    fallbackParams.set('populate', 'avatar,campus');
+    fallbackParams.set('locale', 'zh-CN');
+    const fallbackResult = await fetchApi<{ data: Teacher[] }>(`/api/teachers?${fallbackParams.toString()}`);
+    const teacher = fallbackResult.data[0] || null;
+    console.log(`${LOG_PREFIX} Teacher loaded:`, teacher?.name);
+    return teacher ? { ...teacher, _i18nFallback: true } as Teacher & { _i18nFallback?: boolean } : null;
+  }
+
   console.log(`${LOG_PREFIX} Teacher loaded:`, result.data[0]?.name);
   return result.data[0] || null;
 }
@@ -553,21 +607,34 @@ export interface Campus {
   seo?: Seo;
 }
 
-export async function getCampuses() {
+export async function getCampuses(locale: Locale = 'zh-CN') {
   console.log(`${LOG_PREFIX} Fetching campuses...`);
   const params = new URLSearchParams();
   params.set('sort', 'sortOrder:asc');
   params.set('populate', 'coverImage,gallery,teachers');
+  params.set('locale', locale);
   const result = await fetchApi<{ data: Campus[] }>(`/api/campuses?${params.toString()}`);
   console.log(`${LOG_PREFIX} Campuses loaded: ${result.data.length} items`);
   return result;
 }
 
-export async function getCampusBySlug(slug: string) {
-  console.log(`${LOG_PREFIX} Fetching campus by slug: ${slug}...`);
+export async function getCampusBySlug(slug: string, locale: Locale = 'zh-CN') {
+  console.log(`${LOG_PREFIX} Fetching campus by slug: ${slug} (locale: ${locale})...`);
   const params = new URLSearchParams();
   params.set('filters[slug][$eq]', slug);
+  params.set('locale', locale);
   const result = await fetchApi<{ data: Campus[] }>(`/api/campuses?${params.toString()}`);
+
+  if (result.data.length === 0 && locale !== 'zh-CN') {
+    console.warn(`[i18n] ${locale} missing, fallback to zh-CN: campuses/${slug}`);
+    const fallbackParams = new URLSearchParams();
+    fallbackParams.set('filters[slug][$eq]', slug);
+    fallbackParams.set('locale', 'zh-CN');
+    const fallbackResult = await fetchApi<{ data: Campus[] }>(`/api/campuses?${fallbackParams.toString()}`);
+    console.log(`${LOG_PREFIX} Campus loaded:`, fallbackResult.data[0]?.name);
+    return { ...fallbackResult, _i18nFallback: true } as { data: Campus[]; _i18nFallback: boolean };
+  }
+
   console.log(`${LOG_PREFIX} Campus loaded:`, result.data[0]?.name);
   return result;
 }

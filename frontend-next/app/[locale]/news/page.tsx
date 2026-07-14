@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getNews } from '@/lib/api';
+import { getNews, type Locale } from '@/lib/api';
 import { buildMetadata } from '@/lib/seo';
 import { setRequestLocale } from 'next-intl/server';
 import NewsCard from '@/components/news/NewsCard';
@@ -36,7 +36,7 @@ export default async function NewsListPage({ params, searchParams }: PageProps) 
   const { category, page } = await searchParams;
   const activeCategory = category || '';
   const currentPage = Math.max(1, parseInt(page || '1', 10) || 1);
-  const { data: news } = await getNews(activeCategory || undefined).catch(() => ({ data: [] as never[] }));
+  const { data: news } = await getNews(locale as Locale, activeCategory || undefined).catch(() => ({ data: [] as never[] }));
 
   const totalItems = news.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));

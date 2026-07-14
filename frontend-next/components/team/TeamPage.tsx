@@ -19,7 +19,7 @@ export default function TeamPage() {
     let cancelled = false;
     setLoading(true);
     setError(false);
-    getTeachers({
+    getTeachers('zh-CN', {
       campusSlug: campusSlug || undefined,
       subject: subject || undefined,
     })

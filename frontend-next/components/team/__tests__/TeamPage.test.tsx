@@ -102,6 +102,7 @@ describe('TeamPage 页面', () => {
 
     await waitFor(() => {
       expect(getTeachers).toHaveBeenLastCalledWith(
+        'zh-CN',
         expect.objectContaining({ campusSlug: 'yousen-sanyanglu' })
       );
     });
@@ -123,6 +124,7 @@ describe('TeamPage 页面', () => {
 
     await waitFor(() => {
       expect(getTeachers).toHaveBeenLastCalledWith(
+        'zh-CN',
         expect.objectContaining({ subject: 'math' })
       );
     });
