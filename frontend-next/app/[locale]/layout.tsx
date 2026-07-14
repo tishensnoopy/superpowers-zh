@@ -3,6 +3,7 @@ import { Noto_Sans_SC, Nunito } from 'next/font/google';
 import { setRequestLocale, getMessages } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
 import { getSiteSettings, getNavigationTree, getFooter, getImageUrl } from '@/lib/api';
+import { routing } from '@/i18n/routing';
 import LayoutShell from '@/components/layout/LayoutShell';
 import Navigation from '@/components/layout/Navigation';
 import Footer from '@/components/layout/Footer';
@@ -10,6 +11,10 @@ import FloatingChat from '@/components/chat/FloatingChat';
 import '../globals.css';
 
 export const revalidate = 300;
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
 const notoSansSC = Noto_Sans_SC({
   weight: ['400', '500', '700'],
