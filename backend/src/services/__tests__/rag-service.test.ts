@@ -9,6 +9,7 @@ vi.mock('../llm-service', () => ({
 // Import mocked functions (typed as vitest mocks).
 import { generateEmbedding, chat } from '../llm-service';
 import { setStrapi, retrieve, generateAnswer, feedbackToFaq } from '../rag-service';
+import { clearCache } from '../ai-config-service';
 import type { RetrievedDoc } from '../rag-service';
 
 const mockGenerateEmbedding = generateEmbedding as unknown as ReturnType<typeof vi.fn>;
@@ -23,6 +24,19 @@ function buildMockStrapi(rawRows: unknown[] = []) {
       },
     },
     documents: vi.fn().mockReturnValue({ create: createFn }),
+  };
+}
+
+// 构造支持 ai-config 读取的 mock strapi（documents().findMany() 返回配置行）。
+function buildMockStrapiWithAiConfig(aiConfigRow: Record<string, unknown> | null) {
+  return {
+    db: { connection: { raw: vi.fn() } },
+    documents: vi.fn((uid: string) => {
+      if (uid === 'api::ai-config.ai-config') {
+        return { findMany: vi.fn().mockResolvedValue(aiConfigRow ? [aiConfigRow] : []) };
+      }
+      return { findMany: vi.fn(), create: vi.fn() };
+    }),
   };
 }
 
@@ -309,6 +323,124 @@ describe('rag-service', () => {
       // msg-14: i=14 -> 14%2=0 -> user.
       expect(messages[10]).toEqual({ role: 'user', content: 'msg-14' });
       expect(messages[11]).toEqual({ role: 'user', content: 'q' });
+    });
+
+    test('locale=en-US 时使用 systemPromptEn', async () => {
+      clearCache();
+
+      const aiConfigRow = {
+        provider: 'qwen',
+        model: 'qwen-plus',
+        embeddingModel: 'text-embedding-v2',
+        apiKey: 'sk-test',
+        apiEndpoint: 'https://test',
+        systemPrompt: '中文 prompt {retrieved_docs}',
+        systemPromptEn: 'English prompt {retrieved_docs}',
+        temperature: 0.3,
+        maxTokens: 1000,
+        topK: 5,
+        chunkSize: 500,
+        chunkOverlap: 50,
+        isActive: true,
+      };
+      const configStrapi = buildMockStrapiWithAiConfig(aiConfigRow);
+      setStrapi(configStrapi as any);
+
+      mockChat.mockResolvedValue({ content: 'English answer', tokenCount: 10, latencyMs: 50 });
+
+      await generateAnswer('question', docs, [], 'en-US', false);
+
+      const systemPrompt = mockChat.mock.calls[0][0][0].content;
+      expect(systemPrompt).toContain('English prompt');
+      expect(systemPrompt).not.toContain('中文 prompt');
+    });
+
+    test('locale=en-US + usedFallback 时追加翻译指令', async () => {
+      clearCache();
+
+      const aiConfigRow = {
+        provider: 'qwen',
+        model: 'qwen-plus',
+        embeddingModel: 'text-embedding-v2',
+        apiKey: 'sk-test',
+        apiEndpoint: 'https://test',
+        systemPrompt: '中文 prompt {retrieved_docs}',
+        systemPromptEn: 'English prompt {retrieved_docs}',
+        temperature: 0.3,
+        maxTokens: 1000,
+        topK: 5,
+        chunkSize: 500,
+        chunkOverlap: 50,
+        isActive: true,
+      };
+      const configStrapi = buildMockStrapiWithAiConfig(aiConfigRow);
+      setStrapi(configStrapi as any);
+
+      mockChat.mockResolvedValue({ content: 'answer', tokenCount: 1, latencyMs: 1 });
+
+      await generateAnswer('question', docs, [], 'en-US', true);
+
+      const systemPrompt = mockChat.mock.calls[0][0][0].content;
+      expect(systemPrompt).toContain('Translate the answer to English');
+    });
+
+    test('locale=zh-CN + usedFallback 时不追加翻译指令', async () => {
+      clearCache();
+
+      const aiConfigRow = {
+        provider: 'qwen',
+        model: 'qwen-plus',
+        embeddingModel: 'text-embedding-v2',
+        apiKey: 'sk-test',
+        apiEndpoint: 'https://test',
+        systemPrompt: '中文 prompt {retrieved_docs}',
+        systemPromptEn: 'English prompt {retrieved_docs}',
+        temperature: 0.3,
+        maxTokens: 1000,
+        topK: 5,
+        chunkSize: 500,
+        chunkOverlap: 50,
+        isActive: true,
+      };
+      const configStrapi = buildMockStrapiWithAiConfig(aiConfigRow);
+      setStrapi(configStrapi as any);
+
+      mockChat.mockResolvedValue({ content: 'answer', tokenCount: 1, latencyMs: 1 });
+
+      await generateAnswer('question', docs, [], 'zh-CN', true);
+
+      const systemPrompt = mockChat.mock.calls[0][0][0].content;
+      expect(systemPrompt).not.toContain('Translate the answer to English');
+    });
+
+    test('en-US fallback 链：systemPromptEn 为空时回退到 systemPrompt', async () => {
+      clearCache();
+
+      const aiConfigRow = {
+        provider: 'qwen',
+        model: 'qwen-plus',
+        embeddingModel: 'text-embedding-v2',
+        apiKey: 'sk-test',
+        apiEndpoint: 'https://test',
+        systemPrompt: '中文 prompt {retrieved_docs}',
+        systemPromptEn: null,
+        temperature: 0.3,
+        maxTokens: 1000,
+        topK: 5,
+        chunkSize: 500,
+        chunkOverlap: 50,
+        isActive: true,
+      };
+      const configStrapi = buildMockStrapiWithAiConfig(aiConfigRow);
+      setStrapi(configStrapi as any);
+
+      mockChat.mockResolvedValue({ content: 'answer', tokenCount: 1, latencyMs: 1 });
+
+      await generateAnswer('question', docs, [], 'en-US', false);
+
+      const systemPrompt = mockChat.mock.calls[0][0][0].content;
+      expect(systemPrompt).toContain('中文 prompt');
+      expect(systemPrompt).not.toContain('English prompt');
     });
   });
 
