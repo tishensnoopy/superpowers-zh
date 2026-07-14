@@ -447,9 +447,9 @@ export interface AppointmentData {
 
 export async function createAppointment(data: AppointmentData) {
   console.log(`${LOG_PREFIX} Creating appointment...`);
-  console.log(`${LOG_PREFIX} Appointment request:`, { hasName: !!data.name, hasPhone: !!data.phone, campus: data.campus });
+  console.log(`${LOG_PREFIX} Appointment request:`, { hasParentName: !!data.parentName, hasChildName: !!data.childName, hasPhone: !!data.phone, campus: data.campus });
 
-  const requiredFields = ['name', 'phone', 'campus'];
+  const requiredFields = ['parentName', 'childName', 'phone', 'campus'];
   const missingFields = requiredFields.filter(field => !data[field as keyof AppointmentData]);
   if (missingFields.length > 0) {
     console.warn(`${LOG_PREFIX} WARNING: Missing required fields: ${missingFields.join(', ')}`);
