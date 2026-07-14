@@ -28,18 +28,18 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale, slug } = await params;
   const { data: product } = await getProductBySlug(slug).catch(() => ({
     data: null,
   }));
   if (!product) {
-    return buildMetadata(undefined, { title: '课程详情', canonicalUrl: `/courses/${slug}` });
+    return buildMetadata(undefined, { title: '课程详情', canonicalUrl: `/courses/${slug}` }, { locale: locale as 'zh-CN' | 'en-US', path: `/courses/${slug}` });
   }
   return buildMetadata(product.seo, {
     title: product.name,
     description: product.shortDescription || product.description,
     canonicalUrl: `/courses/${slug}`,
-  });
+  }, { locale: locale as 'zh-CN' | 'en-US', path: `/courses/${slug}` });
 }
 
 export default async function CourseDetailPage({ params }: PageProps) {

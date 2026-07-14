@@ -26,7 +26,7 @@ Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 async function openChatAndWaitForSession(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole('button', { name: /在线咨询/ }));
   await waitFor(() => expect(startChat).toHaveBeenCalled());
-  await screen.findByPlaceholderText(/输入消息/);
+  await screen.findByPlaceholderText(/请输入您的问题/);
   await new Promise(resolve => setTimeout(resolve, 50));
 }
 
@@ -54,7 +54,7 @@ describe('FloatingChat 组件', () => {
     await user.click(screen.getByRole('button', { name: /在线咨询/ }));
 
     expect(await screen.findAllByText(/佑森小课堂/)).toHaveLength(2);
-    expect(screen.getByPlaceholderText(/输入消息/)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/请输入您的问题/)).toBeInTheDocument();
   });
 
   it('打开聊天窗口时创建会话', async () => {
@@ -83,7 +83,7 @@ describe('FloatingChat 组件', () => {
 
     await openChatAndWaitForSession(user);
 
-    const input = screen.getByPlaceholderText(/输入消息/);
+    const input = screen.getByPlaceholderText(/请输入您的问题/);
     await user.type(input, '请问课程怎么报名？');
     await user.click(screen.getByRole('button', { name: /发送/ }));
 
@@ -96,7 +96,7 @@ describe('FloatingChat 组件', () => {
 
     await openChatAndWaitForSession(user);
 
-    const input = screen.getByPlaceholderText(/输入消息/);
+    const input = screen.getByPlaceholderText(/请输入您的问题/);
     await user.type(input, '你好');
     await user.click(screen.getByRole('button', { name: /发送/ }));
 
@@ -111,7 +111,7 @@ describe('FloatingChat 组件', () => {
 
     await openChatAndWaitForSession(user);
 
-    const input = screen.getByPlaceholderText(/输入消息/);
+    const input = screen.getByPlaceholderText(/请输入您的问题/);
     await user.type(input, '你好');
     await user.click(screen.getByRole('button', { name: /发送/ }));
 
@@ -123,11 +123,11 @@ describe('FloatingChat 组件', () => {
     render(<FloatingChat />);
 
     await user.click(screen.getByRole('button', { name: /在线咨询/ }));
-    await screen.findByPlaceholderText(/输入消息/);
+    await screen.findByPlaceholderText(/请输入您的问题/);
 
     await user.click(screen.getByRole('button', { name: /关闭/ }));
 
-    expect(screen.queryByPlaceholderText(/输入消息/)).not.toBeInTheDocument();
+    expect(screen.queryByPlaceholderText(/请输入您的问题/)).not.toBeInTheDocument();
   });
 
   it('转人工后显示转人工提示', async () => {
@@ -141,7 +141,7 @@ describe('FloatingChat 组件', () => {
 
     await openChatAndWaitForSession(user);
 
-    const input = screen.getByPlaceholderText(/输入消息/);
+    const input = screen.getByPlaceholderText(/请输入您的问题/);
     await user.type(input, '转人工');
     await user.click(screen.getByRole('button', { name: /发送/ }));
 
@@ -159,7 +159,7 @@ describe('FloatingChat 组件', () => {
 
     await openChatAndWaitForSession(user);
 
-    const input = screen.getByPlaceholderText(/输入消息/);
+    const input = screen.getByPlaceholderText(/请输入您的问题/);
     await user.type(input, '测试');
     await user.click(screen.getByRole('button', { name: /发送/ }));
 
@@ -204,7 +204,7 @@ describe('FloatingChat 组件', () => {
 
     await openChatAndWaitForSession(user);
 
-    const input = screen.getByPlaceholderText(/输入消息/);
+    const input = screen.getByPlaceholderText(/请输入您的问题/);
     await user.type(input, '测试');
     await user.click(screen.getByRole('button', { name: /发送/ }));
 
@@ -223,7 +223,7 @@ describe('FloatingChat 组件', () => {
 
     await openChatAndWaitForSession(user);
 
-    const input = screen.getByPlaceholderText(/输入消息/);
+    const input = screen.getByPlaceholderText(/请输入您的问题/);
     await user.type(input, '你好');
     await user.click(screen.getByRole('button', { name: /发送/ }));
 
@@ -243,7 +243,7 @@ describe('FloatingChat 组件', () => {
 
     await openChatAndWaitForSession(user);
 
-    const input = screen.getByPlaceholderText(/输入消息/);
+    const input = screen.getByPlaceholderText(/请输入您的问题/);
     await user.type(input, '你好');
     await user.click(screen.getByRole('button', { name: /发送/ }));
 

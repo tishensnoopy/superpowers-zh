@@ -10,7 +10,7 @@ describe('ChatInput 组件', () => {
 
   it('渲染输入框和发送按钮', () => {
     render(<ChatInput onSend={vi.fn()} isLoading={false} />);
-    expect(screen.getByPlaceholderText(/输入消息/)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/请输入您的问题/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /发送/ })).toBeInTheDocument();
   });
 
@@ -19,7 +19,7 @@ describe('ChatInput 组件', () => {
     const onSend = vi.fn();
     render(<ChatInput onSend={onSend} isLoading={false} />);
 
-    const input = screen.getByPlaceholderText(/输入消息/);
+    const input = screen.getByPlaceholderText(/请输入您的问题/);
     await user.type(input, '你好');
     await user.click(screen.getByRole('button', { name: /发送/ }));
 
@@ -31,7 +31,7 @@ describe('ChatInput 组件', () => {
     const onSend = vi.fn();
     render(<ChatInput onSend={onSend} isLoading={false} />);
 
-    const input = screen.getByPlaceholderText(/输入消息/);
+    const input = screen.getByPlaceholderText(/请输入您的问题/);
     await user.type(input, '请问课程怎么报名？{Enter}');
 
     expect(onSend).toHaveBeenCalledWith('请问课程怎么报名？');
@@ -42,7 +42,7 @@ describe('ChatInput 组件', () => {
     const onSend = vi.fn();
     render(<ChatInput onSend={onSend} isLoading={false} />);
 
-    const input = screen.getByPlaceholderText(/输入消息/) as HTMLTextAreaElement;
+    const input = screen.getByPlaceholderText(/请输入您的问题/) as HTMLTextAreaElement;
     await user.type(input, '第一行{Shift>}{Enter}{/Shift}第二行');
 
     expect(onSend).not.toHaveBeenCalled();
@@ -62,7 +62,7 @@ describe('ChatInput 组件', () => {
     const onSend = vi.fn();
     render(<ChatInput onSend={onSend} isLoading={false} />);
 
-    const input = screen.getByPlaceholderText(/输入消息/);
+    const input = screen.getByPlaceholderText(/请输入您的问题/);
     await user.type(input, '   ');
     await user.click(screen.getByRole('button', { name: /发送/ }));
     expect(onSend).not.toHaveBeenCalled();
@@ -70,7 +70,7 @@ describe('ChatInput 组件', () => {
 
   it('isLoading 为 true 时禁用输入框和按钮', () => {
     render(<ChatInput onSend={vi.fn()} isLoading={true} />);
-    expect(screen.getByPlaceholderText(/输入消息/)).toBeDisabled();
+    expect(screen.getByPlaceholderText(/请输入您的问题/)).toBeDisabled();
     expect(screen.getByRole('button', { name: /发送/ })).toBeDisabled();
   });
 
@@ -82,7 +82,7 @@ describe('ChatInput 组件', () => {
 
   it('disabled 为 true 时禁用输入框和按钮', () => {
     render(<ChatInput onSend={vi.fn()} isLoading={false} disabled={true} />);
-    expect(screen.getByPlaceholderText(/输入消息/)).toBeDisabled();
+    expect(screen.getByPlaceholderText(/请输入您的问题/)).toBeDisabled();
     expect(screen.getByRole('button', { name: /发送/ })).toBeDisabled();
   });
 
@@ -91,7 +91,7 @@ describe('ChatInput 组件', () => {
     const onSend = vi.fn();
     render(<ChatInput onSend={onSend} isLoading={false} />);
 
-    const input = screen.getByPlaceholderText(/输入消息/) as HTMLTextAreaElement;
+    const input = screen.getByPlaceholderText(/请输入您的问题/) as HTMLTextAreaElement;
     await user.type(input, '测试消息');
     await user.click(screen.getByRole('button', { name: /发送/ }));
 
@@ -108,7 +108,7 @@ describe('ChatInput 组件', () => {
     const onSend = vi.fn();
     render(<ChatInput onSend={onSend} isLoading={false} />);
 
-    const textarea = screen.getByPlaceholderText(/输入消息/);
+    const textarea = screen.getByPlaceholderText(/请输入您的问题/);
     fireEvent.change(textarea, { target: { value: longText } });
     fireEvent.keyDown(textarea, { key: 'Enter', shiftKey: false });
 
@@ -121,7 +121,7 @@ describe('ChatInput 组件', () => {
     const onSend = vi.fn();
     render(<ChatInput onSend={onSend} isLoading={false} />);
 
-    const input = screen.getByPlaceholderText(/输入消息/);
+    const input = screen.getByPlaceholderText(/请输入您的问题/);
     await user.type(input, 'a'.repeat(500));
     await user.click(screen.getByRole('button', { name: /发送/ }));
 
@@ -132,7 +132,7 @@ describe('ChatInput 组件', () => {
     const onSend = vi.fn();
     render(<ChatInput onSend={onSend} isLoading={false} />);
 
-    const textarea = screen.getByPlaceholderText(/输入消息/);
+    const textarea = screen.getByPlaceholderText(/请输入您的问题/);
     // 先触发错误
     fireEvent.change(textarea, { target: { value: 'a'.repeat(501) } });
     fireEvent.keyDown(textarea, { key: 'Enter', shiftKey: false });

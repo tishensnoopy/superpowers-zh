@@ -234,7 +234,7 @@ export default function FloatingChat({ locale = 'zh-CN' }: { locale?: 'zh-CN' | 
       </div>
 
       {/* Input */}
-      <ChatInput onSend={handleSend} isLoading={isLoading} disabled={isTransferred} />
+      <ChatInput onSend={handleSend} isLoading={isLoading} disabled={isTransferred} locale={locale} />
     </div>
   );
 }

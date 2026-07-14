@@ -9,9 +9,10 @@ interface ChatInputProps {
   onSend: (message: string) => void;
   isLoading: boolean;
   disabled?: boolean;
+  locale?: 'zh-CN' | 'en-US';
 }
 
-export default function ChatInput({ onSend, isLoading, disabled = false }: ChatInputProps) {
+export default function ChatInput({ onSend, isLoading, disabled = false, locale = 'zh-CN' }: ChatInputProps) {
   const [value, setValue] = useState('');
   const [error, setError] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -22,7 +23,7 @@ export default function ChatInput({ onSend, isLoading, disabled = false }: ChatI
     const trimmed = value.trim();
     if (!trimmed || isDisabled) return;
     if (trimmed.length > MAX_LENGTH) {
-      setError(`消息不能超过 ${MAX_LENGTH} 字符`);
+      setError(locale === 'en-US' ? `Message cannot exceed ${MAX_LENGTH} characters` : `消息不能超过 ${MAX_LENGTH} 字符`);
       return;
     }
     setError('');
@@ -52,7 +53,7 @@ export default function ChatInput({ onSend, isLoading, disabled = false }: ChatI
     <div className="border-t border-gray-100 p-3 bg-white">
       {disabled && (
         <div className="mb-2 text-center text-xs text-orange-500 bg-orange-50 rounded-lg py-1.5">
-          已转人工客服，请等待客服回复
+          {locale === 'en-US' ? 'Transferred to human agent, please wait' : '已转人工客服，请等待客服回复'}
         </div>
       )}
       {error && (
@@ -66,7 +67,7 @@ export default function ChatInput({ onSend, isLoading, disabled = false }: ChatI
           value={value}
           onChange={handleInput}
           onKeyDown={handleKeyDown}
-          placeholder="输入消息..."
+          placeholder={locale === 'en-US' ? 'Type your question...' : '请输入您的问题...'}
           disabled={isDisabled}
           maxLength={MAX_LENGTH}
           rows={1}
@@ -77,7 +78,7 @@ export default function ChatInput({ onSend, isLoading, disabled = false }: ChatI
           onClick={handleSend}
           disabled={isDisabled}
           aria-busy={isLoading}
-          aria-label="发送"
+          aria-label={locale === 'en-US' ? 'Send' : '发送'}
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
         >
