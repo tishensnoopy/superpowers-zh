@@ -58,20 +58,20 @@ test.describe('课程搜索页', () => {
 });
 
 test.describe('课程详情页', () => {
-  test('语言启蒙课程详情', async ({ page }) => {
-    await page.goto('/courses/language');
+  test('幼小衔接课程详情', async ({ page }) => {
+    await page.goto('/courses/yousen-youxiao-xianjie');
     await expect(page.locator('h1').first()).toBeVisible();
-    await expect(page).toHaveTitle(/语言启蒙/);
+    await expect(page).toHaveTitle(/幼小衔接/);
   });
 
   test('课程详情 meta 标签', async ({ page }) => {
-    await page.goto('/courses/language');
+    await page.goto('/courses/yousen-youxiao-xianjie');
     await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /.+/);
     await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', /.+/);
   });
 
   test('课程详情 JSON-LD', async ({ page }) => {
-    await page.goto('/courses/language');
+    await page.goto('/courses/yousen-youxiao-xianjie');
     const jsonLd = page.locator('script[type="application/ld+json"]');
     await expect(jsonLd).toHaveCount(1);
     const content = await jsonLd.textContent();
@@ -81,7 +81,7 @@ test.describe('课程详情页', () => {
   });
 
   test('课程详情 CTA 按钮', async ({ page }) => {
-    await page.goto('/courses/language');
+    await page.goto('/courses/yousen-youxiao-xianjie');
     // CourseCTA 组件恒定渲染 <Link href="/?course=...#appointment">（见 components/course/CourseCTA.tsx），
     // 不依赖 Strapi 数据，因此可以直接断言。Next.js <Link> 渲染为 <a> 标签。
     const ctaButton = page.locator('a[href*="appointment"]').first();

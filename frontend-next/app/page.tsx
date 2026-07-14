@@ -7,8 +7,11 @@ export const revalidate = 300;
 
 export async function generateMetadata(): Promise<Metadata> {
   const { data: page } = await getHomepage().catch(() => ({ data: null as null }));
-  if (!page) return buildMetadata(undefined, { title: '首页' });
-  return buildMetadata(page.seo, { title: page.title });
+  if (!page) return buildMetadata(undefined, { title: '首页', description: '佑森小课堂专注于幼小衔接教育8年，提供全日制托班、课后托管、幼小衔接全能班等课程，六大校区遍布武汉三镇。' });
+  return buildMetadata(page.seo, {
+    title: page.title,
+    description: '佑森小课堂专注于幼小衔接教育8年，提供全日制托班、课后托管、幼小衔接全能班等课程，六大校区遍布武汉三镇。',
+  });
 }
 
 export default async function HomePage() {
