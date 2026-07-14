@@ -73,3 +73,4 @@ Thumbs.db
 
 # 旧 Vite 版本的视觉测试快照
 frontend/e2e/visual.spec.ts-snapshots/
+test-results/
