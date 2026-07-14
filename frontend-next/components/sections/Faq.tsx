@@ -77,6 +77,7 @@ export default function Faq({ section }: { section: Section }) {
                 placeholder="搜索常见问题..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                aria-label="搜索常见问题"
                 className="w-full pl-12 pr-4 py-3 rounded-xl border border-border bg-card focus:outline-none focus:border-[#F5851F] transition-colors"
               />
             </div>
