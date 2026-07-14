@@ -1,3 +1,18 @@
+type Locale = 'zh-CN' | 'en-US';
+
+function normalizeLocale(input: unknown): Locale {
+  if (typeof input === 'string' && (['zh-CN', 'en-US'] as readonly string[]).includes(input)) {
+    return input as Locale;
+  }
+  return 'zh-CN';
+}
+
+function buildSourceUrl(uid: string, record: any): string {
+  const locale = normalizeLocale(record?.locale);
+  const docId = record?.documentId || record?.id;
+  return `strapi://${uid}/${docId}?locale=${locale}`;
+}
+
 const CONTENT_TYPES = [
   { uid: 'api::course.course', serialize: serializeCourse, name: '课程' },
   { uid: 'api::news-article.news-article', serialize: serializeNews, name: '新闻' },
@@ -30,41 +45,49 @@ export async function syncWebsiteContent(strapi: any): Promise<{ synced: number;
   let synced = 0;
   let updated = 0;
   const errors: string[] = [];
+  const LOCALES: Locale[] = ['zh-CN', 'en-US'];
 
   for (const { uid, serialize, name } of CONTENT_TYPES) {
-    try {
-      const records = await strapi.documents(uid).findMany({ limit: 1000 });
-      for (const record of records) {
-        const sourceUrl = `strapi://${uid}/${record.documentId || record.id}`;
-        const content = serialize(record);
-
-        const existing = await strapi.db.query('api::knowledge-base.knowledge-base').findOne({
-          where: { sourceUrl },
+    for (const locale of LOCALES) {
+      try {
+        const records = await strapi.documents(uid).findMany({
+          limit: 1000,
+          locale,
         });
+        for (const record of records) {
+          const recordWithLocale = { ...record, locale };
+          const sourceUrl = buildSourceUrl(uid, recordWithLocale);
+          const content = serialize(record);
 
-        if (existing) {
-          await strapi.documents('api::knowledge-base.knowledge-base').update({
-            documentId: existing.documentId,
-            data: { title: record.title || record.name || `${name}文档`, content, status: 'pending' },
+          const existing = await strapi.db.query('api::knowledge-base.knowledge-base').findOne({
+            where: { sourceUrl },
           });
-          updated++;
-        } else {
-          await strapi.documents('api::knowledge-base.knowledge-base').create({
-            data: {
-              title: record.title || record.name || `${name}文档`,
-              content,
-              sourceType: 'content-sync',
-              sourceUrl,
-              status: 'pending',
-              priority: 'high',
-              tags: name,
-            },
-          });
-          synced++;
+
+          if (existing) {
+            await strapi.documents('api::knowledge-base.knowledge-base').update({
+              documentId: existing.documentId,
+              data: { title: record.title || record.name || `${name}文档`, content, locale, status: 'pending' },
+            });
+            updated++;
+          } else {
+            await strapi.documents('api::knowledge-base.knowledge-base').create({
+              data: {
+                title: record.title || record.name || `${name}文档`,
+                content,
+                sourceType: 'content-sync',
+                sourceUrl,
+                locale,
+                status: 'pending',
+                priority: 'high',
+                tags: name,
+              },
+            });
+            synced++;
+          }
         }
+      } catch (err) {
+        errors.push(`${name}[${locale}]: ${err instanceof Error ? err.message : err}`);
       }
-    } catch (err) {
-      errors.push(`${name}: ${err instanceof Error ? err.message : err}`);
     }
   }
 
@@ -76,7 +99,8 @@ export async function syncSingleContent(strapi: any, uid: string, record: any): 
   const config = CONTENT_TYPES.find(c => c.uid === uid);
   if (!config) return;
 
-  const sourceUrl = `strapi://${uid}/${record.documentId || record.id}`;
+  const locale = normalizeLocale(record?.locale);
+  const sourceUrl = buildSourceUrl(uid, record);
   const content = config.serialize(record);
 
   const existing = await strapi.db.query('api::knowledge-base.knowledge-base').findOne({
@@ -86,7 +110,7 @@ export async function syncSingleContent(strapi: any, uid: string, record: any): 
   if (existing) {
     await strapi.documents('api::knowledge-base.knowledge-base').update({
       documentId: existing.documentId,
-      data: { title: record.title || record.name || '文档', content, status: 'pending' },
+      data: { title: record.title || record.name || '文档', content, locale, status: 'pending' },
     });
   } else {
     await strapi.documents('api::knowledge-base.knowledge-base').create({
@@ -95,6 +119,7 @@ export async function syncSingleContent(strapi: any, uid: string, record: any): 
         content,
         sourceType: 'content-sync',
         sourceUrl,
+        locale,
         status: 'pending',
         priority: 'high',
         tags: config.name,
@@ -104,7 +129,7 @@ export async function syncSingleContent(strapi: any, uid: string, record: any): 
 }
 
 export async function deleteSyncedContent(strapi: any, uid: string, record: any): Promise<void> {
-  const sourceUrl = `strapi://${uid}/${record.documentId || record.id}`;
+  const sourceUrl = buildSourceUrl(uid, record);
   const existing = await strapi.db.query('api::knowledge-base.knowledge-base').findOne({
     where: { sourceUrl },
   });

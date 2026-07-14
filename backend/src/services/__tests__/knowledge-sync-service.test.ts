@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { serializeCourse, serializeNews, serializeTeacher, serializeCampus, syncWebsiteContent } from '../knowledge-sync-service';
+import { serializeCourse, serializeNews, serializeTeacher, serializeCampus, syncWebsiteContent, syncSingleContent, deleteSyncedContent } from '../knowledge-sync-service';
 
 describe('knowledge-sync-service 序列化规则', () => {
   it('课程序列化应包含标题/描述/年龄/价格', () => {
@@ -60,5 +60,103 @@ describe('syncWebsiteContent', () => {
 
     const result = await syncWebsiteContent(mockStrapi);
     expect(result.synced).toBeGreaterThan(0);
+  });
+});
+
+describe('syncSingleContent with locale', () => {
+  it('writes locale=en-US to knowledge_base when record has locale=en-US', async () => {
+    const mockFindOne = vi.fn().mockResolvedValue(null);
+    const mockCreate = vi.fn().mockResolvedValue({});
+    const mockStrapi = {
+      db: { query: vi.fn().mockReturnValue({ findOne: mockFindOne }) },
+      documents: vi.fn().mockReturnValue({ create: mockCreate }),
+    } as any;
+
+    await syncSingleContent(mockStrapi, 'api::course.course', {
+      documentId: 'doc1',
+      title: 'English Course',
+      description: 'desc',
+      locale: 'en-US',
+    });
+
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ locale: 'en-US' }),
+      })
+    );
+  });
+
+  it('writes locale=zh-CN when record has no locale field', async () => {
+    const mockFindOne = vi.fn().mockResolvedValue(null);
+    const mockCreate = vi.fn().mockResolvedValue({});
+    const mockStrapi = {
+      db: { query: vi.fn().mockReturnValue({ findOne: mockFindOne }) },
+      documents: vi.fn().mockReturnValue({ create: mockCreate }),
+    } as any;
+
+    await syncSingleContent(mockStrapi, 'api::course.course', {
+      documentId: 'doc2',
+      title: '中文课程',
+    });
+
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ locale: 'zh-CN' }),
+      })
+    );
+  });
+
+  it('creates two independent records for same documentId different locales', async () => {
+    const mockFindOne = vi.fn().mockResolvedValue(null);
+    const mockCreate = vi.fn().mockResolvedValue({});
+    const mockStrapi = {
+      db: { query: vi.fn().mockReturnValue({ findOne: mockFindOne }) },
+      documents: vi.fn().mockReturnValue({ create: mockCreate }),
+    } as any;
+
+    await syncSingleContent(mockStrapi, 'api::course.course', {
+      documentId: 'doc1',
+      title: '中文课程',
+      locale: 'zh-CN',
+    });
+    await syncSingleContent(mockStrapi, 'api::course.course', {
+      documentId: 'doc1',
+      title: 'English Course',
+      locale: 'en-US',
+    });
+
+    expect(mockCreate).toHaveBeenCalledTimes(2);
+    const firstCall = mockCreate.mock.calls[0][0].data;
+    const secondCall = mockCreate.mock.calls[1][0].data;
+    expect(firstCall.locale).toBe('zh-CN');
+    expect(secondCall.locale).toBe('en-US');
+    // sourceUrl should differ by locale
+    expect(firstCall.sourceUrl).not.toBe(secondCall.sourceUrl);
+  });
+
+  it('deleteSyncedContent only deletes matching documentId + locale', async () => {
+    const mockFindOne = vi.fn().mockResolvedValue({ id: 5, documentId: 'kb1' });
+    const mockDeleteVectors = vi.fn();
+    const mockDelete = vi.fn();
+    const mockStrapi = {
+      db: { query: vi.fn().mockReturnValue({ findOne: mockFindOne }) },
+      documents: vi.fn().mockReturnValue({ delete: mockDelete }),
+      service: vi.fn().mockReturnValue({ deleteVectors: mockDeleteVectors }),
+    } as any;
+
+    await deleteSyncedContent(mockStrapi, 'api::course.course', {
+      documentId: 'doc1',
+      locale: 'en-US',
+    });
+
+    expect(mockFindOne).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          sourceUrl: 'strapi://api::course.course/doc1?locale=en-US',
+        }),
+      })
+    );
+    expect(mockDeleteVectors).toHaveBeenCalledWith(5);
+    expect(mockDelete).toHaveBeenCalled();
   });
 });
