@@ -22,12 +22,13 @@ interface PageProps {
   searchParams: Promise<{ category?: string; page?: string }>;
 }
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
   return buildMetadata(undefined, {
     title: '新闻动态',
     description: '了解我们的最新动态、行业资讯和活动通知。',
     canonicalUrl: '/news',
-  });
+  }, { locale: locale as 'zh-CN' | 'en-US', path: '/news' });
 }
 
 export default async function NewsListPage({ params, searchParams }: PageProps) {

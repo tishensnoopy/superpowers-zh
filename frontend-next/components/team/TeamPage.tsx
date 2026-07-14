@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getTeachers, type Teacher } from '@/lib/api';
+import { getTeachers, type Teacher, type Locale } from '@/lib/api';
 import TeamHeader from './TeamHeader';
 import TeamFilter from './TeamFilter';
 import TeamGrid from './TeamGrid';
 
-export default function TeamPage() {
+export default function TeamPage({ locale = 'zh-CN' }: { locale?: Locale }) {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -19,7 +19,7 @@ export default function TeamPage() {
     let cancelled = false;
     setLoading(true);
     setError(false);
-    getTeachers('zh-CN', {
+    getTeachers(locale, {
       campusSlug: campusSlug || undefined,
       subject: subject || undefined,
     })
@@ -39,7 +39,7 @@ export default function TeamPage() {
     return () => {
       cancelled = true;
     };
-  }, [campusSlug, subject]);
+  }, [locale, campusSlug, subject]);
 
   const handleCampusChange = (slug: string | null) => {
     setCampusSlug(slug);

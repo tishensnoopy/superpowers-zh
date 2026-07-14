@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
-import { getProducts, getProductBySlug } from '@/lib/api';
+import { getProducts, getProductBySlug, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd } from '@/lib/seo';
 import CourseHeader from '@/components/course/CourseHeader';
 import CourseSpecs from '@/components/course/CourseSpecs';
@@ -29,7 +29,7 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { locale, slug } = await params;
-  const { data: product } = await getProductBySlug(slug).catch(() => ({
+  const { data: product } = await getProductBySlug(slug, locale as Locale).catch(() => ({
     data: null,
   }));
   if (!product) {
@@ -45,7 +45,7 @@ export async function generateMetadata({
 export default async function CourseDetailPage({ params }: PageProps) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
-  const { data: product } = await getProductBySlug(slug).catch(() => ({
+  const { data: product } = await getProductBySlug(slug, locale as Locale).catch(() => ({
     data: null,
   }));
 

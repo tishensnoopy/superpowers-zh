@@ -1,26 +1,27 @@
 import { Phone, Mail, MessageCircle, Clock, MapPin } from 'lucide-react';
 import { buildMetadata } from '@/lib/seo';
 import { setRequestLocale } from 'next-intl/server';
-import { getCampuses, getSiteSettings } from '@/lib/api';
+import { getCampuses, getSiteSettings, type Locale } from '@/lib/api';
 import ContactForm from '@/components/sections/ContactForm';
 import type { Metadata } from 'next';
 
 export const revalidate = 300;
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
   return buildMetadata(undefined, {
     title: '联系我们',
     description: '联系佑森小课堂，预约免费试听课程，查看各校区联系方式',
     canonicalUrl: '/contact',
-  });
+  }, { locale: locale as 'zh-CN' | 'en-US', path: '/contact' });
 }
 
 export default async function ContactPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const [campusesRes, settingsRes] = await Promise.all([
-    getCampuses().catch(() => ({ data: [] as never[] })),
-    getSiteSettings().catch(() => ({ data: null as any })),
+    getCampuses(locale as Locale).catch(() => ({ data: [] as never[] })),
+    getSiteSettings(locale as Locale).catch(() => ({ data: null as any })),
   ]);
 
   const campuses = campusesRes.data || [];

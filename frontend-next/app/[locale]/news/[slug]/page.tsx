@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
 import Link from 'next/link';
 import { Calendar, Eye, ArrowLeft, Home } from 'lucide-react';
-import { getNews, getNewsBySlug, getNewsCategoryLabel, getImageUrl } from '@/lib/api';
+import { getNews, getNewsBySlug, getNewsCategoryLabel, getImageUrl, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd } from '@/lib/seo';
 import StrapiImage from '@/components/ui/StrapiImage';
 import type { Metadata } from 'next';
@@ -34,17 +34,17 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const { data: news } = await getNewsBySlugSafe(slug);
+  const { locale, slug } = await params;
+  const { data: news } = await getNewsBySlugSafe(slug, locale as Locale);
   if (!news) {
-    return buildMetadata(undefined, { title: '新闻动态', canonicalUrl: `/news/${slug}` });
+    return buildMetadata(undefined, { title: '新闻动态', canonicalUrl: `/news/${slug}` }, { locale: locale as 'zh-CN' | 'en-US', path: `/news/${slug}` });
   }
 
   const metadata = buildMetadata(news.seo, {
     title: news.title,
     description: news.excerpt,
     canonicalUrl: `/news/${slug}`,
-  });
+  }, { locale: locale as 'zh-CN' | 'en-US', path: `/news/${slug}` });
 
   const coverUrl = getImageUrl(news.coverImage);
 
@@ -58,9 +58,9 @@ export async function generateMetadata({
   };
 }
 
-async function getNewsBySlugSafe(slug: string) {
+async function getNewsBySlugSafe(slug: string, locale: Locale) {
   try {
-    const result = await getNewsBySlug(slug);
+    const result = await getNewsBySlug(slug, locale);
     return { data: result.data };
   } catch {
     return { data: null };
@@ -70,7 +70,7 @@ async function getNewsBySlugSafe(slug: string) {
 export default async function NewsDetailPage({ params }: PageProps) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
-  const { data: news } = await getNewsBySlugSafe(slug);
+  const { data: news } = await getNewsBySlugSafe(slug, locale as Locale);
 
   if (!news) {
     notFound();

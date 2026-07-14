@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
-import { getPages, getPageBySlug } from '@/lib/api';
+import { getPages, getPageBySlug, type Locale } from '@/lib/api';
 import { buildMetadata } from '@/lib/seo';
 import SectionRenderer from '@/components/SectionRenderer';
 import type { Metadata } from 'next';
@@ -26,20 +26,20 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const { data: page } = await getPageBySlug(slug).catch(() => ({
+  const { locale, slug } = await params;
+  const { data: page } = await getPageBySlug(slug, locale as Locale).catch(() => ({
     data: null,
   }));
   if (!page) {
-    return buildMetadata(undefined, { title: '页面', canonicalUrl: `/${slug}` });
+    return buildMetadata(undefined, { title: '页面', canonicalUrl: `/${slug}` }, { locale: locale as 'zh-CN' | 'en-US', path: `/${slug}` });
   }
-  return buildMetadata(page.seo, { title: page.title, canonicalUrl: `/${slug}` });
+  return buildMetadata(page.seo, { title: page.title, canonicalUrl: `/${slug}` }, { locale: locale as 'zh-CN' | 'en-US', path: `/${slug}` });
 }
 
 export default async function DynamicPage({ params }: PageProps) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
-  const { data: page } = await getPageBySlug(slug).catch(() => ({
+  const { data: page } = await getPageBySlug(slug, locale as Locale).catch(() => ({
     data: null,
   }));
 

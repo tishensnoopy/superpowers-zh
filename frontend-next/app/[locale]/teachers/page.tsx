@@ -1,5 +1,6 @@
 import TeamPage from '@/components/team/TeamPage';
 import { setRequestLocale } from 'next-intl/server';
+import type { Locale } from '@/lib/api';
 import type { Metadata } from 'next';
 
 export const revalidate = 300;
@@ -13,5 +14,5 @@ export const metadata: Metadata = {
 export default async function TeachersPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <TeamPage />;
+  return <TeamPage locale={locale as Locale} />;
 }

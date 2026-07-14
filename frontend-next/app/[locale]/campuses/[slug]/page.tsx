@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
-import { getCampuses, getCampusBySlug } from '@/lib/api';
+import { getCampuses, getCampusBySlug, type Locale } from '@/lib/api';
 import { buildMetadata } from '@/lib/seo';
 import CampusDetailHeader from '@/components/campus/CampusDetailHeader';
 import CampusGallery from '@/components/campus/CampusGallery';
@@ -27,23 +27,23 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const { data } = await getCampusBySlug(slug).catch(() => ({ data: [] }));
+  const { locale, slug } = await params;
+  const { data } = await getCampusBySlug(slug, locale as Locale).catch(() => ({ data: [] }));
   const campus = Array.isArray(data) ? data[0] : data;
   if (!campus) {
-    return buildMetadata(undefined, { title: '校区详情', canonicalUrl: `/campuses/${slug}` });
+    return buildMetadata(undefined, { title: '校区详情', canonicalUrl: `/campuses/${slug}` }, { locale: locale as 'zh-CN' | 'en-US', path: `/campuses/${slug}` });
   }
   return buildMetadata(campus.seo, {
     title: campus.name,
     description: campus.address,
     canonicalUrl: `/campuses/${slug}`,
-  });
+  }, { locale: locale as 'zh-CN' | 'en-US', path: `/campuses/${slug}` });
 }
 
 export default async function CampusDetailPage({ params }: PageProps) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
-  const { data } = await getCampusBySlug(slug).catch(() => ({ data: [] }));
+  const { data } = await getCampusBySlug(slug, locale as Locale).catch(() => ({ data: [] }));
   const campus = Array.isArray(data) ? data[0] : data;
 
   if (!campus) {

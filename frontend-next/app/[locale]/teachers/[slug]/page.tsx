@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
-import { getTeachers, getTeacherBySlug } from '@/lib/api';
+import { getTeachers, getTeacherBySlug, type Locale } from '@/lib/api';
 import { buildMetadata } from '@/lib/seo';
 import StrapiImage from '@/components/ui/StrapiImage';
 import type { Metadata } from 'next';
@@ -24,19 +24,19 @@ export async function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const teacher = await getTeacherBySlug(slug).catch(() => null);
+  const { locale, slug } = await params;
+  const teacher = await getTeacherBySlug(slug, locale as Locale).catch(() => null);
   if (!teacher) {
     return buildMetadata(undefined, {
       title: '教师详情',
       canonicalUrl: `/teachers/${slug}`,
-    });
+    }, { locale: locale as 'zh-CN' | 'en-US', path: `/teachers/${slug}` });
   }
   return buildMetadata(undefined, {
     title: `${teacher.name} - ${teacher.title}`,
     description: teacher.teachingFeatures || `${teacher.name}，${teacher.title}`,
     canonicalUrl: `/teachers/${slug}`,
-  });
+  }, { locale: locale as 'zh-CN' | 'en-US', path: `/teachers/${slug}` });
 }
 
 const SUBJECT_LABELS: Record<string, string> = {
@@ -49,7 +49,7 @@ const SUBJECT_LABELS: Record<string, string> = {
 export default async function TeacherDetailPage({ params }: PageProps) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
-  const teacher = await getTeacherBySlug(slug).catch(() => null);
+  const teacher = await getTeacherBySlug(slug, locale as Locale).catch(() => null);
 
   if (!teacher) {
     notFound();

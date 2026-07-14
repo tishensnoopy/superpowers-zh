@@ -1,4 +1,4 @@
-import { getFaqItems } from '@/lib/api';
+import { getFaqItems, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd } from '@/lib/seo';
 import { setRequestLocale } from 'next-intl/server';
 import Faq from '@/components/sections/Faq';
@@ -6,18 +6,19 @@ import type { Metadata } from 'next';
 
 export const revalidate = 300;
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
   return buildMetadata(undefined, {
     title: '常见问题',
     description: '幼小衔接课程常见问题解答，帮助您了解入学流程、课程安排等。',
     canonicalUrl: '/faq',
-  });
+  }, { locale: locale as 'zh-CN' | 'en-US', path: '/faq' });
 }
 
 export default async function FaqPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { data: faqItems } = await getFaqItems().catch(() => ({ data: [] as never[] }));
+  const { data: faqItems } = await getFaqItems(locale as Locale).catch(() => ({ data: [] as never[] }));
 
   // 构造 section 对象以复用 Faq 组件
   const section = {
