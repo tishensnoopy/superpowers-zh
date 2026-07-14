@@ -52,6 +52,11 @@
     "metadata": {
       "type": "json"
     },
+    "messageCount": {
+      "type": "integer",
+      "default": 0,
+      "description": "Number of user messages in this session"
+    },
     "messages": {
       "type": "relation",
       "relation": "oneToMany",

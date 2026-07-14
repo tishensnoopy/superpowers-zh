@@ -20,6 +20,9 @@ interface ChatMessageRow {
   createdAt?: string;
 }
 
+const MAX_MESSAGES = 10;
+const MAX_MESSAGE_LENGTH = 500;
+
 function randomId(prefix: string): string {
   return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -51,7 +54,13 @@ export default {
       ctx.throw(400, 'sessionId and message are required');
     }
 
-    // 1. Find the session by business sessionId.
+    // 1. Input length limit — reject messages exceeding 500 characters to
+    //    prevent abuse (prompt injection, token exhaustion, etc.).
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      ctx.throw(400, `消息不能超过 ${MAX_MESSAGE_LENGTH} 字符`);
+    }
+
+    // 2. Find the session by business sessionId.
     const sessions = await strapi.documents('api::chat-session.chat-session').findMany({
       filters: { sessionId },
       limit: 1,
@@ -67,12 +76,24 @@ export default {
       return;
     }
 
-    // 2. Persist the user message.
+    // 3. 10-round threshold — after 10 user messages, guide the visitor to
+    //    book a free trial class instead of continuing the automated chat.
+    if ((session.messageCount ?? 0) >= MAX_MESSAGES) {
+      ctx.body = {
+        type: 'transfer',
+        content: '您今天已经咨询了很多问题，为了更好地为您服务，建议您预约一次免费试听课，我们的顾问会为您详细解答。',
+        actionUrl: '/appointment',
+        retrievedDocs: 0,
+      };
+      return;
+    }
+
+    // 4. Persist the user message.
     await strapi.documents('api::chat-message.chat-message').create({
       data: { session: session.documentId, role: 'user', content: message },
     });
 
-    // 3. Intent detection — transfer to human if appropriate.
+    // 5. Intent detection — transfer to human if appropriate.
     const { detectIntent } = require('../../../services/llm-service') as {
       detectIntent: (message: string) => Promise<{ shouldTransfer: boolean }>;
     };
@@ -90,14 +111,14 @@ export default {
       return;
     }
 
-    // 4. Gather recent history for context (last 10 messages).
+    // 6. Gather recent history for context (last 10 messages).
     const history = await strapi.documents('api::chat-message.chat-message').findMany({
       filters: { session: session.documentId },
       sort: { createdAt: 'asc' },
       limit: 10,
     });
 
-    // 5. RAG: retrieve relevant chunks + generate the answer.
+    // 7. RAG: retrieve relevant chunks + generate the answer.
     const { retrieve, generateAnswer } = require('../../../services/rag-service') as {
       retrieve: (query: string, topK: number) => Promise<{ docs: any[]; isRelevant: boolean }>;
       generateAnswer: (
@@ -108,13 +129,31 @@ export default {
     };
 
     const { docs, isRelevant } = await retrieve(message, 5);
+
+    // 8. Guidance mode — when the knowledge base has no relevant content
+    //    (isRelevant=false), transfer to a human agent instead of letting
+    //    the LLM hallucinate an answer. The session status is updated to
+    //    'transferred' so subsequent messages are handled by humans.
+    if (!isRelevant) {
+      await strapi.db.query('api::chat-session.chat-session').update({
+        where: { id: session.id },
+        data: { status: 'transferred' },
+      });
+      ctx.body = {
+        type: 'transfer',
+        content: '这个问题我需要转给人工客服为您解答。您也可以先留下联系方式，我们的顾问会尽快联系您。',
+        retrievedDocs: 0,
+      };
+      return;
+    }
+
     const result = await generateAnswer(
       message,
       docs,
       (history || []).map((h: any) => ({ role: h.role, content: h.content }))
     );
 
-    // 6. Persist the assistant message.
+    // 9. Persist the assistant message.
     await strapi.documents('api::chat-message.chat-message').create({
       data: {
         session: session.documentId,
@@ -132,6 +171,13 @@ export default {
               }))
             : null,
       },
+    });
+
+    // 10. Increment messageCount — only on a successful automated answer,
+    //    not on transfers (10-round threshold or guidance mode).
+    await strapi.db.query('api::chat-session.chat-session').update({
+      where: { id: session.id },
+      data: { messageCount: (session.messageCount ?? 0) + 1 },
     });
 
     ctx.body = {
