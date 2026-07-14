@@ -84,17 +84,18 @@ export async function retrieve(
 
   const embeddingJson = JSON.stringify(embedding);
 
-  const buildSql = (loc: string) =>
-    `SELECT ke.id, ke.chunk_text, ke.knowledge_base_id, kb.locale, 1 - (ke.embedding <=> ?::vector) as similarity
+  const buildSql = () =>
+    `SELECT ke.id, ke.chunk_text, ke.knowledge_base_id, 1 - (ke.embedding <=> ?::vector) as similarity
      FROM knowledge_embeddings ke
      JOIN knowledge_bases kb ON ke.knowledge_base_id = kb.id
-     WHERE kb.status = 'ready' AND kb.locale = '${loc}'
+     WHERE kb.status = 'ready' AND kb.locale = ?
      ORDER BY ke.embedding <=> ?::vector
      LIMIT ?`;
 
-  const fetchByLocale = async (loc: string): Promise<RetrievedDoc[]> => {
-    const result = await strapiInstance.db.connection.raw(buildSql(loc), [
+  const fetchByLocale = async (loc: 'zh-CN' | 'en-US'): Promise<RetrievedDoc[]> => {
+    const result = await strapiInstance.db.connection.raw(buildSql(), [
       embeddingJson,
+      loc,
       embeddingJson,
       topK,
     ]);

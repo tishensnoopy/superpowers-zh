@@ -67,11 +67,12 @@ describe('rag-service', () => {
       expect(sql).toContain('knowledge_bases');
       expect(sql).toContain('status');
       expect(sql).toContain('LIMIT');
-      // params: [embedding, embedding, topK]
-      expect(params).toHaveLength(3);
+      // params: [embedding, locale, embedding, topK]
+      expect(params).toHaveLength(4);
       expect(params[0]).toBe(JSON.stringify([0.1, 0.2, 0.3]));
-      expect(params[1]).toBe(JSON.stringify([0.1, 0.2, 0.3]));
-      expect(params[2]).toBe(5);
+      expect(params[1]).toBe('zh-CN');
+      expect(params[2]).toBe(JSON.stringify([0.1, 0.2, 0.3]));
+      expect(params[3]).toBe(5);
     });
 
     test('uses default topK of 5 when not specified', async () => {
@@ -81,7 +82,7 @@ describe('rag-service', () => {
       await retrieve('hello');
 
       const params = mockStrapi.db.connection.raw.mock.calls[0][1];
-      expect(params[2]).toBe(5);
+      expect(params[3]).toBe(5);
     });
 
     test('returns empty array when query is empty or whitespace', async () => {
@@ -165,7 +166,9 @@ describe('rag-service', () => {
         const result = await retrieve('hello', 5, 'en-US');
         expect(mockStrapi.db.connection.raw).toHaveBeenCalledTimes(1);
         const sql = mockStrapi.db.connection.raw.mock.calls[0][0] as string;
-        expect(sql).toContain("kb.locale = 'en-US'");
+        const params = mockStrapi.db.connection.raw.mock.calls[0][1] as unknown[];
+        expect(sql).toContain('kb.locale = ?');
+        expect(params[1]).toBe('en-US');
         expect(result.docs).toHaveLength(2);
         expect(result.isRelevant).toBe(true);
         expect(result.usedFallback).toBe(false);
@@ -191,8 +194,12 @@ describe('rag-service', () => {
         expect(mockStrapi.db.connection.raw).toHaveBeenCalledTimes(2);
         const firstSql = mockStrapi.db.connection.raw.mock.calls[0][0] as string;
         const secondSql = mockStrapi.db.connection.raw.mock.calls[1][0] as string;
-        expect(firstSql).toContain("kb.locale = 'en-US'");
-        expect(secondSql).toContain("kb.locale = 'zh-CN'");
+        const firstParams = mockStrapi.db.connection.raw.mock.calls[0][1] as unknown[];
+        const secondParams = mockStrapi.db.connection.raw.mock.calls[1][1] as unknown[];
+        expect(firstSql).toContain('kb.locale = ?');
+        expect(firstParams[1]).toBe('en-US');
+        expect(secondSql).toContain('kb.locale = ?');
+        expect(secondParams[1]).toBe('zh-CN');
         // Merged result: 1 en-US + 3 zh-CN = 4 docs, with fallback flag
         expect(result.docs).toHaveLength(4);
         expect(result.usedFallback).toBe(true);
@@ -215,7 +222,9 @@ describe('rag-service', () => {
 
         await retrieve('hello', 5);
         const sql = mockStrapi.db.connection.raw.mock.calls[0][0] as string;
-        expect(sql).toContain("kb.locale = 'zh-CN'");
+        const params = mockStrapi.db.connection.raw.mock.calls[0][1] as unknown[];
+        expect(sql).toContain('kb.locale = ?');
+        expect(params[1]).toBe('zh-CN');
       });
     });
   });
