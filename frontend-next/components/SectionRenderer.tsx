@@ -10,7 +10,7 @@ import Team from '@/components/sections/Team';
 import Testimonials from '@/components/sections/Testimonials';
 import Faq from '@/components/sections/Faq';
 import Gallery from '@/components/sections/Gallery';
-import FloatingButton from '@/components/sections/FloatingButton';
+// FloatingButton 被 FloatingChat (layout.tsx) 替代，不再从 Strapi section 渲染
 
 const ContactForm = dynamic(() => import('@/components/sections/ContactForm'), {
   loading: () => <div className="h-96 animate-pulse bg-gray-100 rounded" />,
@@ -29,7 +29,7 @@ const componentMap: Record<string, React.ComponentType<{ section: Section }>> = 
   'section.contact-form': ContactForm,
   'section.faq': Faq,
   'section.gallery': Gallery,
-  'section.floating-button': FloatingButton,
+  'section.floating-button': (() => null) as unknown as React.ComponentType<{ section: Section }>,
 };
 
 export default function SectionRenderer({ section }: { section: Section }) {
