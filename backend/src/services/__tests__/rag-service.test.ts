@@ -151,6 +151,73 @@ describe('rag-service', () => {
         expect(result.isRelevant).toBe(true);
       });
     });
+
+    describe('retrieve with locale', () => {
+      test('queries with locale filter when locale=en-US and returns en-US docs', async () => {
+        mockGenerateEmbedding.mockResolvedValue({ embedding: [0.1, 0.2, 0.3], tokenCount: 5 });
+        mockStrapi.db.connection.raw.mockResolvedValue({
+          rows: [
+            { id: 1, chunk_text: 'English content 1', knowledge_base_id: 10, similarity: 0.85, locale: 'en-US' },
+            { id: 2, chunk_text: 'English content 2', knowledge_base_id: 11, similarity: 0.8, locale: 'en-US' },
+          ],
+        });
+
+        const result = await retrieve('hello', 5, 'en-US');
+        expect(mockStrapi.db.connection.raw).toHaveBeenCalledTimes(1);
+        const sql = mockStrapi.db.connection.raw.mock.calls[0][0] as string;
+        expect(sql).toContain("kb.locale = 'en-US'");
+        expect(result.docs).toHaveLength(2);
+        expect(result.isRelevant).toBe(true);
+        expect(result.usedFallback).toBe(false);
+      });
+
+      test('falls back to zh-CN when en-US returns fewer than 2 docs', async () => {
+        mockGenerateEmbedding.mockResolvedValue({ embedding: [0.1, 0.2, 0.3], tokenCount: 5 });
+        mockStrapi.db.connection.raw
+          .mockResolvedValueOnce({
+            rows: [
+              { id: 1, chunk_text: 'English content', knowledge_base_id: 10, similarity: 0.85, locale: 'en-US' },
+            ],
+          })
+          .mockResolvedValueOnce({
+            rows: [
+              { id: 2, chunk_text: '中文内容1', knowledge_base_id: 11, similarity: 0.9, locale: 'zh-CN' },
+              { id: 3, chunk_text: '中文内容2', knowledge_base_id: 12, similarity: 0.8, locale: 'zh-CN' },
+              { id: 4, chunk_text: '中文内容3', knowledge_base_id: 13, similarity: 0.75, locale: 'zh-CN' },
+            ],
+          });
+
+        const result = await retrieve('hello', 5, 'en-US');
+        expect(mockStrapi.db.connection.raw).toHaveBeenCalledTimes(2);
+        const firstSql = mockStrapi.db.connection.raw.mock.calls[0][0] as string;
+        const secondSql = mockStrapi.db.connection.raw.mock.calls[1][0] as string;
+        expect(firstSql).toContain("kb.locale = 'en-US'");
+        expect(secondSql).toContain("kb.locale = 'zh-CN'");
+        // Merged result: 1 en-US + 3 zh-CN = 4 docs, with fallback flag
+        expect(result.docs).toHaveLength(4);
+        expect(result.usedFallback).toBe(true);
+      });
+
+      test('does not fallback when locale=zh-CN (default)', async () => {
+        mockGenerateEmbedding.mockResolvedValue({ embedding: [0.1, 0.2, 0.3], tokenCount: 5 });
+        mockStrapi.db.connection.raw.mockResolvedValue({ rows: [] });
+
+        const result = await retrieve('hello', 5, 'zh-CN');
+        expect(mockStrapi.db.connection.raw).toHaveBeenCalledTimes(1);
+        expect(result.docs).toHaveLength(0);
+        expect(result.isRelevant).toBe(false);
+        expect(result.usedFallback).toBe(false);
+      });
+
+      test('defaults to zh-CN when locale not provided', async () => {
+        mockGenerateEmbedding.mockResolvedValue({ embedding: [0.1, 0.2, 0.3], tokenCount: 5 });
+        mockStrapi.db.connection.raw.mockResolvedValue({ rows: [] });
+
+        await retrieve('hello', 5);
+        const sql = mockStrapi.db.connection.raw.mock.calls[0][0] as string;
+        expect(sql).toContain("kb.locale = 'zh-CN'");
+      });
+    });
   });
 
   describe('generateAnswer', () => {
