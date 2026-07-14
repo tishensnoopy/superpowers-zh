@@ -151,7 +151,7 @@ export default async function LocaleLayout({
             <main className="flex-1">{children}</main>
             <Footer footer={footer} settings={settings} />
           </LayoutShell>
-          <FloatingChat />
+          <FloatingChat locale={locale as Locale} />
         </NextIntlClientProvider>
       </body>
     </html>

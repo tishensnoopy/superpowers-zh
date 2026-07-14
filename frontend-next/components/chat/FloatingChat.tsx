@@ -12,14 +12,16 @@ import {
 } from '@/lib/chat';
 
 const STORAGE_KEY = 'yousen_chat_session';
-const WELCOME_MESSAGE = '您好！我是佑森小课堂的AI助手，有什么可以帮您的吗？';
 
 interface StoredSession {
   sessionId: string;
   visitorId: string;
 }
 
-export default function FloatingChat() {
+export default function FloatingChat({ locale = 'zh-CN' }: { locale?: 'zh-CN' | 'en-US' }) {
+  const WELCOME_MESSAGE = locale === 'en-US'
+    ? "Hello! I'm the Yousen AI assistant. How can I help you?"
+    : '您好！我是佑森小课堂的AI助手，有什么可以帮您的吗？';
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -52,6 +54,7 @@ export default function FloatingChat() {
     try {
       const result = await startChat({
         sourcePage: typeof window !== 'undefined' ? window.location.pathname : '/',
+        locale,
       });
       setSessionId(result.sessionId);
       localStorage.setItem(
@@ -61,7 +64,7 @@ export default function FloatingChat() {
     } catch (err) {
       console.error('[FloatingChat] Failed to start chat:', err);
     }
-  }, []);
+  }, [locale]);
 
   const handleOpen = useCallback(() => {
     setIsOpen(true);
@@ -119,7 +122,7 @@ export default function FloatingChat() {
             return [...updated, {
               id: `msg-${++messageIdRef.current}`,
               role: 'system',
-              content: '已转人工客服，请等待客服回复',
+              content: locale === 'en-US' ? 'Transferred to human agent, please wait' : '已转人工客服，请等待客服回复',
               timestamp: new Date().toISOString(),
               type: 'transfer',
             }];
@@ -131,7 +134,7 @@ export default function FloatingChat() {
             if (updated[aiMessageIndex]) {
               updated[aiMessageIndex] = {
                 ...updated[aiMessageIndex],
-                content: response.content || '抱歉，我暂时无法回答这个问题。',
+                content: response.content || (locale === 'en-US' ? 'Sorry, I cannot answer this question right now.' : '抱歉，我暂时无法回答这个问题。'),
                 streaming: false,
               };
             }
@@ -145,7 +148,7 @@ export default function FloatingChat() {
           if (updated[aiMessageIndex]) {
             updated[aiMessageIndex] = {
               ...updated[aiMessageIndex],
-              content: '抱歉，网络出现问题，请稍后重试。',
+              content: locale === 'en-US' ? 'Sorry, network issue. Please try again later.' : '抱歉，网络出现问题，请稍后重试。',
               streaming: false,
             };
           }
@@ -155,21 +158,21 @@ export default function FloatingChat() {
         setIsLoading(false);
       }
     },
-    [sessionId, isLoading, messages.length]
+    [sessionId, isLoading, messages.length, locale]
   );
 
   if (!isOpen) {
     return (
       <button
         onClick={handleOpen}
-        aria-label="在线咨询"
+        aria-label={locale === 'en-US' ? 'Online consultation' : '在线咨询'}
         className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-5 py-3 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-200 hover:scale-105"
         style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
       >
         <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
           <MessageCircle size={20} className="text-white" />
         </div>
-        <span className="text-white font-semibold text-sm">在线咨询</span>
+        <span className="text-white font-semibold text-sm">{locale === 'en-US' ? 'Chat' : '在线咨询'}</span>
       </button>
     );
   }
@@ -186,9 +189,11 @@ export default function FloatingChat() {
             <Bot size={18} />
           </div>
           <div>
-            <div className="font-semibold text-sm">佑森小课堂 AI助手</div>
+            <div className="font-semibold text-sm">{locale === 'en-US' ? 'Yousen AI Assistant' : '佑森小课堂 AI助手'}</div>
             <div className="text-[10px] text-white/80">
-              {isTransferred ? '人工客服模式' : '在线为您服务'}
+              {isTransferred
+                ? (locale === 'en-US' ? 'Human agent mode' : '人工客服模式')
+                : (locale === 'en-US' ? 'Online' : '在线为您服务')}
             </div>
           </div>
         </div>

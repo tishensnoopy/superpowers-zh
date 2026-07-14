@@ -13,6 +13,11 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
+vi.mock('next-intl', () => ({
+  useLocale: () => 'zh-CN',
+  useTranslations: () => (key: string) => key,
+}));
+
 vi.mock('next/link', () => ({
   default: ({ children, href, ...props }: any) =>
     createElement('a', { href, ...props }, children),

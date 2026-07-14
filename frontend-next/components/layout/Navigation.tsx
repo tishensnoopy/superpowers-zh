@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Phone, Menu, X, ChevronDown } from 'lucide-react';
 import type { NavigationItem, SiteSettings } from '@/lib/api';
 import { getImageUrl } from '@/lib/api';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Navigation({
   navigation,
@@ -147,6 +148,7 @@ export default function Navigation({
         </nav>
 
         <div className="flex items-center gap-3">
+          <LanguageSwitcher />
           {settings.phone && (
             <a
               href={`tel:${settings.phone}`}

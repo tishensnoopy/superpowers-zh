@@ -29,6 +29,7 @@ export async function startChat(options?: {
   sourcePage?: string;
   visitorName?: string;
   visitorPhone?: string;
+  locale?: 'zh-CN' | 'en-US';
 }): Promise<{ sessionId: string; visitorId: string }> {
   const res = await fetch('/api/chat/start', {
     method: 'POST',
