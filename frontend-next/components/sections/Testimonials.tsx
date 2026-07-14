@@ -1,6 +1,18 @@
 import { Star } from 'lucide-react';
 import type { Section } from '@/lib/api';
 
+interface Testimonial {
+  id: number;
+  rating?: number;
+  content: string;
+  author: string;
+  position?: string;
+  company?: string;
+  avatar?: {
+    url: string;
+  };
+}
+
 export default function Testimonials({ section }: { section: Section }) {
   const { title, testimonials } = section;
   const testimonialList = Array.isArray(testimonials) ? testimonials : testimonials?.data || [];
@@ -26,7 +38,7 @@ export default function Testimonials({ section }: { section: Section }) {
         </div>
 
         <div className="grid grid-cols-12 gap-6">
-          {testimonialList.map((testimonial: any) => (
+          {testimonialList.map((testimonial: Testimonial) => (
             <div key={testimonial.id} className="col-span-12 md:col-span-4">
               <div className="bg-card rounded-2xl p-8 border border-border shadow-sm hover:shadow-xl transition-all duration-300">
                 <div className="flex items-center gap-1 mb-4">
