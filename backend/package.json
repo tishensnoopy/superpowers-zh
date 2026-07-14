@@ -8,7 +8,9 @@
     "start": "strapi start",
     "build": "strapi build",
     "strapi": "strapi",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@strapi/plugin-users-permissions": "5",
@@ -26,7 +28,8 @@
   "devDependencies": {
     "@strapi/typescript-utils": "5",
     "@types/node": "^22.0.0",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "vitest": "^4.1.10"
   },
   "engines": {
     "node": ">=22.0.0 <=24.x.x",

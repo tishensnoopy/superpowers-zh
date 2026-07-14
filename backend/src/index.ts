@@ -10,13 +10,17 @@ export default {
         await registerQueues(strapi);
         console.log('[Bootstrap] Queues registered');
 
-        const { setStrapi: setDocumentStrapi, processDocument } = await import('./workers/document-processor');
-        setDocumentStrapi(strapi);
-        const documentWorker = createWorker('document-processing', processDocument, { concurrency: 2 });
-        if (documentWorker) {
-          console.log('[Bootstrap] Document processor worker registered');
-        } else {
-          console.log('[Bootstrap] Document processor worker skipped - Redis not available');
+        // Real document vectorization worker (BullMQ queue -> text extraction ->
+        // cleaning -> chunking -> embedding -> pgvector). Replaces the stub worker.
+        // Guarded so tests don't spin up a Redis worker.
+        if (process.env.NODE_ENV !== 'test') {
+          const { startDocumentWorker } = await import('./queues/document-processor');
+          const documentWorker = startDocumentWorker(strapi);
+          if (documentWorker) {
+            console.log('[Bootstrap] Document processor worker registered');
+          } else {
+            console.log('[Bootstrap] Document processor worker skipped - Redis not available');
+          }
         }
 
         const { setStrapi: setFaqStrapi, processFaqFeedback } = await import('./workers/faq-feedback');
