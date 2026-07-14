@@ -1,3 +1,5 @@
+import { getActiveAiConfig } from './ai-config-service';
+
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
@@ -29,24 +31,86 @@ interface ChatApiResponse {
   usage?: { total_tokens: number };
 }
 
-const DASHSCOPE_ENDPOINT =
-  process.env.DASHSCOPE_API_ENDPOINT || 'https://dashscope.aliyuncs.com/compatible-mode/v1';
-const DASHSCOPE_API_KEY = process.env.DASHSCOPE_API_KEY || '';
-const DEFAULT_MODEL = process.env.QWEN_MODEL || 'qwen-plus';
-const DEFAULT_EMBEDDING_MODEL = process.env.QWEN_EMBEDDING_MODEL || 'text-embedding-v2';
+interface LlmConfig {
+  endpoint: string;
+  apiKey: string;
+  model: string;
+  embeddingModel: string;
+  temperature: number;
+  maxTokens: number;
+  systemPrompt: string;
+}
+
+const DEFAULT_ENDPOINT = 'https://dashscope.aliyuncs.com/compatible-mode/v1';
+const DEFAULT_MODEL = 'qwen-plus';
+const DEFAULT_EMBEDDING_MODEL = 'text-embedding-v2';
+const DEFAULT_TEMPERATURE = 0.7;
+const DEFAULT_MAX_TOKENS = 2000;
+
+/**
+ * Strapi instance injected via `setStrapi()`. Kept as a module-level singleton
+ * (same pattern as src/services/rag-service.ts and src/workers/document-processor.ts)
+ * so the service functions stay callable without threading strapi through every
+ * call site. When null, getConfig() falls back to process.env.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let strapiInstance: any = null;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function setStrapi(strapi: any): void {
+  strapiInstance = strapi;
+}
+
+/**
+ * Resolve the LLM config to use for this call. Prefers an active ai-config row
+ * (read through the cached ai-config-service) when a strapi instance has been
+ * injected; otherwise falls back to process.env defaults.
+ */
+async function getConfig(): Promise<LlmConfig> {
+  if (strapiInstance) {
+    try {
+      const aiConfig = await getActiveAiConfig(strapiInstance);
+      if (aiConfig) {
+        return {
+          endpoint: aiConfig.apiEndpoint || DEFAULT_ENDPOINT,
+          apiKey: aiConfig.apiKey,
+          model: aiConfig.model || DEFAULT_MODEL,
+          embeddingModel: aiConfig.embeddingModel || DEFAULT_EMBEDDING_MODEL,
+          temperature: aiConfig.temperature ?? DEFAULT_TEMPERATURE,
+          maxTokens: aiConfig.maxTokens ?? DEFAULT_MAX_TOKENS,
+          systemPrompt: aiConfig.systemPrompt || '',
+        };
+      }
+    } catch (err) {
+      console.error('[llm-service] Failed to read ai-config, falling back to env:', err);
+    }
+  }
+
+  return {
+    endpoint: process.env.DASHSCOPE_API_ENDPOINT || DEFAULT_ENDPOINT,
+    apiKey: process.env.DASHSCOPE_API_KEY || '',
+    model: process.env.QWEN_MODEL || DEFAULT_MODEL,
+    embeddingModel: process.env.QWEN_EMBEDDING_MODEL || DEFAULT_EMBEDDING_MODEL,
+    temperature: DEFAULT_TEMPERATURE,
+    maxTokens: DEFAULT_MAX_TOKENS,
+    systemPrompt: '',
+  };
+}
 
 export async function generateEmbedding(text: string): Promise<EmbeddingResult> {
-  if (!DASHSCOPE_API_KEY) throw new Error('DASHSCOPE_API_KEY not configured');
   if (!text || text.trim().length === 0) return { embedding: [], tokenCount: 0 };
 
-  const response = await fetch(`${DASHSCOPE_ENDPOINT}/embeddings`, {
+  const { endpoint, apiKey, embeddingModel } = await getConfig();
+  if (!apiKey) throw new Error('DASHSCOPE_API_KEY not configured');
+
+  const response = await fetch(`${endpoint}/embeddings`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${DASHSCOPE_API_KEY}`,
+      Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: DEFAULT_EMBEDDING_MODEL,
+      model: embeddingModel,
       input: text,
       encoding_format: 'float',
     }),
@@ -73,20 +137,22 @@ export async function chat(
   messages: ChatMessage[],
   options: { temperature?: number; maxTokens?: number } = {}
 ): Promise<ChatResult> {
-  if (!DASHSCOPE_API_KEY) throw new Error('DASHSCOPE_API_KEY not configured');
+  const { endpoint, apiKey, model, temperature: defaultTemp, maxTokens: defaultMax } =
+    await getConfig();
+  if (!apiKey) throw new Error('DASHSCOPE_API_KEY not configured');
 
   const startTime = Date.now();
-  const response = await fetch(`${DASHSCOPE_ENDPOINT}/chat/completions`, {
+  const response = await fetch(`${endpoint}/chat/completions`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${DASHSCOPE_API_KEY}`,
+      Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: DEFAULT_MODEL,
+      model,
       messages,
-      temperature: options.temperature ?? 0.7,
-      max_tokens: options.maxTokens ?? 2000,
+      temperature: options.temperature ?? defaultTemp,
+      max_tokens: options.maxTokens ?? defaultMax,
     }),
   });
 
@@ -108,19 +174,21 @@ export async function chatStream(
   messages: ChatMessage[],
   options: { temperature?: number; maxTokens?: number } = {}
 ): Promise<ReadableStream<Uint8Array>> {
-  if (!DASHSCOPE_API_KEY) throw new Error('DASHSCOPE_API_KEY not configured');
+  const { endpoint, apiKey, model, temperature: defaultTemp, maxTokens: defaultMax } =
+    await getConfig();
+  if (!apiKey) throw new Error('DASHSCOPE_API_KEY not configured');
 
-  const response = await fetch(`${DASHSCOPE_ENDPOINT}/chat/completions`, {
+  const response = await fetch(`${endpoint}/chat/completions`, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${DASHSCOPE_API_KEY}`,
+      Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: DEFAULT_MODEL,
+      model,
       messages,
-      temperature: options.temperature ?? 0.7,
-      max_tokens: options.maxTokens ?? 2000,
+      temperature: options.temperature ?? defaultTemp,
+      max_tokens: options.maxTokens ?? defaultMax,
       stream: true,
     }),
   });
@@ -151,7 +219,8 @@ export async function detectIntent(message: string): Promise<IntentResult> {
     }
   }
 
-  if (DASHSCOPE_API_KEY) {
+  const { apiKey } = await getConfig();
+  if (apiKey) {
     try {
       const result = await chat(
         [
@@ -178,6 +247,7 @@ export async function detectIntent(message: string): Promise<IntentResult> {
 }
 
 export default {
+  setStrapi,
   generateEmbedding,
   generateEmbeddings,
   chat,

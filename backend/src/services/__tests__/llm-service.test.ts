@@ -1,5 +1,15 @@
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 
+// Mock ai-config-service so llm-service can be tested in isolation.
+// The mock factory is hoisted; getActiveAiConfig is a vi.fn() whose
+// implementation each test can override via mockResolvedValue.
+vi.mock('../ai-config-service', () => ({
+  getActiveAiConfig: vi.fn(),
+  clearCache: vi.fn(),
+}));
+
+import { getActiveAiConfig } from '../ai-config-service';
+
 /**
  * Helper to (re)import the llm-service module after env/resetModules changes.
  * The module reads DASHSCOPE_API_KEY at load time, so tests that need a
@@ -307,6 +317,79 @@ describe('llm-service', () => {
       expect(typeof def.chat).toBe('function');
       expect(typeof def.chatStream).toBe('function');
       expect(typeof def.detectIntent).toBe('function');
+    });
+  });
+
+  describe('ai-config integration', () => {
+    const aiConfigStub = {
+      provider: 'qwen' as const,
+      model: 'qwen-plus',
+      embeddingModel: 'text-embedding-v2',
+      apiKey: 'sk-test-key',
+      apiEndpoint: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+      systemPrompt: '你是佑森小课堂的AI助手',
+      temperature: 0.7,
+      maxTokens: 2000,
+      topK: 5,
+      chunkSize: 500,
+      chunkOverlap: 50,
+    };
+
+    // Each test in this block re-imports llm-service (parent beforeEach calls
+    // vi.resetModules), so strapiInstance starts as null. We inject a mock
+    // strapi via setStrapi so getConfig() will consult ai-config-service.
+    beforeEach(() => {
+      (getActiveAiConfig as unknown as ReturnType<typeof vi.fn>).mockReset();
+    });
+
+    test('无 active 配置时应降级到 process.env', async () => {
+      (getActiveAiConfig as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+      global.fetch = vi.fn().mockResolvedValue(
+        mockFetchResponse({
+          data: [{ embedding: [0.1, 0.2] }],
+          usage: { total_tokens: 10 },
+        })
+      );
+
+      const { generateEmbedding, setStrapi } = await importLlmService();
+      setStrapi({} as any); // strapi set, but ai-config returns null → env fallback
+
+      const result = await generateEmbedding('测试文本');
+      expect(result).toBeDefined();
+      expect(result.embedding).toEqual([0.1, 0.2]);
+
+      // Fetch should use env-based key (test-key), not any ai-config value.
+      const callArgs = (global.fetch as ReturnType<typeof vi.fn>).mock.calls[0];
+      const init = callArgs[1] as RequestInit;
+      const headers = init.headers as Record<string, string>;
+      expect(headers.Authorization).toBe('Bearer test-key');
+    });
+
+    test('应使用 ai-config 的 apiKey 而非 process.env', async () => {
+      (getActiveAiConfig as unknown as ReturnType<typeof vi.fn>).mockResolvedValue(aiConfigStub);
+      global.fetch = vi.fn().mockResolvedValue(
+        mockFetchResponse({
+          data: [{ embedding: [0.1, 0.2] }],
+          usage: { total_tokens: 10 },
+        })
+      );
+
+      const { generateEmbedding, setStrapi } = await importLlmService();
+      setStrapi({} as any); // strapi set, ai-config returns the stub
+
+      await generateEmbedding('测试文本');
+
+      const callArgs = (global.fetch as ReturnType<typeof vi.fn>).mock.calls[0];
+      const url = callArgs[0] as string;
+      const init = callArgs[1] as RequestInit;
+      const headers = init.headers as Record<string, string>;
+      // Should use ai-config apiKey, not process.env.DASHSCOPE_API_KEY
+      expect(headers.Authorization).toBe('Bearer sk-test-key');
+      // Should use ai-config endpoint
+      expect(url).toContain('dashscope.aliyuncs.com');
+      // Body should use ai-config embeddingModel
+      const body = JSON.parse(init.body as string);
+      expect(body.model).toBe('text-embedding-v2');
     });
   });
 });
