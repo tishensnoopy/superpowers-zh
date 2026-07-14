@@ -153,7 +153,7 @@ export default function ContactForm({ section }: { section: Section }) {
     };
 
     const payloadSize = JSON.stringify(submitData).length;
-    log('submit', `提交数据准备完成, payload 大小: ${payloadSize} bytes`, submitData);
+    log('submit', `提交数据准备完成, payload 大小: ${payloadSize} bytes`, { hasPhone: !!submitData.phone, hasChildName: !!submitData.childName, hasParentName: !!submitData.parentName });
 
     const startTime = performance.now();
     log('api', '开始调用 createAppointment API...');
@@ -178,7 +178,7 @@ export default function ContactForm({ section }: { section: Section }) {
 
       logError('api', `API 调用失败, 耗时: ${duration}ms, 错误类型: ${classified.type}, 状态码: ${classified.statusCode || 'N/A'}`);
       logError('api', '错误详情:', err);
-      logError('submit', `提交失败数据: ${JSON.stringify(submitData)}`);
+      logError('submit', '表单提交失败');
 
       if (err instanceof Error) {
         logError('api', `错误消息: ${err.message}`);

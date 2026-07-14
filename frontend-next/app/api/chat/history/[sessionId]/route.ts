@@ -1,9 +1,12 @@
 import { proxyJsonRequest } from '@/lib/chat-proxy';
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ sessionId: string }> }
 ) {
   const { sessionId } = await params;
-  return proxyJsonRequest(`/api/chat/history/${sessionId}`, null, 'GET');
+  // 透传 visitorId query 参数用于后端 IDOR 校验
+  const visitorId = new URL(request.url).searchParams.get('visitorId');
+  const queryString = visitorId ? `?visitorId=${encodeURIComponent(visitorId)}` : '';
+  return proxyJsonRequest(`/api/chat/history/${sessionId}${queryString}`, null, 'GET');
 }

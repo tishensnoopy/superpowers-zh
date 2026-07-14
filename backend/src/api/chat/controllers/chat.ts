@@ -31,6 +31,18 @@ export default {
   async startSession(ctx: any) {
     const { visitorName, visitorPhone, sourcePage } = ctx.request.body || {};
 
+    // 基本输入校验：visitorPhone 若提供必须是合理长度的字符串
+    if (visitorPhone !== undefined && visitorPhone !== null) {
+      if (typeof visitorPhone !== 'string' || visitorPhone.length > 20) {
+        ctx.throw(400, 'visitorPhone 格式不合法');
+      }
+    }
+    if (visitorName !== undefined && visitorName !== null) {
+      if (typeof visitorName !== 'string' || visitorName.length > 50) {
+        ctx.throw(400, 'visitorName 格式不合法');
+      }
+    }
+
     const sessionId = randomId('sess');
     const visitorId = randomId('vis');
 
@@ -128,7 +140,7 @@ export default {
         query: string,
         docs: any[],
         history: ChatMessageRow[]
-      ) => Promise<{ content: string; tokenCount?: number; latencyMs?: number }>;
+      ) => Promise<string>;
     };
 
     const { docs, isRelevant } = await retrieve(message, 5);
@@ -214,8 +226,16 @@ export default {
 
   async getHistory(ctx: any) {
     const { sessionId } = ctx.params;
+    const { visitorId } = ctx.query || {};
+
+    // IDOR 防护：必须同时提供 sessionId 和 visitorId，且 visitorId 必须与
+    // session 创建时的 visitorId 匹配，防止攻击者枚举 sessionId 读取他人对话。
+    if (!visitorId) {
+      ctx.throw(401, 'visitorId is required');
+    }
+
     const sessions = await strapi.documents('api::chat-session.chat-session').findMany({
-      filters: { sessionId },
+      filters: { sessionId, visitorId },
       limit: 1,
     });
     if (!sessions || sessions.length === 0) {

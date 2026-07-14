@@ -23,8 +23,6 @@ const ABOUT_LINKS = [
 ];
 
 function renderSocialLink(social: SocialLink) {
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=64x64&data=${encodeURIComponent(social.url)}`;
-
   return (
     <a
       key={social.id}
@@ -34,13 +32,10 @@ function renderSocialLink(social: SocialLink) {
       className="flex flex-col items-center gap-1.5 group"
       title={social.label || social.platform}
     >
-      <div className="w-16 h-16 bg-white rounded-lg p-0.5 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg">
-        <img
-          src={qrCodeUrl}
-          alt={`${social.label || social.platform}二维码`}
-          className="w-full h-full rounded-md"
-          loading="lazy"
-        />
+      <div className="w-16 h-16 bg-white/10 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:bg-white/20">
+        <span className="text-white/80 text-xs font-medium text-center px-1">
+          {social.label || social.platform}
+        </span>
       </div>
       <span className="text-white/60 text-xs group-hover:text-white transition-colors">
         {social.label || social.platform}

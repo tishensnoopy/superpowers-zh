@@ -116,6 +116,8 @@ export default function Faq({ section }: { section: Section }) {
                 <button
                   className="w-full flex items-center justify-between p-6 text-left hover:bg-muted/30 transition-colors"
                   onClick={() => setOpenId(isOpen ? null : faq.id)}
+                  aria-expanded={isOpen}
+                  aria-controls={`faq-content-${faq.id}`}
                 >
                   <span className="font-semibold text-[#1C2B3A]">{faq.question}</span>
                   <ChevronDown
@@ -124,6 +126,7 @@ export default function Faq({ section }: { section: Section }) {
                   />
                 </button>
                 <div
+                  id={`faq-content-${faq.id}`}
                   className={`overflow-hidden transition-all duration-200 ${isOpen ? 'max-h-[600px]' : 'max-h-0'}`}
                 >
                   <div className="p-6 pt-0 text-muted-foreground text-sm leading-relaxed">

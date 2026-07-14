@@ -152,7 +152,7 @@ describe('chat API 客户端', () => {
         json: async () => ({ messages: mockMessages }),
       } as Response);
 
-      const result = await getChatHistory('sess-123');
+      const result = await getChatHistory('sess-123', 'vis-456');
 
       expect(fetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/chat/history/sess-123'),
@@ -168,7 +168,7 @@ describe('chat API 客户端', () => {
         status: 404,
       } as Response);
 
-      await expect(getChatHistory('sess-999')).rejects.toThrow();
+      await expect(getChatHistory('sess-999', 'vis-456')).rejects.toThrow();
     });
   });
 });

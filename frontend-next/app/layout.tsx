@@ -68,18 +68,24 @@ export default async function RootLayout({
   const customFontWeight = fontSettings?.fontWeight || '400';
   const customFontDisplay = fontSettings?.fontDisplay || 'swap';
 
+  const isSafeUrl = (url: string) => /^https?:\/\/[^\s]+$/.test(url);
+  const safeFontFamily = /^[\w\s-]{1,64}$/.test(customFontFamily || '') ? customFontFamily : null;
+  const safeFontUrl = isSafeUrl(customFontUrl || '') ? customFontUrl : null;
+  const safeFontFormat = ['woff2', 'ttf', 'otf', 'woff'].includes(customFontFormat || '') ? customFontFormat : null;
+  const safeFontDisplay = ['swap', 'block', 'fallback', 'optional'].includes(customFontDisplay || '') ? customFontDisplay : 'swap';
+
   const fontFaceCSS =
-    customFontUrl && customFontFamily
+    safeFontUrl && safeFontFamily
       ? `@font-face {
-        font-family: '${customFontFamily}';
-        src: url('${customFontUrl}') format('${customFontFormat}');
+        font-family: '${safeFontFamily}';
+        src: url('${safeFontUrl}') format('${safeFontFormat || 'woff2'}');
         font-weight: ${customFontWeight};
-        font-display: ${customFontDisplay};
+        font-display: ${safeFontDisplay};
       }`
       : '';
 
-  const fontFamily = customFontFamily
-    ? `'${customFontFamily}', var(--font-nunito), var(--font-default), sans-serif`
+  const fontFamily = safeFontFamily
+    ? `'${safeFontFamily}', var(--font-nunito), var(--font-default), sans-serif`
     : `var(--font-nunito), var(--font-default), sans-serif`;
 
   const cmsUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';

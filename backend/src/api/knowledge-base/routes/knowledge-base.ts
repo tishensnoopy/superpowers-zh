@@ -53,7 +53,7 @@ export default {
       path: '/knowledge-bases/sync-all',
       handler: 'api::knowledge-base.knowledge-base.syncAll',
       config: {
-        auth: false,
+        auth: { enabled: true },
       },
     },
   ],

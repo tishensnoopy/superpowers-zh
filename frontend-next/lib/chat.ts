@@ -6,6 +6,7 @@
 export type ChatRole = 'user' | 'assistant' | 'system';
 
 export interface ChatMessageData {
+  id?: string;
   role: ChatRole;
   content: string;
   timestamp?: string;
@@ -90,12 +91,13 @@ export async function transferToHuman(
 }
 
 /**
- * 获取聊天历史
+ * 获取聊天历史（需传入 visitorId 做 IDOR 防护）
  */
 export async function getChatHistory(
-  sessionId: string
+  sessionId: string,
+  visitorId: string
 ): Promise<{ messages: ChatMessageData[] }> {
-  const res = await fetch(`/api/chat/history/${sessionId}`, {
+  const res = await fetch(`/api/chat/history/${sessionId}?visitorId=${encodeURIComponent(visitorId)}`, {
     method: 'GET',
   });
 

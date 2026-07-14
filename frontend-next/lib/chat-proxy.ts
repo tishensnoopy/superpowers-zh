@@ -20,6 +20,17 @@ export async function proxyJsonRequest(
     body: method !== 'GET' ? JSON.stringify(body) : undefined,
   });
 
+  // 后端可能返回非 JSON（如 500 错误页面），res.json() 会抛出异常
+  const contentType = res.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    const errorText = await res.text().catch(() => '');
+    console.error('[chat-proxy] Non-JSON response from backend:', res.status, backendPath, errorText.substring(0, 200));
+    return new Response(
+      JSON.stringify({ error: 'Backend service unavailable' }),
+      { status: 502, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
   const data = await res.json();
   return new Response(JSON.stringify(data), {
     status: res.status,
@@ -44,9 +55,10 @@ export async function proxySSERequest(
 
   if (!res.ok || !res.body) {
     const errorText = await res.text().catch(() => '');
+    console.error('[chat-proxy] Backend error:', res.status, errorText);
     return new Response(
-      JSON.stringify({ error: `Backend error: ${res.status}`, detail: errorText }),
-      { status: res.status, headers: { 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: 'Backend service unavailable' }),
+      { status: 502, headers: { 'Content-Type': 'application/json' } }
     );
   }
 

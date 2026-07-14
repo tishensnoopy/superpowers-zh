@@ -2,15 +2,12 @@ import { factories } from '@strapi/strapi';
 
 export default factories.createCoreController('api::knowledge-base.knowledge-base', ({ strapi }) => ({
   async find(ctx) {
-    console.log('[KnowledgeBase] find() called');
     try {
       ctx.query = {
         ...ctx.query,
         populate: [],
       };
-      const result = await super.find(ctx);
-      console.log('[KnowledgeBase] find() completed, count:', result.data?.length);
-      return result;
+      return await super.find(ctx);
     } catch (err) {
       console.error('[KnowledgeBase] find() failed:', err instanceof Error ? err.message : err);
       throw err;
@@ -18,15 +15,12 @@ export default factories.createCoreController('api::knowledge-base.knowledge-bas
   },
 
   async findOne(ctx) {
-    console.log('[KnowledgeBase] findOne() called, id:', ctx.params.id);
     try {
       ctx.query = {
         ...ctx.query,
         populate: [],
       };
-      const result = await super.findOne(ctx);
-      console.log('[KnowledgeBase] findOne() completed');
-      return result;
+      return await super.findOne(ctx);
     } catch (err) {
       console.error('[KnowledgeBase] findOne() failed:', err instanceof Error ? err.message : err);
       throw err;
@@ -34,8 +28,6 @@ export default factories.createCoreController('api::knowledge-base.knowledge-bas
   },
 
   async create(ctx) {
-    console.log('[KnowledgeBase] create() called');
-    console.log('[KnowledgeBase] create() data:', JSON.stringify(ctx.request.body));
     try {
       ctx.request.body.data = {
         ...ctx.request.body.data,
@@ -43,14 +35,12 @@ export default factories.createCoreController('api::knowledge-base.knowledge-bas
         retryCount: 0,
       };
       const result = await super.create(ctx);
-      console.log('[KnowledgeBase] create() completed successfully, id:', result.data?.id);
 
       const { addJob } = await import('../../../utils/queue');
       await addJob('document-processing', 'vectorize', {
         type: 'vectorize',
         documentId: result.data?.id,
       });
-      console.log('[KnowledgeBase] create() added to document-processing queue');
 
       return result;
     } catch (err) {
@@ -60,22 +50,19 @@ export default factories.createCoreController('api::knowledge-base.knowledge-bas
   },
 
   async update(ctx) {
-    console.log('[KnowledgeBase] update() called, id:', ctx.params.id);
-    console.log('[KnowledgeBase] update() data:', JSON.stringify(ctx.request.body));
     try {
       const result = await super.update(ctx);
-      console.log('[KnowledgeBase] update() completed successfully');
 
+      // Strapi v5: ctx.params.id 是 documentId（字符串），db.query 需用 documentId 过滤
       const document = await strapi.db.query('api::knowledge-base.knowledge-base').findOne({
-        where: { id: ctx.params.id },
+        where: { documentId: ctx.params.id },
       });
       if (document?.content && document.status === 'ready') {
         const { addJob } = await import('../../../utils/queue');
-      await addJob('document-processing', 'revectorize', {
-        type: 'revectorize',
-        documentId: ctx.params.id,
-      });
-      console.log('[KnowledgeBase] update() added to document-processing queue for re-vectorization');
+        await addJob('document-processing', 'revectorize', {
+          type: 'revectorize',
+          documentId: ctx.params.id,
+        });
       }
 
       return result;
@@ -86,18 +73,23 @@ export default factories.createCoreController('api::knowledge-base.knowledge-bas
   },
 
   async delete(ctx) {
-    console.log('[KnowledgeBase] delete() called, id:', ctx.params.id);
     try {
+      // Strapi v5: ctx.params.id 是 documentId（字符串），db.query 需用 documentId 过滤
       const document = await strapi.db.query('api::knowledge-base.knowledge-base').findOne({
-        where: { id: ctx.params.id },
+        where: { documentId: ctx.params.id },
       });
-      if (document?.vectorDbIds) {
-        console.log('[KnowledgeBase] delete() cleaning up vector DB entries:', document.vectorDbIds);
+      // 清理 pgvector 中的向量数据，防止孤立残留
+      if (document?.id) {
+        const kbService = strapi.service('api::knowledge-base.knowledge-base');
+        if (kbService && typeof (kbService as any).deleteVectors === 'function') {
+          const deleted = await (kbService as any).deleteVectors(document.id);
+          if (!deleted) {
+            console.warn('[KnowledgeBase] delete() vector cleanup failed for id:', document.id);
+          }
+        }
       }
 
-      const result = await super.delete(ctx);
-      console.log('[KnowledgeBase] delete() completed successfully');
-      return result;
+      return await super.delete(ctx);
     } catch (err) {
       console.error('[KnowledgeBase] delete() failed:', err instanceof Error ? err.message : err);
       throw err;
@@ -105,9 +97,12 @@ export default factories.createCoreController('api::knowledge-base.knowledge-bas
   },
 
   async search(ctx) {
-    console.log('[KnowledgeBase] search() called, query:', ctx.query.q);
     try {
-      const query = ctx.query.q || '';
+      const query = String(ctx.query.q || '');
+      // 限制查询长度，防止恶意超长输入
+      if (query.length > 200) {
+        ctx.throw(400, '查询关键词不能超过 200 字符');
+      }
       const results = await strapi.db.query('api::knowledge-base.knowledge-base').findMany({
         where: {
           $or: [
@@ -118,7 +113,6 @@ export default factories.createCoreController('api::knowledge-base.knowledge-bas
           status: 'ready',
         },
       });
-      console.log('[KnowledgeBase] search() completed, count:', results.length);
       return { data: results, meta: {} };
     } catch (err) {
       console.error('[KnowledgeBase] search() failed:', err instanceof Error ? err.message : err);

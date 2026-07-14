@@ -186,6 +186,14 @@ export default {
   async destroy({ strapi }: { strapi: Core.Strapi }) {
     console.log('[Destroy] Shutting down...');
 
+    // 关闭文档向量化 Worker（独立于 utils/queue 的 workers 字典管理）
+    try {
+      const { closeDocumentWorker } = await import('./queues/document-processor');
+      await closeDocumentWorker();
+    } catch (err) {
+      console.warn('[Destroy] Document worker cleanup failed:', err instanceof Error ? err.message : err);
+    }
+
     try {
       const { closeAllQueues } = await import('./utils/queue');
       await closeAllQueues();

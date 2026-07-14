@@ -26,7 +26,9 @@ export default function Navigation({
 
   const isActive = (url: string) => {
     if (url === '/') return pathname === '/';
-    return pathname.startsWith(url);
+    // 精确匹配：pathname 等于 url 或以 url + '/' 开头
+    // 避免 /about 错误匹配 /about-us 等
+    return pathname === url || pathname.startsWith(url + '/');
   };
 
   const handleMobileNavClick = (url: string) => {
@@ -164,6 +166,8 @@ export default function Navigation({
           <button
             className="lg:hidden p-2 rounded-lg text-foreground"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? '关闭菜单' : '打开菜单'}
+            aria-expanded={mobileMenuOpen}
           >
             {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>

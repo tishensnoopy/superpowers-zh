@@ -36,6 +36,7 @@ describe('chat-proxy', () => {
       vi.spyOn(global, 'fetch').mockResolvedValueOnce({
         ok: true,
         status: 200,
+        headers: new Headers({ 'content-type': 'application/json' }),
         json: async () => mockData,
       } as Response);
 
@@ -58,6 +59,7 @@ describe('chat-proxy', () => {
       vi.spyOn(global, 'fetch').mockResolvedValueOnce({
         ok: true,
         status: 200,
+        headers: new Headers({ 'content-type': 'application/json' }),
         json: async () => ({ messages: [] }),
       } as Response);
 
@@ -70,6 +72,21 @@ describe('chat-proxy', () => {
           body: undefined,
         })
       );
+    });
+
+    it('后端返回非 JSON 响应时返回 502', async () => {
+      vi.spyOn(global, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: new Headers({ 'content-type': 'text/html' }),
+        text: async () => '<html>500 Error Page</html>',
+      } as Response);
+
+      const response = await proxyJsonRequest('/api/chat/start', { sourcePage: '/' });
+
+      expect(response.status).toBe(502);
+      const data = await response.json();
+      expect(data.error).toBe('Backend service unavailable');
     });
   });
 
@@ -99,7 +116,7 @@ describe('chat-proxy', () => {
       expect(response.body).toBeDefined();
     });
 
-    it('后端错误时返回错误 JSON', async () => {
+    it('后端错误时返回 502 错误 JSON（不向前端泄露后端细节）', async () => {
       vi.spyOn(global, 'fetch').mockResolvedValueOnce({
         ok: false,
         status: 500,
@@ -112,13 +129,13 @@ describe('chat-proxy', () => {
         message: 'test',
       });
 
-      expect(response.status).toBe(500);
+      expect(response.status).toBe(502);
       expect(response.headers.get('Content-Type')).toBe('application/json');
       const data = await response.json();
-      expect(data.error).toContain('500');
+      expect(data.error).toBe('Backend service unavailable');
     });
 
-    it('后端返回空 body 时返回错误', async () => {
+    it('后端返回空 body 时返回 502 错误', async () => {
       vi.spyOn(global, 'fetch').mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -131,9 +148,9 @@ describe('chat-proxy', () => {
         message: 'test',
       });
 
-      expect(response.status).toBe(200);
+      expect(response.status).toBe(502);
       const data = await response.json();
-      expect(data.error).toBeDefined();
+      expect(data.error).toBe('Backend service unavailable');
     });
   });
 });

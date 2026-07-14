@@ -26,6 +26,7 @@ export default function FloatingChat() {
   const [isTransferred, setIsTransferred] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messageIdRef = useRef(0);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -67,7 +68,7 @@ export default function FloatingChat() {
     if (messages.length === 0) {
       // Add welcome message
       setMessages([
-        { role: 'assistant' as ChatRole, content: WELCOME_MESSAGE, timestamp: new Date().toISOString() },
+        { id: `msg-${++messageIdRef.current}`, role: 'assistant' as ChatRole, content: WELCOME_MESSAGE, timestamp: new Date().toISOString() },
       ]);
     }
     if (!sessionId) {
@@ -85,6 +86,7 @@ export default function FloatingChat() {
 
       // Add user message
       const userMessage: ChatMessageData = {
+        id: `msg-${++messageIdRef.current}`,
         role: 'user',
         content: message,
         timestamp: new Date().toISOString(),
@@ -96,7 +98,7 @@ export default function FloatingChat() {
       const aiMessageIndex = messages.length + 1;
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: '', timestamp: new Date().toISOString(), streaming: true },
+        { id: `msg-${++messageIdRef.current}`, role: 'assistant', content: '', timestamp: new Date().toISOString(), streaming: true },
       ]);
 
       try {
@@ -115,6 +117,7 @@ export default function FloatingChat() {
               };
             }
             return [...updated, {
+              id: `msg-${++messageIdRef.current}`,
               role: 'system',
               content: '已转人工客服，请等待客服回复',
               timestamp: new Date().toISOString(),
@@ -199,9 +202,9 @@ export default function FloatingChat() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50">
-        {messages.map((msg, i) => (
-          <div key={i}>
+      <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50" aria-live="polite" aria-label="聊天消息">
+        {messages.map((msg) => (
+          <div key={msg.id}>
             <ChatMessage
               role={msg.role as ChatRole}
               content={msg.content}

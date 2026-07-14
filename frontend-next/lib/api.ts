@@ -481,7 +481,7 @@ export interface AppointmentData {
 
 export async function createAppointment(data: AppointmentData) {
   console.log(`${LOG_PREFIX} Creating appointment...`);
-  console.log(`${LOG_PREFIX} Request data:`, JSON.stringify(data, null, 2));
+  console.log(`${LOG_PREFIX} Appointment request:`, { hasName: !!data.name, hasPhone: !!data.phone, campus: data.campus });
 
   const requiredFields = ['name', 'phone', 'campus'];
   const missingFields = requiredFields.filter(field => !data[field as keyof AppointmentData]);
@@ -496,9 +496,7 @@ export async function createAppointment(data: AppointmentData) {
     });
 
     console.log(`${LOG_PREFIX} ✅ Appointment created successfully!`);
-    console.log(`${LOG_PREFIX} Response data:`, JSON.stringify(result, null, 2));
-    console.log(`${LOG_PREFIX} Appointment ID: ${result.data?.id}`);
-    console.log(`${LOG_PREFIX} Status: ${result.data?.status || 'pending'}`);
+    console.log(`${LOG_PREFIX} Appointment created:`, { id: result?.data?.id, status: result?.data?.status });
 
     return result;
   } catch (error) {
@@ -510,7 +508,7 @@ export async function createAppointment(data: AppointmentData) {
       console.error(`${LOG_PREFIX} Error stack:`, error.stack);
     }
 
-    console.error(`${LOG_PREFIX} Request data that failed:`, JSON.stringify(data, null, 2));
+    console.error(`${LOG_PREFIX} Appointment creation failed:`, error instanceof Error ? error.message : 'unknown');
 
     throw error;
   }

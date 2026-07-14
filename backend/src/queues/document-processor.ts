@@ -112,6 +112,10 @@ export function cleanTextContent(text: string): string {
 }
 
 export function chunkText(text: string, chunkSize: number, overlap: number): string[] {
+  // 防御：overlap >= chunkSize 会导致 start 不前进，死循环
+  if (overlap >= chunkSize) {
+    throw new Error(`overlap (${overlap}) must be less than chunkSize (${chunkSize})`);
+  }
   const chunks: string[] = [];
   if (!text) {
     return chunks;
@@ -125,7 +129,7 @@ export function chunkText(text: string, chunkSize: number, overlap: number): str
     }
     start += chunkSize - overlap;
   }
-  return chunks.length > 0 ? chunks : [text];
+  return chunks;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -136,6 +140,8 @@ export function chunkText(text: string, chunkSize: number, overlap: number): str
  * Starts the BullMQ worker that processes document vectorization jobs.
  * Returns the worker instance, or null when Redis is not configured.
  */
+let documentWorkerInstance: Worker | null = null;
+
 export function startDocumentWorker(strapi: any): Worker | null {
   if (!process.env.REDIS_HOST) {
     console.log('[Queue] Document worker skipped - REDIS_HOST not set');
@@ -270,12 +276,29 @@ export function startDocumentWorker(strapi: any): Worker | null {
   });
 
   worker.on('failed', (job, err) => {
-    console.error(`[Queue] Job ${job?.id} failed:`, err.message);
+    const knowledgeBaseId = job?.data?.knowledgeBaseId ?? 'unknown';
+    console.error(`[Queue] Job ${job?.id} failed (knowledgeBaseId=${knowledgeBaseId}, attempts=${job?.attemptsMade}/${job?.opts?.attempts ?? '?'}):`, err.message);
   });
 
   worker.on('error', (err) => {
     console.error('[Queue] Worker error:', err.message);
   });
 
+  documentWorkerInstance = worker;
   return worker;
+}
+
+/**
+ * Close the document worker gracefully. Called from Strapi destroy() lifecycle.
+ */
+export async function closeDocumentWorker(): Promise<void> {
+  if (documentWorkerInstance) {
+    try {
+      await documentWorkerInstance.close();
+      console.log('[Queue] Document worker closed');
+    } catch (err) {
+      console.warn('[Queue] Failed to close document worker:', err instanceof Error ? err.message : err);
+    }
+    documentWorkerInstance = null;
+  }
 }

@@ -142,12 +142,13 @@ export default factories.createCoreService('api::knowledge-base.knowledge-base',
     }
   },
 
-  async deleteVectors(documentId: number) {
-    console.log('[KnowledgeBaseService] deleteVectors() called, documentId:', documentId);
+  async deleteVectors(knowledgeBaseId: number) {
+    console.log('[KnowledgeBaseService] deleteVectors() called, knowledgeBaseId:', knowledgeBaseId);
     try {
+      // knowledge_embeddings 表的列是 knowledge_base_id（整数），不是 documentId
       await strapi.db.connection.raw(
-        'DELETE FROM knowledge_embeddings WHERE "documentId" = ?',
-        [documentId]
+        'DELETE FROM knowledge_embeddings WHERE knowledge_base_id = ?',
+        [knowledgeBaseId]
       );
       console.log('[KnowledgeBaseService] deleteVectors() completed');
       return true;

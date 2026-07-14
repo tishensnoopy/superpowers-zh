@@ -1,4 +1,5 @@
 import { generateEmbedding, chat, type ChatMessage } from './llm-service';
+import { getActiveAiConfig } from './ai-config-service';
 
 /**
  * Strapi instance injected via `setStrapi()`. Kept as a module-level singleton
@@ -112,7 +113,7 @@ export async function retrieve(query: string, topK = 5): Promise<RetrievalResult
   };
 }
 
-function buildSystemPrompt(retrievedDocs: RetrievedDoc[]): string {
+async function buildSystemPrompt(retrievedDocs: RetrievedDoc[]): Promise<string> {
   let docsSection: string;
   if (retrievedDocs.length === 0) {
     docsSection = '（暂无相关知识库内容）';
@@ -121,6 +122,19 @@ function buildSystemPrompt(retrievedDocs: RetrievedDoc[]): string {
       .map((doc, index) => `[${index + 1}] ${doc.chunkText}`)
       .join('\n');
   }
+
+  // 优先使用 ai-config 中配置的 systemPrompt，回退到硬编码默认值
+  if (strapiInstance) {
+    try {
+      const aiConfig = await getActiveAiConfig(strapiInstance);
+      if (aiConfig?.systemPrompt) {
+        return aiConfig.systemPrompt.replace('{retrieved_docs}', docsSection);
+      }
+    } catch (err) {
+      console.warn('[rag-service] Failed to load ai-config systemPrompt, using default:', err instanceof Error ? err.message : err, err instanceof Error ? err.stack : '');
+    }
+  }
+
   return SYSTEM_PROMPT_TEMPLATE.replace('{retrieved_docs}', docsSection);
 }
 
@@ -133,7 +147,7 @@ export async function generateAnswer(
   retrievedDocs: RetrievedDoc[],
   history: ChatMessage[] = []
 ): Promise<string> {
-  const systemPrompt = buildSystemPrompt(retrievedDocs);
+  const systemPrompt = await buildSystemPrompt(retrievedDocs);
 
   const truncatedHistory = history.slice(-MAX_HISTORY_MESSAGES);
 
@@ -143,7 +157,22 @@ export async function generateAnswer(
     { role: 'user', content: query },
   ];
 
-  const result = await chat(messages, { temperature: 0.3, maxTokens: 2000 });
+  // 从 ai-config 读取 temperature/maxTokens，未配置时使用默认值
+  let temperature = 0.3;
+  let maxTokens = 2000;
+  if (strapiInstance) {
+    try {
+      const aiConfig = await getActiveAiConfig(strapiInstance);
+      if (aiConfig) {
+        temperature = aiConfig.temperature ?? temperature;
+        maxTokens = aiConfig.maxTokens ?? maxTokens;
+      }
+    } catch (err) {
+      console.warn('[rag-service] Failed to load ai-config temperature/maxTokens, using defaults:', err instanceof Error ? err.message : err);
+    }
+  }
+
+  const result = await chat(messages, { temperature, maxTokens });
   return result.content;
 }
 
