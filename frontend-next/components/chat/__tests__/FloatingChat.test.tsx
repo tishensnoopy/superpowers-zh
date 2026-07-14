@@ -210,4 +210,44 @@ describe('FloatingChat 组件', () => {
 
     expect(await screen.findByText(/网络出现问题/)).toBeInTheDocument();
   });
+
+  it('收到 transfer + actionUrl 时应渲染预约按钮', async () => {
+    (sendMessage as any).mockResolvedValue({
+      type: 'transfer',
+      content: '建议您预约试听课',
+      actionUrl: '/appointment',
+    });
+
+    const user = userEvent.setup();
+    render(<FloatingChat />);
+
+    await openChatAndWaitForSession(user);
+
+    const input = screen.getByPlaceholderText(/输入消息/);
+    await user.type(input, '你好');
+    await user.click(screen.getByRole('button', { name: /发送/ }));
+
+    const appointmentButton = await screen.findByText('立即预约');
+    expect(appointmentButton).toBeInTheDocument();
+    expect(appointmentButton.closest('a')).toHaveAttribute('href', '/appointment');
+  });
+
+  it('收到 answer + 无 actionUrl 时不渲染预约按钮', async () => {
+    (sendMessage as any).mockResolvedValue({
+      type: 'answer',
+      content: '这是普通回答',
+    });
+
+    const user = userEvent.setup();
+    render(<FloatingChat />);
+
+    await openChatAndWaitForSession(user);
+
+    const input = screen.getByPlaceholderText(/输入消息/);
+    await user.type(input, '你好');
+    await user.click(screen.getByRole('button', { name: /发送/ }));
+
+    expect(await screen.findByText('这是普通回答')).toBeInTheDocument();
+    expect(screen.queryByText('立即预约')).not.toBeInTheDocument();
+  });
 });

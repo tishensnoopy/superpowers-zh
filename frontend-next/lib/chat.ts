@@ -11,6 +11,7 @@ export interface ChatMessageData {
   timestamp?: string;
   type?: 'text' | 'transfer';
   streaming?: boolean;
+  actionUrl?: string;
 }
 
 export interface SSEData {

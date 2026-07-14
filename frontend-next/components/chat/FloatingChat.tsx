@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { MessageCircle, X, Bot } from 'lucide-react';
 import ChatMessage, { type ChatRole } from './ChatMessage';
 import ChatInput from './ChatInput';
@@ -110,6 +111,7 @@ export default function FloatingChat() {
                 ...updated[aiMessageIndex],
                 content: response.content,
                 streaming: false,
+                actionUrl: response.actionUrl,
               };
             }
             return [...updated, {
@@ -199,14 +201,26 @@ export default function FloatingChat() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50">
         {messages.map((msg, i) => (
-          <ChatMessage
-            key={i}
-            role={msg.role as ChatRole}
-            content={msg.content}
-            timestamp={msg.timestamp}
-            streaming={msg.streaming}
-            type={msg.type as 'text' | 'transfer' | undefined}
-          />
+          <div key={i}>
+            <ChatMessage
+              role={msg.role as ChatRole}
+              content={msg.content}
+              timestamp={msg.timestamp}
+              streaming={msg.streaming}
+              type={msg.type as 'text' | 'transfer' | undefined}
+            />
+            {msg.actionUrl && (
+              <div className="flex justify-center mt-2 mb-2">
+                <Link
+                  href={msg.actionUrl}
+                  className="px-4 py-2 rounded-lg text-white text-sm font-semibold"
+                  style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
+                >
+                  立即预约
+                </Link>
+              </div>
+            )}
+          </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
