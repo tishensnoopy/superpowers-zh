@@ -20,6 +20,11 @@ export interface RetrievedDoc {
   similarity: number;
 }
 
+export interface RetrievalResult {
+  docs: RetrievedDoc[];
+  isRelevant: boolean;
+}
+
 export interface FeedbackFaqResult {
   documentId: string;
   id: number;
@@ -27,6 +32,14 @@ export interface FeedbackFaqResult {
 }
 
 const MAX_HISTORY_MESSAGES = 10;
+
+/**
+ * Minimum cosine similarity for a chunk to be considered relevant. Chunks
+ * below this threshold are filtered out before returning; when no chunk
+ * reaches the threshold `isRelevant` is `false` so the chat controller can
+ * fall back to human handoff ("guided mode").
+ */
+const SIMILARITY_THRESHOLD = 0.3;
 
 const SYSTEM_PROMPT_TEMPLATE = `你是佑森小课堂的AI客服助手。佑森小课堂是武汉的幼小衔接教育机构，有6大校区。
 你的职责是回答家长关于课程、校区、预约、费用等问题。
@@ -45,11 +58,14 @@ const SYSTEM_PROMPT_TEMPLATE = `你是佑森小课堂的AI客服助手。佑森�
 /**
  * Generate an embedding for the query and search the pgvector store for the
  * most similar knowledge-base chunks. Only chunks belonging to a knowledge
- * base whose status is "ready" are considered.
+ * base whose status is "ready" are considered. Chunks whose similarity is
+ * below `SIMILARITY_THRESHOLD` are filtered out; `isRelevant` indicates
+ * whether any relevant chunk was found so callers can fall back to human
+ * handoff when the knowledge base has no matching content.
  */
-export async function retrieve(query: string, topK = 5): Promise<RetrievedDoc[]> {
+export async function retrieve(query: string, topK = 5): Promise<RetrievalResult> {
   if (!query || query.trim().length === 0) {
-    return [];
+    return { docs: [], isRelevant: false };
   }
 
   if (!strapiInstance) {
@@ -58,7 +74,7 @@ export async function retrieve(query: string, topK = 5): Promise<RetrievedDoc[]>
 
   const { embedding } = await generateEmbedding(query);
   if (!embedding || embedding.length === 0) {
-    return [];
+    return { docs: [], isRelevant: false };
   }
 
   const embeddingJson = JSON.stringify(embedding);
@@ -81,12 +97,19 @@ export async function retrieve(query: string, topK = 5): Promise<RetrievedDoc[]>
     ? result
     : result.rows || [];
 
-  return rows.map((row) => ({
-    id: Number(row.id),
-    chunkText: String(row.chunk_text ?? ''),
-    knowledgeBaseId: Number(row.knowledge_base_id),
-    similarity: Number(row.similarity),
-  }));
+  const docs = rows
+    .map((row) => ({
+      id: Number(row.id),
+      chunkText: String(row.chunk_text ?? ''),
+      knowledgeBaseId: Number(row.knowledge_base_id),
+      similarity: Number(row.similarity),
+    }))
+    .filter((doc) => doc.similarity >= SIMILARITY_THRESHOLD);
+
+  return {
+    docs,
+    isRelevant: docs.length > 0,
+  };
 }
 
 function buildSystemPrompt(retrievedDocs: RetrievedDoc[]): string {

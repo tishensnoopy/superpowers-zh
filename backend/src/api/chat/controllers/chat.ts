@@ -99,7 +99,7 @@ export default {
 
     // 5. RAG: retrieve relevant chunks + generate the answer.
     const { retrieve, generateAnswer } = require('../../../services/rag-service') as {
-      retrieve: (query: string, topK: number) => Promise<any[]>;
+      retrieve: (query: string, topK: number) => Promise<{ docs: any[]; isRelevant: boolean }>;
       generateAnswer: (
         query: string,
         docs: any[],
@@ -107,7 +107,7 @@ export default {
       ) => Promise<{ content: string; tokenCount?: number; latencyMs?: number }>;
     };
 
-    const docs = await retrieve(message, 5);
+    const { docs, isRelevant } = await retrieve(message, 5);
     const result = await generateAnswer(
       message,
       docs,
@@ -134,7 +134,12 @@ export default {
       },
     });
 
-    ctx.body = { type: 'answer', content: result.content, retrievedDocs: docs ? docs.length : 0 };
+    ctx.body = {
+      type: 'answer',
+      content: result.content,
+      retrievedDocs: docs ? docs.length : 0,
+      isRelevant,
+    };
   },
 
   async transferToHuman(ctx: any) {

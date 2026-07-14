@@ -53,10 +53,11 @@ describe('rag-service', () => {
 
       const result = await retrieve('光谷校区在哪', 5);
 
-      expect(result).toEqual<RetrievedDoc[]>([
+      expect(result.docs).toEqual<RetrievedDoc[]>([
         { id: 1, chunkText: '校区A在光谷', knowledgeBaseId: 10, similarity: 0.95 },
         { id: 2, chunkText: '校区B在徐东', knowledgeBaseId: 10, similarity: 0.88 },
       ]);
+      expect(result.isRelevant).toBe(true);
       expect(mockGenerateEmbedding).toHaveBeenCalledTimes(1);
       expect(mockGenerateEmbedding).toHaveBeenCalledWith('光谷校区在哪');
 
@@ -85,7 +86,8 @@ describe('rag-service', () => {
 
     test('returns empty array when query is empty or whitespace', async () => {
       const result = await retrieve('   ');
-      expect(result).toEqual([]);
+      expect(result.docs).toEqual([]);
+      expect(result.isRelevant).toBe(false);
       expect(mockGenerateEmbedding).not.toHaveBeenCalled();
       expect(mockStrapi.db.connection.raw).not.toHaveBeenCalled();
     });
@@ -95,7 +97,8 @@ describe('rag-service', () => {
       mockStrapi.db.connection.raw.mockResolvedValue({ rows: [] });
 
       const result = await retrieve('random question');
-      expect(result).toEqual([]);
+      expect(result.docs).toEqual([]);
+      expect(result.isRelevant).toBe(false);
     });
 
     test('propagates error when embedding generation fails', async () => {
@@ -103,6 +106,50 @@ describe('rag-service', () => {
 
       await expect(retrieve('hello')).rejects.toThrow('DASHSCOPE_API_KEY not configured');
       expect(mockStrapi.db.connection.raw).not.toHaveBeenCalled();
+    });
+
+    describe('相似度阈值 0.3', () => {
+      test('相似度低于 0.3 的结果应被过滤，isRelevant=false', async () => {
+        mockGenerateEmbedding.mockResolvedValue({ embedding: [0.1], tokenCount: 1 });
+        const rows = [
+          { id: 10, chunk_text: '不相关内容', knowledge_base_id: 1, similarity: 0.1 },
+          { id: 11, chunk_text: '弱相关', knowledge_base_id: 1, similarity: 0.25 },
+        ];
+        mockStrapi.db.connection.raw.mockResolvedValue({ rows });
+
+        const result = await retrieve('测试问题', 5);
+
+        expect(result.docs).toHaveLength(0);
+        expect(result.isRelevant).toBe(false);
+      });
+
+      test('相似度高于 0.3 的结果应保留，isRelevant=true', async () => {
+        mockGenerateEmbedding.mockResolvedValue({ embedding: [0.1], tokenCount: 1 });
+        const rows = [
+          { id: 20, chunk_text: '相关内容', knowledge_base_id: 1, similarity: 0.8 },
+          { id: 21, chunk_text: '不相关', knowledge_base_id: 1, similarity: 0.2 },
+        ];
+        mockStrapi.db.connection.raw.mockResolvedValue({ rows });
+
+        const result = await retrieve('测试问题', 5);
+
+        expect(result.docs).toHaveLength(1);
+        expect(result.docs[0].id).toBe(20);
+        expect(result.isRelevant).toBe(true);
+      });
+
+      test('相似度恰好等于 0.3 的结果应保留（边界 >=）', async () => {
+        mockGenerateEmbedding.mockResolvedValue({ embedding: [0.1], tokenCount: 1 });
+        const rows = [
+          { id: 30, chunk_text: '边界内容', knowledge_base_id: 1, similarity: 0.3 },
+        ];
+        mockStrapi.db.connection.raw.mockResolvedValue({ rows });
+
+        const result = await retrieve('测试问题', 5);
+
+        expect(result.docs).toHaveLength(1);
+        expect(result.isRelevant).toBe(true);
+      });
     });
   });
 
