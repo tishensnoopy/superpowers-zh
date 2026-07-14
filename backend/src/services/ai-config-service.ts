@@ -5,6 +5,7 @@ export interface AiConfig {
   apiKey: string;
   apiEndpoint: string;
   systemPrompt: string;
+  systemPromptEn: string | null;
   temperature: number;
   maxTokens: number;
   topK: number;
@@ -40,6 +41,7 @@ export async function getActiveAiConfig(strapi: any): Promise<AiConfig | null> {
       apiKey: config.apiKey,
       apiEndpoint: config.apiEndpoint,
       systemPrompt: config.systemPrompt,
+      systemPromptEn: config.systemPromptEn ?? null,
       temperature: config.temperature,
       maxTokens: config.maxTokens,
       topK: config.topK,

@@ -68,3 +68,62 @@ describe('ai-config-service', () => {
     expect(findMany).toHaveBeenCalledTimes(2);
   });
 });
+
+describe('ai-config-service systemPromptEn', () => {
+  beforeEach(() => {
+    clearCache();
+  });
+
+  it('returns systemPromptEn from database when present', async () => {
+    const mockStrapi = {
+      documents: vi.fn().mockReturnValue({
+        findMany: vi.fn().mockResolvedValue([
+          {
+            provider: 'qwen',
+            model: 'qwen-plus',
+            embeddingModel: 'text-embedding-v2',
+            apiKey: 'sk-test',
+            apiEndpoint: 'https://test',
+            systemPrompt: '中文 prompt',
+            systemPromptEn: 'English prompt',
+            temperature: 0.3,
+            maxTokens: 1000,
+            topK: 5,
+            chunkSize: 500,
+            chunkOverlap: 50,
+          },
+        ]),
+      }),
+    } as any;
+
+    const config = await getActiveAiConfig(mockStrapi);
+    expect(config?.systemPromptEn).toBe('English prompt');
+    expect(config?.systemPrompt).toBe('中文 prompt');
+  });
+
+  it('returns null systemPromptEn when database field is empty', async () => {
+    const mockStrapi = {
+      documents: vi.fn().mockReturnValue({
+        findMany: vi.fn().mockResolvedValue([
+          {
+            provider: 'qwen',
+            model: 'qwen-plus',
+            embeddingModel: 'text-embedding-v2',
+            apiKey: 'sk-test',
+            apiEndpoint: 'https://test',
+            systemPrompt: '中文 prompt',
+            systemPromptEn: null,
+            temperature: 0.3,
+            maxTokens: 1000,
+            topK: 5,
+            chunkSize: 500,
+            chunkOverlap: 50,
+          },
+        ]),
+      }),
+    } as any;
+
+    const config = await getActiveAiConfig(mockStrapi);
+    expect(config?.systemPromptEn).toBeNull();
+  });
+});
