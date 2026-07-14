@@ -39,7 +39,7 @@ describe('LanguageSwitcher', () => {
 
     render(<LanguageSwitcher />);
     fireEvent.click(screen.getByText('English'));
-    expect(mockReplace).toHaveBeenCalledWith('/courses', { locale: 'en-US' });
+    expect(mockReplace).toHaveBeenCalledWith('/courses');
   });
 
   it('writes NEXT_LOCALE cookie on switch', () => {

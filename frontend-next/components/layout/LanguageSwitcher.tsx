@@ -27,11 +27,12 @@ export default function LanguageSwitcher() {
       setIsOpen(false);
       return;
     }
-    // Set cookie (1 year)
+    // Locale switch relies on NEXT_LOCALE cookie + next-intl middleware redirect,
+    // not on router.replace options (standard Next.js router ignores { locale }).
     document.cookie = `NEXT_LOCALE=${targetLocale}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
     // Strip current locale prefix from pathname for next-intl router.replace
     const cleanPath = pathname.replace(/^\/en-US/, '') || '/';
-    router.replace(cleanPath, { locale: targetLocale });
+    router.replace(cleanPath);
     setIsOpen(false);
   }
 

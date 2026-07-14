@@ -199,7 +199,7 @@ export default function FloatingChat({ locale = 'zh-CN' }: { locale?: 'zh-CN' | 
         </div>
         <button
           onClick={handleClose}
-          aria-label="关闭"
+          aria-label={locale === 'en-US' ? 'Close' : '关闭'}
           className="p-1 rounded-lg hover:bg-white/20 transition-colors"
         >
           <X size={20} />
@@ -224,7 +224,7 @@ export default function FloatingChat({ locale = 'zh-CN' }: { locale?: 'zh-CN' | 
                   className="px-4 py-2 rounded-lg text-white text-sm font-semibold"
                   style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
                 >
-                  立即预约
+                  {locale === 'en-US' ? 'Book Now' : '立即预约'}
                 </Link>
               </div>
             )}
