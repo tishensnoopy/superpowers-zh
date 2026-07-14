@@ -22,3 +22,6 @@ vi.mock('next/image', () => ({
   default: ({ src, alt, fill, width, height, priority, className, sizes, ...props }: any) =>
     createElement('img', { src, alt, width, height, className, ...props }),
 }));
+
+// Mock scrollIntoView (not available in jsdom)
+Element.prototype.scrollIntoView = vi.fn();

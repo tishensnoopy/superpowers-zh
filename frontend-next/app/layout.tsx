@@ -4,6 +4,7 @@ import { getSiteSettings, getNavigationTree, getFooter, getImageUrl } from '@/li
 import LayoutShell from '@/components/layout/LayoutShell';
 import Navigation from '@/components/layout/Navigation';
 import Footer from '@/components/layout/Footer';
+import FloatingChat from '@/components/chat/FloatingChat';
 import './globals.css';
 
 export const revalidate = 300;
@@ -103,6 +104,7 @@ export default async function RootLayout({
           <main className="flex-1">{children}</main>
           <Footer footer={footer} settings={settings} />
         </LayoutShell>
+        <FloatingChat />
       </body>
     </html>
   );
