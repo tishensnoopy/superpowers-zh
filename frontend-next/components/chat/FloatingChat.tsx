@@ -207,7 +207,7 @@ export default function FloatingChat({ locale = 'zh-CN' }: { locale?: 'zh-CN' | 
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50" aria-live="polite" aria-label="聊天消息">
+      <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50" aria-live="polite" aria-label={locale === 'en-US' ? 'Chat messages' : '聊天消息'}>
         {messages.map((msg) => (
           <div key={msg.id}>
             <ChatMessage
