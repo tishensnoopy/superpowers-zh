@@ -433,8 +433,8 @@ export interface Pagination {
 
 export interface AppointmentData {
   name?: string;
-  childName?: string;
-  parentName?: string;
+  childName: string;
+  parentName: string;
   phone: string;
   campus: string;
   age?: string;

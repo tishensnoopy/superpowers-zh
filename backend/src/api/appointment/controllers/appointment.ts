@@ -10,21 +10,31 @@ export default factories.createCoreController('api::appointment.appointment', ({
     console.log(`${LOG_PREFIX} [create] 收到预约提交请求`);
 
     try {
-      const { name, phone, campus } = ctx.request.body.data || {};
+      const { parentName, childName, phone, campus, name } = ctx.request.body.data || {};
+
+      // 向后兼容：旧客户端发送 name，新客户端发送 parentName
+      const effectiveParentName = parentName || name;
 
       console.log(`${LOG_PREFIX} [create] 请求数据:`, {
-        name: name ? `${name.substring(0, 1)}***` : 'empty',
+        parentName: effectiveParentName ? `${effectiveParentName.substring(0, 1)}***` : 'empty',
+        childName: childName ? `${childName.substring(0, 1)}***` : 'empty',
         phone: phone ? `${phone.substring(0, 3)}****${phone.substring(7)}` : 'empty',
         campus: campus || 'empty',
       });
 
-      if (!name || !phone || !campus) {
+      if (!effectiveParentName || !childName || !phone || !campus) {
         const missing: string[] = [];
-        if (!name) missing.push('name');
+        if (!effectiveParentName) missing.push('parentName');
+        if (!childName) missing.push('childName');
         if (!phone) missing.push('phone');
         if (!campus) missing.push('campus');
         console.warn(`${LOG_PREFIX} [create] 校验失败: 缺少必填字段 ${missing.join(', ')}`);
         return ctx.badRequest(`Missing required fields: ${missing.join(', ')}`);
+      }
+
+      // 向后兼容：旧客户端只发送 name，将其映射到 parentName 字段
+      if (!parentName && name) {
+        ctx.request.body.data.parentName = name;
       }
 
       const phoneRegex = /^1[3-9]\d{9}$/;
