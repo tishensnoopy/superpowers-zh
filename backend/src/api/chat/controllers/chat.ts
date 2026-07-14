@@ -20,6 +20,16 @@ interface ChatMessageRow {
   createdAt?: string;
 }
 
+const VALID_LOCALES = ['zh-CN', 'en-US'] as const;
+type Locale = (typeof VALID_LOCALES)[number];
+
+function normalizeLocale(input: unknown): Locale {
+  if (typeof input === 'string' && (VALID_LOCALES as readonly string[]).includes(input)) {
+    return input as Locale;
+  }
+  return 'zh-CN';
+}
+
 const MAX_MESSAGES = 10;
 const MAX_MESSAGE_LENGTH = 500;
 
@@ -29,7 +39,7 @@ function randomId(prefix: string): string {
 
 export default {
   async startSession(ctx: any) {
-    const { visitorName, visitorPhone, sourcePage } = ctx.request.body || {};
+    const { visitorName, visitorPhone, sourcePage, locale } = ctx.request.body || {};
 
     // 基本输入校验：visitorPhone 若提供必须是合理长度的字符串
     if (visitorPhone !== undefined && visitorPhone !== null) {
@@ -43,6 +53,7 @@ export default {
       }
     }
 
+    const sessionLocale = normalizeLocale(locale);
     const sessionId = randomId('sess');
     const visitorId = randomId('vis');
 
@@ -54,6 +65,7 @@ export default {
         visitorPhone: visitorPhone || null,
         sourcePage: sourcePage || null,
         status: 'active',
+        locale: sessionLocale,
       },
     });
 
@@ -134,16 +146,21 @@ export default {
     });
 
     // 7. RAG: retrieve relevant chunks + generate the answer.
+    //    Use session.locale (not body locale) to prevent client tampering —
+    //    locale is fixed at session creation and cannot be changed mid-session.
+    const sessionLocale = normalizeLocale(session.locale);
     const { retrieve, generateAnswer } = require('../../../services/rag-service') as {
-      retrieve: (query: string, topK: number) => Promise<{ docs: any[]; isRelevant: boolean }>;
+      retrieve: (query: string, topK: number, locale?: 'zh-CN' | 'en-US') => Promise<{ docs: any[]; isRelevant: boolean; usedFallback: boolean }>;
       generateAnswer: (
         query: string,
         docs: any[],
-        history: ChatMessageRow[]
+        history: ChatMessageRow[],
+        locale?: 'zh-CN' | 'en-US',
+        usedFallback?: boolean
       ) => Promise<string>;
     };
 
-    const { docs, isRelevant } = await retrieve(message, 5);
+    const { docs, isRelevant, usedFallback } = await retrieve(message, 5, sessionLocale);
 
     // 8. Guidance mode — when the knowledge base has no relevant content
     //    (isRelevant=false), transfer to a human agent instead of letting
@@ -165,7 +182,9 @@ export default {
     const answer = await generateAnswer(
       message,
       docs,
-      (history || []).map((h: any) => ({ role: h.role, content: h.content }))
+      (history || []).map((h: any) => ({ role: h.role, content: h.content })),
+      sessionLocale,
+      usedFallback
     );
 
     // 9. Persist the assistant message.

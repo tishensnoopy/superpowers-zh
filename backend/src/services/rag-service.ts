@@ -134,7 +134,10 @@ export async function retrieve(
   };
 }
 
-async function buildSystemPrompt(retrievedDocs: RetrievedDoc[]): Promise<string> {
+async function buildSystemPrompt(
+  retrievedDocs: RetrievedDoc[],
+  locale: 'zh-CN' | 'en-US' = 'zh-CN'
+): Promise<string> {
   let docsSection: string;
   if (retrievedDocs.length === 0) {
     docsSection = '（暂无相关知识库内容）';
@@ -144,10 +147,15 @@ async function buildSystemPrompt(retrievedDocs: RetrievedDoc[]): Promise<string>
       .join('\n');
   }
 
-  // 优先使用 ai-config 中配置的 systemPrompt，回退到硬编码默认值
+  // 按 locale 选择 systemPrompt，fallback 链：
+  //   en-US: config.systemPromptEn → config.systemPrompt → env AI_CHAT_SYSTEM_PROMPT → SYSTEM_PROMPT_TEMPLATE
+  //   zh-CN: config.systemPrompt → env AI_CHAT_SYSTEM_PROMPT → SYSTEM_PROMPT_TEMPLATE
   if (strapiInstance) {
     try {
       const aiConfig = await getActiveAiConfig(strapiInstance);
+      if (locale === 'en-US' && aiConfig?.systemPromptEn) {
+        return aiConfig.systemPromptEn.replace('{retrieved_docs}', docsSection);
+      }
       if (aiConfig?.systemPrompt) {
         return aiConfig.systemPrompt.replace('{retrieved_docs}', docsSection);
       }
@@ -156,19 +164,31 @@ async function buildSystemPrompt(retrievedDocs: RetrievedDoc[]): Promise<string>
     }
   }
 
-  return SYSTEM_PROMPT_TEMPLATE.replace('{retrieved_docs}', docsSection);
+  return (process.env.AI_CHAT_SYSTEM_PROMPT || SYSTEM_PROMPT_TEMPLATE).replace('{retrieved_docs}', docsSection);
 }
 
 /**
  * Build a chat completion request from the retrieved context and recent
  * history, then return the assistant's answer.
+ *
+ * `locale` selects the system prompt language (en-US uses systemPromptEn when
+ * available). `usedFallback` — when true alongside locale='en-US' — appends an
+ * instruction to translate the answer to English, because the retrieved
+ * context may contain Chinese chunks from the zh-CN fallback merge.
  */
 export async function generateAnswer(
   query: string,
   retrievedDocs: RetrievedDoc[],
-  history: ChatMessage[] = []
+  history: ChatMessage[] = [],
+  locale: 'zh-CN' | 'en-US' = 'zh-CN',
+  usedFallback: boolean = false
 ): Promise<string> {
-  const systemPrompt = await buildSystemPrompt(retrievedDocs);
+  let systemPrompt = await buildSystemPrompt(retrievedDocs, locale);
+
+  // en-US fallback 时追加翻译指令（context 可能含中文 chunk）
+  if (locale === 'en-US' && usedFallback) {
+    systemPrompt += '\n\nNote: Some context is in Chinese. Translate the answer to English.';
+  }
 
   const truncatedHistory = history.slice(-MAX_HISTORY_MESSAGES);
 

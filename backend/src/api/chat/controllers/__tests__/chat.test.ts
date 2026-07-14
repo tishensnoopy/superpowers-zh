@@ -19,6 +19,7 @@ interface MockSession {
   sessionId: string;
   status: string;
   messageCount: number;
+  locale?: string;
 }
 
 function buildMockStrapi(session: MockSession | null) {
@@ -108,6 +109,7 @@ describe('chat controller - sendMessage 防滥用机制', () => {
     mockRetrieve.mockResolvedValue({
       docs: [{ id: 1, chunkText: 'relevant doc', knowledgeBaseId: 10, similarity: 0.9 }],
       isRelevant: true,
+      usedFallback: false,
     });
     mockGenerateAnswer.mockResolvedValue('mock answer');
   });
@@ -338,5 +340,158 @@ describe('chat controller - submitFeedback session 校验', () => {
     expect(mockStrapi.__sessionFindMany).toHaveBeenCalledWith(
       expect.objectContaining({ filters: { sessionId: 'nonexistent' }, limit: 1 })
     );
+  });
+});
+
+describe('chat controller - startSession locale 处理', () => {
+  let originalStrapi: unknown;
+  let originalLoad: typeof Module._load;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    originalStrapi = (globalThis as any).strapi;
+    originalLoad = Module._load;
+    Module._load = function (request: string, parent: NodeJS.Module | undefined, isMain: boolean) {
+      if (parent?.filename?.includes('chat') && parent.filename.includes('controllers')) {
+        if (request.includes('services/llm-service')) {
+          return { detectIntent: mockDetectIntent };
+        }
+        if (request.includes('services/rag-service')) {
+          return { retrieve: mockRetrieve, generateAnswer: mockGenerateAnswer, feedbackToFaq: vi.fn() };
+        }
+      }
+      return originalLoad.call(this, request, parent, isMain);
+    } as typeof Module._load;
+  });
+
+  afterEach(() => {
+    Module._load = originalLoad;
+    if (originalStrapi === undefined) {
+      delete (globalThis as any).strapi;
+    } else {
+      (globalThis as any).strapi = originalStrapi;
+    }
+  });
+
+  test('locale=en-US 时持久化到 session', async () => {
+    const mockCreate = vi.fn().mockResolvedValue({ documentId: 'doc1' });
+    const mockStrapi = {
+      documents: vi.fn().mockReturnValue({ create: mockCreate }),
+    };
+    (globalThis as any).strapi = mockStrapi;
+
+    const ctx: any = {
+      request: { body: { locale: 'en-US' } },
+      body: null as any,
+    };
+
+    await chatController.startSession(ctx);
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ locale: 'en-US' }),
+      })
+    );
+    expect(ctx.body.sessionId).toBeDefined();
+  });
+
+  test('未提供 locale 时默认 zh-CN', async () => {
+    const mockCreate = vi.fn().mockResolvedValue({ documentId: 'doc1' });
+    const mockStrapi = {
+      documents: vi.fn().mockReturnValue({ create: mockCreate }),
+    };
+    (globalThis as any).strapi = mockStrapi;
+
+    const ctx: any = {
+      request: { body: {} },
+      body: null as any,
+    };
+
+    await chatController.startSession(ctx);
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ locale: 'zh-CN' }),
+      })
+    );
+  });
+
+  test('非法 locale 回退到 zh-CN', async () => {
+    const mockCreate = vi.fn().mockResolvedValue({ documentId: 'doc1' });
+    const mockStrapi = {
+      documents: vi.fn().mockReturnValue({ create: mockCreate }),
+    };
+    (globalThis as any).strapi = mockStrapi;
+
+    const ctx: any = {
+      request: { body: { locale: 'fr-FR' } },
+      body: null as any,
+    };
+
+    await chatController.startSession(ctx);
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ locale: 'zh-CN' }),
+      })
+    );
+  });
+});
+
+describe('chat controller - sendMessage locale 覆盖', () => {
+  let originalStrapi: unknown;
+  let originalLoad: typeof Module._load;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    originalStrapi = (globalThis as any).strapi;
+    originalLoad = Module._load;
+    Module._load = function (request: string, parent: NodeJS.Module | undefined, isMain: boolean) {
+      if (parent?.filename?.includes('chat') && parent.filename.includes('controllers')) {
+        if (request.includes('services/llm-service')) {
+          return { detectIntent: mockDetectIntent };
+        }
+        if (request.includes('services/rag-service')) {
+          return { retrieve: mockRetrieve, generateAnswer: mockGenerateAnswer, feedbackToFaq: vi.fn() };
+        }
+      }
+      return originalLoad.call(this, request, parent, isMain);
+    } as typeof Module._load;
+    mockDetectIntent.mockResolvedValue({ shouldTransfer: false });
+    mockRetrieve.mockResolvedValue({
+      docs: [{ id: 1, chunkText: 'doc', knowledgeBaseId: 10, similarity: 0.9 }],
+      isRelevant: true,
+      usedFallback: false,
+    });
+    mockGenerateAnswer.mockResolvedValue('mock answer');
+  });
+
+  afterEach(() => {
+    Module._load = originalLoad;
+    if (originalStrapi === undefined) {
+      delete (globalThis as any).strapi;
+    } else {
+      (globalThis as any).strapi = originalStrapi;
+    }
+  });
+
+  test('用 session.locale 覆盖入参 locale（防篡改）', async () => {
+    // Session 有 locale=en-US；入参 body 有 locale=zh-CN（篡改尝试）
+    const session: MockSession = {
+      id: 1,
+      documentId: 'sess-doc-1',
+      sessionId: 'sess_1',
+      status: 'active',
+      messageCount: 0,
+      locale: 'en-US',
+    };
+    const mockStrapi = buildMockStrapi(session);
+    (globalThis as any).strapi = mockStrapi;
+
+    const ctx = buildCtx({ sessionId: 'sess_1', message: 'hello' });
+    // 在 ctx.request.body 中加 locale: 'zh-CN' 模拟篡改
+    (ctx.request.body as any).locale = 'zh-CN';
+
+    await chatController.sendMessage(ctx);
+
+    // retrieve 应该用 session 的 en-US，不是 body 的 zh-CN
+    expect(mockRetrieve).toHaveBeenCalledWith('hello', 5, 'en-US');
   });
 });
