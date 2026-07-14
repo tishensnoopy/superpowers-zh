@@ -11,11 +11,7 @@ const queueEvents: Record<string, QueueEvents> = {};
 let isAvailable = false;
 
 export function isQueueAvailable(): boolean {
-  const available = isAvailable && !!REDIS_HOST;
-  if (!available && !REDIS_HOST) {
-    console.warn('[Queue] Redis not configured (REDIS_HOST missing). Queue features disabled.');
-  }
-  return available;
+  return isAvailable && !!REDIS_HOST;
 }
 
 async function checkConnection(): Promise<boolean> {
