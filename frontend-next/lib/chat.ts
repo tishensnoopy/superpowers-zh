@@ -43,12 +43,13 @@ export async function startChat(options?: {
 
 /**
  * 发送消息并获取 AI 回复（JSON 响应）
- * 后端返回 { type: 'answer' | 'transfer', content: string, retrievedDocs?: number }
+ * 后端返回 { type: 'answer' | 'transfer', content: string, retrievedDocs?: number, actionUrl?: string }
  */
 export interface ChatResponse {
   type: 'answer' | 'transfer';
   content: string;
   retrievedDocs?: number;
+  actionUrl?: string;
 }
 
 export async function sendMessage(

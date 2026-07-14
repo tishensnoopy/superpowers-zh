@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ChatInput from '@/components/chat/ChatInput';
 
@@ -101,5 +101,47 @@ describe('ChatInput 组件', () => {
   it('disabled 时显示转人工提示文案', () => {
     render(<ChatInput onSend={vi.fn()} isLoading={false} disabled={true} />);
     expect(screen.getByText(/已转人工客服/)).toBeInTheDocument();
+  });
+
+  it('超过 500 字符应显示错误提示且不发送', () => {
+    const longText = 'a'.repeat(501);
+    const onSend = vi.fn();
+    render(<ChatInput onSend={onSend} isLoading={false} />);
+
+    const textarea = screen.getByPlaceholderText(/输入消息/);
+    fireEvent.change(textarea, { target: { value: longText } });
+    fireEvent.keyDown(textarea, { key: 'Enter', shiftKey: false });
+
+    expect(onSend).not.toHaveBeenCalled();
+    expect(screen.getByText(/不能超过.*500/)).toBeInTheDocument();
+  });
+
+  it('不超过 500 字符正常发送', async () => {
+    const user = userEvent.setup();
+    const onSend = vi.fn();
+    render(<ChatInput onSend={onSend} isLoading={false} />);
+
+    const input = screen.getByPlaceholderText(/输入消息/);
+    await user.type(input, 'a'.repeat(500));
+    await user.click(screen.getByRole('button', { name: /发送/ }));
+
+    expect(onSend).toHaveBeenCalledWith('a'.repeat(500));
+  });
+
+  it('错误提示在重新发送合法消息后清除', () => {
+    const onSend = vi.fn();
+    render(<ChatInput onSend={onSend} isLoading={false} />);
+
+    const textarea = screen.getByPlaceholderText(/输入消息/);
+    // 先触发错误
+    fireEvent.change(textarea, { target: { value: 'a'.repeat(501) } });
+    fireEvent.keyDown(textarea, { key: 'Enter', shiftKey: false });
+    expect(screen.getByText(/不能超过.*500/)).toBeInTheDocument();
+
+    // 重新输入合法消息发送
+    fireEvent.change(textarea, { target: { value: '你好' } });
+    fireEvent.keyDown(textarea, { key: 'Enter', shiftKey: false });
+    expect(onSend).toHaveBeenCalledWith('你好');
+    expect(screen.queryByText(/不能超过.*500/)).not.toBeInTheDocument();
   });
 });

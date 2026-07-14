@@ -3,6 +3,8 @@
 import { useState, useRef, type KeyboardEvent } from 'react';
 import { Send, Loader2 } from 'lucide-react';
 
+const MAX_LENGTH = 500;
+
 interface ChatInputProps {
   onSend: (message: string) => void;
   isLoading: boolean;
@@ -11,6 +13,7 @@ interface ChatInputProps {
 
 export default function ChatInput({ onSend, isLoading, disabled = false }: ChatInputProps) {
   const [value, setValue] = useState('');
+  const [error, setError] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const isDisabled = isLoading || disabled;
@@ -18,6 +21,11 @@ export default function ChatInput({ onSend, isLoading, disabled = false }: ChatI
   const handleSend = () => {
     const trimmed = value.trim();
     if (!trimmed || isDisabled) return;
+    if (trimmed.length > MAX_LENGTH) {
+      setError(`消息不能超过 ${MAX_LENGTH} 字符`);
+      return;
+    }
+    setError('');
     onSend(trimmed);
     setValue('');
     if (textareaRef.current) {
@@ -34,6 +42,7 @@ export default function ChatInput({ onSend, isLoading, disabled = false }: ChatI
 
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setValue(e.target.value);
+    if (error) setError('');
     const el = e.target;
     el.style.height = 'auto';
     el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
@@ -46,6 +55,11 @@ export default function ChatInput({ onSend, isLoading, disabled = false }: ChatI
           已转人工客服，请等待客服回复
         </div>
       )}
+      {error && (
+        <div className="mb-2 text-center text-xs text-red-500 bg-red-50 rounded-lg py-1.5" role="alert">
+          {error}
+        </div>
+      )}
       <div className="flex items-end gap-2">
         <textarea
           ref={textareaRef}
@@ -54,6 +68,7 @@ export default function ChatInput({ onSend, isLoading, disabled = false }: ChatI
           onKeyDown={handleKeyDown}
           placeholder="输入消息..."
           disabled={isDisabled}
+          maxLength={MAX_LENGTH}
           rows={1}
           className="flex-1 resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400 disabled:bg-gray-50 disabled:text-gray-400 max-h-[120px]"
         />
