@@ -15,12 +15,9 @@ export async function migrateKnowledgeBaseLocale(strapi: any): Promise<{ updated
     []
   );
 
-  // PostgreSQL returns { rowCount } or { rows: [{ updated: N }] } depending on
-  // the Knex version; handle both shapes.
-  const updated =
-    (result as any).rowCount ??
-    (result as any).rows?.[0]?.updated ??
-    0;
+  // PostgreSQL UPDATE without RETURNING returns { rowCount: N, rows: [] }.
+  // SQLite returns { changes: N } — handle both for local dev compatibility.
+  const updated = (result as any).rowCount ?? (result as any).changes ?? 0;
 
   console.log(`[migrate-knowledge-base-locale] Updated ${updated} rows to locale='zh-CN'`);
   return { updated };
