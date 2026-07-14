@@ -1,0 +1,62 @@
+{
+  "kind": "contentType",
+  "collectionName": "chat_sessions",
+  "info": {
+    "singularName": "chat-session",
+    "pluralName": "chat-sessions",
+    "displayName": "Chat Session",
+    "description": "AI customer service chat session",
+    "icon": "MessageCircle"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "sessionId": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "maxLength": 100
+    },
+    "visitorId": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "visitorName": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "visitorPhone": {
+      "type": "string",
+      "maxLength": 20
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["active", "transferred", "closed"],
+      "default": "active"
+    },
+    "sourcePage": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "transferredAt": {
+      "type": "datetime"
+    },
+    "transferredTo": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "closedAt": {
+      "type": "datetime"
+    },
+    "metadata": {
+      "type": "json"
+    },
+    "messages": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::chat-message.chat-message",
+      "mappedBy": "session"
+    }
+  }
+}

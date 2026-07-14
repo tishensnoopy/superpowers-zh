@@ -85,6 +85,22 @@
       "target": "api::faq-item.faq-item",
       "mappedBy": "sourceDocument",
       "description": "FAQs generated from this document"
+    },
+    "file": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["files", "images"],
+      "description": "Uploaded document file"
+    },
+    "sourceUrl": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Source URL for webpage type"
+    },
+    "category": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "Document category"
     }
   }
 }

@@ -1,0 +1,72 @@
+{
+  "kind": "contentType",
+  "collectionName": "ai_configs",
+  "info": {
+    "singularName": "ai-config",
+    "pluralName": "ai-configs",
+    "displayName": "AI Config",
+    "description": "AI model configuration",
+    "icon": "Settings"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100
+    },
+    "provider": {
+      "type": "enumeration",
+      "enum": ["qwen", "openai", "custom"],
+      "default": "qwen"
+    },
+    "model": {
+      "type": "string",
+      "maxLength": 100,
+      "default": "qwen-plus"
+    },
+    "embeddingModel": {
+      "type": "string",
+      "maxLength": 100,
+      "default": "text-embedding-v2"
+    },
+    "apiKey": {
+      "type": "string",
+      "maxLength": 500,
+      "private": true
+    },
+    "apiEndpoint": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "systemPrompt": {
+      "type": "text"
+    },
+    "temperature": {
+      "type": "float",
+      "default": 0.7
+    },
+    "maxTokens": {
+      "type": "integer",
+      "default": 2000
+    },
+    "topK": {
+      "type": "integer",
+      "default": 5
+    },
+    "chunkSize": {
+      "type": "integer",
+      "default": 500
+    },
+    "chunkOverlap": {
+      "type": "integer",
+      "default": 50
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}

@@ -23,9 +23,9 @@
 # ============================================================================
 
 services:
-  # ---- PostgreSQL 数据库 ----
+  # ---- PostgreSQL 数据库（pgvector 扩展支持向量搜索）----
   postgres:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     container_name: yousen-postgres
     restart: unless-stopped
     environment:
@@ -120,6 +120,11 @@ services:
       MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-changeme_master_key_12345}
       # 文件上传
       UPLOAD_PROVIDER: ${UPLOAD_PROVIDER:-local}
+      # AI 客服
+      DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
+      QWEN_MODEL: ${QWEN_MODEL:-qwen-plus}
+      QWEN_EMBEDDING_MODEL: ${QWEN_EMBEDDING_MODEL:-text-embedding-v2}
+      AI_CHAT_SYSTEM_PROMPT: ${AI_CHAT_SYSTEM_PROMPT:-你是佑森小课堂的AI客服助手，负责回答家长关于幼小衔接课程、校区、预约等问题。请基于知识库内容回答，不确定时建议转人工客服。}
     ports:
       - "${BACKEND_PORT:-1337}:1337"
     volumes:
