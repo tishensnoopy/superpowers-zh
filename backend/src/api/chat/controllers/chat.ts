@@ -112,9 +112,12 @@ export default {
     }
 
     // 6. Gather recent history for context (last 10 messages).
-    const history = await strapi.documents('api::chat-message.chat-message').findMany({
-      filters: { session: session.documentId },
-      sort: { createdAt: 'asc' },
+    // Use db.query + integer id: Strapi v5 Document Service findMany with
+    // `filters: { session: documentId }` misroutes the string documentId to
+    // the integer id column, causing "invalid input syntax for type integer".
+    const history = await strapi.db.query('api::chat-message.chat-message').findMany({
+      where: { session: session.id },
+      orderBy: { createdAt: 'asc' },
       limit: 10,
     });
 
@@ -222,9 +225,9 @@ export default {
     }
     const session = sessions[0];
 
-    const messages = await strapi.documents('api::chat-message.chat-message').findMany({
-      filters: { session: session.documentId },
-      sort: { createdAt: 'asc' },
+    const messages = await strapi.db.query('api::chat-message.chat-message').findMany({
+      where: { session: session.id },
+      orderBy: { createdAt: 'asc' },
       limit: 100,
     });
 
@@ -244,10 +247,22 @@ export default {
       ctx.throw(400, 'sessionId and question are required');
     }
 
+    // Look up the session documentId from the business sessionId string —
+    // sourceSession is a relation field and needs the documentId, not the
+    // business sessionId string.
+    const sessions = await strapi.documents('api::chat-session.chat-session').findMany({
+      filters: { sessionId },
+      limit: 1,
+    });
+    if (!sessions || sessions.length === 0) {
+      ctx.throw(404, 'Session not found');
+    }
+    const sessionDocumentId = sessions[0].documentId;
+
     const { feedbackToFaq } = require('../../../services/rag-service') as {
-      feedbackToFaq: (question: string, answer: string, sessionId: string) => Promise<any>;
+      feedbackToFaq: (question: string, answer: string, sessionDocumentId: string) => Promise<any>;
     };
-    await feedbackToFaq(question, answer || '', sessionId);
+    await feedbackToFaq(question, answer || '', sessionDocumentId);
 
     ctx.body = { success: true, message: '感谢您的反馈' };
   },

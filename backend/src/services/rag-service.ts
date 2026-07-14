@@ -154,7 +154,7 @@ export async function generateAnswer(
 export async function feedbackToFaq(
   question: string,
   answer: string,
-  sessionId: string
+  sessionDocumentId: string
 ): Promise<FeedbackFaqResult> {
   if (!strapiInstance) {
     throw new Error('Strapi instance not initialized. Call setStrapi() first.');
@@ -168,7 +168,7 @@ export async function feedbackToFaq(
         answer,
         sourceType: 'chat-feedback',
         reviewStatus: 'pending',
-        sourceSession: sessionId,
+        sourceSession: sessionDocumentId,
       },
     });
 

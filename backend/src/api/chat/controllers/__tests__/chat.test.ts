@@ -45,6 +45,9 @@ function buildMockStrapi(session: MockSession | null) {
         if (uid === 'api::chat-session.chat-session') {
           return { update: dbUpdate };
         }
+        if (uid === 'api::chat-message.chat-message') {
+          return { findMany: messageFindMany };
+        }
         throw new Error(`unexpected db.query uid: ${uid}`);
       }),
     },
