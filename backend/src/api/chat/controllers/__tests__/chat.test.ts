@@ -109,11 +109,7 @@ describe('chat controller - sendMessage 防滥用机制', () => {
       docs: [{ id: 1, chunkText: 'relevant doc', knowledgeBaseId: 10, similarity: 0.9 }],
       isRelevant: true,
     });
-    mockGenerateAnswer.mockResolvedValue({
-      content: 'mock answer',
-      tokenCount: 10,
-      latencyMs: 50,
-    });
+    mockGenerateAnswer.mockResolvedValue('mock answer');
   });
 
   afterEach(() => {

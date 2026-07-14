@@ -150,7 +150,7 @@ export default {
       return;
     }
 
-    const result = await generateAnswer(
+    const answer = await generateAnswer(
       message,
       docs,
       (history || []).map((h: any) => ({ role: h.role, content: h.content }))
@@ -161,9 +161,7 @@ export default {
       data: {
         session: session.documentId,
         role: 'assistant',
-        content: result.content,
-        tokenCount: result.tokenCount || 0,
-        latencyMs: result.latencyMs || 0,
+        content: answer,
         // `retrievedDocs` is a JSON column — store the array directly, not a
         // stringified string, so it round-trips as a parsed value.
         retrievedDocs:
@@ -185,7 +183,7 @@ export default {
 
     ctx.body = {
       type: 'answer',
-      content: result.content,
+      content: answer,
       retrievedDocs: docs ? docs.length : 0,
       isRelevant,
     };
