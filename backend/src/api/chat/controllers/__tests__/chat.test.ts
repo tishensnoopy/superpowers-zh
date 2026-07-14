@@ -58,7 +58,7 @@ function buildMockStrapi(session: MockSession | null) {
   };
 }
 
-function buildCtx(body: { sessionId?: string; message?: string }) {
+function buildCtx(body: { sessionId?: string; message?: string; question?: string; answer?: string; helpful?: boolean }) {
   const ctx: any = {
     request: { body },
     body: undefined as unknown,
@@ -304,5 +304,39 @@ describe('chat controller - sendMessage 防滥用机制', () => {
       expect(messageCountUpdate![0].data.messageCount).toBe(4);
       expect(messageCountUpdate![0].where).toEqual({ id: 1 });
     });
+  });
+});
+
+describe('chat controller - submitFeedback session 校验', () => {
+  let originalStrapi: unknown;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    originalStrapi = (globalThis as any).strapi;
+  });
+
+  afterEach(() => {
+    if (originalStrapi === undefined) {
+      delete (globalThis as any).strapi;
+    } else {
+      (globalThis as any).strapi = originalStrapi;
+    }
+  });
+
+  test('session 不存在时返回 404', async () => {
+    // buildMockStrapi(null) 让 sessionFindMany 返回空数组，模拟 session 不存在
+    const mockStrapi = buildMockStrapi(null);
+    (globalThis as any).strapi = mockStrapi;
+
+    const ctx = buildCtx({ sessionId: 'nonexistent', question: '某个问题' });
+
+    await expect(chatController.submitFeedback(ctx)).rejects.toMatchObject({
+      status: 404,
+    });
+
+    // 应按 sessionId 查询 session
+    expect(mockStrapi.__sessionFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({ filters: { sessionId: 'nonexistent' }, limit: 1 })
+    );
   });
 });
