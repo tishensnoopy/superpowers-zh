@@ -48,5 +48,13 @@ export default {
         auth: { enabled: true },
       },
     },
+    {
+      method: 'POST',
+      path: '/knowledge-bases/sync-all',
+      handler: 'api::knowledge-base.knowledge-base.syncAll',
+      config: {
+        auth: false,
+      },
+    },
   ],
 };

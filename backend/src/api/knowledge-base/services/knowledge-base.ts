@@ -141,4 +141,25 @@ export default factories.createCoreService('api::knowledge-base.knowledge-base',
       throw err;
     }
   },
+
+  async deleteVectors(documentId: number) {
+    console.log('[KnowledgeBaseService] deleteVectors() called, documentId:', documentId);
+    try {
+      await strapi.db.connection.raw(
+        'DELETE FROM knowledge_embeddings WHERE "documentId" = ?',
+        [documentId]
+      );
+      console.log('[KnowledgeBaseService] deleteVectors() completed');
+      return true;
+    } catch (err) {
+      console.error('[KnowledgeBaseService] deleteVectors() failed:', err);
+      return false;
+    }
+  },
+
+  async findBySourceUrl(sourceUrl: string) {
+    return strapi.db.query('api::knowledge-base.knowledge-base').findOne({
+      where: { sourceUrl },
+    });
+  },
 }));

@@ -26,7 +26,7 @@
     },
     "sourceType": {
       "type": "enumeration",
-      "enum": ["manual", "faq", "pdf", "webpage", "chat-history"],
+      "enum": ["manual", "faq", "pdf", "webpage", "chat-history", "content-sync"],
       "default": "manual",
       "description": "Source type"
     },

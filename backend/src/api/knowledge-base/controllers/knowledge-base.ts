@@ -125,4 +125,14 @@ export default factories.createCoreController('api::knowledge-base.knowledge-bas
       throw err;
     }
   },
+
+  async syncAll(ctx) {
+    try {
+      const { syncWebsiteContent } = require('../../../services/knowledge-sync-service');
+      const result = await syncWebsiteContent(strapi);
+      ctx.body = { success: true, synced: result.synced, updated: result.updated, errors: result.errors };
+    } catch (err) {
+      ctx.badRequest('Sync failed: ' + (err instanceof Error ? err.message : err));
+    }
+  },
 }));
