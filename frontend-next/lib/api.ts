@@ -99,95 +99,57 @@ export function getImageUrl(
 }
 
 export async function getSiteSettings() {
-  console.log(`${LOG_PREFIX} Fetching site settings...`);
-  const result = await fetchApi<{ data: SiteSettings[] }>('/api/site-settings');
-  const item = Array.isArray(result.data) ? result.data[0] : result.data;
-  console.log(`${LOG_PREFIX} Site settings loaded: id=${item?.id}, name=${item?.name}`);
-  return result;
+  return fetchApi<{ data: SiteSettings[] }>('/api/site-settings');
 }
 
 export async function getNavigation() {
-  console.log(`${LOG_PREFIX} Fetching navigation...`);
-  const result = await fetchApi<{ data: NavigationItem[] }>('/api/navigation');
-  console.log(`${LOG_PREFIX} Navigation loaded: ${result.data.length} items`);
-  return result;
+  return fetchApi<{ data: NavigationItem[] }>('/api/navigation');
 }
 
 export async function getNavigationTree() {
-  console.log(`${LOG_PREFIX} Fetching navigation tree...`);
-  const result = await fetchApi<{ data: NavigationItem[] }>('/api/navigation/tree');
-  console.log(`${LOG_PREFIX} Navigation tree loaded: ${result.data.length} items`);
-  return result;
+  return fetchApi<{ data: NavigationItem[] }>('/api/navigation/tree');
 }
 
 export async function getFooter() {
-  console.log(`${LOG_PREFIX} Fetching footer...`);
-  const result = await fetchApi<{ data: Footer[] }>('/api/footer?populate=socialLinks&populate=quickLinks');
-  const item = Array.isArray(result.data) ? result.data[0] : result.data;
-  console.log(`${LOG_PREFIX} Footer loaded: id=${item?.id}`);
-  return result;
+  return fetchApi<{ data: Footer[] }>('/api/footer?populate=socialLinks&populate=quickLinks');
 }
 
 export async function getPages(locale?: string) {
-  console.log(`${LOG_PREFIX} Fetching pages${locale ? ` (locale: ${locale})` : ''}...`);
   const params = locale ? `?locale=${locale}` : '';
-  const result = await fetchApi<{ data: Page[]; meta: Pagination }>(`/api/pages${params}`);
-  console.log(`${LOG_PREFIX} Pages loaded: ${result.data.length} pages, total=${result.meta.total}`);
-  return result;
+  return fetchApi<{ data: Page[]; meta: Pagination }>(`/api/pages${params}`);
 }
 
 export async function getHomepage() {
-  console.log(`${LOG_PREFIX} Fetching homepage...`);
-  const result = await fetchApi<{ data: Page }>('/api/pages/homepage');
-  console.log(`${LOG_PREFIX} Homepage loaded: id=${result.data.id}, title=${result.data.title}, sections=${result.data.sections?.length || 0}`);
-  return result;
+  return fetchApi<{ data: Page }>('/api/pages/homepage');
 }
 
 export async function getPageBySlug(slug: string) {
-  console.log(`${LOG_PREFIX} Fetching page by slug: ${slug}...`);
-  const result = await fetchApi<{ data: Page }>(`/api/pages/slug/${slug}`);
-  console.log(`${LOG_PREFIX} Page loaded: id=${result.data.id}, title=${result.data.title}`);
-  return result;
+  return fetchApi<{ data: Page }>(`/api/pages/slug/${slug}`);
 }
 
 export async function getProducts(filters?: { category?: string }) {
-  console.log(`${LOG_PREFIX} Fetching products${filters?.category ? ` (category: ${filters.category})` : ''}...`);
   const params = new URLSearchParams();
   params.set('populate', 'thumbnail,categories,specs,objectives,outline,testimonials');
   if (filters?.category) {
     params.set('category', filters.category);
   }
-  const result = await fetchApi<{ data: Product[]; meta: Pagination }>(`/api/products?${params.toString()}`);
-  console.log(`${LOG_PREFIX} Products loaded: ${result.data.length} products, total=${result.meta.total}`);
-  return result;
+  return fetchApi<{ data: Product[]; meta: Pagination }>(`/api/products?${params.toString()}`);
 }
 
 export async function getFeaturedProducts() {
-  console.log(`${LOG_PREFIX} Fetching featured products...`);
-  const result = await fetchApi<{ data: Product[] }>('/api/products/featured');
-  console.log(`${LOG_PREFIX} Featured products loaded: ${result.data.length} items`);
-  return result;
+  return fetchApi<{ data: Product[] }>('/api/products/featured');
 }
 
 export async function getProductBySlug(slug: string) {
-  console.log(`${LOG_PREFIX} Fetching product by slug: ${slug}...`);
-  const result = await fetchApi<{ data: Product }>(`/api/products/slug/${slug}`);
-  console.log(`${LOG_PREFIX} Product loaded: id=${result.data.id}, name=${result.data.name}`);
-  return result;
+  return fetchApi<{ data: Product }>(`/api/products/slug/${slug}`);
 }
 
 export async function getProductCategories() {
-  console.log(`${LOG_PREFIX} Fetching product categories...`);
-  const result = await fetchApi<{ data: ProductCategory[] }>('/api/product-categories');
-  console.log(`${LOG_PREFIX} Product categories loaded: ${result.data.length} items`);
-  return result;
+  return fetchApi<{ data: ProductCategory[] }>('/api/product-categories');
 }
 
 export async function getProductCategoryTree() {
-  console.log(`${LOG_PREFIX} Fetching product category tree...`);
-  const result = await fetchApi<{ data: ProductCategory[] }>('/api/product-categories/tree');
-  console.log(`${LOG_PREFIX} Product category tree loaded: ${result.data.length} items`);
-  return result;
+  return fetchApi<{ data: ProductCategory[] }>('/api/product-categories/tree');
 }
 
 // === News Article API ===
