@@ -47,12 +47,11 @@ export default function Hero({ section }: { section: Section }) {
             </div>
 
             <h1
-              className="text-white leading-[1.2] mb-6"
+              className="text-white leading-[1.2] mb-6 whitespace-pre-line"
               style={{
                 fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
                 fontSize: 'clamp(2.4rem, 4vw, 3.6rem)',
                 fontWeight: 800,
-                whiteSpace: 'pre-line',
               }}
             >
               {title || '让每个孩子\n自信迈入小学大门'}
