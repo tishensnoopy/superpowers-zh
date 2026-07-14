@@ -1,6 +1,6 @@
-import { proxySSERequest } from '@/lib/chat-proxy';
+import { proxyJsonRequest } from '@/lib/chat-proxy';
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
-  return proxySSERequest('/api/chat/message', body);
+  return proxyJsonRequest('/api/chat/message', body, 'POST');
 }

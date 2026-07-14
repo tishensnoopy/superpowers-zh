@@ -7,9 +7,7 @@ import ChatInput from './ChatInput';
 import {
   startChat,
   sendMessage,
-  parseSSEStream,
   type ChatMessageData,
-  type SSEData,
 } from '@/lib/chat';
 
 const STORAGE_KEY = 'yousen_chat_session';
@@ -93,61 +91,48 @@ export default function FloatingChat() {
       setMessages((prev) => [...prev, userMessage]);
       setIsLoading(true);
 
-      // Add empty AI message for streaming
-      const aiMessageIndex = messages.length + 1; // current messages + user message
+      // Add "thinking" AI message
+      const aiMessageIndex = messages.length + 1;
       setMessages((prev) => [
         ...prev,
         { role: 'assistant', content: '', timestamp: new Date().toISOString(), streaming: true },
       ]);
 
       try {
-        const stream = await sendMessage(sessionId, message);
-        let accumulated = '';
+        const response = await sendMessage(sessionId, message);
 
-        await parseSSEStream(stream, (data: SSEData) => {
-          if (data.token) {
-            accumulated += data.token;
-            setMessages((prev) => {
-              const updated = [...prev];
-              updated[aiMessageIndex] = {
-                ...updated[aiMessageIndex],
-                content: accumulated,
-                streaming: true,
-              };
-              return updated;
-            });
-          }
-          if (data.type === 'transfer') {
-            setIsTransferred(true);
-            setMessages((prev) => {
-              const updated = [...prev];
-              updated[aiMessageIndex] = {
-                ...updated[aiMessageIndex],
-                content: accumulated,
-                streaming: false,
-              };
-              return [...updated, {
-                role: 'system',
-                content: '已转人工客服，请等待客服回复',
-                timestamp: new Date().toISOString(),
-                type: 'transfer',
-              }];
-            });
-          }
-        }, () => {
-          // Done
+        if (response.type === 'transfer') {
+          setIsTransferred(true);
           setMessages((prev) => {
             const updated = [...prev];
             if (updated[aiMessageIndex]) {
               updated[aiMessageIndex] = {
                 ...updated[aiMessageIndex],
-                content: accumulated || '抱歉，我暂时无法回答这个问题。',
+                content: response.content,
+                streaming: false,
+              };
+            }
+            return [...updated, {
+              role: 'system',
+              content: '已转人工客服，请等待客服回复',
+              timestamp: new Date().toISOString(),
+              type: 'transfer',
+            }];
+          });
+        } else {
+          // type === 'answer'
+          setMessages((prev) => {
+            const updated = [...prev];
+            if (updated[aiMessageIndex]) {
+              updated[aiMessageIndex] = {
+                ...updated[aiMessageIndex],
+                content: response.content || '抱歉，我暂时无法回答这个问题。',
                 streaming: false,
               };
             }
             return updated;
           });
-        });
+        }
       } catch (err) {
         console.error('[FloatingChat] Failed to send message:', err);
         setMessages((prev) => {

@@ -3,16 +3,15 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import FloatingChat from '@/components/chat/FloatingChat';
 
-// Mock chat API
+// Mock chat API — JSON responses, not SSE
 vi.mock('@/lib/chat', () => ({
   startChat: vi.fn().mockResolvedValue({ sessionId: 'sess-test', visitorId: 'vis-test' }),
-  sendMessage: vi.fn(),
+  sendMessage: vi.fn().mockResolvedValue({ type: 'answer', content: '您好！' }),
   transferToHuman: vi.fn().mockResolvedValue({ success: true, sessionId: 'sess-test', status: 'transferred' }),
   getChatHistory: vi.fn().mockResolvedValue({ messages: [] }),
-  parseSSEStream: vi.fn(),
 }));
 
-import { startChat, sendMessage, transferToHuman, parseSSEStream } from '@/lib/chat';
+import { startChat, sendMessage } from '@/lib/chat';
 
 // Mock localStorage
 const localStorageMock = {
@@ -26,22 +25,16 @@ Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 // Helper: open chat and wait for session to be ready
 async function openChatAndWaitForSession(user: ReturnType<typeof userEvent.setup>) {
   await user.click(screen.getByRole('button', { name: /在线咨询/ }));
-  // Wait for startChat to be called (session initializing)
   await waitFor(() => expect(startChat).toHaveBeenCalled());
-  // Wait for input to appear (chat window is open)
   await screen.findByPlaceholderText(/输入消息/);
-  // Wait a tick for state to settle after async startChat resolves
   await new Promise(resolve => setTimeout(resolve, 50));
 }
 
 describe('FloatingChat 组件', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Re-establish mock implementations after clearAllMocks
     (startChat as any).mockResolvedValue({ sessionId: 'sess-test', visitorId: 'vis-test' });
-    (sendMessage as any).mockResolvedValue(new ReadableStream());
-    (transferToHuman as any).mockResolvedValue({ success: true, sessionId: 'sess-test', status: 'transferred' });
-    (parseSSEStream as any).mockImplementation(async () => {});
+    (sendMessage as any).mockResolvedValue({ type: 'answer', content: '您好！有什么可以帮您的吗？' });
     localStorageMock.getItem.mockReturnValue(null);
   });
 
@@ -60,7 +53,6 @@ describe('FloatingChat 组件', () => {
 
     await user.click(screen.getByRole('button', { name: /在线咨询/ }));
 
-    // Header title and welcome message both contain "佑森小课堂"
     expect(await screen.findAllByText(/佑森小课堂/)).toHaveLength(2);
     expect(screen.getByPlaceholderText(/输入消息/)).toBeInTheDocument();
   });
@@ -113,14 +105,7 @@ describe('FloatingChat 组件', () => {
     });
   });
 
-  it('SSE 流式接收 AI 回复', async () => {
-    (parseSSEStream as any).mockImplementation(async (_stream: unknown, onData: (d: any) => void, onDone: () => void) => {
-      onData({ token: '您' });
-      onData({ token: '好' });
-      onData({ token: '！' });
-      onDone();
-    });
-
+  it('接收 AI 回复并显示', async () => {
     const user = userEvent.setup();
     render(<FloatingChat />);
 
@@ -130,7 +115,7 @@ describe('FloatingChat 组件', () => {
     await user.type(input, '你好');
     await user.click(screen.getByRole('button', { name: /发送/ }));
 
-    expect(await screen.findByText('您好！')).toBeInTheDocument();
+    expect(await screen.findByText('您好！有什么可以帮您的吗？')).toBeInTheDocument();
   });
 
   it('点击关闭按钮关闭聊天窗口', async () => {
@@ -146,9 +131,9 @@ describe('FloatingChat 组件', () => {
   });
 
   it('转人工后显示转人工提示', async () => {
-    (parseSSEStream as any).mockImplementation(async (_stream: unknown, onData: (d: any) => void, onDone: () => void) => {
-      onData({ type: 'transfer', message: '正在为您转接人工客服' });
-      onDone();
+    (sendMessage as any).mockResolvedValue({
+      type: 'transfer',
+      content: '好的，正在为您转接人工客服，请稍候...',
     });
 
     const user = userEvent.setup();
@@ -166,10 +151,8 @@ describe('FloatingChat 组件', () => {
   });
 
   it('发送消息时显示 loading 状态', async () => {
-    (parseSSEStream as any).mockImplementation(async () => {
-      // Never calls onDone, simulating in-flight request
-      await new Promise(resolve => setTimeout(resolve, 5000));
-    });
+    // Make sendMessage hang to keep loading state
+    (sendMessage as any).mockImplementation(() => new Promise(() => {}));
 
     const user = userEvent.setup();
     render(<FloatingChat />);
@@ -210,7 +193,21 @@ describe('FloatingChat 组件', () => {
 
     await user.click(screen.getByRole('button', { name: /在线咨询/ }));
 
-    // 不应该再次调用 startChat
     expect(startChat).not.toHaveBeenCalled();
+  });
+
+  it('网络错误时显示错误提示', async () => {
+    (sendMessage as any).mockRejectedValue(new Error('Network error'));
+
+    const user = userEvent.setup();
+    render(<FloatingChat />);
+
+    await openChatAndWaitForSession(user);
+
+    const input = screen.getByPlaceholderText(/输入消息/);
+    await user.type(input, '测试');
+    await user.click(screen.getByRole('button', { name: /发送/ }));
+
+    expect(await screen.findByText(/网络出现问题/)).toBeInTheDocument();
   });
 });

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { startChat, sendMessage, transferToHuman, getChatHistory, type ChatMessageData } from '@/lib/chat';
+import { startChat, sendMessage, transferToHuman, getChatHistory, type ChatMessageData, type ChatResponse } from '@/lib/chat';
 
 describe('chat API 客户端', () => {
   beforeEach(() => {
@@ -57,22 +57,18 @@ describe('chat API 客户端', () => {
   });
 
   describe('sendMessage', () => {
-    it('发送消息并返回 ReadableStream for SSE', async () => {
-      const mockStream = new ReadableStream({
-        start(controller) {
-          controller.enqueue(new TextEncoder().encode('data: {"token":"你"}\n\n'));
-          controller.enqueue(new TextEncoder().encode('data: {"token":"好"}\n\n'));
-          controller.enqueue(new TextEncoder().encode('data: [DONE]\n\n'));
-          controller.close();
-        },
-      });
-
+    it('发送消息并返回 JSON 回复', async () => {
+      const mockResponse: ChatResponse = {
+        type: 'answer',
+        content: '您好！我是佑森小课堂的AI助手。',
+        retrievedDocs: 3,
+      };
       vi.spyOn(global, 'fetch').mockResolvedValueOnce({
         ok: true,
-        body: mockStream,
+        json: async () => mockResponse,
       } as Response);
 
-      const stream = await sendMessage('sess-123', '你好');
+      const result = await sendMessage('sess-123', '你好');
 
       expect(fetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/chat/message'),
@@ -82,7 +78,25 @@ describe('chat API 客户端', () => {
           body: JSON.stringify({ sessionId: 'sess-123', message: '你好' }),
         })
       );
-      expect(stream).toBeDefined();
+      expect(result.type).toBe('answer');
+      expect(result.content).toBe('您好！我是佑森小课堂的AI助手。');
+      expect(result.retrievedDocs).toBe(3);
+    });
+
+    it('转人工响应正确返回', async () => {
+      const mockResponse: ChatResponse = {
+        type: 'transfer',
+        content: '好的，正在为您转接人工客服，请稍候...',
+      };
+      vi.spyOn(global, 'fetch').mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+      } as Response);
+
+      const result = await sendMessage('sess-123', '转人工');
+
+      expect(result.type).toBe('transfer');
+      expect(result.content).toContain('转接人工客服');
     });
 
     it('请求失败时抛出错误', async () => {
@@ -155,63 +169,6 @@ describe('chat API 客户端', () => {
       } as Response);
 
       await expect(getChatHistory('sess-999')).rejects.toThrow();
-    });
-  });
-
-  describe('parseSSEStream', () => {
-    it('解析 SSE 流并回调每个 token', async () => {
-      const { parseSSEStream } = await import('@/lib/chat');
-      const mockStream = new ReadableStream({
-        start(controller) {
-          controller.enqueue(new TextEncoder().encode('data: {"token":"你"}\n\n'));
-          controller.enqueue(new TextEncoder().encode('data: {"token":"好"}\n\n'));
-          controller.enqueue(new TextEncoder().encode('data: {"token":"吗"}\n\n'));
-          controller.enqueue(new TextEncoder().encode('data: [DONE]\n\n'));
-          controller.close();
-        },
-      });
-
-      const tokens: string[] = [];
-      const onDone = vi.fn();
-      await parseSSEStream(mockStream, (data) => {
-        if (data.token) tokens.push(data.token);
-      }, onDone);
-
-      expect(tokens).toEqual(['你', '好', '吗']);
-      expect(onDone).toHaveBeenCalledOnce();
-    });
-
-    it('解析 transfer 事件', async () => {
-      const { parseSSEStream } = await import('@/lib/chat');
-      const mockStream = new ReadableStream({
-        start(controller) {
-          controller.enqueue(new TextEncoder().encode('data: {"type":"transfer","message":"正在转接人工客服"}\n\n'));
-          controller.enqueue(new TextEncoder().encode('data: [DONE]\n\n'));
-          controller.close();
-        },
-      });
-
-      const events: any[] = [];
-      await parseSSEStream(mockStream, (data) => events.push(data), vi.fn());
-
-      expect(events[0].type).toBe('transfer');
-      expect(events[0].message).toBe('正在转接人工客服');
-    });
-
-    it('处理空流', async () => {
-      const { parseSSEStream } = await import('@/lib/chat');
-      const mockStream = new ReadableStream({
-        start(controller) {
-          controller.close();
-        },
-      });
-
-      const onToken = vi.fn();
-      const onDone = vi.fn();
-      await parseSSEStream(mockStream, onToken, onDone);
-
-      expect(onToken).not.toHaveBeenCalled();
-      expect(onDone).toHaveBeenCalledOnce();
     });
   });
 });

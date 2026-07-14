@@ -42,13 +42,19 @@ export async function startChat(options?: {
 }
 
 /**
- * 发送消息并获取 SSE 流
- * 返回 ReadableStream 用于流式解析
+ * 发送消息并获取 AI 回复（JSON 响应）
+ * 后端返回 { type: 'answer' | 'transfer', content: string, retrievedDocs?: number }
  */
+export interface ChatResponse {
+  type: 'answer' | 'transfer';
+  content: string;
+  retrievedDocs?: number;
+}
+
 export async function sendMessage(
   sessionId: string,
   message: string
-): Promise<ReadableStream<Uint8Array>> {
+): Promise<ChatResponse> {
   const res = await fetch('/api/chat/message', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -59,11 +65,7 @@ export async function sendMessage(
     throw new Error(`Failed to send message: ${res.status} ${res.statusText}`);
   }
 
-  if (!res.body) {
-    throw new Error('Response body is null');
-  }
-
-  return res.body;
+  return res.json();
 }
 
 /**
