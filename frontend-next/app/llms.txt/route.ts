@@ -15,28 +15,30 @@ export async function GET() {
     : settingsRes.data;
   const products = productsRes.data;
 
-  const content = `# ${settings?.name || '佑森小课堂'}
+  const content = `# ${settings?.name || '佑森小课堂'} (Yousen Education)
 
-> ${settings?.slogan || '专注幼小衔接教育8年'}
+> ${settings?.slogan || '专注幼小衔接教育8年'} | Focus on preschool-primary transition education for 8 years
 
-## 关于我们
-- 关于我们: ${baseUrl}/about
+## 中文版 / Chinese Version
+- 首页: ${baseUrl}
 - 师资团队: ${baseUrl}/teachers
 - 校区环境: ${baseUrl}/campuses
-
-## 课程体系
 ${products.map((p) => `- ${p.name}: ${baseUrl}/courses/${p.slug}`).join('\n')}
+- 常见问题: ${baseUrl}/faq
+- 退费政策: ${baseUrl}/refund-policy
 
-## 常见问题
-- ${baseUrl}/faq
+## English Version
+- Home: ${baseUrl}/en-US
+- Teachers: ${baseUrl}/en-US/teachers
+- Campuses: ${baseUrl}/en-US/campuses
+${products.map((p) => `- ${p.name}: ${baseUrl}/en-US/courses/${p.slug}`).join('\n')}
+- FAQ: ${baseUrl}/en-US/faq
+- Refund Policy: ${baseUrl}/en-US/refund-policy
 
-## 退费政策
-- ${baseUrl}/refund-policy
-
-## 联系方式
-${settings?.phone ? `- 电话: ${settings.phone}` : ''}
-${settings?.email ? `- 邮箱: ${settings.email}` : ''}
-${settings?.address ? `- 地址: ${settings.address}` : ''}
+## Contact
+${settings?.phone ? `- 电话/Phone: ${settings.phone}` : ''}
+${settings?.email ? `- 邮箱/Email: ${settings.email}` : ''}
+${settings?.address ? `- 地址/Address: ${settings.address}` : ''}
 `;
 
   return new Response(content, {

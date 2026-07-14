@@ -5,35 +5,65 @@ export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-  const entries: MetadataRoute.Sitemap = [
-    { url: baseUrl, lastModified: new Date(), priority: 1.0, changeFrequency: 'daily' },
-    { url: `${baseUrl}/courses`, lastModified: new Date(), priority: 0.9 },
-    { url: `${baseUrl}/news`, lastModified: new Date(), priority: 0.8 },
-    { url: `${baseUrl}/campuses`, lastModified: new Date(), priority: 0.8 },
-    { url: `${baseUrl}/teachers`, lastModified: new Date(), priority: 0.7 },
-    { url: `${baseUrl}/faq`, lastModified: new Date(), priority: 0.6 },
-  ];
+  const entries: MetadataRoute.Sitemap = [];
 
+  // Static pages — output both zh-CN and en-US URLs with hreflang
+  const staticPaths = ['', '/courses', '/news', '/campuses', '/teachers', '/faq', '/refund-policy', '/privacy-policy', '/user-agreement'];
+  staticPaths.forEach((path) => {
+    const zhUrl = `${baseUrl}${path}`;
+    const enUrl = `${baseUrl}/en-US${path}`;
+    entries.push({
+      url: zhUrl,
+      lastModified: new Date(),
+      priority: path === '' ? 1.0 : 0.8,
+      changeFrequency: 'daily',
+      alternates: {
+        languages: {
+          'zh-CN': zhUrl,
+          'en-US': enUrl,
+        },
+      },
+    });
+    entries.push({
+      url: enUrl,
+      lastModified: new Date(),
+      priority: path === '' ? 0.9 : 0.7,
+      alternates: {
+        languages: {
+          'zh-CN': zhUrl,
+          'en-US': enUrl,
+        },
+      },
+    });
+  });
+
+  // Dynamic pages (products, news) — same pattern
   const { data: products } = await getProducts().catch(() => ({ data: [] as never[] }));
   products.forEach((p) => {
-    entries.push({
-      url: `${baseUrl}/courses/${p.slug}`,
-      lastModified: p.updatedAt ? new Date(p.updatedAt) : new Date(),
-      priority: 0.7,
+    const zhUrl = `${baseUrl}/courses/${p.slug}`;
+    const enUrl = `${baseUrl}/en-US/courses/${p.slug}`;
+    [zhUrl, enUrl].forEach((url) => {
+      entries.push({
+        url,
+        lastModified: p.updatedAt ? new Date(p.updatedAt) : new Date(),
+        priority: 0.7,
+        alternates: { languages: { 'zh-CN': zhUrl, 'en-US': enUrl } },
+      });
     });
   });
 
   const { data: news } = await getNews().catch(() => ({ data: [] as never[] }));
   news.forEach((n) => {
-    entries.push({
-      url: `${baseUrl}/news/${n.slug}`,
-      lastModified: n.publishedAt ? new Date(n.publishedAt) : new Date(),
-      priority: 0.6,
+    const zhUrl = `${baseUrl}/news/${n.slug}`;
+    const enUrl = `${baseUrl}/en-US/news/${n.slug}`;
+    [zhUrl, enUrl].forEach((url) => {
+      entries.push({
+        url,
+        lastModified: n.publishedAt ? new Date(n.publishedAt) : new Date(),
+        priority: 0.6,
+        alternates: { languages: { 'zh-CN': zhUrl, 'en-US': enUrl } },
+      });
     });
-  });
-
-  ['/refund-policy', '/privacy-policy', '/user-agreement'].forEach((path) => {
-    entries.push({ url: `${baseUrl}${path}`, priority: 0.3 });
   });
 
   return entries;
