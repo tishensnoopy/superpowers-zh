@@ -144,4 +144,18 @@ describe('ChatInput 组件', () => {
     expect(onSend).toHaveBeenCalledWith('你好');
     expect(screen.queryByText(/不能超过.*500/)).not.toBeInTheDocument();
   });
+
+  it('renders English placeholder when locale is en-US', () => {
+    render(<ChatInput onSend={vi.fn()} isLoading={false} locale="en-US" />);
+    expect(screen.getByPlaceholderText(/type your question/i)).toBeInTheDocument();
+  });
+
+  it('shows English error message when message exceeds max length', () => {
+    render(<ChatInput onSend={vi.fn()} isLoading={false} locale="en-US" />);
+    const textarea = screen.getByPlaceholderText(/type your question/i);
+    fireEvent.change(textarea, { target: { value: 'a'.repeat(501) } });
+    // 触发发送
+    fireEvent.keyDown(textarea, { key: 'Enter' });
+    expect(screen.getByText(/cannot exceed 500 characters/i)).toBeInTheDocument();
+  });
 });

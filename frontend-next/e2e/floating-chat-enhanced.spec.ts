@@ -15,15 +15,15 @@ test.describe('AI 客服增强功能', () => {
     // 欢迎消息
     await expect(page.getByText(/您好.*我是佑森小课堂的AI助手/)).toBeVisible();
     // 输入框
-    await expect(page.getByPlaceholder(/输入消息/)).toBeVisible();
+    await expect(page.getByPlaceholder(/请输入您的问题/)).toBeVisible();
   });
 
   test('输入超过 500 字符时显示错误提示', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: /在线咨询/ }).click();
-    await expect(page.getByPlaceholder(/输入消息/)).toBeVisible();
+    await expect(page.getByPlaceholder(/请输入您的问题/)).toBeVisible();
 
-    const textarea = page.getByPlaceholder(/输入消息/);
+    const textarea = page.getByPlaceholder(/请输入您的问题/);
     // textarea 有 maxLength=500 属性，浏览器会阻止直接输入超过 500 字符
     // 先移除 maxLength 限制，再用 Playwright fill 触发 React 的 onChange
     // （nativeSetter + dispatchEvent('input') 在 React 18 中不会触发 onChange，
@@ -44,9 +44,9 @@ test.describe('AI 客服增强功能', () => {
   test('正常长度的消息可以发送', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: /在线咨询/ }).click();
-    await expect(page.getByPlaceholder(/输入消息/)).toBeVisible();
+    await expect(page.getByPlaceholder(/请输入您的问题/)).toBeVisible();
 
-    const input = page.getByPlaceholder(/输入消息/);
+    const input = page.getByPlaceholder(/请输入您的问题/);
     await input.fill('你好');
     await input.press('Enter');
 

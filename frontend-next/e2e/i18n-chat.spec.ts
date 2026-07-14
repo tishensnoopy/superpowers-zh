@@ -3,6 +3,17 @@ import { test, expect } from '@playwright/test';
 test.describe('i18n AI customer service', () => {
   test('FloatingChat on en-US page responds in English', async ({ page }) => {
     // Mock DashScope to return English response
+    await page.route('**/api/chat/start', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          sessionId: 'test-session-id',
+          visitorId: 'test-visitor-id',
+        }),
+      });
+    });
+
     await page.route('**/api/chat/message', async (route) => {
       await route.fulfill({
         status: 200,
@@ -25,6 +36,17 @@ test.describe('i18n AI customer service', () => {
   });
 
   test('FloatingChat on zh-CN page responds in Chinese', async ({ page }) => {
+    await page.route('**/api/chat/start', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          sessionId: 'test-session-id',
+          visitorId: 'test-visitor-id',
+        }),
+      });
+    });
+
     await page.route('**/api/chat/message', async (route) => {
       await route.fulfill({
         status: 200,

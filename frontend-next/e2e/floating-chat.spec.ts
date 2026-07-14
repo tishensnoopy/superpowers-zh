@@ -15,24 +15,24 @@ test.describe('AI 客服 FloatingChat E2E', () => {
     // 欢迎消息
     await expect(page.getByText(/您好.*我是佑森小课堂的AI助手/)).toBeVisible();
     // 输入框
-    await expect(page.getByPlaceholder(/输入消息/)).toBeVisible();
+    await expect(page.getByPlaceholder(/请输入您的问题/)).toBeVisible();
   });
 
   test('关闭按钮关闭聊天窗口', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: /在线咨询/ }).click();
-    await expect(page.getByPlaceholder(/输入消息/)).toBeVisible();
+    await expect(page.getByPlaceholder(/请输入您的问题/)).toBeVisible();
 
     await page.getByRole('button', { name: /关闭/ }).click();
-    await expect(page.getByPlaceholder(/输入消息/)).not.toBeVisible();
+    await expect(page.getByPlaceholder(/请输入您的问题/)).not.toBeVisible();
   });
 
   test('输入消息并发送，显示用户消息', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: /在线咨询/ }).click();
-    await expect(page.getByPlaceholder(/输入消息/)).toBeVisible();
+    await expect(page.getByPlaceholder(/请输入您的问题/)).toBeVisible();
 
-    const input = page.getByPlaceholder(/输入消息/);
+    const input = page.getByPlaceholder(/请输入您的问题/);
     await input.fill('请问课程怎么报名？');
     await page.getByRole('button', { name: /发送/ }).click();
 
@@ -43,9 +43,9 @@ test.describe('AI 客服 FloatingChat E2E', () => {
   test('Enter 键发送消息', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: /在线咨询/ }).click();
-    await expect(page.getByPlaceholder(/输入消息/)).toBeVisible();
+    await expect(page.getByPlaceholder(/请输入您的问题/)).toBeVisible();
 
-    const input = page.getByPlaceholder(/输入消息/);
+    const input = page.getByPlaceholder(/请输入您的问题/);
     await input.fill('你好');
     await input.press('Enter');
 
@@ -69,9 +69,9 @@ test.describe('AI 客服 FloatingChat E2E', () => {
   test('发送消息后输入框清空', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: /在线咨询/ }).click();
-    await expect(page.getByPlaceholder(/输入消息/)).toBeVisible();
+    await expect(page.getByPlaceholder(/请输入您的问题/)).toBeVisible();
 
-    const input = page.getByPlaceholder(/输入消息/);
+    const input = page.getByPlaceholder(/请输入您的问题/);
     await input.fill('测试消息');
     await page.getByRole('button', { name: /发送/ }).click();
 
@@ -82,9 +82,9 @@ test.describe('AI 客服 FloatingChat E2E', () => {
   test('AI 回复流式渲染（如果后端可用）', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: /在线咨询/ }).click();
-    await expect(page.getByPlaceholder(/输入消息/)).toBeVisible();
+    await expect(page.getByPlaceholder(/请输入您的问题/)).toBeVisible();
 
-    const input = page.getByPlaceholder(/输入消息/);
+    const input = page.getByPlaceholder(/请输入您的问题/);
     await input.fill('你好');
     await page.getByRole('button', { name: /发送/ }).click();
 
