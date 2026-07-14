@@ -1,8 +1,68 @@
 import type { Core } from '@strapi/strapi';
 
 export default {
+  async register({ strapi }: { strapi: Core.Strapi }) {
+    console.log('[Register] Registering lifecycle hooks...');
+
+    const { syncSingleContent, deleteSyncedContent } = await import('./services/knowledge-sync-service');
+
+    const SYNCED_CONTENT_TYPES = [
+      'api::course.course',
+      'api::news-article.news-article',
+      'api::teacher.teacher',
+      'api::campus.campus',
+      'api::faq-item.faq-item',
+    ];
+
+    for (const uid of SYNCED_CONTENT_TYPES) {
+      try {
+        strapi.db.lifecycles.subscribe({
+          models: [uid],
+          afterCreate: async (event) => {
+            const record = event.result;
+            if (record) {
+              await syncSingleContent(strapi, uid, record);
+              console.log(`[Lifecycle] Synced new ${uid}`);
+            }
+          },
+          afterUpdate: async (event) => {
+            const record = event.result;
+            if (record) {
+              await syncSingleContent(strapi, uid, record);
+              console.log(`[Lifecycle] Synced updated ${uid}`);
+            }
+          },
+          afterDelete: async (event) => {
+            const record = event.result;
+            if (record) {
+              await deleteSyncedContent(strapi, uid, record);
+              console.log(`[Lifecycle] Deleted synced ${uid}`);
+            }
+          },
+        });
+      } catch (err) {
+        console.warn(`[Register] Failed to subscribe lifecycle for ${uid}:`, err);
+      }
+    }
+
+    console.log('[Register] Lifecycle hooks registered');
+  },
+
   async bootstrap({ strapi }: { strapi: Core.Strapi }) {
     console.log('[Bootstrap] Starting up...');
+
+    // 注入 strapi 到 llm-service 和 rag-service（生产环境必须）
+    try {
+      const { setStrapi: setLlmStrapi } = await import('./services/llm-service');
+      setLlmStrapi(strapi);
+      console.log('[Bootstrap] strapi injected into llm-service');
+
+      const { setStrapi: setRagStrapi } = await import('./services/rag-service');
+      setRagStrapi(strapi);
+      console.log('[Bootstrap] strapi injected into rag-service');
+    } catch (err) {
+      console.warn('[Bootstrap] Failed to inject strapi into services:', err);
+    }
 
     if (process.env.REDIS_HOST) {
       try {
