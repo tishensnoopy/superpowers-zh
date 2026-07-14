@@ -2,7 +2,6 @@ import { factories } from '@strapi/strapi';
 
 export default factories.createCoreService('api::knowledge-base.knowledge-base', ({ strapi }) => ({
   async search(params: any) {
-    console.log('[KnowledgeBaseService] search() called, params:', params);
     try {
       const query = params?.query || '';
       const documents = await strapi.db.query('api::knowledge-base.knowledge-base').findMany({
@@ -17,7 +16,6 @@ export default factories.createCoreService('api::knowledge-base.knowledge-base',
         orderBy: { priority: 'desc', createdAt: 'desc' },
       });
 
-      console.log('[KnowledgeBaseService] search() completed, found:', documents.length);
       return { data: documents };
     } catch (err) {
       console.error('[KnowledgeBaseService] search() failed:', err instanceof Error ? err.message : err);
@@ -26,7 +24,6 @@ export default factories.createCoreService('api::knowledge-base.knowledge-base',
   },
 
   async updateStatus(documentId: number, status: string, message?: string) {
-    console.log('[KnowledgeBaseService] updateStatus() called, documentId:', documentId, 'status:', status);
     try {
       const updateData: any = { status };
       if (message) {
@@ -49,7 +46,6 @@ export default factories.createCoreService('api::knowledge-base.knowledge-base',
       }
 
       const result = await this.update(documentId, { data: updateData });
-      console.log('[KnowledgeBaseService] updateStatus() completed successfully');
       return result;
     } catch (err) {
       console.error('[KnowledgeBaseService] updateStatus() failed:', err instanceof Error ? err.message : err);
@@ -58,7 +54,6 @@ export default factories.createCoreService('api::knowledge-base.knowledge-base',
   },
 
   async setVectorDbIds(documentId: number, ids: string[]) {
-    console.log('[KnowledgeBaseService] setVectorDbIds() called, documentId:', documentId, 'ids:', ids);
     try {
       const result = await this.update(documentId, {
         data: {
@@ -66,7 +61,6 @@ export default factories.createCoreService('api::knowledge-base.knowledge-base',
           chunkCount: ids.length,
         },
       });
-      console.log('[KnowledgeBaseService] setVectorDbIds() completed successfully');
       return result;
     } catch (err) {
       console.error('[KnowledgeBaseService] setVectorDbIds() failed:', err instanceof Error ? err.message : err);
@@ -75,13 +69,10 @@ export default factories.createCoreService('api::knowledge-base.knowledge-base',
   },
 
   async initializeDefaults() {
-    console.log('[KnowledgeBaseService] initializeDefaults() called');
     try {
       const existing = await strapi.db.query('api::knowledge-base.knowledge-base').findMany();
-      console.log('[KnowledgeBaseService] initializeDefaults() found existing records:', existing.length);
 
       if (existing.length === 0) {
-        console.log('[KnowledgeBaseService] initializeDefaults() creating default documents');
         const defaults = [
           {
             title: 'Introduction to Our Company',
@@ -108,17 +99,14 @@ export default factories.createCoreService('api::knowledge-base.knowledge-base',
             tags: 'technical, documentation, specs',
           },
         ];
-        console.log('[KnowledgeBaseService] initializeDefaults() defaults:', JSON.stringify(defaults));
 
         const created = await Promise.all(
           defaults.map((item, index) => {
             return this.create({ data: item });
           })
         );
-        console.log('[KnowledgeBaseService] initializeDefaults() created successfully, count:', created.length);
         return created;
       } else {
-        console.log('[KnowledgeBaseService] initializeDefaults() skipping - already exists');
         return existing;
       }
     } catch (err) {
@@ -128,13 +116,11 @@ export default factories.createCoreService('api::knowledge-base.knowledge-base',
   },
 
   async getPendingDocuments() {
-    console.log('[KnowledgeBaseService] getPendingDocuments() called');
     try {
       const documents = await strapi.db.query('api::knowledge-base.knowledge-base').findMany({
         where: { status: 'pending' },
         orderBy: { priority: 'desc', createdAt: 'asc' },
       });
-      console.log('[KnowledgeBaseService] getPendingDocuments() completed, count:', documents.length);
       return documents;
     } catch (err) {
       console.error('[KnowledgeBaseService] getPendingDocuments() failed:', err instanceof Error ? err.message : err);
@@ -143,14 +129,12 @@ export default factories.createCoreService('api::knowledge-base.knowledge-base',
   },
 
   async deleteVectors(knowledgeBaseId: number) {
-    console.log('[KnowledgeBaseService] deleteVectors() called, knowledgeBaseId:', knowledgeBaseId);
     try {
       // knowledge_embeddings 表的列是 knowledge_base_id（整数），不是 documentId
       await strapi.db.connection.raw(
         'DELETE FROM knowledge_embeddings WHERE knowledge_base_id = ?',
         [knowledgeBaseId]
       );
-      console.log('[KnowledgeBaseService] deleteVectors() completed');
       return true;
     } catch (err) {
       console.error('[KnowledgeBaseService] deleteVectors() failed:', err);
