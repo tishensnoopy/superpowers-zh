@@ -99,7 +99,6 @@ describe('ContactForm 组件', () => {
         expect.objectContaining({
           childName: '小明',
           parentName: '张先生',
-          name: '张先生',
           phone: '13800138000',
           campus: 'yousen-baibuting',
           age: undefined,

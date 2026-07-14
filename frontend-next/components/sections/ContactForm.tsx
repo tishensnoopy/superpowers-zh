@@ -141,7 +141,6 @@ export default function ContactForm({ section }: { section: Section }) {
     const submitData = {
       childName: values.childName || '',
       parentName: values.parentName || '',
-      name: values.parentName || '',
       phone: values.phone || '',
       campus: values.campus || '',
       age: values.age || undefined,

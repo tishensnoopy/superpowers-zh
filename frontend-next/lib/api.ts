@@ -432,13 +432,17 @@ export interface Pagination {
 }
 
 export interface AppointmentData {
-  name: string;
+  name?: string;
+  childName?: string;
+  parentName?: string;
   phone: string;
   campus: string;
   age?: string;
   course?: string;
+  preferredDate?: string;
   preferredTimeSlot?: string;
   message?: string;
+  sourcePage?: string;
 }
 
 export async function createAppointment(data: AppointmentData) {

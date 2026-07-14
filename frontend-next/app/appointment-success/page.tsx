@@ -121,7 +121,7 @@ export default function AppointmentSuccessPage() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">预约姓名</p>
-                  <p className="font-semibold text-[#1C2B3A]">{appointment.name || '未填写'}</p>
+                  <p className="font-semibold text-[#1C2B3A]">{appointment.parentName || appointment.name || '未填写'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
