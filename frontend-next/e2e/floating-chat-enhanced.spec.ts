@@ -25,17 +25,14 @@ test.describe('AI 客服增强功能', () => {
 
     const textarea = page.getByPlaceholder(/输入消息/);
     // textarea 有 maxLength=500 属性，浏览器会阻止直接输入超过 500 字符
-    // 通过原生 setter 绕过 maxLength 限制，触发 ChatInput 的长度校验逻辑
-    await page.evaluate(() => {
-      const textarea = document.querySelector('textarea');
-      if (!textarea) return;
-      const nativeSetter = Object.getOwnPropertyDescriptor(
-        window.HTMLTextAreaElement.prototype,
-        'value'
-      )?.set;
-      nativeSetter?.call(textarea, 'a'.repeat(501));
-      textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    // 先移除 maxLength 限制，再用 Playwright fill 触发 React 的 onChange
+    // （nativeSetter + dispatchEvent('input') 在 React 18 中不会触发 onChange，
+    //  且 document.querySelector('textarea') 会选错元素——页面其他位置如预约表单
+    //  的备注字段也是 textarea）
+    await textarea.evaluate((el: HTMLTextAreaElement) => {
+      el.removeAttribute('maxlength');
     });
+    await textarea.fill('a'.repeat(501));
 
     // 按 Enter 触发发送
     await textarea.press('Enter');
