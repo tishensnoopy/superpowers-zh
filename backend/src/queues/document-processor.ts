@@ -12,6 +12,18 @@
  *
  * `llm-service` is required via a deferred require() so this module can load
  * even before the LLM service file exists (incremental dev / boot safety).
+ *
+ * Worker lifecycle:
+ *   - `startDocumentWorker(strapi)` creates and starts the Worker, saving the
+ *     instance to `documentWorkerInstance` for later shutdown.
+ *   - `closeDocumentWorker()` gracefully closes the Worker. Called from
+ *     `src/index.ts` destroy() before `closeAllQueues()`.
+ *   - The Queue (`documentQueue`) is a producer-only instance; consumers that
+ *     enqueue via `utils/queue.addJob()` do not need it.
+ *
+ * Schema bootstrap:
+ *   - `ensureSchema(strapi)` lazily creates the `knowledge_embeddings`
+ *     pgvector table on the first job, making the worker self-sufficient.
  */
 import { Queue, Worker } from 'bullmq';
 
