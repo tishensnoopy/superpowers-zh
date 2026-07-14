@@ -1,0 +1,53 @@
+{
+  "common": {
+    "i18nFallbackNotice": "此内容暂无英文版，已为你显示中文版本",
+    "emptyList": "暂无内容",
+    "loading": "加载中..."
+  },
+  "navigation": {
+    "home": "首页",
+    "courses": "课程",
+    "news": "新闻动态",
+    "campuses": "校区环境",
+    "teachers": "师资团队",
+    "about": "关于我们",
+    "contact": "联系我们",
+    "faq": "常见问题",
+    "appointment": "预约试听",
+    "onlineConsult": "在线咨询"
+  },
+  "footer": {
+    "copyright": "版权所有",
+    "quickLinks": "快速链接",
+    "contactUs": "联系我们"
+  },
+  "chat": {
+    "welcome": "您好！我是佑森小课堂的AI助手，有什么可以帮您的吗？",
+    "transferPrompt": "好的，正在为您转接人工客服，请稍候...",
+    "thresholdPrompt": "您今天已经咨询了很多问题，为了更好地为您服务，建议您预约一次免费试听课，我们的顾问会为您详细解答。",
+    "guidancePrompt": "这个问题我需要转给人工客服为您解答。您也可以先留下联系方式，我们的顾问会尽快联系您。",
+    "fallbackAnswer": "Sorry, I cannot answer this question. Would you like to transfer to a human agent?",
+    "inputPlaceholder": "请输入您的问题...",
+    "sendButton": "发送"
+  },
+  "languageSwitcher": {
+    "label": "切换语言",
+    "chinese": "中文",
+    "english": "English"
+  },
+  "courses": {
+    "title": "课程体系",
+    "viewDetails": "查看详情"
+  },
+  "news": {
+    "title": "新闻动态"
+  },
+  "appointment": {
+    "title": "预约试听课",
+    "parentName": "家长姓名",
+    "childName": "孩子姓名",
+    "phone": "手机号码",
+    "campus": "选择校区",
+    "submit": "提交预约"
+  }
+}

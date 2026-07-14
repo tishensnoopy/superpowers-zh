@@ -1,5 +1,6 @@
 import type { NextConfig } from 'next';
 import { withSentryConfig } from '@sentry/nextjs';
+import createNextIntlPlugin from 'next-intl/plugin';
 
 const cmsUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
 const cmsParsedUrl = new URL(cmsUrl);
@@ -69,7 +70,9 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
   enabled: process.env.ANALYZE === 'true',
 });
 
+const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
+
 export default withSentryConfig(
-  withBundleAnalyzer(nextConfig),
+  withBundleAnalyzer(withNextIntl(nextConfig)),
   sentryConfig
 );
