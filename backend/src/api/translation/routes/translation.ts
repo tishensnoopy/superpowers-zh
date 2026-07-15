@@ -5,7 +5,8 @@ export default {
       path: '/translation/assist',
       handler: 'translation.assist',
       config: {
-        auth: true,  // 需要认证
+        // Strapi v5 default requires auth; controller also enforces admin-only via isAdmin().
+        // Note: auth must be false or an object — `true` is rejected by Strapi v5 route validator.
         policies: [],
       },
     },
