@@ -19,6 +19,10 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   const jobId = params.id;
   const encoder = new TextEncoder();
 
+  // 将 heartbeat 和 writer 提到外层闭包，供 cancel() 和 abort 处理器共用清理
+  let heartbeat: NodeJS.Timeout | undefined;
+  let registeredWriter: WritableStreamDefaultWriter<Uint8Array> | undefined;
+
   const stream = new ReadableStream<Uint8Array>({
     start(controller) {
       const writer = {
@@ -35,6 +39,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
         },
         closed: false,
       } as unknown as WritableStreamDefaultWriter<Uint8Array>;
+      registeredWriter = writer;
 
       // 1. 发送 SSE 头部注释（保活）
       controller.enqueue(encoder.encode(`: connected to job ${jobId}\n\n`));
@@ -76,24 +81,25 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
       addSSEClient(jobId, writer);
 
       // 5. 心跳：每 25 秒发注释行，防止代理超时
-      const heartbeat = setInterval(() => {
+      heartbeat = setInterval(() => {
         try {
           controller.enqueue(encoder.encode(`: heartbeat\n\n`));
         } catch {
-          clearInterval(heartbeat);
+          if (heartbeat) clearInterval(heartbeat);
         }
       }, 25000);
 
       // 6. 客户端断开时清理
       req.signal.addEventListener('abort', () => {
-        clearInterval(heartbeat);
-        removeSSEClient(jobId, writer);
+        if (heartbeat) clearInterval(heartbeat);
+        if (registeredWriter) removeSSEClient(jobId, registeredWriter);
         try { controller.close(); } catch {}
       });
     },
     cancel() {
-      // ReadableStream 被 cancel（浏览器关闭）
-      // removeSSEClient 已在 abort 处理器中调用
+      // ReadableStream 被 cancel（浏览器关闭）—— 主动清理，不依赖 abort 事件
+      if (heartbeat) clearInterval(heartbeat);
+      if (registeredWriter) removeSSEClient(jobId, registeredWriter);
     },
   });
 

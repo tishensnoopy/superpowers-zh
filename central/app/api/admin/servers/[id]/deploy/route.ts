@@ -63,16 +63,25 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   const sent = await sendToServer(params.id, command);
   if (!sent) {
-    // 通过状态机原子更新，避免 TOCTOU 并发风险
-    // 注意：queued → failed 不是合法转换（状态机仅允许 queued → running|cancelled），
-    // 若 agent 已抢先把 job 推进到 running 则 running → failed 合法；
-    // 否则抛 invalid transition，已被 catch 吞掉并告警。
+    // 通过状态机原子更新，避免 TOCTOU 并发风险。
+    // 选项 C：先尝试 'failed'（running → failed 合法，语义准确），
+    // 若 job 仍为 queued（agent 未 ack）则降级 'cancelled'（queued → cancelled 合法，确保清理）。
+    // 否则 queued → failed 会抛 invalid transition 留下僵尸 job（markStaleJobsFailed 不回收 queued）。
     try {
       await updateJobStatus(job.id, 'failed', { errorMessage: 'agent disconnected' });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      if (!/invalid transition|job not found/.test(msg)) throw err;
-      console.warn(`[deploy] send-failure status conflict for ${job.id}:`, msg);
+      if (/job not found/.test(msg)) throw err;
+      if (/invalid transition/.test(msg)) {
+        // job 仍为 queued（agent 未 ack），降级为 cancelled 确保清理
+        try {
+          await updateJobStatus(job.id, 'cancelled', { errorMessage: 'send failed: agent disconnected' });
+        } catch (e2: unknown) {
+          const m2 = e2 instanceof Error ? e2.message : String(e2);
+          if (!/invalid transition|job not found/.test(m2)) throw e2;
+          console.warn(`[deploy] send-failure cleanup conflict for ${job.id}:`, m2);
+        }
+      } else throw err;
     }
     return errorResponse('Failed to send deploy command (agent disconnected)', 503);
   }
