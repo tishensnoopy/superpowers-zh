@@ -93,6 +93,34 @@ export default function ServerDetailPage() {
           }} className="bg-yellow-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50">
             重启服务
           </button>
+          <button
+            disabled={busy || server?.status !== 'online'}
+            onClick={async () => {
+              if (!confirm('确认触发部署？这将执行 git pull + docker compose up --build，预计需要 3-5 分钟。')) return;
+              const mode = confirm('使用 Nginx 模式？取消则用直连模式。') ? 'nginx' : 'direct';
+              setBusy(true);
+              try {
+                const res = await fetch(`/api/admin/servers/${id}/deploy`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ mode }),
+                });
+                const body = await res.json();
+                if (res.ok) {
+                  window.open(`/jobs/${body.jobId}`, '_blank');
+                } else {
+                  alert(`部署失败: ${body.error}`);
+                }
+              } catch (e) {
+                alert(`网络错误: ${e instanceof Error ? e.message : String(e)}`);
+              } finally {
+                setBusy(false);
+              }
+            }}
+            className="bg-green-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
+          >
+            部署
+          </button>
           <Link href={`/servers/${id}/sync-config`}
             className="inline-block bg-blue-600 text-white px-3 py-1 rounded text-sm">
             同步配置
