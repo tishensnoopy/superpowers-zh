@@ -14,15 +14,34 @@ function buildSourceUrl(uid: string, record: any): string {
 }
 
 const CONTENT_TYPES = [
-  { uid: 'api::course.course', serialize: serializeCourse, name: '课程' },
+  { uid: 'api::product.product', serialize: serializeProduct, name: '课程' },
   { uid: 'api::news-article.news-article', serialize: serializeNews, name: '新闻' },
   { uid: 'api::teacher.teacher', serialize: serializeTeacher, name: '教师' },
   { uid: 'api::campus.campus', serialize: serializeCampus, name: '校区' },
   { uid: 'api::faq-item.faq-item', serialize: serializeFaq, name: 'FAQ' },
 ];
 
-export function serializeCourse(c: any): string {
-  return `课程：${c.title || ''}。${c.description || ''}适合${c.ageRange || ''}。学费${c.price || ''}。`;
+export function serializeProduct(p: any): string {
+  const lines: string[] = [];
+  lines.push(`课程：${p.name || ''}`);
+  if (p.shortDescription) {
+    lines.push(`简介：${p.shortDescription}`);
+  } else if (p.description) {
+    lines.push(`简介：${p.description}`);
+  }
+  if (p.objectives && Array.isArray(p.objectives) && p.objectives.length > 0) {
+    const objectives = p.objectives.map((o: any) => o.title || '').filter(Boolean).join(' | ');
+    if (objectives) {
+      lines.push(`教学目标：${objectives}`);
+    }
+  }
+  if (p.teachingMethod) {
+    lines.push(`教学方式：${p.teachingMethod}`);
+  }
+  if (p.price) {
+    lines.push(`价格：${p.price}元`);
+  }
+  return lines.join('\n');
 }
 
 export function serializeNews(n: any): string {
