@@ -239,6 +239,7 @@ describe('buildLocalBusinessSchema', () => {
       address: '武汉市江岸区百步亭花园路',
       phone: '027-82345678',
       businessHours: '周一至周五 8:00-18:00',
+      transportation: '地铁3号线百步亭站',
       coverImage: { url: '/campus.jpg', alternativeText: 'campus' },
     } as any;
     const schema = buildLocalBusinessSchema(campus, 'zh-CN');
@@ -296,6 +297,8 @@ describe('buildPersonSchema', () => {
       slug: 'zhang-laoshi',
       avatar: { url: '/avatar.jpg', alternativeText: 'avatar' },
       subject: 'pinyin',
+      teachingYears: 10,
+      education: '本科',
       teachingFeatures: '趣味拼音教学',
       achievements: ['市级优秀教师', '教学比赛一等奖'],
     } as any;
@@ -340,13 +343,15 @@ describe('buildCourseSchema', () => {
       name: '拼音全能班',
       slug: 'pinyin',
       description: '系统学习汉语拼音',
+      objectives: [{ id: 1, title: '掌握声母' }],
+      teachingMethod: '小班教学',
       price: 2980,
     } as any;
     const settings = { name: '佑森小课堂' } as any;
     const schema = buildCourseSchema(product, settings, 'zh-CN');
     expect(schema['@type']).toBe('Course');
     expect(schema['name']).toBe('拼音全能班');
-    expect(schema['description']).toBe('系统学习汉语拼音');
+    expect(schema['description']).toContain('系统学习汉语拼音');
     expect(schema['provider']).toEqual({
       '@type': 'EducationalOrganization',
       name: '佑森小课堂',
@@ -373,7 +378,7 @@ describe('buildCourseSchema', () => {
     } as any;
     const settings = { name: 'Test' } as any;
     const schema = buildCourseSchema(product, settings, 'zh-CN');
-    expect(schema['description']).toBe('short desc');
+    expect(schema['description']).toContain('short desc');
   });
 });
 

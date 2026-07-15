@@ -11,6 +11,7 @@ import type {
   Product,
   NewsArticle,
 } from './api';
+import { buildCourseSummary, buildTeacherSummary, buildCampusSummary } from './geo';
 
 // Next.js Metadata API 仅接受以下 OpenGraph 类型
 // 详见 https://nextjs.org/docs/app/api-reference/functions/generate-metadata#opengraph
@@ -182,7 +183,7 @@ export function buildFaqPageSchema(
  * 使用双类型 ['LocalBusiness', 'EducationalOrganization'] 兼顾本地 SEO 和教育权威
  */
 export function buildLocalBusinessSchema(
-  campus: Pick<Campus, 'name' | 'slug' | 'address' | 'phone' | 'businessHours' | 'coverImage'>,
+  campus: Pick<Campus, 'name' | 'slug' | 'address' | 'phone' | 'businessHours' | 'coverImage' | 'transportation'>,
   locale: Locale
 ): Record<string, unknown> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
@@ -191,6 +192,7 @@ export function buildLocalBusinessSchema(
     '@context': 'https://schema.org',
     '@type': ['LocalBusiness', 'EducationalOrganization'],
     name: campus.name,
+    description: buildCampusSummary(campus, locale),
     url: `${baseUrl}${prefix}/campuses/${campus.slug}`,
   };
 
@@ -213,7 +215,7 @@ export function buildLocalBusinessSchema(
  * 构建 Person schema（教师实体）
  */
 export function buildPersonSchema(
-  teacher: Pick<Teacher, 'name' | 'title' | 'slug' | 'avatar' | 'achievements'>,
+  teacher: Pick<Teacher, 'name' | 'title' | 'slug' | 'avatar' | 'achievements' | 'teachingYears' | 'education' | 'teachingFeatures'>,
   locale: Locale
 ): Record<string, unknown> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
@@ -222,6 +224,7 @@ export function buildPersonSchema(
     '@context': 'https://schema.org',
     '@type': 'Person',
     name: teacher.name,
+    description: buildTeacherSummary(teacher, locale),
     url: `${baseUrl}${prefix}/teachers/${teacher.slug}`,
     worksFor: {
       '@type': 'EducationalOrganization',
@@ -248,13 +251,13 @@ export function buildPersonSchema(
  * provider 为 EducationalOrganization，offers 含 price + priceCurrency
  */
 export function buildCourseSchema(
-  product: Pick<Product, 'name' | 'slug' | 'description' | 'shortDescription' | 'price'>,
+  product: Pick<Product, 'name' | 'slug' | 'description' | 'shortDescription' | 'objectives' | 'teachingMethod' | 'price'>,
   settings: Pick<SiteSettings, 'name'>,
   locale: Locale
 ): Record<string, unknown> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
   const prefix = locale === 'en-US' ? '/en-US' : '';
-  const description = product.description || product.shortDescription || '';
+  const description = buildCourseSummary(product, locale);
   const schema: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'Course',
