@@ -33,7 +33,7 @@ describe('POST /api/admin/enrollment-codes', () => {
     expect(res.status).toBe(201);
     const body = await res.json();
     expect(body.code).toMatch(/^[A-Z0-9_-]{32}$/);
-    expect(body.expiresAt).toBeDefined();
+    expect(body.expires_at).toBeDefined();
     codeId = body.id;
     codeValue = body.code;
   });

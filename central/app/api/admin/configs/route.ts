@@ -23,20 +23,25 @@ export async function POST(req: NextRequest) {
   if (!customerId) return errorResponse('customerId is required', 400);
 
   const encrypted = encryptSensitiveFields({ brand, ai, deployment, envOverrides });
-  const result = await withTransaction(async (client) => {
-    const versionRow = await client.query<{ max: string }>(
-      'SELECT COALESCE(MAX(version),0) + 1 AS max FROM customer_configs WHERE customer_id=$1',
-      [customerId]
-    );
-    const version = Number(versionRow.rows[0].max);
-    const insertResult = await client.query(
-      `INSERT INTO customer_configs (customer_id, version, brand, ai, deployment, env_overrides)
-       VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
-      [customerId, version, encrypted.brand ?? {}, encrypted.ai ?? {}, encrypted.deployment ?? {}, encrypted.envOverrides ?? {}]
-    );
-    return insertResult.rows[0];
-  });
-  return json(maskApiRow(result), 201);
+  try {
+    const result = await withTransaction(async (client) => {
+      const versionRow = await client.query<{ max: number }>(
+        'SELECT COALESCE(MAX(version),0) + 1 AS max FROM customer_configs WHERE customer_id=$1',
+        [customerId]
+      );
+      const version = versionRow.rows[0].max;
+      const insertResult = await client.query(
+        `INSERT INTO customer_configs (customer_id, version, brand, ai, deployment, env_overrides)
+         VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+        [customerId, version, encrypted.brand ?? {}, encrypted.ai ?? {}, encrypted.deployment ?? {}, encrypted.envOverrides ?? {}]
+      );
+      return insertResult.rows[0];
+    });
+    return json(maskApiRow(result), 201);
+  } catch (err: any) {
+    if (err.code === '23505') return errorResponse('Version conflict, please retry', 409);
+    throw err;
+  }
 }
 
 function maskApiRow(row: Record<string, any>) {

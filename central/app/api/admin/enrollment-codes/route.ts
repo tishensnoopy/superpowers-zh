@@ -24,12 +24,12 @@ export async function POST(req: NextRequest) {
   const { customerId } = await req.json();
   if (!customerId) return errorResponse('customerId required', 400);
 
-  const code = crypto.randomBytes(16).toString('base64url').toUpperCase().slice(0, 32);
+  const code = crypto.randomBytes(24).toString('base64url').toUpperCase().slice(0, 32);
   const result = await query(
     `INSERT INTO enrollment_codes (customer_id, code, expires_at)
-     VALUES ($1,$2, now() + interval '${CODE_TTL_HOURS} hours')
+     VALUES ($1,$2, now() + make_interval(hours => $3))
      RETURNING id, customer_id, code, issued_at, expires_at, used_at, failed_attempts`,
-    [customerId, code]
+    [customerId, code, CODE_TTL_HOURS]
   );
   return json(result.rows[0], 201);
 }
