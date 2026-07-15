@@ -1,0 +1,51 @@
+name: Test Data Cleanup
+
+# 清理 E2E 测试在 Strapi 中遗留的污染数据（FAQ / 新闻 / 预约）
+# 防止测试数据累积导致视觉回归基线失效
+#
+# 触发方式:
+#   1. 手动触发（workflow_dispatch）— 部署前或排查问题时手动执行
+#   2. 每日定时（UTC 19:00 = 北京时间 03:00）— 在非工作时间自动清理
+#
+# 必需 Secrets（在仓库 Settings → Secrets 中配置）:
+#   STRAPI_URL          — Strapi 后端地址，如 https://api.yousen.com
+#   ADMIN_EMAIL         — Strapi 管理员邮箱
+#   ADMIN_PASSWORD      — Strapi 管理员密码
+
+on:
+  workflow_dispatch:
+    inputs:
+      strapi_url:
+        description: 'Strapi 后端地址（覆盖 Secrets）'
+        required: false
+        type: string
+  schedule:
+    # UTC 19:00 = 北京时间 03:00
+    - cron: '0 19 * * *'
+
+jobs:
+  cleanup:
+    name: 清理测试污染数据
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 运行清理脚本
+        env:
+          STRAPI_URL: ${{ inputs.strapi_url || secrets.STRAPI_URL }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+        run: node backend/scripts/cleanup-test-data.js
+
+      - name: 清理结果摘要
+        if: always()
+        run: |
+          echo "## 测试数据清理结果" >> $GITHUB_STEP_SUMMARY
+          echo "执行时间: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "Strapi: ${{ inputs.strapi_url || secrets.STRAPI_URL || '未配置' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "详细输出见上方步骤日志" >> $GITHUB_STEP_SUMMARY
