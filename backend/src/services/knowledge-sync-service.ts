@@ -49,11 +49,48 @@ export function serializeNews(n: any): string {
 }
 
 export function serializeTeacher(t: any): string {
-  return `教师：${t.name || ''}，${t.title || ''}。${t.bio || t.description || ''}`;
+  const lines: string[] = [];
+  lines.push(`教师：${t.name || ''}`);
+  if (t.title) {
+    lines.push(`职称：${t.title}`);
+  }
+  if (t.teachingYears) {
+    lines.push(`教龄：${t.teachingYears}年`);
+  }
+  if (t.education) {
+    lines.push(`学历：${t.education}`);
+  }
+  if (t.teachingFeatures) {
+    lines.push(`教学特色：${t.teachingFeatures}`);
+  }
+  if (t.achievements && Array.isArray(t.achievements) && t.achievements.length > 0) {
+    lines.push(`成就：${t.achievements.join(' | ')}`);
+  }
+  if (t.bio || t.description) {
+    lines.push(t.bio || t.description);
+  }
+  return lines.join('\n');
 }
 
 export function serializeCampus(c: any): string {
-  return `校区：${c.name || ''}，地址${c.address || ''}，电话${c.phone || ''}。${c.description || ''}`;
+  const lines: string[] = [];
+  lines.push(`校区：${c.name || ''}`);
+  if (c.address) {
+    lines.push(`地址：${c.address}`);
+  }
+  if (c.phone) {
+    lines.push(`电话：${c.phone}`);
+  }
+  if (c.businessHours) {
+    lines.push(`营业时间：${c.businessHours}`);
+  }
+  if (c.transportation) {
+    lines.push(`交通：${c.transportation}`);
+  }
+  if (c.description) {
+    lines.push(c.description);
+  }
+  return lines.join('\n');
 }
 
 export function serializeFaq(f: any): string {

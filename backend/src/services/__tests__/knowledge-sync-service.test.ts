@@ -45,6 +45,61 @@ describe('knowledge-sync-service 序列化规则', () => {
     expect(lines[0]).toBe('课程：A');
     expect(lines[1]).toBe('简介：B');
   });
+
+  it('教师序列化应包含姓名/职称/教龄/学历/教学特色/成就', () => {
+    const teacher = {
+      name: '王老师',
+      title: '高级教师',
+      teachingYears: 10,
+      education: '本科',
+      teachingFeatures: '寓教于乐',
+      achievements: ['市级优秀教师', '教学论文一等奖'],
+    };
+    const text = serializeTeacher(teacher);
+    expect(text).toContain('教师：王老师');
+    expect(text).toContain('职称：高级教师');
+    expect(text).toContain('教龄：10年');
+    expect(text).toContain('学历：本科');
+    expect(text).toContain('教学特色：寓教于乐');
+    expect(text).toContain('市级优秀教师');
+    expect(text).toContain('教学论文一等奖');
+  });
+
+  it('教师序列化空值字段应跳过', () => {
+    const teacher = { name: '测试教师' };
+    const text = serializeTeacher(teacher);
+    expect(text).toContain('教师：测试教师');
+    expect(text).not.toContain('职称：');
+    expect(text).not.toContain('教龄：');
+    expect(text).not.toContain('学历：');
+  });
+
+  it('校区序列化应包含名称/地址/电话/营业时间/交通', () => {
+    const campus = {
+      name: '百步亭校区',
+      address: '江岸区百步亭花园路',
+      phone: '027-12345678',
+      businessHours: '周一至周五 8:00-18:00',
+      transportation: '地铁3号线百步亭站',
+      description: '500平米教学区',
+    };
+    const text = serializeCampus(campus);
+    expect(text).toContain('校区：百步亭校区');
+    expect(text).toContain('地址：江岸区百步亭花园路');
+    expect(text).toContain('电话：027-12345678');
+    expect(text).toContain('营业时间：周一至周五 8:00-18:00');
+    expect(text).toContain('交通：地铁3号线百步亭站');
+    expect(text).toContain('500平米教学区');
+  });
+
+  it('校区序列化空值字段应跳过', () => {
+    const campus = { name: '测试校区', address: '测试地址' };
+    const text = serializeCampus(campus);
+    expect(text).toContain('校区：测试校区');
+    expect(text).not.toContain('电话：');
+    expect(text).not.toContain('营业时间：');
+    expect(text).not.toContain('交通：');
+  });
 });
 
 describe('syncWebsiteContent', () => {
