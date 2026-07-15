@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
 import { getCampuses, getCampusBySlug, type Locale } from '@/lib/api';
-import { buildMetadata } from '@/lib/seo';
+import { buildMetadata, buildJsonLd, buildLocalBusinessSchema, buildBreadcrumbSchema } from '@/lib/seo';
 import CampusDetailHeader from '@/components/campus/CampusDetailHeader';
 import CampusGallery from '@/components/campus/CampusGallery';
 import CampusInfoCard from '@/components/campus/CampusInfoCard';
@@ -50,8 +50,26 @@ export default async function CampusDetailPage({ params }: PageProps) {
     notFound();
   }
 
+  const localBusinessSchema = buildLocalBusinessSchema(campus, locale as Locale);
+  const breadcrumbSchema = buildBreadcrumbSchema(
+    [
+      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
+      { name: locale === 'en-US' ? 'Campuses' : '校区分布', url: '/campuses' },
+      { name: campus.name, url: `/campuses/${campus.slug}` },
+    ],
+    locale as Locale
+  );
+
   return (
     <div className="pt-[120px] pb-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: buildJsonLd(localBusinessSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: buildJsonLd(breadcrumbSchema) }}
+      />
       <div className="max-w-[1400px] mx-auto px-8">
         <CampusDetailHeader campus={campus} />
 

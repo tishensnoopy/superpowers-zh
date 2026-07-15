@@ -1,5 +1,5 @@
 import { getFaqItems, type Locale } from '@/lib/api';
-import { buildMetadata, buildJsonLd } from '@/lib/seo';
+import { buildMetadata, buildJsonLd, buildFaqPageSchema, buildBreadcrumbSchema } from '@/lib/seo';
 import { setRequestLocale } from 'next-intl/server';
 import Faq from '@/components/sections/Faq';
 import type { Metadata } from 'next';
@@ -29,24 +29,24 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
     showSearch: true,
   };
 
-  const faqJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faqItems.map((f) => ({
-      '@type': 'Question',
-      name: f.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: f.answer,
-      },
-    })),
-  };
+  const faqJsonLd = buildFaqPageSchema(faqItems);
+  const breadcrumbSchema = buildBreadcrumbSchema(
+    [
+      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
+      { name: locale === 'en-US' ? 'FAQ' : '常见问题', url: '/faq' },
+    ],
+    locale as Locale
+  );
 
   return (
     <div className="pt-[120px] min-h-screen" style={{ background: '#FAFAFA' }}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: buildJsonLd(faqJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: buildJsonLd(breadcrumbSchema) }}
       />
       <div className="max-w-[1400px] mx-auto px-8 pt-16">
         <h1

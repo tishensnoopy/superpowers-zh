@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
-import { getProducts, getProductBySlug, type Locale } from '@/lib/api';
-import { buildMetadata, buildJsonLd } from '@/lib/seo';
+import { getProducts, getProductBySlug, getSiteSettings, type Locale } from '@/lib/api';
+import { buildMetadata, buildJsonLd, buildCourseSchema, buildBreadcrumbSchema } from '@/lib/seo';
 import CourseHeader from '@/components/course/CourseHeader';
 import CourseSpecs from '@/components/course/CourseSpecs';
 import CourseObjectives from '@/components/course/CourseObjectives';
@@ -53,18 +53,28 @@ export default async function CourseDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const courseJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Course',
-    name: product.name,
-    description: product.description || product.shortDescription || '',
-  };
+  const { data: settingsData } = await getSiteSettings(locale as Locale).catch(() => ({ data: [] as never[] }));
+  const settings = Array.isArray(settingsData) ? settingsData[0] : settingsData;
+
+  const courseSchema = buildCourseSchema(product, settings || { name: '佑森小课堂' }, locale as Locale);
+  const breadcrumbSchema = buildBreadcrumbSchema(
+    [
+      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
+      { name: locale === 'en-US' ? 'Courses' : '课程', url: '/courses' },
+      { name: product.name, url: `/courses/${product.slug}` },
+    ],
+    locale as Locale
+  );
 
   return (
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: buildJsonLd(courseJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: buildJsonLd(courseSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: buildJsonLd(breadcrumbSchema) }}
       />
       <CourseHeader product={product} />
       <CourseSpecs product={product} />

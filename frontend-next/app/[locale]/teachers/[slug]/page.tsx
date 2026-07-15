@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
 import { getTeachers, getTeacherBySlug, type Locale } from '@/lib/api';
-import { buildMetadata } from '@/lib/seo';
+import { buildMetadata, buildJsonLd, buildPersonSchema, buildBreadcrumbSchema } from '@/lib/seo';
 import StrapiImage from '@/components/ui/StrapiImage';
 import type { Metadata } from 'next';
 
@@ -59,8 +59,26 @@ export default async function TeacherDetailPage({ params }: PageProps) {
     ? teacher.achievements
     : [];
 
+  const personSchema = buildPersonSchema(teacher, locale as Locale);
+  const breadcrumbSchema = buildBreadcrumbSchema(
+    [
+      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
+      { name: locale === 'en-US' ? 'Teachers' : '师资团队', url: '/teachers' },
+      { name: teacher.name, url: `/teachers/${teacher.slug}` },
+    ],
+    locale as Locale
+  );
+
   return (
     <div className="pt-[120px] pb-24 min-h-screen" style={{ background: '#FAFAFA' }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: buildJsonLd(personSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: buildJsonLd(breadcrumbSchema) }}
+      />
       <div className="max-w-[1200px] mx-auto px-8">
         {/* 面包屑 */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">

@@ -2,8 +2,8 @@ import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
 import Link from 'next/link';
 import { Calendar, Eye, ArrowLeft, Home } from 'lucide-react';
-import { getNews, getNewsBySlug, getNewsCategoryLabel, getImageUrl, type Locale } from '@/lib/api';
-import { buildMetadata, buildJsonLd } from '@/lib/seo';
+import { getNews, getNewsBySlug, getNewsCategoryLabel, getImageUrl, getSiteSettings, type Locale } from '@/lib/api';
+import { buildMetadata, buildJsonLd, buildNewsArticleSchema, buildBreadcrumbSchema } from '@/lib/seo';
 import StrapiImage from '@/components/ui/StrapiImage';
 import type { Metadata } from 'next';
 
@@ -78,21 +78,30 @@ export default async function NewsDetailPage({ params }: PageProps) {
 
   const { title, content, coverImage, category, publishedAt, viewCount } = news;
   const categoryLabel = category ? getNewsCategoryLabel(category) : '';
-  const coverUrl = getImageUrl(coverImage);
 
-  const articleJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'NewsArticle',
-    headline: title,
-    datePublished: publishedAt,
-    image: coverUrl,
-  };
+  const { data: settingsData } = await getSiteSettings(locale as Locale).catch(() => ({ data: [] as never[] }));
+  const settings = Array.isArray(settingsData) ? settingsData[0] : settingsData;
+  const newsSettings = settings || { name: '佑森小课堂' };
+
+  const newsSchema = buildNewsArticleSchema(news, newsSettings, locale as Locale);
+  const breadcrumbSchema = buildBreadcrumbSchema(
+    [
+      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
+      { name: locale === 'en-US' ? 'News' : '新闻动态', url: '/news' },
+      { name: news.title, url: `/news/${news.slug}` },
+    ],
+    locale as Locale
+  );
 
   return (
     <div className="pt-[120px] pb-16 min-h-screen" style={{ background: '#FAFAFA' }}>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: buildJsonLd(articleJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: buildJsonLd(newsSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: buildJsonLd(breadcrumbSchema) }}
       />
       <div className="max-w-[800px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* 面包屑导航 */}
