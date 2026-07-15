@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getNews, type Locale } from '@/lib/api';
-import { buildMetadata } from '@/lib/seo';
+import { buildMetadata, buildJsonLd, buildBreadcrumbSchema } from '@/lib/seo';
 import { setRequestLocale } from 'next-intl/server';
 import NewsCard from '@/components/news/NewsCard';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -54,8 +54,20 @@ export default async function NewsListPage({ params, searchParams }: PageProps) 
     return qs ? `/news?${qs}` : '/news';
   };
 
+  const breadcrumbSchema = buildBreadcrumbSchema(
+    [
+      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
+      { name: locale === 'en-US' ? 'News' : '新闻动态', url: '/news' },
+    ],
+    locale as Locale
+  );
+
   return (
     <div className="pt-[120px] pb-16 min-h-screen" style={{ background: '#FAFAFA' }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: buildJsonLd(breadcrumbSchema) }}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-12 text-center">
           <h1

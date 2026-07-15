@@ -1,6 +1,7 @@
 import TeamPage from '@/components/team/TeamPage';
 import { setRequestLocale } from 'next-intl/server';
 import type { Locale } from '@/lib/api';
+import { buildJsonLd, buildBreadcrumbSchema } from '@/lib/seo';
 import type { Metadata } from 'next';
 
 export const revalidate = 300;
@@ -14,5 +15,20 @@ export const metadata: Metadata = {
 export default async function TeachersPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <TeamPage locale={locale as Locale} />;
+  const breadcrumbSchema = buildBreadcrumbSchema(
+    [
+      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
+      { name: locale === 'en-US' ? 'Teachers' : '师资团队', url: '/teachers' },
+    ],
+    locale as Locale
+  );
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: buildJsonLd(breadcrumbSchema) }}
+      />
+      <TeamPage locale={locale as Locale} />
+    </>
+  );
 }

@@ -1,5 +1,5 @@
 import { Phone, Mail, MessageCircle, Clock, MapPin } from 'lucide-react';
-import { buildMetadata } from '@/lib/seo';
+import { buildMetadata, buildJsonLd, buildBreadcrumbSchema } from '@/lib/seo';
 import { setRequestLocale } from 'next-intl/server';
 import { getCampuses, getSiteSettings, type Locale } from '@/lib/api';
 import ContactForm from '@/components/sections/ContactForm';
@@ -34,8 +34,20 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
     { icon: Clock, label: '服务时间', value: '周一至周日 8:30-20:00' },
   ];
 
+  const breadcrumbSchema = buildBreadcrumbSchema(
+    [
+      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
+      { name: locale === 'en-US' ? 'Contact' : '联系我们', url: '/contact' },
+    ],
+    locale as Locale
+  );
+
   return (
     <div className="pt-[120px] pb-16 min-h-screen bg-gradient-to-br from-[#FFF3E5] to-[#FFFCF8]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: buildJsonLd(breadcrumbSchema) }}
+      />
       <div className="max-w-[1200px] mx-auto px-8">
         <div className="text-center mb-12">
           <h1

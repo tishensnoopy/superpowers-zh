@@ -1,4 +1,4 @@
-import { buildMetadata } from '@/lib/seo';
+import { buildMetadata, buildJsonLd, buildBreadcrumbSchema } from '@/lib/seo';
 import { setRequestLocale } from 'next-intl/server';
 import ContactForm from '@/components/sections/ContactForm';
 import type { Metadata } from 'next';
@@ -16,8 +16,19 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function AppointmentPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const breadcrumbSchema = buildBreadcrumbSchema(
+    [
+      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
+      { name: locale === 'en-US' ? 'Appointment' : '预约试听', url: '/appointment' },
+    ],
+    locale as 'zh-CN' | 'en-US'
+  );
   return (
     <div className="pt-[120px] pb-16 min-h-screen bg-gradient-to-br from-[#FFF3E5] to-[#FFFCF8]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: buildJsonLd(breadcrumbSchema) }}
+      />
       <div className="max-w-[1200px] mx-auto px-8">
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#F5851F]/10 border border-[#F5851F]/20 text-[#F5851F] text-sm mb-6">
