@@ -10,9 +10,11 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   const job = await getJob(params.id);
   if (!job) return errorResponse('Job not found', 404);
 
-  // 附带日志（最近 500 行）
+  // 附带日志（最近 500 行，按时间升序展示）
   const logs = await query(
-    `SELECT ts, stream, line FROM job_logs WHERE job_id=$1 ORDER BY ts ASC LIMIT 500`,
+    `SELECT ts, stream, line FROM (
+       SELECT ts, stream, line FROM job_logs WHERE job_id=$1 ORDER BY ts DESC LIMIT 500
+     ) sub ORDER BY ts ASC`,
     [params.id]
   );
 
