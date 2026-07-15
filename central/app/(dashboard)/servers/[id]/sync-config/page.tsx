@@ -11,26 +11,25 @@ export default function SyncConfigPage() {
 
   async function submit() {
     setBusy(true);
-    let envVars: Record<string, string> = {};
-    try {
-      for (const line of envText.split('\n')) {
-        const m = line.match(/^\s*([A-Z_]+)\s*=\s*(.+)\s*$/);
-        if (m) envVars[m[1]] = m[2];
-      }
-    } catch {
-      alert('env 格式错误');
-      setBusy(false);
-      return;
+    const envVars: Record<string, string> = {};
+    for (const line of envText.split('\n')) {
+      const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.+)\s*$/);
+      if (m) envVars[m[1]] = m[2];
     }
 
-    const res = await fetch(`/api/admin/servers/${id}/command`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'config-sync', envVars, restart }),
-    });
-    const body = await res.json();
-    setBusy(false);
-    if (res.ok) router.push(`/jobs/${body.jobId}`);
-    else alert(`失败: ${body.error}`);
+    try {
+      const res = await fetch(`/api/admin/servers/${id}/command`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'config-sync', envVars, restart }),
+      });
+      const body = await res.json();
+      if (res.ok) router.push(`/jobs/${body.jobId}`);
+      else alert(`失败: ${body.error}`);
+    } catch (e) {
+      alert(`网络错误: ${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (

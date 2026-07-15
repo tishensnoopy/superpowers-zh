@@ -5,11 +5,16 @@ import { useParams } from 'next/navigation';
 export default function JobDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [job, setJob] = useState<any>(null);
+  const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/admin/jobs/${id}`).then((r) => r.json()).then(setJob);
+    fetch(`/api/admin/jobs/${id}`)
+      .then((r) => r.json())
+      .then(setJob)
+      .catch((e) => setErr(e instanceof Error ? e.message : String(e)));
   }, [id]);
 
+  if (err) return <p className="text-red-600">加载失败: {err}</p>;
   if (!job) return <p>加载中...</p>;
 
   return (

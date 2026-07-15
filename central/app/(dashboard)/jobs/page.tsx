@@ -1,16 +1,19 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function JobsPage() {
+function JobsList() {
   const params = useSearchParams();
   const serverId = params.get('serverId');
   const [items, setItems] = useState<any[]>([]);
 
   useEffect(() => {
     const url = '/api/admin/jobs' + (serverId ? `?serverId=${serverId}` : '');
-    fetch(url).then((r) => r.json()).then((d) => setItems(d.items ?? []));
+    fetch(url)
+      .then((r) => r.json())
+      .then((d) => setItems(d.items ?? []))
+      .catch((e) => alert(`加载失败: ${e instanceof Error ? e.message : String(e)}`));
   }, [serverId]);
 
   const statusColor: Record<string, string> = {
@@ -49,5 +52,13 @@ export default function JobsPage() {
         </tbody>
       </table>
     </div>
+  );
+}
+
+export default function JobsPage() {
+  return (
+    <Suspense fallback={<p>加载中...</p>}>
+      <JobsList />
+    </Suspense>
   );
 }

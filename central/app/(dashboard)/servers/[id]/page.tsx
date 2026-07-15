@@ -29,6 +29,8 @@ export default function ServerDetailPage() {
       } else {
         alert(`失败: ${body.error}`);
       }
+    } catch (e) {
+      alert(`网络错误: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       setBusy(false);
     }
@@ -49,6 +51,8 @@ export default function ServerDetailPage() {
       } else {
         alert(`失败: ${body.error}`);
       }
+    } catch (e) {
+      alert(`网络错误: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       setBusy(false);
     }
@@ -83,7 +87,8 @@ export default function ServerDetailPage() {
             查看日志
           </button>
           <button disabled={busy} onClick={() => {
-            const services = prompt('重启哪些服务？（逗号分隔）', 'backend') ?? 'backend';
+            const services = prompt('重启哪些服务？（逗号分隔）', 'backend');
+            if (services === null) return;  // 用户点取消
             sendCommand('restart', { services: services.split(',').map((s) => s.trim()) });
           }} className="bg-yellow-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50">
             重启服务
