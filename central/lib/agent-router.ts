@@ -46,7 +46,7 @@ export async function handleAgentMessage(ws: WebSocket, serverId: string, msg: A
         `INSERT INTO job_logs (job_id, stream, line) VALUES ($1,$2,$3)`,
         [msg.jobId, msg.stream, msg.line]
       );
-      broadcastToAdmins('job:log', { jobId: msg.jobId, ...msg });
+      broadcastToAdmins('job:log', { ...msg, jobId: msg.jobId });
       break;
 
     case 'command:ack':
