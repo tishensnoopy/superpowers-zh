@@ -100,6 +100,54 @@ describe('knowledge-sync-service 序列化规则', () => {
     expect(text).not.toContain('营业时间：');
     expect(text).not.toContain('交通：');
   });
+
+  it('新闻序列化应包含标题/发布日期/摘要/内容', () => {
+    const news = {
+      title: '开学通知',
+      publishedAt: '2026-01-15',
+      excerpt: '春季班开始报名',
+      content: '<p>详细内容</p>',
+    };
+    const text = serializeNews(news);
+    expect(text).toContain('新闻：开学通知');
+    expect(text).toContain('发布日期：2026-01-15');
+    expect(text).toContain('摘要：春季班开始报名');
+    expect(text).toContain('详细内容');
+  });
+
+  it('新闻序列化空值字段应跳过', () => {
+    const news = { title: '测试新闻' };
+    const text = serializeNews(news);
+    expect(text).toContain('新闻：测试新闻');
+    expect(text).not.toContain('发布日期：');
+    expect(text).not.toContain('摘要：');
+  });
+
+  it('新闻序列化 content fallback 当 excerpt 不存在', () => {
+    const news = { title: '测试', content: '正文内容' };
+    const text = serializeNews(news);
+    expect(text).toContain('正文内容');
+  });
+
+  it('FAQ序列化应包含问题/答案/分类', () => {
+    const faq = {
+      question: '什么是幼小衔接？',
+      answer: '幼儿园到小学的过渡教育',
+      category: '课程相关',
+    };
+    const text = serializeFaq(faq);
+    expect(text).toContain('问题：什么是幼小衔接？');
+    expect(text).toContain('答案：幼儿园到小学的过渡教育');
+    expect(text).toContain('分类：课程相关');
+  });
+
+  it('FAQ序列化空值分类应跳过', () => {
+    const faq = { question: '测试问题', answer: '测试答案' };
+    const text = serializeFaq(faq);
+    expect(text).toContain('问题：测试问题');
+    expect(text).toContain('答案：测试答案');
+    expect(text).not.toContain('分类：');
+  });
 });
 
 describe('syncWebsiteContent', () => {

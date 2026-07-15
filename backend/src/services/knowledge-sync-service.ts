@@ -45,7 +45,21 @@ export function serializeProduct(p: any): string {
 }
 
 export function serializeNews(n: any): string {
-  return `新闻：${n.title || ''}。${n.content || n.excerpt || ''}`;
+  const lines: string[] = [];
+  lines.push(`新闻：${n.title || ''}`);
+  if (n.publishedAt) {
+    const date = typeof n.publishedAt === 'string' ? n.publishedAt.split('T')[0] : '';
+    if (date) {
+      lines.push(`发布日期：${date}`);
+    }
+  }
+  if (n.excerpt) {
+    lines.push(`摘要：${n.excerpt}`);
+  }
+  if (n.content) {
+    lines.push(n.content);
+  }
+  return lines.join('\n');
 }
 
 export function serializeTeacher(t: any): string {
@@ -94,7 +108,15 @@ export function serializeCampus(c: any): string {
 }
 
 export function serializeFaq(f: any): string {
-  return `问题：${f.question || ''}。答案：${f.answer || ''}`;
+  const lines: string[] = [];
+  lines.push(`问题：${f.question || ''}`);
+  if (f.answer) {
+    lines.push(`答案：${f.answer}`);
+  }
+  if (f.category) {
+    lines.push(`分类：${f.category}`);
+  }
+  return lines.join('\n');
 }
 
 export async function syncWebsiteContent(strapi: any): Promise<{ synced: number; updated: number; errors: string[] }> {
