@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { json, errorResponse, requireAdmin } from '@/lib/api-helpers';
 import { query } from '@/lib/db';
-import { createJob } from '@/lib/job-manager';
+import { createJob, updateJobStatus, type JobType } from '@/lib/job-manager';
 import { sendToServer, isOnline } from '@/lib/connections';
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
@@ -27,19 +27,21 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   // 创建 job
   const job = await createJob({
     serverId: params.id,
-    type: type as any,
+    type: type as JobType,
     triggeredBy: admin.sub,
   });
 
-  // 生成 commandId（与 jobId 相同）
+  // 生成指令：服务端字段放在 ...rest 之后，防止客户端覆盖 commandId/type
   const command = {
+    ...rest,
     commandId: job.id,
     type: `command:${type}`,
-    ...rest,
   };
 
   const sent = await sendToServer(params.id, command);
   if (!sent) {
+    // 下发失败时取消 job，避免 queued 僵尸记录（markStaleJobsFailed 只清理 running）
+    await updateJobStatus(job.id, 'cancelled', { errorMessage: 'send failed: agent disconnected' });
     return errorResponse('Failed to send command (agent disconnected)', 503);
   }
 
