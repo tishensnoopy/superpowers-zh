@@ -1,5 +1,15 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { buildMetadata, buildWebSiteSchema, buildOrganizationSchema, buildBreadcrumbSchema, buildFaqPageSchema } from '../seo';
+import {
+  buildMetadata,
+  buildWebSiteSchema,
+  buildOrganizationSchema,
+  buildBreadcrumbSchema,
+  buildFaqPageSchema,
+  buildLocalBusinessSchema,
+  buildPersonSchema,
+  buildCourseSchema,
+  buildNewsArticleSchema,
+} from '../seo';
 
 describe('buildMetadata hreflang injection', () => {
   beforeEach(() => {
@@ -209,5 +219,220 @@ describe('buildFaqPageSchema', () => {
   it('handles empty faqItems array', () => {
     const schema = buildFaqPageSchema([]);
     expect(schema['mainEntity']).toEqual([]);
+  });
+});
+
+describe('buildLocalBusinessSchema', () => {
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_SITE_URL = 'https://example.com';
+    process.env.NEXT_PUBLIC_STRAPI_API_URL = 'https://example.com';
+  });
+  afterEach(() => {
+    delete process.env.NEXT_PUBLIC_SITE_URL;
+    delete process.env.NEXT_PUBLIC_STRAPI_API_URL;
+  });
+
+  it('returns LocalBusiness + EducationalOrganization dual type', () => {
+    const campus = {
+      name: '百步亭校区',
+      slug: 'baibuting',
+      address: '武汉市江岸区百步亭花园路',
+      phone: '027-82345678',
+      businessHours: '周一至周五 8:00-18:00',
+      coverImage: { url: '/campus.jpg', alternativeText: 'campus' },
+    } as any;
+    const schema = buildLocalBusinessSchema(campus, 'zh-CN');
+    expect(schema['@type']).toEqual(['LocalBusiness', 'EducationalOrganization']);
+    expect(schema['name']).toBe('百步亭校区');
+    expect(schema['address']).toEqual({
+      '@type': 'PostalAddress',
+      streetAddress: '武汉市江岸区百步亭花园路',
+    });
+    expect(schema['telephone']).toBe('027-82345678');
+    expect(schema['openingHours']).toBe('周一至周五 8:00-18:00');
+    expect(schema['url']).toBe('https://example.com/campuses/baibuting');
+  });
+
+  it('adds /en-US prefix to url for en-US locale', () => {
+    const campus = { name: 'Test', slug: 'test', address: 'addr' } as any;
+    const schema = buildLocalBusinessSchema(campus, 'en-US');
+    expect(schema['url']).toBe('https://example.com/en-US/campuses/test');
+  });
+
+  it('omits telephone/openingHours/image when not provided', () => {
+    const campus = { name: 'Test', slug: 'test', address: 'addr' } as any;
+    const schema = buildLocalBusinessSchema(campus, 'zh-CN');
+    expect(schema['telephone']).toBeUndefined();
+    expect(schema['openingHours']).toBeUndefined();
+    expect(schema['image']).toBeUndefined();
+  });
+
+  it('includes image from coverImage when available', () => {
+    const campus = {
+      name: 'Test',
+      slug: 'test',
+      address: 'addr',
+      coverImage: { url: '/img.jpg' },
+    } as any;
+    const schema = buildLocalBusinessSchema(campus, 'zh-CN');
+    expect(schema['image']).toBe('https://example.com/img.jpg');
+  });
+});
+
+describe('buildPersonSchema', () => {
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_SITE_URL = 'https://example.com';
+    process.env.NEXT_PUBLIC_STRAPI_API_URL = 'https://example.com';
+  });
+  afterEach(() => {
+    delete process.env.NEXT_PUBLIC_SITE_URL;
+    delete process.env.NEXT_PUBLIC_STRAPI_API_URL;
+  });
+
+  it('returns Person schema with core fields', () => {
+    const teacher = {
+      name: '张老师',
+      title: '高级教师',
+      slug: 'zhang-laoshi',
+      avatar: { url: '/avatar.jpg', alternativeText: 'avatar' },
+      subject: 'pinyin',
+      teachingFeatures: '趣味拼音教学',
+      achievements: ['市级优秀教师', '教学比赛一等奖'],
+    } as any;
+    const schema = buildPersonSchema(teacher, 'zh-CN');
+    expect(schema['@type']).toBe('Person');
+    expect(schema['name']).toBe('张老师');
+    expect(schema['jobTitle']).toBe('高级教师');
+    expect(schema['image']).toBe('https://example.com/avatar.jpg');
+    expect(schema['url']).toBe('https://example.com/teachers/zhang-laoshi');
+    expect(schema['worksFor']).toEqual({
+      '@type': 'EducationalOrganization',
+      name: '佑森小课堂',
+    });
+    expect(schema['knowsAbout']).toEqual(['市级优秀教师', '教学比赛一等奖']);
+  });
+
+  it('omits jobTitle/image/knowsAbout when not provided', () => {
+    const teacher = { name: 'Test', slug: 'test' } as any;
+    const schema = buildPersonSchema(teacher, 'zh-CN');
+    expect(schema['jobTitle']).toBeUndefined();
+    expect(schema['image']).toBeUndefined();
+    expect(schema['knowsAbout']).toBeUndefined();
+  });
+
+  it('omits knowsAbout when achievements is empty array', () => {
+    const teacher = { name: 'Test', slug: 'test', achievements: [] } as any;
+    const schema = buildPersonSchema(teacher, 'zh-CN');
+    expect(schema['knowsAbout']).toBeUndefined();
+  });
+});
+
+describe('buildCourseSchema', () => {
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_SITE_URL = 'https://example.com';
+  });
+  afterEach(() => {
+    delete process.env.NEXT_PUBLIC_SITE_URL;
+  });
+
+  it('returns Course schema with provider and offers', () => {
+    const product = {
+      name: '拼音全能班',
+      slug: 'pinyin',
+      description: '系统学习汉语拼音',
+      price: 2980,
+    } as any;
+    const settings = { name: '佑森小课堂' } as any;
+    const schema = buildCourseSchema(product, settings, 'zh-CN');
+    expect(schema['@type']).toBe('Course');
+    expect(schema['name']).toBe('拼音全能班');
+    expect(schema['description']).toBe('系统学习汉语拼音');
+    expect(schema['provider']).toEqual({
+      '@type': 'EducationalOrganization',
+      name: '佑森小课堂',
+    });
+    expect(schema['offers']).toEqual({
+      '@type': 'Offer',
+      price: 2980,
+      priceCurrency: 'CNY',
+    });
+  });
+
+  it('omits offers when price is missing', () => {
+    const product = { name: 'Test', slug: 'test', description: 'desc' } as any;
+    const settings = { name: 'Test' } as any;
+    const schema = buildCourseSchema(product, settings, 'zh-CN');
+    expect(schema['offers']).toBeUndefined();
+  });
+
+  it('falls back to shortDescription when description missing', () => {
+    const product = {
+      name: 'Test',
+      slug: 'test',
+      shortDescription: 'short desc',
+    } as any;
+    const settings = { name: 'Test' } as any;
+    const schema = buildCourseSchema(product, settings, 'zh-CN');
+    expect(schema['description']).toBe('short desc');
+  });
+});
+
+describe('buildNewsArticleSchema', () => {
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_SITE_URL = 'https://example.com';
+    process.env.NEXT_PUBLIC_STRAPI_API_URL = 'https://example.com';
+  });
+  afterEach(() => {
+    delete process.env.NEXT_PUBLIC_SITE_URL;
+    delete process.env.NEXT_PUBLIC_STRAPI_API_URL;
+  });
+
+  it('returns NewsArticle schema with author and publisher', () => {
+    const news = {
+      title: '佑森小课堂开学通知',
+      slug: 'opening-notice',
+      excerpt: '2026年春季班开始报名',
+      content: '<p>详细内容</p>',
+      publishedAt: '2026-01-15T10:00:00Z',
+      coverImage: { url: '/cover.jpg' },
+    } as any;
+    const settings = { name: '佑森小课堂' } as any;
+    const schema = buildNewsArticleSchema(news, settings, 'zh-CN');
+    expect(schema['@type']).toBe('NewsArticle');
+    expect(schema['headline']).toBe('佑森小课堂开学通知');
+    expect(schema['datePublished']).toBe('2026-01-15T10:00:00Z');
+    expect(schema['dateModified']).toBe('2026-01-15T10:00:00Z');
+    expect(schema['author']).toEqual({
+      '@type': 'Organization',
+      name: '佑森小课堂',
+    });
+    expect(schema['publisher']).toEqual({
+      '@type': 'Organization',
+      name: '佑森小课堂',
+    });
+    expect(schema['image']).toBe('https://example.com/cover.jpg');
+  });
+
+  it('uses excerpt as description when available', () => {
+    const news = {
+      title: 'Test',
+      slug: 'test',
+      excerpt: 'excerpt text',
+      publishedAt: '2026-01-15T10:00:00Z',
+    } as any;
+    const settings = { name: 'Test' } as any;
+    const schema = buildNewsArticleSchema(news, settings, 'zh-CN');
+    expect(schema['description']).toBe('excerpt text');
+  });
+
+  it('omits image when coverImage missing', () => {
+    const news = {
+      title: 'Test',
+      slug: 'test',
+      publishedAt: '2026-01-15T10:00:00Z',
+    } as any;
+    const settings = { name: 'Test' } as any;
+    const schema = buildNewsArticleSchema(news, settings, 'zh-CN');
+    expect(schema['image']).toBeUndefined();
   });
 });

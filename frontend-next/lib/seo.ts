@@ -6,6 +6,10 @@ import type {
   SocialLink,
   FaqItem,
   Locale,
+  Campus,
+  Teacher,
+  Product,
+  NewsArticle,
 } from './api';
 
 // Next.js Metadata API 仅接受以下 OpenGraph 类型
@@ -171,4 +175,139 @@ export function buildFaqPageSchema(
       },
     })),
   };
+}
+
+/**
+ * 构建 LocalBusiness schema（校区本地商业实体）
+ * 使用双类型 ['LocalBusiness', 'EducationalOrganization'] 兼顾本地 SEO 和教育权威
+ */
+export function buildLocalBusinessSchema(
+  campus: Pick<Campus, 'name' | 'slug' | 'address' | 'phone' | 'businessHours' | 'coverImage'>,
+  locale: Locale
+): Record<string, unknown> {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const prefix = locale === 'en-US' ? '/en-US' : '';
+  const schema: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': ['LocalBusiness', 'EducationalOrganization'],
+    name: campus.name,
+    url: `${baseUrl}${prefix}/campuses/${campus.slug}`,
+  };
+
+  if (campus.address) {
+    schema.address = {
+      '@type': 'PostalAddress',
+      streetAddress: campus.address,
+    };
+  }
+  if (campus.phone) schema.telephone = campus.phone;
+  if (campus.businessHours) schema.openingHours = campus.businessHours;
+  if (campus.coverImage?.url) {
+    schema.image = getImageUrl(campus.coverImage);
+  }
+
+  return schema;
+}
+
+/**
+ * 构建 Person schema（教师实体）
+ */
+export function buildPersonSchema(
+  teacher: Pick<Teacher, 'name' | 'title' | 'slug' | 'avatar' | 'achievements'>,
+  locale: Locale
+): Record<string, unknown> {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const prefix = locale === 'en-US' ? '/en-US' : '';
+  const schema: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: teacher.name,
+    url: `${baseUrl}${prefix}/teachers/${teacher.slug}`,
+    worksFor: {
+      '@type': 'EducationalOrganization',
+      name: '佑森小课堂',
+    },
+  };
+
+  if (teacher.title) schema.jobTitle = teacher.title;
+  if (teacher.avatar?.url) {
+    schema.image = getImageUrl(teacher.avatar);
+  }
+  const achievements = Array.isArray(teacher.achievements)
+    ? teacher.achievements.filter(Boolean)
+    : [];
+  if (achievements.length > 0) {
+    schema.knowsAbout = achievements;
+  }
+
+  return schema;
+}
+
+/**
+ * 构建 Course schema（课程实体，增强版）
+ * provider 为 EducationalOrganization，offers 含 price + priceCurrency
+ */
+export function buildCourseSchema(
+  product: Pick<Product, 'name' | 'slug' | 'description' | 'shortDescription' | 'price'>,
+  settings: Pick<SiteSettings, 'name'>,
+  locale: Locale
+): Record<string, unknown> {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const prefix = locale === 'en-US' ? '/en-US' : '';
+  const description = product.description || product.shortDescription || '';
+  const schema: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'Course',
+    name: product.name,
+    description,
+    url: `${baseUrl}${prefix}/courses/${product.slug}`,
+    provider: {
+      '@type': 'EducationalOrganization',
+      name: settings.name,
+    },
+  };
+
+  if (typeof product.price === 'number') {
+    schema.offers = {
+      '@type': 'Offer',
+      price: product.price,
+      priceCurrency: 'CNY',
+    };
+  }
+
+  return schema;
+}
+
+/**
+ * 构建 NewsArticle schema（新闻文章实体，增强版）
+ * author 和 publisher 均为 Organization 类型
+ */
+export function buildNewsArticleSchema(
+  news: Pick<NewsArticle, 'title' | 'slug' | 'excerpt' | 'publishedAt' | 'coverImage'>,
+  settings: Pick<SiteSettings, 'name'>,
+  locale: Locale
+): Record<string, unknown> {
+  void locale; // 保持与其他生成器 API 一致；NewsArticle schema 不含 url 字段
+  const schema: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: news.title,
+    datePublished: news.publishedAt,
+    dateModified: news.publishedAt,
+    author: {
+      '@type': 'Organization',
+      name: settings.name,
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: settings.name,
+    },
+  };
+
+  if (news.excerpt) schema.description = news.excerpt;
+  if (news.coverImage?.url) {
+    schema.image = getImageUrl(news.coverImage);
+  }
+
+  return schema;
 }
