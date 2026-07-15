@@ -543,15 +543,256 @@ superpowers-zh/
 
 ## 12. 实现里程碑
 
-| 里程碑 | 内容 | 依赖 |
-|---|---|---|
-| **M1** | 中央 DB schema + 管理员登录 + 客户/服务器/配置 CRUD（REST + UI） | 无 |
-| **M2** | Agent 注册（enrollment）+ WebSocket 长连接 + 心跳 | M1 |
-| **M3** | Agent 指令执行器 + 中央下发 `config-sync` / `restart` / `status` / `logs` | M2 |
-| **M4** | `command:deploy` + 实时日志流（SSE 到浏览器）+ 任务面板 | M3 |
-| **M5** | 安全加固（敏感字段加密、审计、防爆破）+ E2E 测试 | M4 |
+### 12.0 里程碑总览
+
+| 里程碑 | 内容 | 依赖 | 估算规模 |
+|---|---|---|---|
+| **M1** | 中央 DB schema + 管理员登录 + 客户/服务器/配置 CRUD（REST + UI） | 无 | 中 |
+| **M2** | Agent 注册（enrollment）+ WebSocket 长连接 + 心跳 | M1 | 中 |
+| **M3** | Agent 指令执行器 + 中央下发 `config-sync` / `restart` / `status` / `logs` | M2 | 中 |
+| **M4** | `command:deploy` + 实时日志流（SSE 到浏览器）+ 任务面板 | M3 | 大 |
+| **M5** | 安全加固（敏感字段加密、审计、防爆破）+ E2E 测试 | M4 | 中 |
 
 详细任务拆分由 `writing-plans` 技能生成。
+
+---
+
+### 12.1 M1：中央基础 + 管理 UI
+
+**目标**：维护者能登录中央管理后台，CRUD 客户/服务器/配置，并为每个客户服务器生成一次性 enrollment code。
+
+**交付物清单**：
+
+| 类别 | 文件 | 说明 |
+|---|---|---|
+| DB | `central/db/schema.sql` | 完整建表 SQL（customers / customer_servers / customer_configs / admin_users / agent_tokens / deploy_jobs / job_logs + 索引） |
+| DB | `central/db/seed.ts` | 初始超级管理员（email + bcrypt 密码） |
+| DB | `central/db/migrate.ts` | 幂等迁移脚本（`CREATE TABLE IF NOT EXISTS`） |
+| 后端 | `central/lib/db.ts` | `pg` 客户端封装（连接池 + query helper） |
+| 后端 | `central/lib/encryption.ts` | AES-256-GCM 加密工具（用于 ai.dashscopeKey 等敏感字段） |
+| 后端 | `central/lib/auth.ts` | JWT 签发/验证 + bcrypt 密码比对 |
+| 后端 | `central/middleware.ts` | 路由守卫：未登录重定向到 /login |
+| 后端 | `central/app/api/admin/auth/login/route.ts` | POST 登录 |
+| 后端 | `central/app/api/admin/auth/logout/route.ts` | POST 登出 |
+| 后端 | `central/app/api/admin/customers/route.ts` | GET 列表 / POST 创建 |
+| 后端 | `central/app/api/admin/customers/[id]/route.ts` | GET / PATCH / DELETE |
+| 后端 | `central/app/api/admin/servers/route.ts` | GET / POST |
+| 后端 | `central/app/api/admin/servers/[id]/route.ts` | GET / PATCH / DELETE |
+| 后端 | `central/app/api/admin/configs/route.ts` | GET 列表 / POST 新建版本 |
+| 后端 | `central/app/api/admin/configs/[id]/route.ts` | GET / PATCH（仅未发布）/ DELETE |
+| 后端 | `central/app/api/admin/enrollment-codes/route.ts` | POST 生成一次性 enrollment code（24h 有效） |
+| 后端 | `central/app/api/admin/enrollment-codes/[id]/revoke/route.ts` | POST 撤销 |
+| UI | `central/app/(auth)/login/page.tsx` | 登录表单 |
+| UI | `central/app/(dashboard)/layout.tsx` | 管理后台 shell（侧边栏 + 顶部） |
+| UI | `central/app/(dashboard)/customers/page.tsx` | 客户列表 + 搜索 |
+| UI | `central/app/(dashboard)/customers/[id]/page.tsx` | 客户详情（含服务器列表 + 配置版本列表） |
+| UI | `central/app/(dashboard)/customers/new/page.tsx` | 创建客户 |
+| UI | `central/app/(dashboard)/servers/page.tsx` | 服务器列表（含在线状态） |
+| UI | `central/app/(dashboard)/servers/[id]/page.tsx` | 服务器详情 |
+| UI | `central/app/(dashboard)/configs/page.tsx` | 配置版本列表 |
+| UI | `central/app/(dashboard)/configs/[id]/page.tsx` | 配置编辑器（brand / ai / deployment / env_overrides 四个 tab） |
+| 部署 | `central/Dockerfile` | Node.js + Next.js 镜像 |
+| 部署 | `central/docker-compose.yml` | central + postgres 服务 |
+| 部署 | `central/.env.example` | 配置示例（DATABASE_URL / JWT_SECRET / AES_KEY...） |
+| 测试 | `central/__tests__/auth.test.ts` | 登录/登出/JWT 验证 |
+| 测试 | `central/__tests__/encryption.test.ts` | AES-256-GCM 加解密 |
+| 测试 | `central/__tests__/api-customers.test.ts` | 客户 CRUD |
+| 测试 | `central/__tests__/api-servers.test.ts` | 服务器 CRUD |
+| 测试 | `central/__tests__/api-configs.test.ts` | 配置版本化（含发布后不可修改） |
+| 测试 | `central/__tests__/api-enrollment.test.ts` | enrollment code 生成 + 撤销 + 24h 过期 |
+
+**验收标准**：
+- `docker compose up` 后能访问 `http://localhost:3000/login` 登录
+- 完整客户 CRUD 流程：创建客户 → 添加服务器 → 创建配置版本 → 生成 enrollment code
+- 敏感字段（ai.dashscopeKey）在数据库中是密文，UI 显示脱敏
+- 配置版本发布后不可修改，只能新建版本
+- 全部单元测试通过
+
+---
+
+### 12.2 M2：Agent 注册 + WebSocket 长连接 + 心跳
+
+**目标**：客户服务器上跑 Agent 容器，能通过 enrollment code 注册到中央，建立长连接并维持心跳。
+
+**交付物清单**：
+
+| 类别 | 文件 | 说明 |
+|---|---|---|
+| 后端 | `central/app/api/agent/enroll/route.ts` | POST 一次性 enrollment code 换 token |
+| 后端 | `central/server.ts` | Next.js custom server（挂 WebSocket） |
+| 后端 | `central/lib/agent-auth.ts` | token 验证（SHA-256 比对 + revoke 检查） |
+| 后端 | `central/lib/connections.ts` | serverId → ws 映射 + 在线状态广播 |
+| 后端 | `central/lib/agent-router.ts` | 消息分发（register/heartbeat/result/log） |
+| 后端 | `central/lib/heartbeat-monitor.ts` | 定时扫描：60s 无心跳的 server 标记 offline |
+| Agent | `agent/src/register.ts` | `agent register` 子命令（调 enroll API + 写 agent.env） |
+| Agent | `agent/src/connection.ts` | WebSocket 客户端 + 指数退避重连 + 优雅关闭 |
+| Agent | `agent/src/reporter.ts` | 30s 心跳 + cpu/mem/disk 采集（os模块） |
+| Agent | `agent/src/index.ts` | 主入口（启动 connection + reporter） |
+| Agent | `agent/Dockerfile` | Node.js + agent 镜像 |
+| Agent | `agent/package.json` | 依赖：ws、execa |
+| Agent | `agent/README.md` | 客户服务器安装步骤 |
+| 部署 | `central/nginx.conf` | `proxy_read_timeout 3600s` 支持 WS 长连接 |
+| 测试 | `central/__tests__/agent-enroll.test.ts` | enrollment code 验证 + token 生成 |
+| 测试 | `central/__tests__/agent-auth.test.ts` | token 哈希验证 + revoke |
+| 测试 | `central/__tests__/agent-router.test.ts` | 各类消息分发到 db |
+| 测试 | `central/__tests__/heartbeat-monitor.test.ts` | 超时标记 offline |
+| 测试 | `agent/__tests__/connection.test.ts` | 重连算法（fake clock） + 优雅关闭 |
+| 测试 | `agent/__tests__/reporter.test.ts` | 心跳消息格式 + 采集字段 |
+| 集成 | `central/__tests__/ws-integration.test.ts` | 端到端：模拟 Agent 连接 → register → heartbeat → 中央 db 更新 |
+
+**验收标准**：
+- 客户服务器执行 `docker run --rm yousen-agent:latest register --central ... --enrollment-code ...` 成功注册并写入 `agent.env`
+- Agent 容器启动后，中央管理后台服务器列表显示状态 online
+- 心跳每 30s 上报，中央 db `last_heartbeat` 字段更新
+- 手动 kill 中央 ws server，Agent 在指数退避（1s→2s→4s...→60s）后重连成功
+- 手动 `docker stop agent`，中央 60s 后标记 server offline
+- Agent 收到 SIGTERM 时先发 `ws.close(1001)` 再退出，中央不会误判 offline
+- 全部单元 + 集成测试通过
+
+---
+
+### 12.3 M3：指令执行器 + config-sync / restart / status / logs
+
+**目标**：维护者能从中央 UI 一键下发配置同步、重启、状态查询、日志拉取指令，并看到执行结果。
+
+**交付物清单**：
+
+| 类别 | 文件 | 说明 |
+|---|---|---|
+| 后端 | `central/app/api/admin/servers/[id]/command/route.ts` | POST 下发指令（创建 deploy_job + 调 sendCommand） |
+| 后端 | `central/app/api/admin/jobs/route.ts` | GET 任务列表（分页 + 过滤） |
+| 后端 | `central/app/api/admin/jobs/[id]/route.ts` | GET 任务详情（含 result） |
+| 后端 | `central/lib/job-manager.ts` | 任务状态机：queued → running → success/failed/cancelled |
+| 后端 | `central/lib/agent-router.ts` | 扩展：处理 command:result / command:progress，更新 deploy_jobs |
+| UI | `central/app/(dashboard)/servers/[id]/page.tsx` | 扩展：4 个指令按钮（同步配置/重启/状态/日志） |
+| UI | `central/app/(dashboard)/servers/[id]/logs/page.tsx` | 日志查看页（拉取最近 N 行） |
+| UI | `central/app/(dashboard)/jobs/page.tsx` | 任务历史列表 |
+| UI | `central/app/(dashboard)/jobs/[id]/page.tsx` | 任务详情（含 result + 静态日志） |
+| Agent | `agent/src/executor.ts` | 指令执行器主入口（switch dispatch + AbortController） |
+| Agent | `agent/src/commands/config-sync.ts` | 写 .env + 可选 restart |
+| Agent | `agent/src/commands/restart.ts` | docker compose restart |
+| Agent | `agent/src/commands/status.ts` | docker compose ps --format json |
+| Agent | `agent/src/commands/logs.ts` | docker compose logs --tail |
+| Agent | `agent/src/lib/compose.ts` | runCompose 封装（execa + stdout/stderr 流） |
+| Agent | `agent/src/lib/env-file.ts` | .env 读写（保留注释 + 仅更新指定字段） |
+| 测试 | `agent/__tests__/executor.test.ts` | 各指令类型正确调 docker compose 参数 |
+| 测试 | `agent/__tests__/config-sync.test.ts` | .env 写入 + restart 触发 |
+| 测试 | `agent/__tests__/restart.test.ts` | 多服务重启 |
+| 测试 | `agent/__tests__/status.test.ts` | JSON 解析 + 上报 |
+| 测试 | `agent/__tests__/logs.test.ts` | tail 参数 + 行解析 |
+| 测试 | `central/__tests__/job-manager.test.ts` | 状态机转换 + 超时标记 failed |
+| 集成 | `central/__tests__/command-flow.test.ts` | 端到端：下发 config-sync → Agent 写 .env → 上报 result → 中央 db 更新 |
+
+**验收标准**：
+- 中央点"同步配置"按钮 → Agent 写入 .env → 重启 backend/frontend → 中央任务面板显示 success
+- 中央点"重启服务"按钮 → Agent 执行 `docker compose restart backend` → 上报结果
+- 中央点"查看状态"按钮 → 返回所有容器状态 JSON，UI 渲染为表格
+- 中央点"查看日志"按钮 → 返回最近 N 行日志，UI 渲染为终端样式
+- 任务历史可分页查看，含 triggered_by / started_at / duration
+- 错误场景：docker compose 命令失败时，stderr 正确上报到中央
+- 全部单元 + 集成测试通过
+
+---
+
+### 12.4 M4：command:deploy + 实时日志流 + 任务面板
+
+**目标**：维护者能从中央 UI 触发完整部署（git pull + build + healthcheck），并在浏览器实时看到部署日志流。
+
+**交付物清单**：
+
+| 类别 | 文件 | 说明 |
+|---|---|---|
+| 后端 | `central/app/api/admin/servers/[id]/deploy/route.ts` | POST 触发部署（创建 deploy_job + 下发 command:deploy） |
+| 后端 | `central/app/api/admin/jobs/[id]/stream/route.ts` | SSE 端点：实时推 job_logs + 状态变更 |
+| 后端 | `central/lib/sse-broadcaster.ts` | SSE 广播器（jobId → client Set） |
+| 后端 | `central/lib/agent-router.ts` | 扩展：log:line 消息写 job_logs + 广播 SSE |
+| UI | `central/app/(dashboard)/servers/[id]/page.tsx` | 扩展：部署按钮 + 版本选择 |
+| UI | `central/app/(dashboard)/jobs/[id]/page.tsx` | 扩展：实时日志流（EventSource 订阅）+ 进度条 |
+| Agent | `agent/src/commands/deploy.ts` | git pull + docker compose up --build + 健康检查循环 |
+| Agent | `agent/src/lib/healthcheck.ts` | 复刻 deploy.sh 的健康检查顺序（pg → backend → frontend） |
+| Agent | `agent/src/lib/git-pull.ts` | git pull 封装 + 冲突检测 |
+| 测试 | `agent/__tests__/deploy.test.ts` | git pull + compose up + 健康检查完整链路（mock execa） |
+| 测试 | `agent/__tests__/healthcheck.test.ts` | 各服务健康检查逻辑 + 超时 |
+| 测试 | `central/__tests__/sse-broadcaster.test.ts` | 多客户端订阅 + 断开清理 |
+| 测试 | `central/__tests__/deploy-flow.test.ts` | 端到端：下发 deploy → Agent 流式日志 → SSE 推浏览器 |
+| 集成 | `central/__tests__/deploy-e2e-harness.ts` | 测试夹具：mock git/docker，模拟完整部署 5 分钟流程 |
+
+**验收标准**：
+- 中央点"部署"按钮 → Agent 执行 git pull → docker compose up --build → 等待健康检查
+- 浏览器实时显示部署日志（逐行流式，<1s 延迟）
+- 部署进度条显示当前阶段（git-pull / build / up / healthcheck）
+- 部署成功 → 任务状态 success；失败 → failed + 错误日志
+- 部署中可点"取消"按钮 → Agent 收到 command:cancel → AbortController 终止子进程 → 任务状态 cancelled
+- 浏览器关闭重开任务详情页，能看到历史日志（从 db 加载）+ 新日志继续流式
+- 全部单元 + 集成测试通过
+
+---
+
+### 12.5 M5：安全加固 + E2E 测试
+
+**目标**：完成所有安全机制（敏感字段加密复核、审计、防爆破），并通过端到端测试覆盖完整流程。
+
+**交付物清单**：
+
+| 类别 | 文件 | 说明 |
+|---|---|---|
+| 后端 | `central/lib/rate-limit.ts` | 通用限流（IP + endpoint 维度，内存 + Redis 可选） |
+| 后端 | `central/lib/audit.ts` | 审计日志写入（admin_user_id + action + target + ts） |
+| 后端 | `central/app/api/admin/audit-logs/route.ts` | GET 审计日志列表 |
+| 后端 | `central/db/schema.sql` | 扩展：audit_logs 表 |
+| 后端 | `central/app/api/agent/enroll/route.ts` | 扩展：enrollment 防爆破（IP 限流 + code 失败计数） |
+| 后端 | `central/lib/encryption.ts` | 扩展：密钥轮换支持（保留旧密钥解密 + 新密钥加密） |
+| UI | `central/app/(dashboard)/audit-logs/page.tsx` | 审计日志查看页 |
+| UI | `central/app/(dashboard)/servers/[id]/page.tsx` | 扩展：revoke token 按钮 |
+| 测试 | `central/__tests__/rate-limit.test.ts` | IP 限流 + 锁定 |
+| 测试 | `central/__tests__/audit.test.ts` | 审计日志写入 + 查询 |
+| 测试 | `central/__tests__/encryption-rotation.test.ts` | 密钥轮换 + 旧密文解密 |
+| E2E | `central/e2e/full-flow.spec.ts` | 完整流程：登录 → 创建客户 → 颁发 enrollment → 模拟 Agent 注册 → 下发 config-sync → 下发 deploy → 看到日志流 → 验证状态 |
+| E2E | `central/e2e/security.spec.ts` | token 失效、enrollment code 重放、命令注入（hostname 字段含 `;` `&`） |
+| E2E | `central/e2e/reconnect.spec.ts` | Agent 重连：kill 中央 ws → Agent 重连 → 离线指令 flush |
+| E2E | `central/playwright.config.ts` | Playwright 配置 |
+| 文档 | `central/README.md` | 中央部署指南 |
+| 文档 | `agent/README.md` | Agent 安装指南（扩展自 M2） |
+
+**验收标准**：
+- 敏感字段（dashscopeKey / wechatAppSecret 等）在 db 中是密文
+- 单 IP 5 分钟内 3 次 enrollment 失败 → 锁定 1 小时（返回 429）
+- enrollment code 失败 5 次 → 自动作废
+- 所有管理操作（创建/修改/删除/部署）有审计记录
+- token 可在 UI 一键 revoke，revoke 后 Agent 重连失败
+- 密钥轮换：旧密文可解密，新写入用新密钥
+- E2E 测试全部通过（full-flow / security / reconnect）
+- 命令注入测试：hostname 含 `; rm -rf /` 时被安全处理（参数化查询 + execa 默认不经过 shell）
+
+---
+
+### 12.6 里程碑间依赖与并行可能性
+
+```
+M1 ──► M2 ──► M3 ──► M4 ──► M5
+                  │
+                  └─► (M3 完成后可并行) M5 安全基础可启动
+```
+
+- **严格顺序**：M1 → M2 → M3（每个里程碑的接口被下一个依赖）
+- **可并行**：M3 完成后，M4（部署+SSE）和 M5 的安全基础（rate-limit/audit）可并行启动
+- **建议**：M5 的 E2E 测试必须在 M4 完成后才能跑（依赖完整部署链路）
+
+### 12.7 总交付物统计
+
+| 类别 | M1 | M2 | M3 | M4 | M5 | 合计 |
+|---|---|---|---|---|---|---|
+| 后端 API | 9 | 4 | 4 | 3 | 3 | 23 |
+| 后端 lib | 3 | 4 | 2 | 3 | 3 | 15 |
+| UI 页面 | 7 | 0 | 3 | 2 | 2 | 14 |
+| Agent 文件 | 0 | 5 | 7 | 3 | 0 | 15 |
+| 部署/配置 | 3 | 3 | 0 | 0 | 1 | 7 |
+| 测试文件 | 6 | 7 | 6 | 4 | 4 | 27 |
+| E2E 测试 | 0 | 0 | 0 | 0 | 3 | 3 |
+| 文档 | 0 | 1 | 0 | 0 | 2 | 3 |
+| **合计** | **28** | **24** | **22** | **15** | **18** | **107** |
+
+注：以上文件数为估算，实际拆分由 `writing-plans` 技能细化。
 
 ---
 
