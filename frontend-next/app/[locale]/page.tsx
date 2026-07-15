@@ -1,5 +1,5 @@
-import { getHomepage, getSiteSettings, type Locale } from '@/lib/api';
-import { buildMetadata, buildJsonLd } from '@/lib/seo';
+import { getHomepage, type Locale } from '@/lib/api';
+import { buildMetadata } from '@/lib/seo';
 import { setRequestLocale } from 'next-intl/server';
 import SectionRenderer from '@/components/SectionRenderer';
 import type { Metadata } from 'next';
@@ -19,11 +19,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [homepageRes, settingsRes] = await Promise.all([
-    getHomepage(locale as Locale).catch(() => ({ data: null as null })),
-    getSiteSettings(locale as Locale).catch(() => ({ data: null as null })),
-  ]);
-  const page = homepageRes.data;
+  const { data: page } = await getHomepage(locale as Locale).catch(() => ({ data: null as null }));
   if (!page) {
     return (
       <div className="pt-[120px] min-h-screen flex items-center justify-center">
@@ -33,26 +29,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   }
   const sections = page.sections || [];
 
-  const settings = Array.isArray(settingsRes.data)
-    ? settingsRes.data[0]
-    : settingsRes.data;
-  const siteName = settings?.name || '佑森小课堂';
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
-
-  // 首页注入 WebSite 类型 JSON-LD，有助于搜索引擎识别站点实体。
-  const websiteJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: siteName,
-    url: siteUrl,
-  };
-
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: buildJsonLd(websiteJsonLd) }}
-      />
       {sections.map((section, index) => (
         <SectionRenderer
           key={`${section.__component}-${section.id}-${index}`}

@@ -3,6 +3,7 @@ import { Noto_Sans_SC, Nunito } from 'next/font/google';
 import { setRequestLocale, getMessages } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
 import { getSiteSettings, getNavigationTree, getFooter, getImageUrl, type Locale } from '@/lib/api';
+import { buildWebSiteSchema, buildOrganizationSchema, buildJsonLd } from '@/lib/seo';
 import { routing } from '@/i18n/routing';
 import LayoutShell from '@/components/layout/LayoutShell';
 import Navigation from '@/components/layout/Navigation';
@@ -131,6 +132,17 @@ export default async function LocaleLayout({
     process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
   const cmsParsedUrl = new URL(cmsUrl);
 
+  const websiteSchema = settings
+    ? buildWebSiteSchema(settings, locale as Locale)
+    : null;
+  const orgSchema = settings
+    ? buildOrganizationSchema(
+        settings,
+        footer?.socialLinks || [],
+        locale as Locale
+      )
+    : null;
+
   return (
     <html
       lang={locale}
@@ -145,6 +157,18 @@ export default async function LocaleLayout({
         <link rel="preconnect" href={cmsUrl} crossOrigin="anonymous" />
       </head>
       <body>
+        {websiteSchema && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: buildJsonLd(websiteSchema) }}
+          />
+        )}
+        {orgSchema && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: buildJsonLd(orgSchema) }}
+          />
+        )}
         <NextIntlClientProvider locale={locale} messages={messages}>
           <LayoutShell>
             <Navigation navigation={navigation} settings={settings} />
