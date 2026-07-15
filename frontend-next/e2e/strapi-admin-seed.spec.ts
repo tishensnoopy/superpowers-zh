@@ -7,6 +7,10 @@ const ADMIN_PASSWORD = 'Yousen2026!';
 
 let adminToken: string;
 
+// Track created items for cleanup in afterAll — 避免测试数据污染 FAQ/新闻等公共集合
+// 导致 visual-comprehensive.spec.ts 的 FAQ 视觉回归基线失效
+const createdItems: Array<{ contentType: string; documentId: string }> = [];
+
 async function createViaContentManager(
   request: APIRequestContext,
   contentType: string,
@@ -24,7 +28,24 @@ async function createViaContentManager(
     throw new Error(`Create ${contentType} failed: ${response.status()} ${text}`);
   }
   const body = await response.json();
-  return { documentId: body.data.documentId, id: body.data.id };
+  const documentId = body.data.documentId;
+  createdItems.push({ contentType, documentId });
+  return { documentId, id: body.data.id };
+}
+
+async function deleteViaContentManager(
+  request: APIRequestContext,
+  contentType: string,
+  documentId: string
+): Promise<void> {
+  const response = await request.delete(
+    `${STRAPI_URL}/content-manager/collection-types/${contentType}/${documentId}`,
+    { headers: { Authorization: `Bearer ${adminToken}` } }
+  );
+  if (!response.ok()) {
+    // 清理失败不阻塞测试结果，仅记录
+    console.warn(`Cleanup delete ${contentType} ${documentId} failed: ${response.status()}`);
+  }
 }
 
 async function verifyViaContentManager(
@@ -52,6 +73,14 @@ test.describe('Strapi REST API 录入测试数据（真实后端）', () => {
     expect(response.ok()).toBe(true);
     const body = await response.json();
     adminToken = body.data.token;
+  });
+
+  // 测试结束后清理创建的数据，防止污染公共集合（FAQ/新闻）导致视觉回归基线失效
+  test.afterAll(async ({ request }) => {
+    for (const { contentType, documentId } of createdItems) {
+      await deleteViaContentManager(request, contentType, documentId);
+    }
+    createdItems.length = 0;
   });
 
   test('创建测试 FAQ（政策分类）并通过 Admin API 验证', async ({ request }) => {
