@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: central-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: control_db
+      POSTGRES_USER: central
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-changeme}
+    volumes:
+      - central_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U central -d control_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  central:
+    build: .
+    container_name: central-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://central:${DATABASE_PASSWORD:-changeme}@postgres:5432/control_db
+      JWT_SECRET: ${JWT_SECRET}
+      AES_KEY: ${AES_KEY}
+      NODE_ENV: production
+    ports:
+      - "${CENTRAL_PORT:-3000}:3000"
+    command: sh -c "npx tsx db/migrate.ts && npx tsx db/seed.ts && npm start"
+
+volumes:
+  central_pgdata:
