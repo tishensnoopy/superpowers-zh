@@ -29,7 +29,9 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@vitest/ui": "^4.1.10",
+    "autoprefixer": "^10.5.3",
     "jsdom": "^29.1.1",
+    "tailwindcss": "^3.4.19",
     "tsx": "^4.23.1",
     "vitest": "^4.1.10"
   }
