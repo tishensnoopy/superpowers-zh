@@ -1,4 +1,4 @@
-import { ComposeHooks } from './lib/compose';
+import { runCompose, type ComposeHooks } from './lib/compose';
 import { createAbortController, abortCommand, cleanupAbortController } from './lib/abort-registry';
 import { handleConfigSync } from './commands/config-sync';
 import { handleRestart } from './commands/restart';
@@ -23,17 +23,12 @@ export type Command =
 export async function executeCommand(cmd: Command, hooks: CommandHandler): Promise<string | undefined> {
   const composeHooks: ComposeHooks = { onLog: hooks.onLog };
 
-  // cancel 和 deploy 不需要预创建 AbortController：
-  // cancel 需要检查 registry 中是否已存在 controller（否则 createAbortController
-  // 会新建一个空 controller，导致 abortCommand 永远返回 true，'no running task' 分支成为死代码）
+  // cancel 需要检查 registry 中是否已存在 controller，不能预创建 AbortController：
+  // 否则 createAbortController 会新建一个空 controller，导致 abortCommand 永远返回 true，
+  // 'no running task' 分支成为死代码
   if (cmd.type === 'command:cancel') {
     const aborted = abortCommand(cmd.commandId);
     return aborted ? 'cancelled' : 'no running task';
-  }
-
-  if (cmd.type === 'command:deploy') {
-    // M4 实现
-    throw new Error('deploy not implemented yet (M4)');
   }
 
   const controller = createAbortController(cmd.commandId);
@@ -50,6 +45,28 @@ export async function executeCommand(cmd: Command, hooks: CommandHandler): Promi
 
       case 'command:logs':
         return await handleLogs(cmd, DATA_DIR, composeHooks, controller.signal);
+
+      case 'command:deploy': {
+        const { handleDeploy } = await import('./commands/deploy');
+        const deployResult = await handleDeploy(
+          cmd as any,
+          DATA_DIR,
+          hooks,
+          {
+            runCompose: async (args, opts, composeHooks) => {
+              const r = await runCompose(args, opts, composeHooks);
+              return { exitCode: r.exitCode };
+            },
+          },
+          controller.signal
+        );
+        if (!deployResult.success) {
+          throw Object.assign(new Error(deployResult.stderr ?? 'deploy failed'), {
+            exitCode: deployResult.exitCode ?? 1,
+          });
+        }
+        return `deploy completed in ${deployResult.durationMs}ms`;
+      }
 
       default:
         throw new Error(`unknown command type: ${(cmd as any).type}`);
