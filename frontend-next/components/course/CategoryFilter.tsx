@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 interface CategoryFilterProps {
   categories: { id: number; slug: string; name: string }[];
   selected: string | null;
@@ -7,6 +9,7 @@ interface CategoryFilterProps {
 }
 
 export default function CategoryFilter({ categories, selected, onChange }: CategoryFilterProps) {
+  const t = useTranslations('common');
   const chipClass = (active: boolean) =>
     [
       'inline-flex items-center justify-center px-4 py-2 text-sm font-medium cursor-pointer',
@@ -30,7 +33,7 @@ export default function CategoryFilter({ categories, selected, onChange }: Categ
         style={activeStyle(selected === null)}
         onClick={() => onChange(null)}
       >
-        全部
+        {t('all')}
       </button>
       {categories.map((cat) => {
         const isActive = selected === cat.slug;

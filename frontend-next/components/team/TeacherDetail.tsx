@@ -3,6 +3,7 @@
 import { X } from 'lucide-react';
 import StrapiImage from '@/components/ui/StrapiImage';
 import type { Teacher } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 interface TeacherDetailProps {
   teacher: Teacher;
@@ -10,6 +11,7 @@ interface TeacherDetailProps {
 }
 
 export default function TeacherDetail({ teacher, onClose }: TeacherDetailProps) {
+  const t = useTranslations('teachers');
   const {
     name,
     title,
@@ -47,7 +49,7 @@ export default function TeacherDetail({ teacher, onClose }: TeacherDetailProps) 
           <h3 className="mt-4 text-xl font-bold text-[#1C2B3A]">{name}</h3>
           {title && <p className="text-sm text-muted-foreground mt-1">{title}</p>}
           {typeof teachingYears === 'number' && (
-            <p className="text-sm text-[#F5851F] mt-1">{teachingYears}年教龄</p>
+            <p className="text-sm text-[#F5851F] mt-1">{teachingYears} {t('teachingYearsUnit')}</p>
           )}
         </div>
 
@@ -55,21 +57,21 @@ export default function TeacherDetail({ teacher, onClose }: TeacherDetailProps) 
         <div className="flex-1 min-w-0">
           {education && (
             <div className="mb-6">
-              <h4 className="text-base font-bold text-[#1C2B3A] mb-2">教育背景</h4>
+              <h4 className="text-base font-bold text-[#1C2B3A] mb-2">{t('education')}</h4>
               <p className="text-sm text-muted-foreground leading-relaxed">{education}</p>
             </div>
           )}
 
           {teachingFeatures && (
             <div className="mb-6">
-              <h4 className="text-base font-bold text-[#1C2B3A] mb-2">教学特色</h4>
+              <h4 className="text-base font-bold text-[#1C2B3A] mb-2">{t('teachingFeatures')}</h4>
               <p className="text-sm text-muted-foreground leading-relaxed">{teachingFeatures}</p>
             </div>
           )}
 
           {achievementList.length > 0 && (
             <div>
-              <h4 className="text-base font-bold text-[#1C2B3A] mb-3">荣誉成就</h4>
+              <h4 className="text-base font-bold text-[#1C2B3A] mb-3">{t('achievements')}</h4>
               <div className="flex flex-wrap gap-2">
                 {achievementList.map((item, idx) => (
                   <span
@@ -90,7 +92,7 @@ export default function TeacherDetail({ teacher, onClose }: TeacherDetailProps) 
         <button
           type="button"
           onClick={onClose}
-          aria-label="关闭"
+          aria-label={t('close')}
           className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-muted hover:bg-muted/80 text-muted-foreground transition-colors"
         >
           <X size={16} />

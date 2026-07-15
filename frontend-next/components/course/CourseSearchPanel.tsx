@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { BookOpen } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useProductSearch } from '@/hooks/useProductSearch';
 import { getProductCategories } from '@/lib/api';
 import type { ProductCategory } from '@/lib/api';
@@ -17,9 +18,10 @@ interface CourseSearchPanelProps {
 }
 
 export default function CourseSearchPanel({
-  title = '课程体系',
-  description = '由资深教研团队研发，严格对标小学课程标准，让孩子学得快乐、学得扎实。',
+  title,
+  description,
 }: CourseSearchPanelProps) {
+  const t = useTranslations('courses');
   const search = useProductSearch(12);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
 
@@ -36,16 +38,16 @@ export default function CourseSearchPanel({
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#EFF6FF] text-[#2563EB] text-sm font-medium mb-5">
               <BookOpen size={14} />
-              课程体系
+              {t('courseSystemBadge')}
             </div>
             <h2
               className="text-[#1C2B3A] mb-4"
               style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif", fontSize: '2.25rem', fontWeight: 800 }}
             >
-              {title}
+              {title ?? t('title')}
             </h2>
             <p className="text-muted-foreground text-base max-w-[560px] mx-auto leading-relaxed">
-              {description}
+              {description ?? '由资深教研团队研发，严格对标小学课程标准，让孩子学得快乐、学得扎实。'}
             </p>
           </div>
 

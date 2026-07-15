@@ -1,24 +1,29 @@
 import TeamPage from '@/components/team/TeamPage';
-import { setRequestLocale } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import type { Locale } from '@/lib/api';
 import { buildJsonLd, buildBreadcrumbSchema } from '@/lib/seo';
 import type { Metadata } from 'next';
 
 export const revalidate = 300;
 
-export const metadata: Metadata = {
-  title: '师资团队',
-  description:
-    '认识我们的资深教师团队，所有教师均持有教师资格证，拥有丰富的幼小衔接教学经验。',
-};
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations('teachers');
+  return {
+    title: t('title'),
+    description: t('description'),
+  };
+}
 
 export default async function TeachersPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const tSeo = useTranslations('seo');
   const breadcrumbSchema = buildBreadcrumbSchema(
     [
-      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
-      { name: locale === 'en-US' ? 'Teachers' : '师资团队', url: '/teachers' },
+      { name: tSeo('home'), url: '/' },
+      { name: tSeo('teachers'), url: '/teachers' },
     ],
     locale as Locale
   );

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { AlertCircle, CheckCircle, Clock, RefreshCw } from 'lucide-react';
 import type { Product } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 interface SearchResultsGridProps {
   results: Product[];
@@ -10,13 +11,6 @@ interface SearchResultsGridProps {
   error: string | null;
   onRetry?: () => void;
 }
-
-const specLabels: Record<string, string> = {
-  course_hours: '课时',
-  class_size: '班额',
-  age_range: '适合年龄',
-  duration: '课程周期',
-};
 
 function SkeletonCard() {
   return (
@@ -41,6 +35,14 @@ function SkeletonCard() {
 }
 
 export default function SearchResultsGrid({ results, loading, error, onRetry }: SearchResultsGridProps) {
+  const t = useTranslations('courses');
+  const specLabels: Record<string, string> = {
+    course_hours: t('specCourseHours'),
+    class_size: t('specClassSize'),
+    age_range: t('specAgeRange'),
+    duration: t('specDuration'),
+  };
+
   if (loading) {
     return (
       <div className="grid grid-cols-12 gap-6">
@@ -66,7 +68,7 @@ export default function SearchResultsGrid({ results, loading, error, onRetry }: 
           style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
         >
           <RefreshCw size={14} />
-          重试
+          {t('retry')}
         </button>
       </div>
     );
@@ -79,8 +81,8 @@ export default function SearchResultsGrid({ results, loading, error, onRetry }: 
         style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}
       >
         <div className="text-5xl mb-4 opacity-40">🔍</div>
-        <p className="text-[#1C2B3A] text-lg font-medium mb-2">未找到相关课程</p>
-        <p className="text-muted-foreground text-sm">试试调整搜索条件或清除筛选</p>
+        <p className="text-[#1C2B3A] text-lg font-medium mb-2">{t('noResults')}</p>
+        <p className="text-muted-foreground text-sm">{t('noResultsHint')}</p>
       </div>
     );
   }
@@ -121,7 +123,7 @@ export default function SearchResultsGrid({ results, loading, error, onRetry }: 
                     href={`/courses/${product.slug}`}
                     className="text-xs text-muted-foreground hover:text-[#2563EB] flex items-center gap-1 transition-colors"
                   >
-                    <Clock size={12} /> 查看详情
+                    <Clock size={12} /> {t('viewDetails')}
                   </Link>
                 </div>
               </div>

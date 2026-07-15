@@ -1,6 +1,7 @@
 import { Award, BookOpen, ChevronRight, GraduationCap, Shield, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { Section } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 const iconMap: Record<string, LucideIcon> = {
   GraduationCap,
@@ -10,6 +11,7 @@ const iconMap: Record<string, LucideIcon> = {
 };
 
 export default function Advantages({ section }: { section: Section }) {
+  const t = useTranslations('sections.advantages');
   const { title, description, advantages } = section;
 
   return (
@@ -18,7 +20,7 @@ export default function Advantages({ section }: { section: Section }) {
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FFF3E5] text-[#F5851F] text-sm font-medium mb-5">
             <Award size={14} />
-            为什么选择我们
+            {t('badge')}
           </div>
           <h2
             className="text-[#1C2B3A] mb-4"
@@ -28,10 +30,10 @@ export default function Advantages({ section }: { section: Section }) {
               fontWeight: 800,
             }}
           >
-            {title || '4大核心优势，给孩子最好的起点'}
+            {title || t('titleFallback')}
           </h2>
           <p className="text-muted-foreground text-base max-w-[560px] mx-auto leading-relaxed">
-            {description || '我们深知每位家长对孩子教育的期望与用心，以专业、安全、温暖的教育环境陪伴每一个孩子成长。'}
+            {description || t('descriptionFallback')}
           </p>
         </div>
 
@@ -61,7 +63,7 @@ export default function Advantages({ section }: { section: Section }) {
                     className="mt-6 flex items-center gap-1 text-sm font-medium transition-colors duration-200"
                     style={{ color: adv.color || '#F5851F' }}
                   >
-                    了解详情 <ChevronRight size={15} />
+                    {t('learnMore')} <ChevronRight size={15} />
                   </div>
                 </div>
               </div>

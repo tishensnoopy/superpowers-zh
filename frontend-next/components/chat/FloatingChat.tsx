@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { MessageCircle, X, Bot } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import ChatMessage, { type ChatRole } from './ChatMessage';
 import ChatInput from './ChatInput';
 import {
@@ -19,9 +20,8 @@ interface StoredSession {
 }
 
 export default function FloatingChat({ locale = 'zh-CN' }: { locale?: 'zh-CN' | 'en-US' }) {
-  const WELCOME_MESSAGE = locale === 'en-US'
-    ? "Hello! I'm the Yousen AI assistant. How can I help you?"
-    : '您好！我是佑森小课堂的AI助手，有什么可以帮您的吗？';
+  const t = useTranslations('chat');
+  const WELCOME_MESSAGE = t('welcome');
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessageData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -122,7 +122,7 @@ export default function FloatingChat({ locale = 'zh-CN' }: { locale?: 'zh-CN' | 
             return [...updated, {
               id: `msg-${++messageIdRef.current}`,
               role: 'system',
-              content: locale === 'en-US' ? 'Transferred to human agent, please wait' : '已转人工客服，请等待客服回复',
+              content: t('transferredNotice'),
               timestamp: new Date().toISOString(),
               type: 'transfer',
             }];
@@ -134,7 +134,7 @@ export default function FloatingChat({ locale = 'zh-CN' }: { locale?: 'zh-CN' | 
             if (updated[aiMessageIndex]) {
               updated[aiMessageIndex] = {
                 ...updated[aiMessageIndex],
-                content: response.content || (locale === 'en-US' ? 'Sorry, I cannot answer this question right now.' : '抱歉，我暂时无法回答这个问题。'),
+                content: response.content || t('noAnswerFallback'),
                 streaming: false,
               };
             }
@@ -148,7 +148,7 @@ export default function FloatingChat({ locale = 'zh-CN' }: { locale?: 'zh-CN' | 
           if (updated[aiMessageIndex]) {
             updated[aiMessageIndex] = {
               ...updated[aiMessageIndex],
-              content: locale === 'en-US' ? 'Sorry, network issue. Please try again later.' : '抱歉，网络出现问题，请稍后重试。',
+              content: t('networkError'),
               streaming: false,
             };
           }
@@ -158,21 +158,21 @@ export default function FloatingChat({ locale = 'zh-CN' }: { locale?: 'zh-CN' | 
         setIsLoading(false);
       }
     },
-    [sessionId, isLoading, messages.length, locale]
+    [sessionId, isLoading, messages.length, locale, t]
   );
 
   if (!isOpen) {
     return (
       <button
         onClick={handleOpen}
-        aria-label={locale === 'en-US' ? 'Online consultation' : '在线咨询'}
+        aria-label={t('onlineConsult')}
         className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-5 py-3 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-200 hover:scale-105"
         style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
       >
         <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
           <MessageCircle size={20} className="text-white" />
         </div>
-        <span className="text-white font-semibold text-sm">{locale === 'en-US' ? 'Chat' : '在线咨询'}</span>
+        <span className="text-white font-semibold text-sm">{t('chat')}</span>
       </button>
     );
   }
@@ -189,17 +189,15 @@ export default function FloatingChat({ locale = 'zh-CN' }: { locale?: 'zh-CN' | 
             <Bot size={18} />
           </div>
           <div>
-            <div className="font-semibold text-sm">{locale === 'en-US' ? 'Yousen AI Assistant' : '佑森小课堂 AI助手'}</div>
+            <div className="font-semibold text-sm">{t('assistantTitle')}</div>
             <div className="text-[10px] text-white/80">
-              {isTransferred
-                ? (locale === 'en-US' ? 'Human agent mode' : '人工客服模式')
-                : (locale === 'en-US' ? 'Online' : '在线为您服务')}
+              {isTransferred ? t('humanModeStatus') : t('onlineStatus')}
             </div>
           </div>
         </div>
         <button
           onClick={handleClose}
-          aria-label={locale === 'en-US' ? 'Close' : '关闭'}
+          aria-label={t('close')}
           className="p-1 rounded-lg hover:bg-white/20 transition-colors"
         >
           <X size={20} />
@@ -207,7 +205,7 @@ export default function FloatingChat({ locale = 'zh-CN' }: { locale?: 'zh-CN' | 
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50" aria-live="polite" aria-label={locale === 'en-US' ? 'Chat messages' : '聊天消息'}>
+      <div className="flex-1 overflow-y-auto p-3 space-y-3 bg-gray-50" aria-live="polite" aria-label={t('chatMessages')}>
         {messages.map((msg) => (
           <div key={msg.id}>
             <ChatMessage
@@ -224,7 +222,7 @@ export default function FloatingChat({ locale = 'zh-CN' }: { locale?: 'zh-CN' | 
                   className="px-4 py-2 rounded-lg text-white text-sm font-semibold"
                   style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
                 >
-                  {locale === 'en-US' ? 'Book Now' : '立即预约'}
+                  {t('bookNow')}
                 </Link>
               </div>
             )}

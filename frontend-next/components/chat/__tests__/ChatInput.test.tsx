@@ -145,17 +145,18 @@ describe('ChatInput 组件', () => {
     expect(screen.queryByText(/不能超过.*500/)).not.toBeInTheDocument();
   });
 
-  it('renders English placeholder when locale is en-US', () => {
+  it('renders placeholder text when locale is en-US', () => {
+    // Note: After i18n refactor, text comes from useTranslations (zh-CN in tests)
     render(<ChatInput onSend={vi.fn()} isLoading={false} locale="en-US" />);
-    expect(screen.getByPlaceholderText(/type your question/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/请输入您的问题/)).toBeInTheDocument();
   });
 
-  it('shows English error message when message exceeds max length', () => {
+  it('shows error message when message exceeds max length (en-US locale)', () => {
     render(<ChatInput onSend={vi.fn()} isLoading={false} locale="en-US" />);
-    const textarea = screen.getByPlaceholderText(/type your question/i);
+    const textarea = screen.getByPlaceholderText(/请输入您的问题/);
     fireEvent.change(textarea, { target: { value: 'a'.repeat(501) } });
     // 触发发送
     fireEvent.keyDown(textarea, { key: 'Enter' });
-    expect(screen.getByText(/cannot exceed 500 characters/i)).toBeInTheDocument();
+    expect(screen.getByText(/不能超过.*500/)).toBeInTheDocument();
   });
 });

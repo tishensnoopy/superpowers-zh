@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 // 师资团队筛选器：校区 + 科目
 
 interface TeamFilterProps {
@@ -9,28 +11,29 @@ interface TeamFilterProps {
   onSubjectChange: (subject: string | null) => void;
 }
 
-const campusOptions = [
-  { label: '百步亭', slug: 'yousen-baibuting' },
-  { label: '三阳路', slug: 'yousen-sanyanglu' },
-  { label: '动物园', slug: 'yousen-dongwuyuan' },
-  { label: '钟家村', slug: 'yousen-zhongjiacun' },
-  { label: '四新', slug: 'yousen-sixin' },
-  { label: '沌口', slug: 'yousen-zhuankou' },
-];
-
-const subjectOptions = [
-  { label: '拼音', value: 'pinyin' },
-  { label: '数学', value: 'math' },
-  { label: '英语', value: 'english' },
-  { label: '综合素养', value: 'comprehensive' },
-];
-
 export default function TeamFilter({
   campusSlug,
   subject,
   onCampusChange,
   onSubjectChange,
 }: TeamFilterProps) {
+  const t = useTranslations('teachers');
+  const campusOptions = [
+    { label: t('campusBaibuting'), slug: 'yousen-baibuting' },
+    { label: t('campusSanyanglu'), slug: 'yousen-sanyanglu' },
+    { label: t('campusDongwuyuan'), slug: 'yousen-dongwuyuan' },
+    { label: t('campusZhongjiacun'), slug: 'yousen-zhongjiacun' },
+    { label: t('campusSixin'), slug: 'yousen-sixin' },
+    { label: t('campusZhuankou'), slug: 'yousen-zhuankou' },
+  ];
+
+  const subjectOptions = [
+    { label: t('pinyin'), value: 'pinyin' },
+    { label: t('math'), value: 'math' },
+    { label: t('english'), value: 'english' },
+    { label: t('comprehensive'), value: 'comprehensive' },
+  ];
+
   const isCampusAll = !campusSlug;
   const isSubjectAll = !subject;
 
@@ -50,14 +53,14 @@ export default function TeamFilter({
     >
       {/* 校区筛选 */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-        <span className="text-sm font-bold text-[#1C2B3A] sm:mr-2 shrink-0">校区</span>
+        <span className="text-sm font-bold text-[#1C2B3A] sm:mr-2 shrink-0">{t('campusLabel')}</span>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
             className={chipClass(isCampusAll)}
             onClick={() => onCampusChange(null)}
           >
-            全部
+            {t('all')}
           </button>
           {campusOptions.map((opt) => (
             <button
@@ -74,14 +77,14 @@ export default function TeamFilter({
 
       {/* 科目筛选 */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-        <span className="text-sm font-bold text-[#1C2B3A] sm:mr-2 shrink-0">科目</span>
+        <span className="text-sm font-bold text-[#1C2B3A] sm:mr-2 shrink-0">{t('subjectLabel')}</span>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
             className={chipClass(isSubjectAll)}
             onClick={() => onSubjectChange(null)}
           >
-            全部
+            {t('all')}
           </button>
           {subjectOptions.map((opt) => (
             <button

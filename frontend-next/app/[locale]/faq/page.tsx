@@ -1,6 +1,7 @@
 import { getFaqItems, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd, buildFaqPageSchema, buildBreadcrumbSchema } from '@/lib/seo';
-import { setRequestLocale } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import Faq from '@/components/sections/Faq';
 import type { Metadata } from 'next';
 
@@ -8,9 +9,10 @@ export const revalidate = 300;
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
+  const t = await getTranslations('faq');
   return buildMetadata(undefined, {
-    title: '常见问题',
-    description: '幼小衔接课程常见问题解答，帮助您了解入学流程、课程安排等。',
+    title: t('title'),
+    description: t('description'),
     canonicalUrl: '/faq',
   }, { locale: locale as 'zh-CN' | 'en-US', path: '/faq' });
 }
@@ -18,13 +20,15 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function FaqPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = useTranslations('faq');
+  const tSeo = useTranslations('seo');
   const { data: faqItems } = await getFaqItems(locale as Locale).catch(() => ({ data: [] as never[] }));
 
   // 构造 section 对象以复用 Faq 组件
   const section = {
     id: 0,
     __component: 'section.faq',
-    title: '常见问题',
+    title: t('title'),
     faqs: { data: faqItems },
     showSearch: true,
   };
@@ -32,8 +36,8 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
   const faqJsonLd = buildFaqPageSchema(faqItems);
   const breadcrumbSchema = buildBreadcrumbSchema(
     [
-      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
-      { name: locale === 'en-US' ? 'FAQ' : '常见问题', url: '/faq' },
+      { name: tSeo('home'), url: '/' },
+      { name: tSeo('faq'), url: '/faq' },
     ],
     locale as Locale
   );
@@ -57,10 +61,10 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
             fontWeight: 800,
           }}
         >
-          常见问题
+          {t('title')}
         </h1>
         <p className="text-center text-[#6B7280] text-base sm:text-lg mt-4 mb-8">
-          幼小衔接课程常见问题解答
+          {t('subtitle')}
         </p>
       </div>
       <Faq section={section} />

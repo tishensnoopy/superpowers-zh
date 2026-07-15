@@ -1,6 +1,8 @@
 import type { Section } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 export default function ProductComparison({ section }: { section: Section }) {
+  const t = useTranslations('sections.productComparison');
   const { title, products, specs } = section;
 
   const productData = products?.data || [];
@@ -18,7 +20,7 @@ export default function ProductComparison({ section }: { section: Section }) {
               fontWeight: 800,
             }}
           >
-            {title || '产品对比'}
+            {title || t('titleFallback')}
           </h2>
         </div>
 
@@ -26,7 +28,7 @@ export default function ProductComparison({ section }: { section: Section }) {
           <table className="w-full bg-card rounded-2xl border border-border">
             <thead>
               <tr>
-                <th className="p-4 text-left font-bold text-[#1C2B3A] bg-muted/50">规格</th>
+                <th className="p-4 text-left font-bold text-[#1C2B3A] bg-muted/50">{t('specColumnHeader')}</th>
                 {productData.map((product: any) => (
                   <th key={product.id} className="p-4 text-center font-bold text-[#1C2B3A] bg-muted/50 min-w-[200px]">
                     {product.name}

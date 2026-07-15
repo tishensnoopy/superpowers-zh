@@ -1,11 +1,14 @@
-const stats = [
-  { value: '50+', label: '专业教师' },
-  { value: '6', label: '校区覆盖' },
-  { value: '10年+', label: '平均教龄' },
-  { value: '98%', label: '家长好评' },
-];
+import { useTranslations } from 'next-intl';
 
 export default function TeamHeader() {
+  const t = useTranslations('teachers');
+  const stats = [
+    { value: '50+', label: t('professionalTeachers') },
+    { value: '6', label: t('campusesCovered') },
+    { value: '10年+', label: t('avgTeachingYears') },
+    { value: '98%', label: t('parentApproval') },
+  ];
+
   return (
     <section
       className="pt-[120px] pb-16"
@@ -22,10 +25,10 @@ export default function TeamHeader() {
             fontWeight: 800,
           }}
         >
-          师资团队
+          {t('title')}
         </h1>
         <p className="text-lg text-muted-foreground mb-10 max-w-[640px]">
-          专业教师阵容 用心陪伴成长
+          {t('subtitle')}
         </p>
 
         <div className="flex flex-wrap gap-6">

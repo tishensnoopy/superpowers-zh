@@ -1,7 +1,9 @@
 import { Sparkles } from 'lucide-react';
 import type { Section } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 export default function Features({ section }: { section: Section }) {
+  const t = useTranslations('sections.features');
   const { title, description, features } = section;
 
   return (
@@ -10,7 +12,7 @@ export default function Features({ section }: { section: Section }) {
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#EFF6FF] text-[#2563EB] text-sm font-medium mb-5">
             <Sparkles size={14} />
-            核心功能
+            {t('badge')}
           </div>
           <h2
             className="text-[#1C2B3A] mb-4"
@@ -20,10 +22,10 @@ export default function Features({ section }: { section: Section }) {
               fontWeight: 800,
             }}
           >
-            {title || '全方位课程体系'}
+            {title || t('titleFallback')}
           </h2>
           <p className="text-muted-foreground text-base max-w-[560px] mx-auto leading-relaxed">
-            {description || '科学规划，全面发展'}
+            {description || t('descriptionFallback')}
           </p>
         </div>
 

@@ -1,7 +1,9 @@
 import { Heart, User } from 'lucide-react';
 import type { Section } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 export default function Team({ section }: { section: Section }) {
+  const t = useTranslations('sections.team');
   const { title, description, members } = section;
 
   return (
@@ -10,7 +12,7 @@ export default function Team({ section }: { section: Section }) {
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#ECFDF5] text-[#059669] text-sm font-medium mb-5">
             <Heart size={14} />
-            师资团队
+            {t('badge')}
           </div>
           <h2
             className="text-[#1C2B3A] mb-4"
@@ -20,10 +22,10 @@ export default function Team({ section }: { section: Section }) {
               fontWeight: 800,
             }}
           >
-            {title || '资深教师团队'}
+            {title || t('titleFallback')}
           </h2>
           <p className="text-muted-foreground text-base max-w-[480px] mx-auto">
-            {description || '8年沉淀，打造出一支专业、有爱、懂孩子的教师队伍。'}
+            {description || t('descriptionFallback')}
           </p>
         </div>
 

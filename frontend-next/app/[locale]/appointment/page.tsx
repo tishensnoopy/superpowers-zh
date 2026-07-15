@@ -1,14 +1,17 @@
 import { buildMetadata, buildJsonLd, buildBreadcrumbSchema } from '@/lib/seo';
-import { setRequestLocale } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import ContactForm from '@/components/sections/ContactForm';
 import type { Metadata } from 'next';
 
 export const revalidate = 300;
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations('appointment');
   return buildMetadata(undefined, {
-    title: '预约免费试听',
-    description: '预约佑森小课堂免费试听课程，填写表单后我们将在 24 小时内联系您。',
+    title: t('pageTitle'),
+    description: t('pageDescription'),
     canonicalUrl: '/appointment',
   });
 }
@@ -16,10 +19,13 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function AppointmentPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = useTranslations('appointment');
+  const tSeo = useTranslations('seo');
+  const tContactForm = useTranslations('sections.contactForm');
   const breadcrumbSchema = buildBreadcrumbSchema(
     [
-      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
-      { name: locale === 'en-US' ? 'Appointment' : '预约试听', url: '/appointment' },
+      { name: tSeo('home'), url: '/' },
+      { name: tSeo('appointment'), url: '/appointment' },
     ],
     locale as 'zh-CN' | 'en-US'
   );
@@ -32,7 +38,7 @@ export default async function AppointmentPage({ params }: { params: Promise<{ lo
       <div className="max-w-[1200px] mx-auto px-8">
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#F5851F]/10 border border-[#F5851F]/20 text-[#F5851F] text-sm mb-6">
-            📅 预约试听
+            📅 {t('badgeText')}
           </div>
           <h1
             className="text-[#1C2B3A] mb-4"
@@ -42,18 +48,18 @@ export default async function AppointmentPage({ params }: { params: Promise<{ lo
               fontWeight: 800,
             }}
           >
-            预约免费试听
+            {t('pageTitle')}
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            填写下方表单预约免费试听课程，我们将在 24 小时内与您联系确认时间。
+            {t('pageSubtitle')}
           </p>
         </div>
         <ContactForm section={{
           id: 0,
           __component: 'section.contact-form',
-          title: '预约免费试听',
-          description: '填写下方表单，我们将尽快联系您',
-          submitText: '立即预约',
+          title: tContactForm('titleFallback'),
+          description: tContactForm('descriptionFallback'),
+          submitText: tContactForm('submitTextFallback'),
         }} />
       </div>
     </div>

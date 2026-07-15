@@ -2,13 +2,7 @@
 
 import StrapiImage from '@/components/ui/StrapiImage';
 import type { Teacher } from '@/lib/api';
-
-export const subjectLabels: Record<string, string> = {
-  pinyin: '拼音',
-  math: '数学',
-  english: '英语',
-  comprehensive: '综合素养',
-};
+import { useTranslations } from 'next-intl';
 
 interface TeacherCardProps {
   teacher: Teacher;
@@ -17,6 +11,13 @@ interface TeacherCardProps {
 }
 
 export default function TeacherCard({ teacher, isSelected, onSelect }: TeacherCardProps) {
+  const t = useTranslations('teachers');
+  const subjectLabels: Record<string, string> = {
+    pinyin: t('pinyin'),
+    math: t('math'),
+    english: t('english'),
+    comprehensive: t('comprehensive'),
+  };
   const { name, title, avatar, campus, subject, teachingYears } = teacher;
 
   const campusName = campus?.name;
@@ -70,7 +71,7 @@ export default function TeacherCard({ teacher, isSelected, onSelect }: TeacherCa
         )}
 
         {typeof teachingYears === 'number' && (
-          <p className="text-xs text-muted-foreground">{teachingYears}年教龄</p>
+          <p className="text-xs text-muted-foreground">{teachingYears} {t('teachingYearsUnit')}</p>
         )}
       </div>
     </div>

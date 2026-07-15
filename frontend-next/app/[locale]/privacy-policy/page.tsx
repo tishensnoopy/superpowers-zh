@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
-import { setRequestLocale } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import { getPageBySlug, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd, buildBreadcrumbSchema } from '@/lib/seo';
 import SectionRenderer from '@/components/SectionRenderer';
@@ -12,8 +13,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { data: page } = await getPageBySlug('privacy-policy', locale as Locale).catch(() => ({
     data: null,
   }));
+  const tPolicies = await getTranslations('policies');
   if (!page) {
-    return buildMetadata(undefined, { title: '隐私政策' }, { locale: locale as 'zh-CN' | 'en-US', path: '/privacy-policy' });
+    return buildMetadata(undefined, { title: tPolicies('privacyPolicy') }, { locale: locale as 'zh-CN' | 'en-US', path: '/privacy-policy' });
   }
   return buildMetadata(page.seo, { title: page.title }, { locale: locale as 'zh-CN' | 'en-US', path: '/privacy-policy' });
 }
@@ -31,10 +33,12 @@ export default async function PrivacyPolicyPage({ params }: { params: Promise<{ 
 
   const sections = page.sections || [];
 
+  const tSeo = useTranslations('seo');
+  const tPolicies = useTranslations('policies');
   const breadcrumbSchema = buildBreadcrumbSchema(
     [
-      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
-      { name: locale === 'en-US' ? 'Privacy Policy' : '隐私政策', url: '/privacy-policy' },
+      { name: tSeo('home'), url: '/' },
+      { name: tPolicies('privacyPolicy'), url: '/privacy-policy' },
     ],
     locale as Locale
   );

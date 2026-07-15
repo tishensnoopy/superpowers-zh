@@ -1,6 +1,7 @@
 import { getCampuses, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd, buildBreadcrumbSchema } from '@/lib/seo';
-import { setRequestLocale } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import CampusHeader from '@/components/campus/CampusHeader';
 import CampusGrid from '@/components/campus/CampusGrid';
 import type { Metadata } from 'next';
@@ -9,9 +10,10 @@ export const revalidate = 300;
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
+  const t = await getTranslations('campuses');
   return buildMetadata(undefined, {
-    title: '校区分布',
-    description: '查看我们的各校区地址和联系方式，欢迎就近选择。',
+    title: t('pageTitle'),
+    description: t('pageDescription'),
     canonicalUrl: '/campuses',
   }, { locale: locale as 'zh-CN' | 'en-US', path: '/campuses' });
 }
@@ -19,12 +21,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function CampusOverviewPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const tSeo = useTranslations('seo');
   const { data: campuses } = await getCampuses(locale as Locale).catch(() => ({ data: [] as never[] }));
 
   const breadcrumbSchema = buildBreadcrumbSchema(
     [
-      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
-      { name: locale === 'en-US' ? 'Campuses' : '校区分布', url: '/campuses' },
+      { name: tSeo('home'), url: '/' },
+      { name: tSeo('campuses'), url: '/campuses' },
     ],
     locale as Locale
   );

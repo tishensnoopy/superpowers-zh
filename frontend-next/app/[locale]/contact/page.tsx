@@ -1,6 +1,7 @@
 import { Phone, Mail, MessageCircle, Clock, MapPin } from 'lucide-react';
 import { buildMetadata, buildJsonLd, buildBreadcrumbSchema } from '@/lib/seo';
-import { setRequestLocale } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import { getCampuses, getSiteSettings, type Locale } from '@/lib/api';
 import ContactForm from '@/components/sections/ContactForm';
 import type { Metadata } from 'next';
@@ -9,9 +10,10 @@ export const revalidate = 300;
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
+  const t = await getTranslations('contact');
   return buildMetadata(undefined, {
-    title: '联系我们',
-    description: '联系佑森小课堂，预约免费试听课程，查看各校区联系方式',
+    title: t('title'),
+    description: t('description'),
     canonicalUrl: '/contact',
   }, { locale: locale as 'zh-CN' | 'en-US', path: '/contact' });
 }
@@ -19,6 +21,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function ContactPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = useTranslations('contact');
+  const tSeo = useTranslations('seo');
+  const tContactForm = useTranslations('sections.contactForm');
   const [campusesRes, settingsRes] = await Promise.all([
     getCampuses(locale as Locale).catch(() => ({ data: [] as never[] })),
     getSiteSettings(locale as Locale).catch(() => ({ data: null as any })),
@@ -28,16 +33,16 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
   const settings = Array.isArray(settingsRes.data) ? settingsRes.data[0] : settingsRes.data;
 
   const infoCards = [
-    { icon: Phone, label: '客服热线', value: settings?.phone || '400-888-XXXX', href: `tel:${settings?.phone || ''}` },
-    { icon: Mail, label: '邮箱', value: settings?.email || 'contact@yousen.com', href: `mailto:${settings?.email || ''}` },
-    { icon: MessageCircle, label: '微信咨询', value: settings?.wechat || 'yousen-edu' },
-    { icon: Clock, label: '服务时间', value: '周一至周日 8:30-20:00' },
+    { icon: Phone, label: t('hotline'), value: settings?.phone || '400-888-XXXX', href: `tel:${settings?.phone || ''}` },
+    { icon: Mail, label: t('email'), value: settings?.email || 'contact@yousen.com', href: `mailto:${settings?.email || ''}` },
+    { icon: MessageCircle, label: t('wechatConsult'), value: settings?.wechat || 'yousen-edu' },
+    { icon: Clock, label: t('serviceHours'), value: t('serviceHoursValue') },
   ];
 
   const breadcrumbSchema = buildBreadcrumbSchema(
     [
-      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
-      { name: locale === 'en-US' ? 'Contact' : '联系我们', url: '/contact' },
+      { name: tSeo('home'), url: '/' },
+      { name: tSeo('contact'), url: '/contact' },
     ],
     locale as Locale
   );
@@ -58,10 +63,10 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
               fontWeight: 800,
             }}
           >
-            联系我们
+            {t('title')}
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            填写下方表单预约免费试听课程，或通过以下方式直接联系我们
+            {t('subtitle')}
           </p>
         </div>
 
@@ -96,7 +101,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
               }}
             >
               <MapPin size={22} className="text-[#F5851F]" />
-              各校区联系方式
+              {t('campusContactTitle')}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {campuses.map((campus: any) => (
@@ -126,9 +131,9 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
         <ContactForm section={{
           id: 0,
           __component: 'section.contact-form',
-          title: '预约免费试听',
-          description: '填写下方表单，我们将尽快联系您',
-          submitText: '立即预约',
+          title: tContactForm('titleFallback'),
+          description: tContactForm('descriptionFallback'),
+          submitText: tContactForm('submitTextFallback'),
         }} />
       </div>
     </div>

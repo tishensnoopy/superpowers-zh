@@ -1,9 +1,12 @@
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import type { Campus } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 // 校区详情页头部：面包屑 + 校区名 + 简介
 export default function CampusDetailHeader({ campus }: { campus: Campus }) {
+  const tNav = useTranslations('navigation');
+  const tCampuses = useTranslations('campuses');
   const { name, description } = campus;
 
   return (
@@ -11,11 +14,11 @@ export default function CampusDetailHeader({ campus }: { campus: Campus }) {
       {/* 面包屑 */}
       <nav className="flex items-center gap-1 text-sm text-muted-foreground mb-6">
         <Link href="/" className="hover:text-[#F5851F] transition-colors">
-          首页
+          {tNav('home')}
         </Link>
         <ChevronRight size={14} />
         <Link href="/campuses" className="hover:text-[#F5851F] transition-colors">
-          校区总览
+          {tCampuses('campusOverview')}
         </Link>
         <ChevronRight size={14} />
         <span className="text-[#1C2B3A]">{name}</span>

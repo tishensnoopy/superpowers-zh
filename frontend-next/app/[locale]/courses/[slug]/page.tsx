@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
-import { setRequestLocale } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import { getProducts, getProductBySlug, getSiteSettings, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd, buildCourseSchema, buildBreadcrumbSchema } from '@/lib/seo';
 import CourseHeader from '@/components/course/CourseHeader';
@@ -32,8 +33,9 @@ export async function generateMetadata({
   const { data: product } = await getProductBySlug(slug, locale as Locale).catch(() => ({
     data: null,
   }));
+  const tSeo = await getTranslations('seo');
   if (!product) {
-    return buildMetadata(undefined, { title: '课程详情', canonicalUrl: `/courses/${slug}` }, { locale: locale as 'zh-CN' | 'en-US', path: `/courses/${slug}` });
+    return buildMetadata(undefined, { title: tSeo('courseDetail'), canonicalUrl: `/courses/${slug}` }, { locale: locale as 'zh-CN' | 'en-US', path: `/courses/${slug}` });
   }
   return buildMetadata(product.seo, {
     title: product.name,
@@ -53,14 +55,18 @@ export default async function CourseDetailPage({ params }: PageProps) {
     notFound();
   }
 
+  const tSeo = useTranslations('seo');
+  const tNav = useTranslations('navigation');
+  const tCourses = useTranslations('courses');
+
   const { data: settingsData } = await getSiteSettings(locale as Locale).catch(() => ({ data: [] as never[] }));
   const settings = Array.isArray(settingsData) ? settingsData[0] : settingsData;
 
-  const courseSchema = buildCourseSchema(product, settings || { name: '佑森小课堂' }, locale as Locale);
+  const courseSchema = buildCourseSchema(product, settings || { name: tSeo('siteNameZh') }, locale as Locale);
   const breadcrumbSchema = buildBreadcrumbSchema(
     [
-      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
-      { name: locale === 'en-US' ? 'Courses' : '课程', url: '/courses' },
+      { name: tNav('home'), url: '/' },
+      { name: tNav('courses'), url: '/courses' },
       { name: product.name, url: `/courses/${product.slug}` },
     ],
     locale as Locale
@@ -90,7 +96,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
                 fontWeight: 700,
               }}
             >
-              课程介绍
+              {tCourses('courseIntro')}
             </h2>
             <div className="prose prose-lg max-w-none text-muted-foreground leading-relaxed">
               {product.description}
@@ -113,7 +119,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
                 fontWeight: 700,
               }}
             >
-              教学方法
+              {tCourses('teachingMethod')}
             </h2>
             <div className="prose prose-lg max-w-none text-muted-foreground leading-relaxed">
               {product.teachingMethod}

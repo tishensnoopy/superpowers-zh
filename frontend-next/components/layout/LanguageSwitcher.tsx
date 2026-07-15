@@ -2,11 +2,12 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Globe, ChevronDown } from 'lucide-react';
 
 export default function LanguageSwitcher() {
   const locale = useLocale() as 'zh-CN' | 'en-US';
+  const t = useTranslations('languageSwitcher');
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -41,7 +42,7 @@ export default function LanguageSwitcher() {
     <div ref={dropdownRef} className="relative">
       <button
         type="button"
-        aria-label="切换语言"
+        aria-label={t('label')}
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-1 px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
@@ -55,7 +56,7 @@ export default function LanguageSwitcher() {
           onClick={() => switchTo('zh-CN')}
           className="block w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors"
         >
-          中文
+          {t('chinese')}
         </button>
         <button
           type="button"
@@ -63,7 +64,7 @@ export default function LanguageSwitcher() {
           onClick={() => switchTo('en-US')}
           className="block w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors"
         >
-          English
+          {t('english')}
         </button>
       </div>
     </div>

@@ -1,7 +1,9 @@
 import { BookOpen } from 'lucide-react';
 import type { CourseModule } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 export default function CourseOutline({ outline }: { outline?: CourseModule[] }) {
+  const t = useTranslations('courses');
   const hasData = outline && outline.length > 0;
 
   return (
@@ -19,7 +21,7 @@ export default function CourseOutline({ outline }: { outline?: CourseModule[] })
               fontWeight: 700,
             }}
           >
-            课程大纲
+            {t('courseOutline')}
           </h2>
         </div>
         {hasData ? (
@@ -38,7 +40,7 @@ export default function CourseOutline({ outline }: { outline?: CourseModule[] })
                       <h3 className="text-lg font-bold text-[#1C2B3A]">{module.title}</h3>
                       {module.lessonCount && module.lessonCount > 0 && (
                         <span className="text-sm text-[#2563EB] font-medium bg-[#EFF6FF] px-3 py-1 rounded-full">
-                          {module.lessonCount} 课时
+                          {module.lessonCount} {t('lessonCountUnit')}
                         </span>
                       )}
                     </div>
@@ -53,7 +55,7 @@ export default function CourseOutline({ outline }: { outline?: CourseModule[] })
         ) : (
           <div className="text-center py-12 text-muted-foreground bg-muted/20 rounded-2xl border border-dashed border-border">
             <BookOpen size={32} className="mx-auto mb-3 opacity-40" />
-            <p>课程大纲内容更新中，敬请期待</p>
+            <p>{t('outlineUpdating')}</p>
           </div>
         )}
       </div>

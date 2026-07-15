@@ -1,26 +1,9 @@
+'use client';
+
 import Link from 'next/link';
 import { Phone, MapPin, Mail } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import type { Footer as FooterData, SiteSettings, SocialLink } from '@/lib/api';
-
-const DEFAULT_SOCIAL_LINKS: SocialLink[] = [
-  { id: 1, platform: 'wechat', url: 'https://wechat.example.com', label: '微信' },
-  { id: 2, platform: 'weibo', url: 'https://weibo.example.com', label: '微博' },
-  { id: 3, platform: 'douyin', url: 'https://douyin.example.com', label: '抖音' },
-  { id: 4, platform: 'qq', url: 'https://qq.example.com', label: 'QQ' },
-];
-
-const COURSE_LINKS = [
-  { title: '幼小衔接全能班', url: '/courses/yousen-youxiao-xianjie' },
-  { title: '课后托管班', url: '/courses/yousen-kehao-tuoguan' },
-  { title: '全日制托班', url: '/courses/yousen-tuoban' },
-];
-
-const ABOUT_LINKS = [
-  { title: '关于我们', url: '/about' },
-  { title: '师资团队', url: '/teachers' },
-  { title: '校区环境', url: '/campuses' },
-  { title: '新闻资讯', url: '/news' },
-];
 
 function renderSocialLink(social: SocialLink) {
   return (
@@ -51,6 +34,28 @@ export default function Footer({
   footer: FooterData;
   settings: SiteSettings;
 }) {
+  const t = useTranslations('footer');
+
+  const DEFAULT_SOCIAL_LINKS: SocialLink[] = [
+    { id: 1, platform: 'wechat', url: 'https://wechat.example.com', label: t('wechat') },
+    { id: 2, platform: 'weibo', url: 'https://weibo.example.com', label: t('weibo') },
+    { id: 3, platform: 'douyin', url: 'https://douyin.example.com', label: t('douyin') },
+    { id: 4, platform: 'qq', url: 'https://qq.example.com', label: t('qq') },
+  ];
+
+  const COURSE_LINKS = [
+    { title: t('courseFullClass'), url: '/courses/yousen-youxiao-xianjie' },
+    { title: t('courseAfterSchool'), url: '/courses/yousen-kehao-tuoguan' },
+    { title: t('courseFullTimeDaycare'), url: '/courses/yousen-tuoban' },
+  ];
+
+  const ABOUT_LINKS = [
+    { title: t('aboutUs'), url: '/about' },
+    { title: t('teachers'), url: '/teachers' },
+    { title: t('campuses'), url: '/campuses' },
+    { title: t('newsInfo'), url: '/news' },
+  ];
+
   const socialData = footer.socialLinks;
   const links =
     socialData && socialData.length > 0 ? socialData : DEFAULT_SOCIAL_LINKS;
@@ -58,11 +63,11 @@ export default function Footer({
   const quickLinks = footer.quickLinks && footer.quickLinks.length > 0
     ? footer.quickLinks
     : [
-        { title: '常见问题', url: '/faq' },
-        { title: '退费政策', url: '/refund-policy' },
-        { title: '隐私政策', url: '/privacy-policy' },
-        { title: '用户协议', url: '/user-agreement' },
-        { title: '联系客服', url: '/contact' },
+        { title: t('faq'), url: '/faq' },
+        { title: t('refundPolicy'), url: '/refund-policy' },
+        { title: t('privacyPolicy'), url: '/privacy-policy' },
+        { title: t('userAgreement'), url: '/user-agreement' },
+        { title: t('contactService'), url: '/contact' },
       ];
 
   return (
@@ -75,20 +80,20 @@ export default function Footer({
                 className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-lg font-black"
                 style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
               >
-                {settings.name?.[0] || '佑'}
+                {settings.name?.[0] || t('brandNameFallback')[0]}
               </div>
               <div>
                 <div
                   className="font-black text-[18px] leading-tight text-white"
                   style={{ fontFamily: "'Nunito', sans-serif" }}
                 >
-                  {settings.name || '佑森小课堂'}
+                  {settings.name || t('brandNameFallback')}
                 </div>
-                <div className="text-[10px] text-white/40 tracking-widest">{settings.slogan || '专注幼小衔接教育8年'}</div>
+                <div className="text-[10px] text-white/40 tracking-widest">{settings.slogan || t('sloganFallback')}</div>
               </div>
             </div>
             <p className="text-white/55 text-sm leading-relaxed mb-6 max-w-[300px]">
-              {footer.aboutText || '武汉佑森小课堂艺术培训学校有限公司，专注幼小衔接教育8年，6大校区遍布武汉三镇。'}
+              {footer.aboutText || t('aboutTextFallback')}
             </p>
             <div className="space-y-3">
               {settings.address && (
@@ -116,7 +121,7 @@ export default function Footer({
             <div className="flex flex-wrap gap-8">
               <div className="flex-1 min-w-[120px]">
                 <h4 className="text-white font-bold text-sm mb-5 pb-2 border-b border-white/10">
-                  课程体系
+                  {t('courseSystem')}
                 </h4>
                 <ul className="space-y-3">
                   {COURSE_LINKS.map((link) => (
@@ -126,7 +131,7 @@ export default function Footer({
               </div>
               <div className="flex-1 min-w-[120px]">
                 <h4 className="text-white font-bold text-sm mb-5 pb-2 border-b border-white/10">
-                  关于我们
+                  {t('aboutUs')}
                 </h4>
                 <ul className="space-y-3">
                   {ABOUT_LINKS.map((link) => (
@@ -136,7 +141,7 @@ export default function Footer({
               </div>
               <div className="flex-1 min-w-[120px]">
                 <h4 className="text-white font-bold text-sm mb-5 pb-2 border-b border-white/10">
-                  帮助中心
+                  {t('helpCenter')}
                 </h4>
                 <ul className="space-y-3">
                   {quickLinks.map((link: any) => (
@@ -150,7 +155,7 @@ export default function Footer({
           {links.length > 0 && (
             <div className="col-span-12 lg:col-span-2">
               <h4 className="text-white font-bold text-sm mb-5 pb-2 border-b border-white/10">
-                关注我们
+                {t('followUs')}
               </h4>
               <div data-testid="social-links" className="flex flex-wrap gap-3">
                 {links.map(renderSocialLink)}
@@ -161,15 +166,15 @@ export default function Footer({
 
         <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-white/35 text-sm">
-            {footer.copyright || '© 2026 佑森小课堂'}
+            {footer.copyright || t('copyrightFallback')}
             {settings.icp && <span className="mx-2">·</span>}
             {settings.icp && <span>{settings.icp}</span>}
             {settings.publicSecurityRecord && <span className="mx-2">·</span>}
             {settings.publicSecurityRecord && <span>{settings.publicSecurityRecord}</span>}
           </p>
           <div className="flex items-center gap-6 text-white/35 text-sm">
-            <Link href="/privacy-policy" className="hover:text-white/60 transition-colors">隐私政策</Link>
-            <Link href="/user-agreement" className="hover:text-white/60 transition-colors">用户协议</Link>
+            <Link href="/privacy-policy" className="hover:text-white/60 transition-colors">{t('privacyPolicy')}</Link>
+            <Link href="/user-agreement" className="hover:text-white/60 transition-colors">{t('userAgreement')}</Link>
           </div>
         </div>
       </div>

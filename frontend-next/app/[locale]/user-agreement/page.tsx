@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
-import { setRequestLocale } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import { getPageBySlug, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd, buildBreadcrumbSchema } from '@/lib/seo';
 import SectionRenderer from '@/components/SectionRenderer';
@@ -12,8 +13,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { data: page } = await getPageBySlug('user-agreement', locale as Locale).catch(() => ({
     data: null,
   }));
+  const tPolicies = await getTranslations('policies');
   if (!page) {
-    return buildMetadata(undefined, { title: '用户协议' }, { locale: locale as 'zh-CN' | 'en-US', path: '/user-agreement' });
+    return buildMetadata(undefined, { title: tPolicies('userAgreement') }, { locale: locale as 'zh-CN' | 'en-US', path: '/user-agreement' });
   }
   return buildMetadata(page.seo, { title: page.title }, { locale: locale as 'zh-CN' | 'en-US', path: '/user-agreement' });
 }
@@ -31,10 +33,12 @@ export default async function UserAgreementPage({ params }: { params: Promise<{ 
 
   const sections = page.sections || [];
 
+  const tSeo = useTranslations('seo');
+  const tPolicies = useTranslations('policies');
   const breadcrumbSchema = buildBreadcrumbSchema(
     [
-      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
-      { name: locale === 'en-US' ? 'User Agreement' : '用户协议', url: '/user-agreement' },
+      { name: tSeo('home'), url: '/' },
+      { name: tPolicies('userAgreement'), url: '/user-agreement' },
     ],
     locale as Locale
   );

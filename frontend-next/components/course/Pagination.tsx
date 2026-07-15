@@ -1,6 +1,7 @@
 'use client';
 
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface PaginationProps {
   page: number;
@@ -27,6 +28,7 @@ function getPageNumbers(page: number, pageCount: number): PageItem[] {
 }
 
 export default function Pagination({ page, pageCount, onChange }: PaginationProps) {
+  const t = useTranslations('courses');
   if (pageCount <= 1) {
     return null;
   }
@@ -61,7 +63,7 @@ export default function Pagination({ page, pageCount, onChange }: PaginationProp
     >
       <button
         type="button"
-        aria-label="上一页"
+        aria-label={t('prevPageAriaLabel')}
         disabled={prevDisabled}
         className={navButtonClass(prevDisabled)}
         onClick={() => !prevDisabled && onChange(page - 1)}
@@ -96,7 +98,7 @@ export default function Pagination({ page, pageCount, onChange }: PaginationProp
 
       <button
         type="button"
-        aria-label="下一页"
+        aria-label={t('nextPageAriaLabel')}
         disabled={nextDisabled}
         className={navButtonClass(nextDisabled)}
         onClick={() => !nextDisabled && onChange(page + 1)}

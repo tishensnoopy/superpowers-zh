@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import * as Sentry from '@sentry/nextjs';
 
 export default function GlobalError({
@@ -10,6 +11,8 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations('errors');
+
   useEffect(() => {
     Sentry.captureException(error, {
       tags: { section: 'global-error', digest: error.digest },
@@ -28,9 +31,9 @@ export default function GlobalError({
           fontFamily: 'sans-serif',
         }}>
           <div style={{ textAlign: 'center' }}>
-            <h2>系统错误</h2>
-            <p>网站遇到技术问题，请稍后重试。</p>
-            <button onClick={reset}>重试</button>
+            <h2>{t('systemErrorTitle')}</h2>
+            <p>{t('systemErrorMessage')}</p>
+            <button onClick={reset}>{t('retry')}</button>
           </div>
         </div>
       </body>

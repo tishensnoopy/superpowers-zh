@@ -1,5 +1,6 @@
 import { Star } from 'lucide-react';
 import type { Section } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 interface Testimonial {
   id: number;
@@ -14,6 +15,7 @@ interface Testimonial {
 }
 
 export default function Testimonials({ section }: { section: Section }) {
+  const t = useTranslations('sections.testimonials');
   const { title, testimonials } = section;
   const testimonialList = Array.isArray(testimonials) ? testimonials : testimonials?.data || [];
 
@@ -23,7 +25,7 @@ export default function Testimonials({ section }: { section: Section }) {
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FFF3E5] text-[#F5851F] text-sm font-medium mb-5">
             <Star size={14} />
-            客户评价
+            {t('badge')}
           </div>
           <h2
             className="text-[#1C2B3A] mb-4"
@@ -33,7 +35,7 @@ export default function Testimonials({ section }: { section: Section }) {
               fontWeight: 800,
             }}
           >
-            {title || '听听家长们怎么说'}
+            {title || t('titleFallback')}
           </h2>
         </div>
 

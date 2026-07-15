@@ -1,6 +1,7 @@
 import { MapPin, Phone, Clock, Train, Ruler } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { Campus } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 interface InfoRow {
   icon: LucideIcon;
@@ -9,14 +10,15 @@ interface InfoRow {
 }
 
 export default function CampusInfoCard({ campus }: { campus: Campus }) {
+  const t = useTranslations('campuses');
   const { address, phone, businessHours, transportation, area } = campus;
 
   const rows: InfoRow[] = [
-    { icon: MapPin, label: '地址', value: address },
-    { icon: Phone, label: '联系电话', value: phone },
-    { icon: Clock, label: '营业时间', value: businessHours },
-    { icon: Train, label: '交通信息', value: transportation },
-    { icon: Ruler, label: '教学面积', value: area },
+    { icon: MapPin, label: t('addressLabel'), value: address },
+    { icon: Phone, label: t('phoneLabel'), value: phone },
+    { icon: Clock, label: t('businessHoursLabel'), value: businessHours },
+    { icon: Train, label: t('transportationLabel'), value: transportation },
+    { icon: Ruler, label: t('areaLabel'), value: area },
   ];
 
   const visibleRows = rows.filter((row) => row.value);
@@ -31,7 +33,7 @@ export default function CampusInfoCard({ campus }: { campus: Campus }) {
           fontWeight: 700,
         }}
       >
-        校区信息
+        {t('infoTitle')}
       </h2>
       <ul className="space-y-4">
         {visibleRows.map((row) => {

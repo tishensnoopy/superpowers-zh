@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Users } from 'lucide-react';
 import StrapiImage from '@/components/ui/StrapiImage';
 import type { Teacher } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 interface CampusTeachersProps {
   teachers?: Teacher[];
@@ -9,6 +10,7 @@ interface CampusTeachersProps {
 
 // 校区详情页教师列表：4 列迷你卡片
 export default function CampusTeachers({ teachers }: CampusTeachersProps) {
+  const t = useTranslations('campuses');
   const list = teachers ?? [];
 
   return (
@@ -25,7 +27,7 @@ export default function CampusTeachers({ teachers }: CampusTeachersProps) {
             fontWeight: 700,
           }}
         >
-          本校教师
+          {t('teachersTitle')}
         </h2>
       </div>
 
@@ -68,7 +70,7 @@ export default function CampusTeachers({ teachers }: CampusTeachersProps) {
       ) : (
         <div className="text-center py-12 text-muted-foreground bg-muted/20 rounded-2xl border border-dashed border-border">
           <Users size={32} className="mx-auto mb-3 opacity-40" />
-          <p>本校教师信息更新中，敬请期待</p>
+          <p>{t('teachersUpdating')}</p>
         </div>
       )}
     </section>

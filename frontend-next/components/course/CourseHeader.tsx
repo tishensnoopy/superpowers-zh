@@ -1,16 +1,25 @@
 import { Clock, Users, Calendar, GraduationCap } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { Product } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
-const specConfig: Record<string, { label: string; icon: LucideIcon }> = {
-  course_hours: { label: '课时', icon: Clock },
-  class_size: { label: '班额', icon: Users },
-  age_range: { label: '年龄', icon: GraduationCap },
-  duration: { label: '周期', icon: Calendar },
+const specIconConfig: Record<string, LucideIcon> = {
+  course_hours: Clock,
+  class_size: Users,
+  age_range: GraduationCap,
+  duration: Calendar,
 };
 
 export default function CourseHeader({ product }: { product: Product }) {
+  const t = useTranslations('courses');
   const { name, shortDescription, specValues, price, originalPrice } = product;
+
+  const specConfig: Record<string, { label: string; icon: LucideIcon }> = {
+    course_hours: { label: t('specCourseHours'), icon: specIconConfig.course_hours },
+    class_size: { label: t('specClassSize'), icon: specIconConfig.class_size },
+    age_range: { label: t('specAge'), icon: specIconConfig.age_range },
+    duration: { label: t('specPeriod'), icon: specIconConfig.duration },
+  };
 
   return (
     <section className="pt-[120px] pb-16 bg-gradient-to-b from-[#FFF3E5] to-background">

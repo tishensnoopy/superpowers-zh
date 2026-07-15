@@ -1,12 +1,13 @@
 import { Clock, Users, Calendar, GraduationCap } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { Product } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
-const specConfig: Record<string, { label: string; icon: LucideIcon }> = {
-  course_hours: { label: '课时', icon: Clock },
-  class_size: { label: '班额', icon: Users },
-  age_range: { label: '年龄', icon: GraduationCap },
-  duration: { label: '周期', icon: Calendar },
+const specIconConfig: Record<string, LucideIcon> = {
+  course_hours: Clock,
+  class_size: Users,
+  age_range: GraduationCap,
+  duration: Calendar,
 };
 
 function formatPrice(value: number): string {
@@ -14,7 +15,15 @@ function formatPrice(value: number): string {
 }
 
 export default function CourseSpecs({ product }: { product: Product }) {
+  const t = useTranslations('courses');
   const { specValues, price, originalPrice } = product;
+
+  const specConfig: Record<string, { label: string; icon: LucideIcon }> = {
+    course_hours: { label: t('specCourseHours'), icon: specIconConfig.course_hours },
+    class_size: { label: t('specClassSize'), icon: specIconConfig.class_size },
+    age_range: { label: t('specAge'), icon: specIconConfig.age_range },
+    duration: { label: t('specPeriod'), icon: specIconConfig.duration },
+  };
 
   const hasSpecs = specValues && Object.keys(specValues).length > 0;
   const hasPrice = price !== undefined && price > 0;
@@ -35,7 +44,7 @@ export default function CourseSpecs({ product }: { product: Product }) {
                 fontWeight: 700,
               }}
             >
-              课程规格
+              {t('courseSpecs')}
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {Object.entries(specValues).map(([key, value]) => {
@@ -61,7 +70,7 @@ export default function CourseSpecs({ product }: { product: Product }) {
 
         {hasPrice && (
           <div className="bg-gradient-to-br from-[#F5851F] to-[#FF6B35] rounded-2xl p-6 text-white text-center shadow-lg">
-            <div className="text-xs opacity-80 mb-2">课程价格</div>
+            <div className="text-xs opacity-80 mb-2">{t('coursePrice')}</div>
             <div className="flex items-baseline justify-center gap-2 mb-2">
               {hasDiscount && (
                 <span className="text-sm opacity-70 line-through">{formatPrice(originalPrice!)}</span>
@@ -70,10 +79,10 @@ export default function CourseSpecs({ product }: { product: Product }) {
             </div>
             {hasDiscount && (
               <div className="inline-block px-3 py-1 bg-white/20 rounded-full text-xs font-semibold">
-                立省 {formatPrice(originalPrice! - price!)}
+                {t('save')} {formatPrice(originalPrice! - price!)}
               </div>
             )}
-            <div className="text-xs opacity-80 mt-3">含全部课时及教材</div>
+            <div className="text-xs opacity-80 mt-3">{t('priceIncludes')}</div>
           </div>
         )}
       </div>

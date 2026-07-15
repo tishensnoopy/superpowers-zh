@@ -1,4 +1,7 @@
+'use client';
+
 import { User, Bot } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export type ChatRole = 'user' | 'assistant' | 'system';
 export type MessageType = 'text' | 'transfer';
@@ -31,6 +34,7 @@ export default function ChatMessage({
   streaming = false,
   type = 'text',
 }: ChatMessageProps) {
+  const t = useTranslations('chat');
   if (role === 'system') {
     return (
       <div data-role="system" data-type={type} className="flex justify-center py-2">
@@ -60,7 +64,7 @@ export default function ChatMessage({
           isUser ? 'bg-gray-100' : 'text-white'
         }`}
         style={!isUser ? { background: 'linear-gradient(135deg, #F5851F, #FF6B35)' } : undefined}
-        aria-label={isUser ? '用户' : 'AI助手'}
+        aria-label={isUser ? t('userAriaLabel') : t('assistantAriaLabel')}
       >
         {isUser ? <User size={16} className="text-gray-600" /> : <Bot size={16} />}
       </div>

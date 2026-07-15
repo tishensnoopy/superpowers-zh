@@ -5,28 +5,9 @@ import { useRouter } from 'next/navigation';
 import { Calendar } from 'lucide-react';
 import type { Section } from '@/lib/api';
 import { createAppointment } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 const LOG_PREFIX = '[ContactForm]';
-const CAMPUSES = [
-  { value: 'yousen-baibuting', label: '百步亭校区' },
-  { value: 'yousen-sanyanglu', label: '三阳路校区' },
-  { value: 'yousen-dongwuyuan', label: '动物园校区' },
-  { value: 'yousen-zhongjiacun', label: '钟家村校区' },
-  { value: 'yousen-sixin', label: '四新校区' },
-  { value: 'yousen-zhuankou', label: '沌口校区' },
-];
-
-const COURSES = [
-  { value: 'yousen-youxiao-xianjie', label: '幼小衔接全能班' },
-  { value: 'yousen-kehao-tuoguan', label: '课后托管班' },
-  { value: 'yousen-tuoban', label: '全日制托班' },
-];
-
-const TIME_SLOTS = [
-  { value: 'morning', label: '上午' },
-  { value: 'afternoon', label: '下午' },
-  { value: 'evening', label: '晚上' },
-];
 
 function log(stage: string, message: string, data?: unknown) {
   const timestamp = new Date().toISOString();
@@ -46,38 +27,60 @@ function logError(stage: string, message: string, error?: unknown) {
   }
 }
 
-function classifyError(err: unknown): { type: string; userMessage: string; statusCode?: number } {
+function classifyError(err: unknown, t: (key: string) => string): { type: string; userMessage: string; statusCode?: number } {
   if (!(err instanceof Error)) {
-    return { type: 'unknown', userMessage: '提交失败，请稍后重试' };
+    return { type: 'unknown', userMessage: t('submitFailed') };
   }
 
   const msg = err.message;
 
   if (msg.includes('429')) {
-    return { type: 'rate_limit', userMessage: '提交过于频繁，请稍后再试', statusCode: 429 };
+    return { type: 'rate_limit', userMessage: t('rateLimited'), statusCode: 429 };
   }
   if (msg.includes('Network') || msg.includes('Failed to fetch') || msg.includes('network')) {
-    return { type: 'network', userMessage: '网络连接失败，请检查网络后重试' };
+    return { type: 'network', userMessage: t('networkError') };
   }
   if (msg.includes('400')) {
-    return { type: 'bad_request', userMessage: '提交信息有误，请检查后重试', statusCode: 400 };
+    return { type: 'bad_request', userMessage: t('badRequest'), statusCode: 400 };
   }
   if (msg.includes('401') || msg.includes('403')) {
-    return { type: 'auth', userMessage: '没有提交权限，请刷新页面后重试', statusCode: 401 };
+    return { type: 'auth', userMessage: t('authError'), statusCode: 401 };
   }
   if (msg.includes('500') || msg.includes('502') || msg.includes('503')) {
-    return { type: 'server', userMessage: '服务器暂时不可用，请稍后重试', statusCode: 500 };
+    return { type: 'server', userMessage: t('serverError'), statusCode: 500 };
   }
 
-  return { type: 'unknown', userMessage: '提交失败，请稍后重试' };
+  return { type: 'unknown', userMessage: t('submitFailed') };
 }
 
 export default function ContactForm({ section }: { section: Section }) {
   const { title, description, submitText } = section;
+  const t = useTranslations('sections.contactForm');
   const [values, setValues] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
+
+  const CAMPUSES = [
+    { value: 'yousen-baibuting', label: t('campusBaibuting') },
+    { value: 'yousen-sanyanglu', label: t('campusSanyanglu') },
+    { value: 'yousen-dongwuyuan', label: t('campusDongwuyuan') },
+    { value: 'yousen-zhongjiacun', label: t('campusZhongjiacun') },
+    { value: 'yousen-sixin', label: t('campusSixin') },
+    { value: 'yousen-zhuankou', label: t('campusZhuankou') },
+  ];
+
+  const COURSES = [
+    { value: 'yousen-youxiao-xianjie', label: t('courseFullClass') },
+    { value: 'yousen-kehao-tuoguan', label: t('courseAfterSchool') },
+    { value: 'yousen-tuoban', label: t('courseFullTimeDaycare') },
+  ];
+
+  const TIME_SLOTS = [
+    { value: 'morning', label: t('morning') },
+    { value: 'afternoon', label: t('afternoon') },
+    { value: 'evening', label: t('evening') },
+  ];
 
   const handleFieldChange = (name: string, value: string) => {
     log('input', `字段变更: ${name}, 值长度: ${value.length}`);
@@ -94,29 +97,29 @@ export default function ContactForm({ section }: { section: Section }) {
     let valid = true;
 
     if (!values.childName) {
-      newErrors.childName = '请输入孩子姓名';
+      newErrors.childName = t('childNameRequired');
       log('validate', '校验失败: childName 为空');
       valid = false;
     }
 
     if (!values.parentName) {
-      newErrors.parentName = '请输入家长姓名';
+      newErrors.parentName = t('parentNameRequired');
       log('validate', '校验失败: parentName 为空');
       valid = false;
     }
 
     if (!values.phone) {
-      newErrors.phone = '请输入预约电话';
+      newErrors.phone = t('phoneRequired');
       log('validate', '校验失败: phone 为空');
       valid = false;
     } else if (!/^1[3-9]\d{9}$/.test(values.phone)) {
-      newErrors.phone = '手机号格式不正确';
+      newErrors.phone = t('phoneInvalid');
       log('validate', `校验失败: phone 格式错误 (长度: ${values.phone.length})`);
       valid = false;
     }
 
     if (!values.campus) {
-      newErrors.campus = '请选择校区';
+      newErrors.campus = t('campusRequired');
       log('validate', '校验失败: campus 未选择');
       valid = false;
     }
@@ -173,7 +176,7 @@ export default function ContactForm({ section }: { section: Section }) {
       log('submit', '✅ 提交流程完成 (成功)');
     } catch (err) {
       const duration = Math.round(performance.now() - startTime);
-      const classified = classifyError(err);
+      const classified = classifyError(err, t);
 
       logError('api', `API 调用失败, 耗时: ${duration}ms, 错误类型: ${classified.type}, 状态码: ${classified.statusCode || 'N/A'}`);
       logError('api', '错误详情:', err);
@@ -204,15 +207,15 @@ export default function ContactForm({ section }: { section: Section }) {
         <div className="text-center mb-10">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-white/80 text-sm mb-6">
             <Calendar size={14} />
-            预约试听
+            {t('badge')}
           </div>
           <h2
             className="text-white mb-4"
             style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif", fontSize: '2.25rem', fontWeight: 800 }}
           >
-            {title || '预约免费试听'}
+            {title || t('titleFallback')}
           </h2>
-          <p className="text-white/70 text-base">{description || '填写下方表单，我们将尽快联系您'}</p>
+          <p className="text-white/70 text-base">{description || t('descriptionFallback')}</p>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
@@ -226,20 +229,20 @@ export default function ContactForm({ section }: { section: Section }) {
                   <span className="text-2xl">🎓</span>
                 </div>
                 <div>
-                  <h4 className="text-xl font-bold">佑森小课堂</h4>
-                  <p className="text-sm opacity-80">专注幼小衔接教育8年</p>
+                  <h4 className="text-xl font-bold">{t('brandName')}</h4>
+                  <p className="text-sm opacity-80">{t('slogan')}</p>
                 </div>
               </div>
 
-              <h5 className="text-lg font-bold mb-4">为什么选择我们？</h5>
+              <h5 className="text-lg font-bold mb-4">{t('whyChooseUs')}</h5>
               <div className="space-y-4 mb-6">
                 <div className="flex items-start gap-3">
                   <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
                     <span className="text-sm">👨‍🏫</span>
                   </div>
                   <div>
-                    <p className="font-bold text-sm">专业师资团队</p>
-                    <p className="text-xs opacity-80">8年教学经验，持证上岗</p>
+                    <p className="font-bold text-sm">{t('professionalTeachers')}</p>
+                    <p className="text-xs opacity-80">{t('professionalTeachersDesc')}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -247,8 +250,8 @@ export default function ContactForm({ section }: { section: Section }) {
                     <span className="text-sm">🏠</span>
                   </div>
                   <div>
-                    <p className="font-bold text-sm">安全舒适环境</p>
-                    <p className="text-xs opacity-80">监控全覆盖，营养配餐</p>
+                    <p className="font-bold text-sm">{t('safeEnvironment')}</p>
+                    <p className="text-xs opacity-80">{t('safeEnvironmentDesc')}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -256,8 +259,8 @@ export default function ContactForm({ section }: { section: Section }) {
                     <span className="text-sm">📚</span>
                   </div>
                   <div>
-                    <p className="font-bold text-sm">个性化课程定制</p>
-                    <p className="text-xs opacity-80">根据孩子特点定制方案</p>
+                    <p className="font-bold text-sm">{t('personalizedCourses')}</p>
+                    <p className="text-xs opacity-80">{t('personalizedCoursesDesc')}</p>
                   </div>
                 </div>
               </div>
@@ -266,17 +269,17 @@ export default function ContactForm({ section }: { section: Section }) {
                 <div className="flex justify-between text-center">
                   <div>
                     <div className="text-2xl font-bold">3000+</div>
-                    <div className="text-xs opacity-80">服务家庭</div>
+                    <div className="text-xs opacity-80">{t('familiesServed')}</div>
                   </div>
                   <div className="w-px bg-white/30" />
                   <div>
                     <div className="text-2xl font-bold">98%</div>
-                    <div className="text-xs opacity-80">满意度</div>
+                    <div className="text-xs opacity-80">{t('satisfaction')}</div>
                   </div>
                   <div className="w-px bg-white/30" />
                   <div>
                     <div className="text-2xl font-bold">6</div>
-                    <div className="text-xs opacity-80">校区</div>
+                    <div className="text-xs opacity-80">{t('campuses')}</div>
                   </div>
                 </div>
               </div>
@@ -285,8 +288,8 @@ export default function ContactForm({ section }: { section: Section }) {
                 <div className="flex items-center gap-2">
                   <span className="text-lg">🎉</span>
                   <div>
-                    <p className="font-bold text-sm">本月报名享9折</p>
-                    <p className="text-xs opacity-90">名额有限，先到先得！</p>
+                    <p className="font-bold text-sm">{t('discountTitle')}</p>
+                    <p className="text-xs opacity-90">{t('discountDesc')}</p>
                   </div>
                 </div>
               </div>
@@ -298,14 +301,14 @@ export default function ContactForm({ section }: { section: Section }) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="childName" className="block text-gray-800 text-sm font-semibold mb-2">
-                    孩子姓名 <span className="text-[#F5851F] ml-1">*</span>
+                    {t('childNameLabel')} <span className="text-[#F5851F] ml-1">*</span>
                   </label>
                   <input
                     id="childName"
                     type="text"
                     value={values.childName || ''}
                     onChange={(e) => handleFieldChange('childName', e.target.value)}
-                    placeholder="请输入孩子姓名"
+                    placeholder={t('childNamePlaceholder')}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
                     style={{ borderColor: errors.childName ? '#DC2626' : 'rgba(0,0,0,0.1)' }}
                   />
@@ -314,14 +317,14 @@ export default function ContactForm({ section }: { section: Section }) {
 
                 <div>
                   <label htmlFor="parentName" className="block text-gray-800 text-sm font-semibold mb-2">
-                    家长姓名 <span className="text-[#F5851F] ml-1">*</span>
+                    {t('parentNameLabel')} <span className="text-[#F5851F] ml-1">*</span>
                   </label>
                   <input
                     id="parentName"
                     type="text"
                     value={values.parentName || ''}
                     onChange={(e) => handleFieldChange('parentName', e.target.value)}
-                    placeholder="请输入家长姓名"
+                    placeholder={t('parentNamePlaceholder')}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
                     style={{ borderColor: errors.parentName ? '#DC2626' : 'rgba(0,0,0,0.1)' }}
                   />
@@ -330,14 +333,14 @@ export default function ContactForm({ section }: { section: Section }) {
 
                 <div>
                   <label htmlFor="phone" className="block text-gray-800 text-sm font-semibold mb-2">
-                    预约电话 <span className="text-[#F5851F] ml-1">*</span>
+                    {t('phoneLabel')} <span className="text-[#F5851F] ml-1">*</span>
                   </label>
                   <input
                     id="phone"
                     type="tel"
                     value={values.phone || ''}
                     onChange={(e) => handleFieldChange('phone', e.target.value)}
-                    placeholder="请输入手机号码"
+                    placeholder={t('phonePlaceholder')}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
                     style={{ borderColor: errors.phone ? '#DC2626' : 'rgba(0,0,0,0.1)' }}
                   />
@@ -346,7 +349,7 @@ export default function ContactForm({ section }: { section: Section }) {
 
                 <div className="md:col-span-2">
                   <label htmlFor="campus" className="block text-gray-800 text-sm font-semibold mb-2">
-                    选择校区 <span className="text-[#F5851F] ml-1">*</span>
+                    {t('campusLabel')} <span className="text-[#F5851F] ml-1">*</span>
                   </label>
                   <select
                     id="campus"
@@ -355,7 +358,7 @@ export default function ContactForm({ section }: { section: Section }) {
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
                     style={{ borderColor: errors.campus ? '#DC2626' : 'rgba(0,0,0,0.1)' }}
                   >
-                    <option value="">请选择校区</option>
+                    <option value="">{t('campusPlaceholder')}</option>
                     {CAMPUSES.map((campus) => (
                       <option key={campus.value} value={campus.value}>{campus.label}</option>
                     ))}
@@ -365,7 +368,7 @@ export default function ContactForm({ section }: { section: Section }) {
 
                 <div>
                   <label htmlFor="age" className="block text-gray-800 text-sm font-semibold mb-2">
-                    孩子年龄
+                    {t('ageLabel')}
                   </label>
                   <input
                     id="age"
@@ -374,7 +377,7 @@ export default function ContactForm({ section }: { section: Section }) {
                     max="12"
                     value={values.age || ''}
                     onChange={(e) => handleFieldChange('age', e.target.value)}
-                    placeholder="选填"
+                    placeholder={t('optional')}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
                     style={{ borderColor: 'rgba(0,0,0,0.1)' }}
                   />
@@ -382,7 +385,7 @@ export default function ContactForm({ section }: { section: Section }) {
 
                 <div>
                   <label htmlFor="course" className="block text-gray-800 text-sm font-semibold mb-2">
-                    意向课程
+                    {t('courseLabel')}
                   </label>
                   <select
                     id="course"
@@ -391,7 +394,7 @@ export default function ContactForm({ section }: { section: Section }) {
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
                     style={{ borderColor: 'rgba(0,0,0,0.1)' }}
                   >
-                    <option value="">选填</option>
+                    <option value="">{t('optional')}</option>
                     {COURSES.map((course) => (
                       <option key={course.value} value={course.value}>{course.label}</option>
                     ))}
@@ -400,7 +403,7 @@ export default function ContactForm({ section }: { section: Section }) {
 
                 <div>
                   <label htmlFor="preferredDate" className="block text-gray-800 text-sm font-semibold mb-2">
-                    期望试听日期
+                    {t('preferredDateLabel')}
                   </label>
                   <input
                     id="preferredDate"
@@ -414,7 +417,7 @@ export default function ContactForm({ section }: { section: Section }) {
 
                 <div>
                   <label htmlFor="preferredTimeSlot" className="block text-gray-800 text-sm font-semibold mb-2">
-                    期望时段
+                    {t('preferredTimeSlotLabel')}
                   </label>
                   <select
                     id="preferredTimeSlot"
@@ -423,7 +426,7 @@ export default function ContactForm({ section }: { section: Section }) {
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
                     style={{ borderColor: 'rgba(0,0,0,0.1)' }}
                   >
-                    <option value="">选填</option>
+                    <option value="">{t('optional')}</option>
                     {TIME_SLOTS.map((slot) => (
                       <option key={slot.value} value={slot.value}>{slot.label}</option>
                     ))}
@@ -432,13 +435,13 @@ export default function ContactForm({ section }: { section: Section }) {
 
                 <div className="md:col-span-2">
                   <label htmlFor="message" className="block text-gray-800 text-sm font-semibold mb-2">
-                    备注
+                    {t('messageLabel')}
                   </label>
                   <textarea
                     id="message"
                     value={values.message || ''}
                     onChange={(e) => handleFieldChange('message', e.target.value)}
-                    placeholder="选填，如有特殊需求请在此说明"
+                    placeholder={t('messagePlaceholder')}
                     rows={2}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
                     style={{ borderColor: 'rgba(0,0,0,0.1)' }}
@@ -454,7 +457,7 @@ export default function ContactForm({ section }: { section: Section }) {
                 className="w-full mt-6 py-4 rounded-xl text-white font-bold text-base shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
                 style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
               >
-                {submitting ? '提交中...' : (submitText || '立即预约')}
+                {submitting ? t('submitting') : (submitText || t('submitTextFallback'))}
               </button>
             </form>
           </div>

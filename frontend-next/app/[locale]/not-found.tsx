@@ -1,7 +1,9 @@
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Home, Search } from 'lucide-react';
 
 export default function NotFound() {
+  const t = useTranslations('errors');
   return (
     <div
       className="min-h-screen flex items-center justify-center"
@@ -12,29 +14,29 @@ export default function NotFound() {
           className="text-[120px] font-black text-white leading-none opacity-90"
           style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}
         >
-          404
+          {t('code404')}
         </div>
         <h1
           className="text-3xl font-bold text-white mt-4 mb-3"
           style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}
         >
-          页面未找到
+          {t('notFoundTitle')}
         </h1>
         <p className="text-white/80 mb-8 max-w-md mx-auto">
-          您访问的页面不存在或已被移除，请返回首页继续浏览
+          {t('notFoundMessage')}
         </p>
         <div className="flex gap-4 justify-center flex-wrap">
           <Link
             href="/"
             className="inline-flex items-center gap-2 px-6 py-3 bg-white text-[#F5851F] rounded-xl font-semibold hover:bg-white/90 transition-colors shadow-lg"
           >
-            <Home size={18} /> 返回首页
+            <Home size={18} /> {t('backToHome')}
           </Link>
           <Link
             href="/courses"
             className="inline-flex items-center gap-2 px-6 py-3 border-2 border-white/70 text-white rounded-xl font-semibold hover:bg-white/10 transition-colors"
           >
-            <Search size={18} /> 浏览课程
+            <Search size={18} /> {t('browseCourses')}
           </Link>
         </div>
       </div>

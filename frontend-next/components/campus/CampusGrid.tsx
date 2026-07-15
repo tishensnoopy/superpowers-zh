@@ -1,14 +1,16 @@
 import { MapPin } from 'lucide-react';
 import type { Campus } from '@/lib/api';
 import CampusCard from './CampusCard';
+import { useTranslations } from 'next-intl';
 
 // 校区卡片网格：4 列（桌面）/ 3 列（平板）/ 2 列（小平板）/ 1 列（手机）
 export default function CampusGrid({ campuses }: { campuses: Campus[] }) {
+  const t = useTranslations('campuses');
   if (campuses.length === 0) {
     return (
       <div className="py-32 text-center">
         <MapPin size={40} className="mx-auto mb-4 text-muted-foreground opacity-40" />
-        <p className="text-muted-foreground">校区信息更新中，敬请期待</p>
+        <p className="text-muted-foreground">{t('updating')}</p>
       </div>
     );
   }

@@ -1,7 +1,9 @@
 import { Heart } from 'lucide-react';
 import type { Section } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 export default function Gallery({ section }: { section: Section }) {
+  const t = useTranslations('sections.gallery');
   const { title, description, images, columns = '3' } = section;
 
   const colClasses: Record<string, string> = {
@@ -16,7 +18,7 @@ export default function Gallery({ section }: { section: Section }) {
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#ECFDF5] text-[#059669] text-sm font-medium mb-5">
             <Heart size={14} />
-            课堂瞬间
+            {t('badge')}
           </div>
           <h2
             className="text-[#1C2B3A] mb-4"
@@ -26,10 +28,10 @@ export default function Gallery({ section }: { section: Section }) {
               fontWeight: 800,
             }}
           >
-            {title || '记录每一个精彩成长时刻'}
+            {title || t('titleFallback')}
           </h2>
           <p className="text-muted-foreground text-base max-w-[480px] mx-auto">
-            {description || '真实课堂，真实笑脸。每一张照片都是孩子成长的珍贵印记。'}
+            {description || t('descriptionFallback')}
           </p>
         </div>
 
@@ -51,7 +53,7 @@ export default function Gallery({ section }: { section: Section }) {
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
                 <span className="text-white text-sm font-semibold bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">
-                  {img.caption || '照片'}
+                  {img.caption || t('photoFallback')}
                 </span>
               </div>
             </div>

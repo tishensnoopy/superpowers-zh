@@ -1,6 +1,7 @@
 import { vi } from 'vitest';
 import '@testing-library/jest-dom';
 import { createElement } from 'react';
+import zhCNMessages from '../i18n/messages/zh-CN.json';
 
 vi.mock('next/navigation', () => ({
   usePathname: () => '/',
@@ -13,9 +14,31 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
+function getNestedValue(obj: any, path: string): any {
+  return path.split('.').reduce((acc, key) => (acc ? acc[key] : undefined), obj);
+}
+
+function createTranslator(namespace: string) {
+  return (key: string, params?: Record<string, any>) => {
+    const fullKey = namespace ? `${namespace}.${key}` : key;
+    let value = getNestedValue(zhCNMessages, fullKey);
+    if (value === undefined) return key;
+    if (params && typeof value === 'string') {
+      Object.entries(params).forEach(([k, v]) => {
+        value = value.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
+      });
+    }
+    return value;
+  };
+}
+
 vi.mock('next-intl', () => ({
   useLocale: () => 'zh-CN',
-  useTranslations: () => (key: string) => key,
+  useTranslations: (namespace: string) => createTranslator(namespace),
+}));
+
+vi.mock('next-intl/server', () => ({
+  getTranslations: async (namespace: string) => createTranslator(namespace),
 }));
 
 vi.mock('next/link', () => ({

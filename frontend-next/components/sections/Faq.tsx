@@ -4,13 +4,7 @@ import { useState } from 'react';
 import { Search, ChevronDown, ThumbsUp, ThumbsDown } from 'lucide-react';
 import type { Section } from '@/lib/api';
 import { submitFaqFeedback } from '@/lib/api';
-
-const CATEGORIES = [
-  { value: 'all', label: '全部' },
-  { value: 'course', label: '课程咨询' },
-  { value: 'service', label: '服务相关' },
-  { value: 'policy', label: '政策规定' },
-] as const;
+import { useTranslations } from 'next-intl';
 
 interface FaqItem {
   id: number;
@@ -21,10 +15,20 @@ interface FaqItem {
 
 export default function Faq({ section }: { section: Section }) {
   const { title, faqs, showSearch = true } = section;
+  const t = useTranslations('sections.faq');
+  const tFaq = useTranslations('faq');
+  const tCommon = useTranslations('common');
   const [openId, setOpenId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [feedbackGiven, setFeedbackGiven] = useState<Record<number, 'helpful' | 'notHelpful' | 'submitting'>>({});
+
+  const CATEGORIES = [
+    { value: 'all', label: tFaq('all') },
+    { value: 'course', label: tFaq('courseConsulting') },
+    { value: 'service', label: tFaq('serviceRelated') },
+    { value: 'policy', label: tFaq('policyRegulations') },
+  ] as const;
 
   const faqList: FaqItem[] = Array.isArray(faqs) ? faqs : faqs?.data || [];
 
@@ -64,7 +68,7 @@ export default function Faq({ section }: { section: Section }) {
               fontWeight: 800,
             }}
           >
-            {title || '常见问题'}
+            {title || t('titleFallback')}
           </h2>
         </div>
 
@@ -74,10 +78,10 @@ export default function Faq({ section }: { section: Section }) {
               <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="搜索常见问题..."
+                placeholder={tFaq('searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                aria-label="搜索常见问题"
+                aria-label={tFaq('searchAriaLabel')}
                 className="w-full pl-12 pr-4 py-3 rounded-xl border border-border bg-card focus:outline-none focus:border-[#F5851F] transition-colors"
               />
             </div>
@@ -103,7 +107,7 @@ export default function Faq({ section }: { section: Section }) {
         <div className="max-w-3xl mx-auto space-y-4">
           {filteredFaqs.length === 0 && (
             <div className="text-center py-12 text-muted-foreground">
-              没有找到匹配的问题，请尝试其他关键词或分类。
+              {tFaq('noResults')}
             </div>
           )}
           {filteredFaqs.map((faq) => {
@@ -137,26 +141,26 @@ export default function Faq({ section }: { section: Section }) {
                     <div className="px-6 pb-4 flex items-center gap-3 border-t border-border/50 pt-3">
                       {!given && (
                         <>
-                          <span className="text-xs text-muted-foreground mr-2">这个回答对您有帮助吗？</span>
+                          <span className="text-xs text-muted-foreground mr-2">{tFaq('feedbackPrompt')}</span>
                           <button
                             onClick={() => handleFeedback(faq.id, true)}
                             className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-border bg-card hover:border-[#F5851F] hover:text-[#F5851F] transition-colors"
                           >
-                            <ThumbsUp size={12} /> 有用
+                            <ThumbsUp size={12} /> {tFaq('helpful')}
                           </button>
                           <button
                             onClick={() => handleFeedback(faq.id, false)}
                             className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-border bg-card hover:border-[#F5851F] hover:text-[#F5851F] transition-colors"
                           >
-                            <ThumbsDown size={12} /> 没用
+                            <ThumbsDown size={12} /> {tFaq('notHelpful')}
                           </button>
                         </>
                       )}
                       {given === 'submitting' && (
-                        <span className="text-xs text-muted-foreground">提交中...</span>
+                        <span className="text-xs text-muted-foreground">{tCommon('submitting')}</span>
                       )}
                       {(given === 'helpful' || given === 'notHelpful') && (
-                        <span className="text-xs text-[#F5851F] font-semibold">感谢反馈，我们会持续改进</span>
+                        <span className="text-xs text-[#F5851F] font-semibold">{tFaq('thanksForFeedback')}</span>
                       )}
                     </div>
                   )}

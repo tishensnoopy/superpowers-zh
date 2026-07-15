@@ -1,6 +1,7 @@
 'use client';
 
 import { Search } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface SearchBarProps {
   value: string;
@@ -8,7 +9,8 @@ interface SearchBarProps {
   placeholder?: string;
 }
 
-export default function SearchBar({ value, onChange, placeholder = '搜索课程...' }: SearchBarProps) {
+export default function SearchBar({ value, onChange, placeholder }: SearchBarProps) {
+  const t = useTranslations('courses');
   return (
     <div className="relative w-full">
       <Search
@@ -19,7 +21,7 @@ export default function SearchBar({ value, onChange, placeholder = '搜索课程
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
+        placeholder={placeholder ?? t('searchPlaceholder')}
         className="w-full pl-11 pr-4 py-3 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#F5851F] focus:ring-2 focus:ring-[#F5851F]/20 transition-all"
         style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}
       />

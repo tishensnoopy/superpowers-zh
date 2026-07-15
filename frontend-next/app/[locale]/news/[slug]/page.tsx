@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
-import { setRequestLocale } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { Calendar, Eye, ArrowLeft, Home } from 'lucide-react';
 import { getNews, getNewsBySlug, getNewsCategoryLabel, getImageUrl, getSiteSettings, type Locale } from '@/lib/api';
@@ -36,8 +37,9 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { locale, slug } = await params;
   const { data: news } = await getNewsBySlugSafe(slug, locale as Locale);
+  const tNews = await getTranslations('news');
   if (!news) {
-    return buildMetadata(undefined, { title: '新闻动态', canonicalUrl: `/news/${slug}` }, { locale: locale as 'zh-CN' | 'en-US', path: `/news/${slug}` });
+    return buildMetadata(undefined, { title: tNews('title'), canonicalUrl: `/news/${slug}` }, { locale: locale as 'zh-CN' | 'en-US', path: `/news/${slug}` });
   }
 
   const metadata = buildMetadata(news.seo, {
@@ -81,13 +83,16 @@ export default async function NewsDetailPage({ params }: PageProps) {
 
   const { data: settingsData } = await getSiteSettings(locale as Locale).catch(() => ({ data: [] as never[] }));
   const settings = Array.isArray(settingsData) ? settingsData[0] : settingsData;
-  const newsSettings = settings || { name: '佑森小课堂' };
+  const tSeo = useTranslations('seo');
+  const tNav = useTranslations('navigation');
+  const tNews = useTranslations('news');
+  const newsSettings = settings || { name: tSeo('siteNameZh') };
 
   const newsSchema = buildNewsArticleSchema(news, newsSettings, locale as Locale);
   const breadcrumbSchema = buildBreadcrumbSchema(
     [
-      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
-      { name: locale === 'en-US' ? 'News' : '新闻动态', url: '/news' },
+      { name: tNav('home'), url: '/' },
+      { name: tNav('news'), url: '/news' },
       { name: news.title, url: `/news/${news.slug}` },
     ],
     locale as Locale
@@ -107,11 +112,11 @@ export default async function NewsDetailPage({ params }: PageProps) {
         {/* 面包屑导航 */}
         <nav className="flex items-center gap-2 py-6 text-sm text-[#9CA3AF]">
           <Link href="/" className="flex items-center gap-1 hover:text-[#F5851F] transition-colors">
-            <Home size={14} /> 首页
+            <Home size={14} /> {tNav('home')}
           </Link>
           <span>/</span>
           <Link href="/news" className="hover:text-[#F5851F] transition-colors">
-            新闻动态
+            {tNav('news')}
           </Link>
           {categoryLabel && (
             <>
@@ -153,7 +158,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
             {viewCount !== undefined && (
               <span className="flex items-center gap-1.5 text-sm text-[#9CA3AF]">
                 <Eye size={14} />
-                {formatViewCount(viewCount)} 次阅读
+                {formatViewCount(viewCount)} {tNews('viewsCount')}
               </span>
             )}
           </div>
@@ -189,7 +194,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
               className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold transition-all hover:scale-105"
               style={{ background: '#FFF3E5', color: '#F5851F' }}
             >
-              <ArrowLeft size={16} /> 返回新闻列表
+              <ArrowLeft size={16} /> {tNews('backToList')}
             </Link>
           </div>
         </article>

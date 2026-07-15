@@ -4,8 +4,10 @@ import { useState } from 'react';
 import { Images } from 'lucide-react';
 import StrapiImage from '@/components/ui/StrapiImage';
 import type { Campus } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 export default function CampusGallery({ campus }: { campus: Campus }) {
+  const t = useTranslations('campuses');
   const galleryData = (campus.gallery ?? []).filter((item) => !!item?.url);
 
   const [activeIndex, setActiveIndex] = useState(0);
@@ -20,13 +22,13 @@ export default function CampusGallery({ campus }: { campus: Campus }) {
           fontWeight: 700,
         }}
       >
-        校区环境
+        {t('galleryTitle')}
       </h2>
 
       {galleryData.length === 0 ? (
         <div className="text-center py-16 text-muted-foreground bg-muted/20 rounded-xl border border-dashed border-border">
           <Images size={40} className="mx-auto mb-3 opacity-40" />
-          <p>图片更新中，敬请期待</p>
+          <p>{t('galleryUpdating')}</p>
         </div>
       ) : (
         <div className="flex flex-col md:flex-row gap-4">
@@ -34,7 +36,7 @@ export default function CampusGallery({ campus }: { campus: Campus }) {
             <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-muted">
               <StrapiImage
                 src={galleryData[activeIndex]}
-                alt={`校区环境图片 ${activeIndex + 1}`}
+                alt={t('galleryImageAlt', { index: activeIndex + 1 })}
                 fill
                 sizes="(max-width: 768px) 100vw, 66vw"
                 className="object-cover"
@@ -48,7 +50,7 @@ export default function CampusGallery({ campus }: { campus: Campus }) {
                   key={(item.url || '') + index}
                   type="button"
                   onClick={() => setActiveIndex(index)}
-                  aria-label={`切换到图片 ${index + 1}`}
+                  aria-label={t('switchToImageAriaLabel', { index: index + 1 })}
                   className={`relative aspect-[4/3] rounded-lg overflow-hidden border-2 transition-all ${
                     index === activeIndex
                       ? 'border-[#F5851F] ring-2 ring-[#F5851F]/30'
@@ -57,7 +59,7 @@ export default function CampusGallery({ campus }: { campus: Campus }) {
                 >
                   <StrapiImage
                     src={item}
-                    alt={`缩略图 ${index + 1}`}
+                    alt={t('thumbnailAlt', { index: index + 1 })}
                     fill
                     sizes="100px"
                     className="object-cover"

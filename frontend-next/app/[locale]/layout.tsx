@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Noto_Sans_SC, Nunito } from 'next/font/google';
-import { setRequestLocale, getMessages } from 'next-intl/server';
+import { setRequestLocale, getMessages, getTranslations } from 'next-intl/server';
 import { NextIntlClientProvider } from 'next-intl';
 import { getSiteSettings, getNavigationTree, getFooter, getImageUrl, type Locale } from '@/lib/api';
 import { buildWebSiteSchema, buildOrganizationSchema, buildJsonLd } from '@/lib/seo';
@@ -39,26 +39,27 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
+  const t = await getTranslations('seo');
   return {
     title: {
       default:
         locale === 'en-US'
-          ? 'Yousen Education | Preschool-Primary Transition'
-          : '佑森小课堂 | 专注幼小衔接教育8年',
+          ? t('defaultTitleEn')
+          : t('defaultTitleZh'),
       template:
-        locale === 'en-US' ? '%s | Yousen Education' : '%s | 佑森小课堂',
+        locale === 'en-US' ? t('titleTemplateEn') : t('titleTemplateZh'),
     },
     description:
       locale === 'en-US'
-        ? '8 years of preschool-primary transition education with scientific curriculum and professional teachers'
-        : '专注幼小衔接教育8年，科学课程体系+专业师资团队',
+        ? t('defaultDescriptionEn')
+        : t('defaultDescriptionZh'),
     metadataBase: new URL(
       process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
     ),
     openGraph: {
       type: 'website',
       locale: locale === 'en-US' ? 'en_US' : 'zh_CN',
-      siteName: locale === 'en-US' ? 'Yousen Education' : '佑森小课堂',
+      siteName: locale === 'en-US' ? t('siteNameEn') : t('siteNameZh'),
     },
     robots: { index: true, follow: true },
   };

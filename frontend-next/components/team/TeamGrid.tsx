@@ -1,6 +1,7 @@
 import TeacherCard from './TeacherCard';
 import TeacherDetail from './TeacherDetail';
 import type { Teacher } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 interface TeamGridProps {
   teachers?: Teacher[];
@@ -10,6 +11,7 @@ interface TeamGridProps {
 }
 
 export default function TeamGrid({ teachers, selectedId, onSelect, onClose }: TeamGridProps) {
+  const t = useTranslations('teachers');
   const list = Array.isArray(teachers) ? teachers : [];
 
   // 空状态
@@ -19,7 +21,7 @@ export default function TeamGrid({ teachers, selectedId, onSelect, onClose }: Te
         className="py-20 text-center text-muted-foreground bg-muted/20 rounded-2xl border border-dashed border-border"
         style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}
       >
-        暂无教师数据
+        {t('empty')}
       </div>
     );
   }

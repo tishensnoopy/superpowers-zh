@@ -1,7 +1,9 @@
 import { Target } from 'lucide-react';
 import type { CourseObjective } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 export default function CourseObjectives({ objectives }: { objectives?: CourseObjective[] }) {
+  const t = useTranslations('courses');
   const hasData = objectives && objectives.length > 0;
 
   return (
@@ -19,7 +21,7 @@ export default function CourseObjectives({ objectives }: { objectives?: CourseOb
               fontWeight: 700,
             }}
           >
-            学习目标
+            {t('learningObjectives')}
           </h2>
         </div>
         {hasData ? (
@@ -45,7 +47,7 @@ export default function CourseObjectives({ objectives }: { objectives?: CourseOb
         ) : (
           <div className="text-center py-12 text-muted-foreground bg-muted/20 rounded-2xl border border-dashed border-border">
             <Target size={32} className="mx-auto mb-3 opacity-40" />
-            <p>学习目标内容更新中，敬请期待</p>
+            <p>{t('objectivesUpdating')}</p>
           </div>
         )}
       </div>

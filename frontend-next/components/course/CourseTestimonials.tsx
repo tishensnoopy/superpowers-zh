@@ -1,5 +1,6 @@
 import { MessageSquare } from 'lucide-react';
 import type { CourseTestimonial } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -18,6 +19,7 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export default function CourseTestimonials({ testimonials }: { testimonials?: CourseTestimonial[] }) {
+  const t = useTranslations('courses');
   const hasData = testimonials && testimonials.length > 0;
 
   return (
@@ -35,7 +37,7 @@ export default function CourseTestimonials({ testimonials }: { testimonials?: Co
               fontWeight: 700,
             }}
           >
-            家长评价
+            {t('parentReviews')}
           </h2>
         </div>
         {hasData ? (
@@ -58,7 +60,7 @@ export default function CourseTestimonials({ testimonials }: { testimonials?: Co
         ) : (
           <div className="text-center py-12 text-muted-foreground bg-muted/20 rounded-2xl border border-dashed border-border">
             <MessageSquare size={32} className="mx-auto mb-3 opacity-40" />
-            <p>家长评价内容更新中，敬请期待</p>
+            <p>{t('testimonialsUpdating')}</p>
           </div>
         )}
       </div>

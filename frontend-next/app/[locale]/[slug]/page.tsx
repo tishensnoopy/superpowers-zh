@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
-import { setRequestLocale } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import { getPages, getPageBySlug, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd, buildBreadcrumbSchema } from '@/lib/seo';
 import SectionRenderer from '@/components/SectionRenderer';
@@ -30,8 +31,9 @@ export async function generateMetadata({
   const { data: page } = await getPageBySlug(slug, locale as Locale).catch(() => ({
     data: null,
   }));
+  const tSeo = await getTranslations('seo');
   if (!page) {
-    return buildMetadata(undefined, { title: '页面', canonicalUrl: `/${slug}` }, { locale: locale as 'zh-CN' | 'en-US', path: `/${slug}` });
+    return buildMetadata(undefined, { title: tSeo('page'), canonicalUrl: `/${slug}` }, { locale: locale as 'zh-CN' | 'en-US', path: `/${slug}` });
   }
   return buildMetadata(page.seo, { title: page.title, canonicalUrl: `/${slug}` }, { locale: locale as 'zh-CN' | 'en-US', path: `/${slug}` });
 }
@@ -49,9 +51,10 @@ export default async function DynamicPage({ params }: PageProps) {
 
   const sections = page.sections || [];
 
+  const tSeo = useTranslations('seo');
   const breadcrumbSchema = buildBreadcrumbSchema(
     [
-      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
+      { name: tSeo('home'), url: '/' },
       { name: page.title, url: `/${page.slug}` },
     ],
     locale as Locale

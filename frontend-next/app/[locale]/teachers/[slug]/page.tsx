@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { setRequestLocale } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import { getTeachers, getTeacherBySlug, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd, buildPersonSchema, buildBreadcrumbSchema } from '@/lib/seo';
 import StrapiImage from '@/components/ui/StrapiImage';
@@ -26,9 +27,10 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { locale, slug } = await params;
   const teacher = await getTeacherBySlug(slug, locale as Locale).catch(() => null);
+  const tSeo = await getTranslations('seo');
   if (!teacher) {
     return buildMetadata(undefined, {
-      title: '教师详情',
+      title: tSeo('teacherDetail'),
       canonicalUrl: `/teachers/${slug}`,
     }, { locale: locale as 'zh-CN' | 'en-US', path: `/teachers/${slug}` });
   }
@@ -40,10 +42,10 @@ export async function generateMetadata({
 }
 
 const SUBJECT_LABELS: Record<string, string> = {
-  pinyin: '拼音',
-  math: '数学',
-  english: '英语',
-  comprehensive: '综合素养',
+  pinyin: 'pinyin',
+  math: 'math',
+  english: 'english',
+  comprehensive: 'comprehensive',
 };
 
 export default async function TeacherDetailPage({ params }: PageProps) {
@@ -59,11 +61,14 @@ export default async function TeacherDetailPage({ params }: PageProps) {
     ? teacher.achievements
     : [];
 
+  const tSeo = useTranslations('seo');
+  const tTeachers = useTranslations('teachers');
+
   const personSchema = buildPersonSchema(teacher, locale as Locale);
   const breadcrumbSchema = buildBreadcrumbSchema(
     [
-      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
-      { name: locale === 'en-US' ? 'Teachers' : '师资团队', url: '/teachers' },
+      { name: tSeo('home'), url: '/' },
+      { name: tSeo('teachers'), url: '/teachers' },
       { name: teacher.name, url: `/teachers/${teacher.slug}` },
     ],
     locale as Locale
@@ -83,11 +88,11 @@ export default async function TeacherDetailPage({ params }: PageProps) {
         {/* 面包屑 */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
           <Link href="/" className="hover:text-[#F5851F] transition-colors">
-            首页
+            {tSeo('home')}
           </Link>
           <span>/</span>
           <Link href="/teachers" className="hover:text-[#F5851F] transition-colors">
-            师资团队
+            {tSeo('teachers')}
           </Link>
           <span>/</span>
           <span className="text-[#1C2B3A] font-medium">{teacher.name}</span>
@@ -137,17 +142,17 @@ export default async function TeacherDetailPage({ params }: PageProps) {
                     className="inline-block px-3 py-1 rounded-full text-xs font-medium text-white"
                     style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
                   >
-                    {SUBJECT_LABELS[teacher.subject] || teacher.subject}
+                    {SUBJECT_LABELS[teacher.subject] ? tTeachers(SUBJECT_LABELS[teacher.subject]) : teacher.subject}
                   </span>
                 )}
                 {typeof teacher.teachingYears === 'number' && (
                   <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-[#FFF3E5] text-[#F5851F]">
-                    {teacher.teachingYears}年教龄
+                    {teacher.teachingYears}{tTeachers('teachingYearsUnit')}
                   </span>
                 )}
                 {teacher.education && (
                   <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
-                    {teacher.education}学历
+                    {teacher.education}{tTeachers('educationDegree')}
                   </span>
                 )}
               </div>
@@ -170,7 +175,7 @@ export default async function TeacherDetailPage({ params }: PageProps) {
                 className="inline-block px-6 py-2.5 rounded-xl text-white font-medium text-sm transition-transform hover:scale-105"
                 style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
               >
-                预约试听
+                {tTeachers('bookTrial')}
               </Link>
             </div>
           </div>
@@ -185,7 +190,7 @@ export default async function TeacherDetailPage({ params }: PageProps) {
                 className="text-lg font-bold text-[#1C2B3A] mb-3"
                 style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}
               >
-                教育背景
+                {tTeachers('education')}
               </h2>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {teacher.education}
@@ -200,7 +205,7 @@ export default async function TeacherDetailPage({ params }: PageProps) {
                 className="text-lg font-bold text-[#1C2B3A] mb-3"
                 style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}
               >
-                教学特色
+                {tTeachers('teachingFeatures')}
               </h2>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 {teacher.teachingFeatures}
@@ -216,7 +221,7 @@ export default async function TeacherDetailPage({ params }: PageProps) {
               className="text-lg font-bold text-[#1C2B3A] mb-4"
               style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}
             >
-              荣誉成就
+              {tTeachers('achievements')}
             </h2>
             <div className="flex flex-wrap gap-2">
               {achievementList.map((item, idx) => (

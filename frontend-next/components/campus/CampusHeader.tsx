@@ -1,7 +1,9 @@
 import { MapPin } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 // 校区总览页 Hero 区：固定标题与副标题
 export default function CampusHeader() {
+  const t = useTranslations('campuses');
   return (
     <div className="text-center mb-12">
       <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white shadow-sm mb-5">
@@ -15,10 +17,10 @@ export default function CampusHeader() {
           fontWeight: 800,
         }}
       >
-        六大校区 任您选择
+        {t('title')}
       </h1>
       <p className="text-muted-foreground text-lg max-w-[640px] mx-auto">
-        遍布武汉三镇，就近选择优质教学
+        {t('subtitle')}
       </p>
     </div>
   );

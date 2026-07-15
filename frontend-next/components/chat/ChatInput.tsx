@@ -2,6 +2,7 @@
 
 import { useState, useRef, type KeyboardEvent } from 'react';
 import { Send, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 const MAX_LENGTH = 500;
 
@@ -15,6 +16,7 @@ interface ChatInputProps {
 export default function ChatInput({ onSend, isLoading, disabled = false, locale = 'zh-CN' }: ChatInputProps) {
   const [value, setValue] = useState('');
   const [error, setError] = useState('');
+  const t = useTranslations('chat');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const isDisabled = isLoading || disabled;
@@ -23,7 +25,7 @@ export default function ChatInput({ onSend, isLoading, disabled = false, locale 
     const trimmed = value.trim();
     if (!trimmed || isDisabled) return;
     if (trimmed.length > MAX_LENGTH) {
-      setError(locale === 'en-US' ? `Message cannot exceed ${MAX_LENGTH} characters` : `消息不能超过 ${MAX_LENGTH} 字符`);
+      setError(t('messageTooLong', { max: MAX_LENGTH }));
       return;
     }
     setError('');
@@ -53,7 +55,7 @@ export default function ChatInput({ onSend, isLoading, disabled = false, locale 
     <div className="border-t border-gray-100 p-3 bg-white">
       {disabled && (
         <div className="mb-2 text-center text-xs text-orange-500 bg-orange-50 rounded-lg py-1.5">
-          {locale === 'en-US' ? 'Transferred to human agent, please wait' : '已转人工客服，请等待客服回复'}
+          {t('transferredNotice')}
         </div>
       )}
       {error && (
@@ -67,7 +69,7 @@ export default function ChatInput({ onSend, isLoading, disabled = false, locale 
           value={value}
           onChange={handleInput}
           onKeyDown={handleKeyDown}
-          placeholder={locale === 'en-US' ? 'Type your question...' : '请输入您的问题...'}
+          placeholder={t('inputPlaceholder')}
           disabled={isDisabled}
           maxLength={MAX_LENGTH}
           rows={1}
@@ -78,7 +80,7 @@ export default function ChatInput({ onSend, isLoading, disabled = false, locale 
           onClick={handleSend}
           disabled={isDisabled}
           aria-busy={isLoading}
-          aria-label={locale === 'en-US' ? 'Send' : '发送'}
+          aria-label={t('sendButton')}
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
         >

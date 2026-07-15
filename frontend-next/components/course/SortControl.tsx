@@ -1,20 +1,22 @@
 'use client';
 
 import { ChevronDown } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface SortControlProps {
   value: string | null;
   onChange: (value: string | null) => void;
 }
 
-const options = [
-  { label: '默认排序', value: null },
-  { label: '名称 A-Z', value: 'name:asc' },
-  { label: '价格从低到高', value: 'price:asc' },
-  { label: '价格从高到低', value: 'price:desc' },
-];
-
 export default function SortControl({ value, onChange }: SortControlProps) {
+  const t = useTranslations('courses');
+  const options = [
+    { label: t('sortDefault'), value: null },
+    { label: t('sortNameAsc'), value: 'name:asc' },
+    { label: t('sortPriceAsc'), value: 'price:asc' },
+    { label: t('sortPriceDesc'), value: 'price:desc' },
+  ];
+
   return (
     <div className="relative inline-block">
       <select

@@ -7,6 +7,7 @@ import { Phone, Menu, X, ChevronDown } from 'lucide-react';
 import type { NavigationItem, SiteSettings } from '@/lib/api';
 import { getImageUrl } from '@/lib/api';
 import LanguageSwitcher from './LanguageSwitcher';
+import { useTranslations } from 'next-intl';
 
 export default function Navigation({
   navigation,
@@ -15,6 +16,7 @@ export default function Navigation({
   navigation: NavigationItem[];
   settings: SiteSettings;
 }) {
+  const t = useTranslations('navigation');
   const pathname = usePathname();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -59,7 +61,7 @@ export default function Navigation({
           {logoUrl ? (
             <img
               src={logoUrl}
-              alt={settings.name || '佑森小课堂'}
+              alt={settings.name || t('brandNameFallback')}
               className="w-10 h-10 rounded-xl object-cover"
             />
           ) : (
@@ -67,7 +69,7 @@ export default function Navigation({
               className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-lg font-black shadow-sm"
               style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
             >
-              {settings.name?.[0] || '佑'}
+              {settings.name?.[0] || t('brandNameFallback')[0]}
             </div>
           )}
           <div>
@@ -75,9 +77,9 @@ export default function Navigation({
               className="font-black text-[18px] leading-tight text-[#1C2B3A]"
               style={{ fontFamily: "'Nunito', sans-serif" }}
             >
-              {settings.name || '佑森小课堂'}
+              {settings.name || t('brandNameFallback')}
             </div>
-            <div className="text-[10px] text-muted-foreground tracking-widest">{settings.slogan || '专注幼小衔接教育8年'}</div>
+            <div className="text-[10px] text-muted-foreground tracking-widest">{settings.slogan || t('sloganFallback')}</div>
           </div>
         </div>
 
@@ -163,12 +165,12 @@ export default function Navigation({
             className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.03]"
             style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
           >
-            预约免费试听
+            {t('bookFreeTrial')}
           </Link>
           <button
             className="lg:hidden p-2 rounded-lg text-foreground"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? '关闭菜单' : '打开菜单'}
+            aria-label={mobileMenuOpen ? t('closeMenu') : t('openMenu')}
             aria-expanded={mobileMenuOpen}
           >
             {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
@@ -235,7 +237,7 @@ export default function Navigation({
             className="mt-3 py-3 rounded-xl text-white text-sm font-semibold text-center"
             style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
           >
-            预约免费试听
+            {t('bookFreeTrial')}
           </button>
         </div>
       )}

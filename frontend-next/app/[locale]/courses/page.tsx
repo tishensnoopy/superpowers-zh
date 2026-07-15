@@ -1,22 +1,25 @@
 import CourseSearchPanel from '@/components/course/CourseSearchPanel';
-import { setRequestLocale } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import { buildMetadata, buildJsonLd, buildBreadcrumbSchema } from '@/lib/seo';
 import type { Metadata } from 'next';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
+  const t = await getTranslations('courses');
   return buildMetadata(undefined, {
-    title: '课程体系',
+    title: t('title'),
   }, { locale: locale as 'zh-CN' | 'en-US', path: '/courses' });
 }
 
 export default async function CoursesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const tNav = useTranslations('navigation');
   const breadcrumbSchema = buildBreadcrumbSchema(
     [
-      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
-      { name: locale === 'en-US' ? 'Courses' : '课程', url: '/courses' },
+      { name: tNav('home'), url: '/' },
+      { name: tNav('courses'), url: '/courses' },
     ],
     locale as 'zh-CN' | 'en-US'
   );

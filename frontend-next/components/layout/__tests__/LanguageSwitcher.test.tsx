@@ -1,19 +1,26 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { usePathname } from 'next/navigation';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import LanguageSwitcher from '../LanguageSwitcher';
 
 vi.mock('next/navigation');
 vi.mock('next-intl');
 
+const translations: Record<string, string> = {
+  label: '切换语言',
+  chinese: '中文',
+  english: 'English',
+};
+
 describe('LanguageSwitcher', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    (useLocale as any).mockReturnValue('zh-CN');
+    (useTranslations as any).mockReturnValue((key: string) => translations[key] || key);
   });
 
   it('renders with aria-label', () => {
-    (useLocale as any).mockReturnValue('zh-CN');
     (usePathname as any).mockReturnValue('/courses');
 
     render(<LanguageSwitcher />);

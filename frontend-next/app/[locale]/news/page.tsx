@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { getNews, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd, buildBreadcrumbSchema } from '@/lib/seo';
-import { setRequestLocale } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import NewsCard from '@/components/news/NewsCard';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -9,10 +10,10 @@ import type { Metadata } from 'next';
 export const revalidate = 300;
 
 const CATEGORIES = [
-  { value: '', label: '全部' },
-  { value: 'company_news', label: '公司动态' },
-  { value: 'industry_news', label: '行业资讯' },
-  { value: 'event_notice', label: '活动通知' },
+  { value: '', label: 'all' },
+  { value: 'company_news', label: 'companyNews' },
+  { value: 'industry_news', label: 'industryNews' },
+  { value: 'event_notice', label: 'eventNotice' },
 ];
 
 const PAGE_SIZE = 9;
@@ -24,9 +25,10 @@ interface PageProps {
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
+  const t = await getTranslations('news');
   return buildMetadata(undefined, {
-    title: '新闻动态',
-    description: '了解我们的最新动态、行业资讯和活动通知。',
+    title: t('title'),
+    description: t('description'),
     canonicalUrl: '/news',
   }, { locale: locale as 'zh-CN' | 'en-US', path: '/news' });
 }
@@ -34,6 +36,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function NewsListPage({ params, searchParams }: PageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
+  const t = useTranslations('news');
+  const tNav = useTranslations('navigation');
   const { category, page } = await searchParams;
   const activeCategory = category || '';
   const currentPage = Math.max(1, parseInt(page || '1', 10) || 1);
@@ -56,8 +60,8 @@ export default async function NewsListPage({ params, searchParams }: PageProps) 
 
   const breadcrumbSchema = buildBreadcrumbSchema(
     [
-      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
-      { name: locale === 'en-US' ? 'News' : '新闻动态', url: '/news' },
+      { name: tNav('home'), url: '/' },
+      { name: tNav('news'), url: '/news' },
     ],
     locale as Locale
   );
@@ -78,10 +82,10 @@ export default async function NewsListPage({ params, searchParams }: PageProps) 
               fontWeight: 800,
             }}
           >
-            新闻动态
+            {t('title')}
           </h1>
           <p className="text-[#6B7280] text-base sm:text-lg">
-            了解最新教育资讯与校区活动
+            {t('subtitle')}
           </p>
         </div>
 
@@ -101,7 +105,7 @@ export default async function NewsListPage({ params, searchParams }: PageProps) 
                 }`}
                 style={isActive ? { background: '#F5851F' } : {}}
               >
-                {cat.label}
+                {t(cat.label)}
               </Link>
             );
           })}
@@ -109,7 +113,7 @@ export default async function NewsListPage({ params, searchParams }: PageProps) 
 
         {pageNews.length === 0 ? (
           <div className="text-center py-20 text-[#9CA3AF]">
-            <p className="text-lg">暂无新闻内容</p>
+            <p className="text-lg">{t('empty')}</p>
           </div>
         ) : (
           <>
@@ -126,7 +130,7 @@ export default async function NewsListPage({ params, searchParams }: PageProps) 
                     href={buildPageHref(safeCurrentPage - 1)}
                     className="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-white border border-[#E5E7EB] text-sm text-[#6B7280] hover:border-[#F5851F] hover:text-[#F5851F] transition-colors"
                   >
-                    <ChevronLeft size={16} /> 上一页
+                    <ChevronLeft size={16} /> {t('prevPage')}
                   </Link>
                 )}
 
@@ -150,14 +154,14 @@ export default async function NewsListPage({ params, searchParams }: PageProps) 
                     href={buildPageHref(safeCurrentPage + 1)}
                     className="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-white border border-[#E5E7EB] text-sm text-[#6B7280] hover:border-[#F5851F] hover:text-[#F5851F] transition-colors"
                   >
-                    下一页 <ChevronRight size={16} />
+                    {t('nextPage')} <ChevronRight size={16} />
                   </Link>
                 )}
               </div>
             )}
 
             <div className="text-center text-sm text-[#9CA3AF] mt-6">
-              第 {safeCurrentPage} / {totalPages} 页 · 共 {totalItems} 条新闻
+              {t('paginationInfo', { current: safeCurrentPage, total: totalPages, count: totalItems })}
             </div>
           </>
         )}

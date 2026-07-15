@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
-import { setRequestLocale } from 'next-intl/server';
+import { setRequestLocale, getTranslations } from 'next-intl/server';
+import { useTranslations } from 'next-intl';
 import { getCampuses, getCampusBySlug, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd, buildLocalBusinessSchema, buildBreadcrumbSchema } from '@/lib/seo';
 import CampusDetailHeader from '@/components/campus/CampusDetailHeader';
@@ -30,8 +31,9 @@ export async function generateMetadata({
   const { locale, slug } = await params;
   const { data } = await getCampusBySlug(slug, locale as Locale).catch(() => ({ data: [] }));
   const campus = Array.isArray(data) ? data[0] : data;
+  const tSeo = await getTranslations('seo');
   if (!campus) {
-    return buildMetadata(undefined, { title: '校区详情', canonicalUrl: `/campuses/${slug}` }, { locale: locale as 'zh-CN' | 'en-US', path: `/campuses/${slug}` });
+    return buildMetadata(undefined, { title: tSeo('campusDetail'), canonicalUrl: `/campuses/${slug}` }, { locale: locale as 'zh-CN' | 'en-US', path: `/campuses/${slug}` });
   }
   return buildMetadata(campus.seo, {
     title: campus.name,
@@ -51,10 +53,11 @@ export default async function CampusDetailPage({ params }: PageProps) {
   }
 
   const localBusinessSchema = buildLocalBusinessSchema(campus, locale as Locale);
+  const tSeo = useTranslations('seo');
   const breadcrumbSchema = buildBreadcrumbSchema(
     [
-      { name: locale === 'en-US' ? 'Home' : '首页', url: '/' },
-      { name: locale === 'en-US' ? 'Campuses' : '校区分布', url: '/campuses' },
+      { name: tSeo('home'), url: '/' },
+      { name: tSeo('campuses'), url: '/campuses' },
       { name: campus.name, url: `/campuses/${campus.slug}` },
     ],
     locale as Locale

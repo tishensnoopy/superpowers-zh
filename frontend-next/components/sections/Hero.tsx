@@ -2,8 +2,10 @@ import { CalendarDays, ChevronRight, Sparkles, Star } from 'lucide-react';
 import Link from 'next/link';
 import type { Section } from '@/lib/api';
 import { getImageUrl } from '@/lib/api';
+import { useTranslations } from 'next-intl';
 
 export default function Hero({ section }: { section: Section }) {
+  const t = useTranslations('sections.hero');
   const { title, subtitle, description, backgroundImage, buttonText, isFullWidth = true, image1, image2 } = section;
 
   const image1Url = getImageUrl(image1) || 'https://images.unsplash.com/photo-1586694680938-9682c9e1f736?w=400&h=480&fit=crop&auto=format';
@@ -43,7 +45,7 @@ export default function Hero({ section }: { section: Section }) {
           <div className="col-span-12 lg:col-span-7">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-white/80 text-sm mb-8">
               <Sparkles size={14} className="text-[#F5851F]" />
-              <span>{subtitle || '2026年秋季班正在招生 · 名额有限'}</span>
+              <span>{subtitle || t('subtitleFallback')}</span>
             </div>
 
             <h1
@@ -54,19 +56,19 @@ export default function Hero({ section }: { section: Section }) {
                 fontWeight: 800,
               }}
             >
-              {title || '让每个孩子\n自信迈入小学大门'}
+              {title || t('titleFallback')}
             </h1>
 
             <p className="text-white/75 text-lg leading-relaxed mb-10 max-w-[520px]">
-              {description || '专注幼小衔接教育8年，科学课程体系 + 专业师资团队，帮助3-6岁儿童在入学前全面准备。'}
+              {description || t('descriptionFallback')}
             </p>
 
             <div className="flex items-center gap-8 mb-10">
               {[
-                { num: '8年+', label: '专注幼教' },
-                { num: '3000+', label: '毕业学员' },
-                { num: '98%', label: '家长满意度' },
-                { num: '6所', label: '直营校区' },
+                { num: t('stat1Num'), label: t('stat1Label') },
+                { num: t('stat2Num'), label: t('stat2Label') },
+                { num: t('stat3Num'), label: t('stat3Label') },
+                { num: t('stat4Num'), label: t('stat4Label') },
               ].map((stat) => (
                 <div key={stat.label} className="text-center">
                   <div
@@ -87,13 +89,13 @@ export default function Hero({ section }: { section: Section }) {
                 style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
               >
                 <CalendarDays size={18} />
-                {buttonText || '立即预约试听'}
+                {buttonText || t('buttonTextFallback')}
               </Link>
               <Link
                 href="/courses"
                 className="flex items-center gap-2 px-8 py-4 rounded-xl font-semibold text-base border border-white/30 text-white hover:bg-white/10 transition-all duration-200"
               >
-                了解课程体系
+                {t('secondaryButton')}
                 <ChevronRight size={18} />
               </Link>
             </div>
@@ -104,14 +106,14 @@ export default function Hero({ section }: { section: Section }) {
               <div className="absolute top-0 right-0 w-72 h-80 rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20">
                 <img
                   src={image1Url}
-                  alt="小女孩认真学习写字"
+                  alt={t('image1Alt')}
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="absolute bottom-10 left-0 w-60 h-64 rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20">
                 <img
                   src={image2Url}
-                  alt="孩子们快乐学习"
+                  alt={t('image2Alt')}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -123,8 +125,8 @@ export default function Hero({ section }: { section: Section }) {
                   <Star size={18} fill="white" />
                 </div>
                 <div>
-                  <div className="font-black text-sm text-[#1C2B3A]">口碑认证</div>
-                  <div className="text-xs text-muted-foreground">连续5年优质教育机构</div>
+                  <div className="font-black text-sm text-[#1C2B3A]">{t('badgeTitle')}</div>
+                  <div className="text-xs text-muted-foreground">{t('badgeDesc')}</div>
                 </div>
               </div>
             </div>

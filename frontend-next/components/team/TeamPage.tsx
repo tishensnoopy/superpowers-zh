@@ -5,8 +5,11 @@ import { getTeachers, type Teacher, type Locale } from '@/lib/api';
 import TeamHeader from './TeamHeader';
 import TeamFilter from './TeamFilter';
 import TeamGrid from './TeamGrid';
+import { useTranslations } from 'next-intl';
 
 export default function TeamPage({ locale = 'zh-CN' }: { locale?: Locale }) {
+  const tCommon = useTranslations('common');
+  const tCourses = useTranslations('courses');
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -78,11 +81,11 @@ export default function TeamPage({ locale = 'zh-CN' }: { locale?: Locale }) {
 
           {/* 内容区 */}
           {loading ? (
-            <div className="py-32 text-center text-muted-foreground">加载中...</div>
+            <div className="py-32 text-center text-muted-foreground">{tCommon('loading')}</div>
           ) : error ? (
             <div className="py-32 text-center">
-              <h2 className="text-2xl font-bold text-[#1C2B3A] mb-4">加载失败</h2>
-              <p className="text-muted-foreground">请稍后重试。</p>
+              <h2 className="text-2xl font-bold text-[#1C2B3A] mb-4">{tCourses('loadFailed')}</h2>
+              <p className="text-muted-foreground">{tCommon('retryLater')}</p>
             </div>
           ) : (
             <TeamGrid

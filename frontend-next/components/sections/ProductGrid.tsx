@@ -5,18 +5,20 @@ import Link from 'next/link';
 import { BookOpen, CheckCircle, Clock } from 'lucide-react';
 import type { Section } from '@/lib/api';
 import { getProducts } from '@/lib/api';
-
-const specLabels: Record<string, string> = {
-  course_hours: '课时',
-  class_size: '班额',
-  age_range: '适合年龄',
-  duration: '课程周期',
-};
+import { useTranslations } from 'next-intl';
 
 export default function ProductGrid({ section }: { section: Section }) {
   const { title, description } = section;
+  const t = useTranslations('sections.productGrid');
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const specLabels: Record<string, string> = {
+    course_hours: t('specCourseHours'),
+    class_size: t('specClassSize'),
+    age_range: t('specAgeRange'),
+    duration: t('specDuration'),
+  };
 
   useEffect(() => {
     getProducts()
@@ -36,7 +38,7 @@ export default function ProductGrid({ section }: { section: Section }) {
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#EFF6FF] text-[#2563EB] text-sm font-medium mb-5">
             <BookOpen size={14} />
-            课程体系
+            {t('badge')}
           </div>
           <h2
             className="text-[#1C2B3A] mb-4"
@@ -46,15 +48,15 @@ export default function ProductGrid({ section }: { section: Section }) {
               fontWeight: 800,
             }}
           >
-            {title || '科学课程，全面衔接小学学习'}
+            {title || t('titleFallback')}
           </h2>
           <p className="text-muted-foreground text-base max-w-[560px] mx-auto leading-relaxed">
-            {description || '由资深教研团队研发，严格对标小学课程标准，让孩子学得快乐、学得扎实。'}
+            {description || t('descriptionFallback')}
           </p>
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-muted-foreground">加载中...</div>
+          <div className="text-center py-12 text-muted-foreground">{t('loading')}</div>
         ) : (
           <div className="grid grid-cols-12 gap-6">
             {products.map((product: any) => {
@@ -91,7 +93,7 @@ export default function ProductGrid({ section }: { section: Section }) {
                           href={`/courses/${product.slug}`}
                           className="text-xs text-muted-foreground hover:text-[#2563EB] flex items-center gap-1 transition-colors"
                         >
-                          <Clock size={12} /> 查看详情
+                          <Clock size={12} /> {t('viewDetails')}
                         </Link>
                       </div>
                     </div>
