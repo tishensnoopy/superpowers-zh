@@ -122,9 +122,14 @@ services:
       UPLOAD_PROVIDER: ${UPLOAD_PROVIDER:-local}
       # AI 客服
       DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
+      DASHSCOPE_API_ENDPOINT: ${DASHSCOPE_API_ENDPOINT:-https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation}
       QWEN_MODEL: ${QWEN_MODEL:-qwen-plus}
       QWEN_EMBEDDING_MODEL: ${QWEN_EMBEDDING_MODEL:-text-embedding-v2}
       AI_CHAT_SYSTEM_PROMPT: ${AI_CHAT_SYSTEM_PROMPT:-你是佑森小课堂的AI客服助手，负责回答家长关于幼小衔接课程、校区、预约等问题。请基于知识库内容回答，不确定时建议转人工客服。}
+      # 微信公众号（5C 集成）
+      WECHAT_APP_ID: ${WECHAT_APP_ID:-}
+      WECHAT_APP_SECRET: ${WECHAT_APP_SECRET:-}
+      WECHAT_TOKEN: ${WECHAT_TOKEN:-}
     ports:
       - "${BACKEND_PORT:-1337}:1337"
     volumes:
