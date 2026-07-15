@@ -22,8 +22,21 @@ export type Command =
 
 export async function executeCommand(cmd: Command, hooks: CommandHandler): Promise<string | undefined> {
   const composeHooks: ComposeHooks = { onLog: hooks.onLog };
-  const controller = createAbortController(cmd.commandId);
 
+  // cancel 和 deploy 不需要预创建 AbortController：
+  // cancel 需要检查 registry 中是否已存在 controller（否则 createAbortController
+  // 会新建一个空 controller，导致 abortCommand 永远返回 true，'no running task' 分支成为死代码）
+  if (cmd.type === 'command:cancel') {
+    const aborted = abortCommand(cmd.commandId);
+    return aborted ? 'cancelled' : 'no running task';
+  }
+
+  if (cmd.type === 'command:deploy') {
+    // M4 实现
+    throw new Error('deploy not implemented yet (M4)');
+  }
+
+  const controller = createAbortController(cmd.commandId);
   try {
     switch (cmd.type) {
       case 'command:config-sync':
@@ -37,15 +50,6 @@ export async function executeCommand(cmd: Command, hooks: CommandHandler): Promi
 
       case 'command:logs':
         return await handleLogs(cmd, DATA_DIR, composeHooks, controller.signal);
-
-      case 'command:deploy':
-        // M4 实现
-        throw new Error('deploy not implemented yet (M4)');
-
-      case 'command:cancel': {
-        const aborted = abortCommand(cmd.commandId);
-        return aborted ? 'cancelled' : 'no running task';
-      }
 
       default:
         throw new Error(`unknown command type: ${(cmd as any).type}`);
