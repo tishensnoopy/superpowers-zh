@@ -6,6 +6,7 @@ import { verifyAgentToken } from '@/lib/agent-auth';
 import { addConnection } from '@/lib/connections';
 import { handleAgentMessage } from '@/lib/agent-router';
 import { startHeartbeatMonitor } from '@/lib/heartbeat-monitor';
+import { startJobTimeoutMonitor } from '@/lib/job-manager';
 
 const dev = process.env.NODE_ENV !== 'production';
 const port = parseInt(process.env.PORT ?? '3000', 10);
@@ -61,6 +62,7 @@ app.prepare().then(() => {
   wss.on('close', () => clearInterval(pingInterval));
 
   startHeartbeatMonitor(60, 10000);
+  startJobTimeoutMonitor(5 * 60 * 1000, 60000);
 
   server.listen(port);
   console.log(`> Ready on http://localhost:${port} (dev=${dev})`);
