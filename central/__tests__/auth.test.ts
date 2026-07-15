@@ -26,4 +26,20 @@ describe('auth', () => {
     const tampered = token.slice(0, -4) + 'XXXX';
     await expect(verifyJwt(tampered)).rejects.toThrow();
   });
+
+  it('rejects invalid token format', async () => {
+    await expect(verifyJwt('not.a.jwt')).rejects.toThrow();
+    await expect(verifyJwt('garbage')).rejects.toThrow();
+  });
+
+  it('throws when JWT_SECRET is missing', async () => {
+    delete process.env.JWT_SECRET;
+    await expect(signJwt({ sub: 'x', email: 'x@x.x', role: 'admin' })).rejects.toThrow(/JWT_SECRET env var is required/);
+    await expect(verifyJwt('eyJhbGciOiJIUzI1NiJ9.eyJ0ZXN0IjoxfQ.xxx')).rejects.toThrow(/JWT_SECRET env var is required/);
+  });
+
+  it('throws when JWT_SECRET is too short', async () => {
+    process.env.JWT_SECRET = 'short';
+    await expect(signJwt({ sub: 'x', email: 'x@x.x', role: 'admin' })).rejects.toThrow(/at least 32 characters/);
+  });
 });

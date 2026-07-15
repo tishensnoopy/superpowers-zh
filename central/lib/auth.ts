@@ -7,6 +7,7 @@ const JWT_ALG = 'HS256';
 function getJwtSecret(): Uint8Array {
   const s = process.env.JWT_SECRET;
   if (!s) throw new Error('JWT_SECRET env var is required');
+  if (s.length < 32) throw new Error('JWT_SECRET must be at least 32 characters');
   return new TextEncoder().encode(s);
 }
 
