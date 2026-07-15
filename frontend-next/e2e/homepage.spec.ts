@@ -34,8 +34,10 @@ test.describe('首页', () => {
   test('JSON-LD 结构化数据存在', async ({ page }) => {
     await page.goto('/');
     const jsonLd = page.locator('script[type="application/ld+json"]');
-    await expect(jsonLd).toHaveCount(1);
-    const content = await jsonLd.textContent();
+    // 5B-1 SEO 在首页添加了多个 JSON-LD（Organization + WebSite），至少 1 个即可
+    const count = await jsonLd.count();
+    expect(count).toBeGreaterThanOrEqual(1);
+    const content = await jsonLd.first().textContent();
     expect(content).toBeTruthy();
     const parsed = JSON.parse(content!);
     expect(parsed['@type']).toBeTruthy();
@@ -43,9 +45,9 @@ test.describe('首页', () => {
 
   test('FloatingButton 可见', async ({ page }) => {
     await page.goto('/');
-    // FloatingButton 渲染为 div.fixed.z-50 容器内的 button（见 components/sections/FloatingButton.tsx），
-    // 没有 href 属性。这里通过外层固定定位容器定位，该 class 组合在首页中唯一标识 FloatingButton。
-    const floatingButton = page.locator('div.fixed.z-50').first();
+    // FloatingChat 在折叠态渲染为 <button aria-label="在线咨询">（见 components/chat/FloatingChat.tsx），
+    // 不是 div 容器。使用 aria-label 精确定位，避免与 Navigation header 的 z-50 冲突。
+    const floatingButton = page.locator('button[aria-label="在线咨询"]');
     await expect(floatingButton).toBeVisible();
   });
 });

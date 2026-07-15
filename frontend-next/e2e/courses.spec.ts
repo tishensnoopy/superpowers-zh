@@ -73,10 +73,20 @@ test.describe('课程详情页', () => {
   test('课程详情 JSON-LD', async ({ page }) => {
     await page.goto('/courses/yousen-youxiao-xianjie');
     const jsonLd = page.locator('script[type="application/ld+json"]');
-    await expect(jsonLd).toHaveCount(1);
-    const content = await jsonLd.textContent();
-    const parsed = JSON.parse(content!);
-    expect(parsed['@type']).toBe('Course');
+    // 5B-1 SEO 添加了 BreadcrumbList JSON-LD，课程页现在有 2 个 JSON-LD 脚本
+    const count = await jsonLd.count();
+    expect(count).toBeGreaterThanOrEqual(1);
+    // 找到 @type 为 Course 的那个
+    const contents = await jsonLd.allTextContents();
+    const courseJson = contents.find((c) => {
+      try {
+        return JSON.parse(c)['@type'] === 'Course';
+      } catch {
+        return false;
+      }
+    });
+    expect(courseJson).toBeTruthy();
+    const parsed = JSON.parse(courseJson!);
     expect(parsed.name).toBeTruthy();
   });
 
