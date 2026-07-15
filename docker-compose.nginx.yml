@@ -1,0 +1,45 @@
+# ============================================================================
+# Nginx 反向代理覆盖文件
+# 用法: docker compose -f docker-compose.yml -f docker-compose.nginx.yml up -d
+#
+# 此覆盖文件：
+#   1. 添加 nginx 服务作为统一入口（端口 80）
+#   2. 移除 backend 和 frontend 的对外端口暴露（仅内部网络可达）
+#   3. 适用于 IP 访问场景（无 domain/SSL）
+# ============================================================================
+
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: yousen-nginx
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    ports:
+      - "${NGINX_PORT:-80}:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - nginx_logs:/var/log/nginx
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      default:
+
+  # 覆盖 backend：不暴露端口（仅通过 nginx 访问）
+  backend:
+    ports: !reset []
+
+  # 覆盖 frontend：不暴露端口（仅通过 nginx 访问）
+  frontend:
+    ports: !reset []
+
+volumes:
+  nginx_logs:
+    driver: local
