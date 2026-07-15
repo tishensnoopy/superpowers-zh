@@ -5,7 +5,6 @@ import { BookOpen } from 'lucide-react';
 import { useProductSearch } from '@/hooks/useProductSearch';
 import { getProductCategories } from '@/lib/api';
 import type { ProductCategory } from '@/lib/api';
-import Seo from '@/components/Seo';
 import SearchBar from './SearchBar';
 import CategoryFilter from './CategoryFilter';
 import SortControl from './SortControl';
@@ -32,8 +31,6 @@ export default function CourseSearchPanel({
 
   return (
     <div className="pt-[120px]">
-      <Seo title={title} description={description} />
-
       <section className="py-24" style={{ background: 'linear-gradient(180deg, #F8F9FF 0%, #FFFCF8 100%)' }}>
         <div className="max-w-[1400px] mx-auto px-8">
           <div className="text-center mb-12">

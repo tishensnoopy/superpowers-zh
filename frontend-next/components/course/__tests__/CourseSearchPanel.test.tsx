@@ -92,13 +92,4 @@ describe('CourseSearchPanel 组件', () => {
     });
     expect(screen.getByText('语言启蒙基础课')).toBeInTheDocument();
   });
-
-  it('注入 SEO title', async () => {
-    render(<CourseSearchPanel title="课程体系" />);
-    await act(async () => {
-      await vi.runAllTimersAsync();
-    });
-    const titleEl = document.querySelector('title');
-    expect(titleEl?.textContent).toContain('课程体系');
-  });
 });
