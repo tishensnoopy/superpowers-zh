@@ -25,6 +25,9 @@ export function useWechatShare(shareData: ShareData | null): { ready: boolean } 
     if (!shareData) return;
     if (!isWechatBrowser()) return;
 
+    // Capture into a local const so TypeScript's null narrowing persists
+    // into the nested async closures below (shareData is typed as nullable).
+    const data = shareData;
     let cancelled = false;
 
     async function init() {
@@ -49,15 +52,15 @@ export function useWechatShare(shareData: ShareData | null): { ready: boolean } 
         wx.ready(() => {
           if (cancelled) return;
           wx.updateAppMessageShareData({
-            title: shareData.title,
-            desc: shareData.desc,
-            link: shareData.link,
-            imgUrl: shareData.imgUrl,
+            title: data.title,
+            desc: data.desc,
+            link: data.link,
+            imgUrl: data.imgUrl,
           });
           wx.updateTimelineShareData({
-            title: shareData.title,
-            link: shareData.link,
-            imgUrl: shareData.imgUrl,
+            title: data.title,
+            link: data.link,
+            imgUrl: data.imgUrl,
           });
           setReady(true);
         });
