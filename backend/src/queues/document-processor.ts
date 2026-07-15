@@ -124,22 +124,57 @@ export function cleanTextContent(text: string): string {
 }
 
 export function chunkText(text: string, chunkSize: number, overlap: number): string[] {
-  // 防御：overlap >= chunkSize 会导致 start 不前进，死循环
+  // 防御：overlap >= chunkSize 会导致死循环或无意义分块
   if (overlap >= chunkSize) {
     throw new Error(`overlap (${overlap}) must be less than chunkSize (${chunkSize})`);
   }
-  const chunks: string[] = [];
   if (!text) {
-    return chunks;
+    return [];
   }
-  let start = 0;
-  while (start < text.length) {
-    const end = Math.min(start + chunkSize, text.length);
-    chunks.push(text.slice(start, end));
-    if (end >= text.length) {
-      break;
+  // 短文本直接返回单个 chunk
+  if (text.length <= chunkSize) {
+    return [text];
+  }
+
+  const chunks: string[] = [];
+  // 按换行切分，丢弃纯空白行（如连续空行），保留有内容的行
+  const lines = text.split('\n').filter((l) => l.trim());
+  let current = '';
+
+  for (const line of lines) {
+    // 超长单行（单行就超过 chunkSize）：fallback 到字符级切片，避免单行无法放入任何 chunk
+    if (line.length > chunkSize) {
+      // 先把累积的 current 推入 chunks，避免跨 chunk 拼接混淆
+      if (current) {
+        chunks.push(current);
+        current = '';
+      }
+      let start = 0;
+      while (start < line.length) {
+        const end = Math.min(start + chunkSize, line.length);
+        chunks.push(line.slice(start, end));
+        if (end >= line.length) break;
+        start += chunkSize - overlap;
+      }
+      continue;
     }
-    start += chunkSize - overlap;
+
+    // 常规行：判断加入后是否会超出 chunkSize
+    // +1 是为了算上换行符（current 非空时需要拼接 \n）
+    if (current.length + line.length + 1 > chunkSize && current) {
+      // 当前 chunk 已满，推入 chunks
+      chunks.push(current);
+      // overlap 保留 current 末尾 2 行（语义上下文连续性）
+      const overlapLines = current.split('\n').slice(-2);
+      current = overlapLines.join('\n') + '\n' + line;
+    } else {
+      // 累积到 current
+      current = current ? current + '\n' + line : line;
+    }
+  }
+  // 推入最后一个 chunk
+  if (current) {
+    chunks.push(current);
   }
   return chunks;
 }
