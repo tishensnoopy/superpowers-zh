@@ -1,16 +1,30 @@
+import { NextRequest } from 'next/server';
 import { getSiteSettings, getProducts, getTeachers, getCampuses, getNews, getFaqItems } from '@/lib/api';
 import { buildLlmsTxtContent } from '@/lib/geo';
+import type { Locale } from '@/lib/api';
 
 export const revalidate = 3600;
 
-export async function GET() {
+const SUPPORTED_LOCALES: Locale[] = ['zh-CN', 'en-US'];
+
+function parseLocale(searchParams: URLSearchParams): Locale {
+  const raw = searchParams.get('locale');
+  if (raw && SUPPORTED_LOCALES.includes(raw as Locale)) {
+    return raw as Locale;
+  }
+  return 'zh-CN';
+}
+
+export async function GET(request: NextRequest) {
+  const locale = parseLocale(request.nextUrl.searchParams);
+
   const [settingsRes, productsRes, teachersRes, campusesRes, newsRes, faqRes] = await Promise.all([
-    getSiteSettings().catch(() => ({ data: [] as never[] })),
-    getProducts().catch(() => ({ data: [] as never[] })),
-    getTeachers().catch(() => ({ data: [] as never[] })),
-    getCampuses().catch(() => ({ data: [] as never[] })),
-    getNews().catch(() => ({ data: [] as never[] })),
-    getFaqItems().catch(() => ({ data: [] as never[] })),
+    getSiteSettings(locale).catch(() => ({ data: [] as never[] })),
+    getProducts(locale).catch(() => ({ data: [] as never[] })),
+    getTeachers(locale).catch(() => ({ data: [] as never[] })),
+    getCampuses(locale).catch(() => ({ data: [] as never[] })),
+    getNews(locale).catch(() => ({ data: [] as never[] })),
+    getFaqItems(locale).catch(() => ({ data: [] as never[] })),
   ]);
 
   const settings = Array.isArray(settingsRes.data) ? settingsRes.data[0] : settingsRes.data;
@@ -21,7 +35,7 @@ export async function GET() {
     campusesRes.data,
     newsRes.data,
     faqRes.data,
-    'zh-CN'
+    locale
   );
 
   return new Response(content, {
