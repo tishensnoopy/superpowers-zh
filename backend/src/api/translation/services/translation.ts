@@ -45,7 +45,7 @@ export async function translateDocument(opts: TranslateOptions): Promise<Record<
       throw new Error(`DashScope ${response.status}: ${text}`);
     }
 
-    const data = await response.json();
+    const data: any = await response.json();
     const content = data?.choices?.[0]?.message?.content;
     if (!content) {
       throw new Error('AI_RESPONSE_PARSE_ERROR: empty content');

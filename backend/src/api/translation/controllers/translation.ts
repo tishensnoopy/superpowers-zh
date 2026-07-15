@@ -59,7 +59,7 @@ export default {
 
     // 3. Read source document
     const uid = CONTENT_TYPE_UIDS[contentType];
-    const sourceDoc = await strapi.documents(uid).findOne({
+    const sourceDoc = await strapi.documents(uid as any).findOne({
       documentId,
       locale: sourceLocale || 'zh-CN',
     });
