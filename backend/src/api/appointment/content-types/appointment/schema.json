@@ -1,0 +1,88 @@
+{
+  "kind": "contentType",
+  "collectionName": "appointments",
+  "info": {
+    "singularName": "appointment",
+    "pluralName": "appointments",
+    "displayName": "预约试听",
+    "description": "预约试听表单提交",
+    "icon": "Calendar"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "预约姓名（向后兼容，新数据用 parentName）"
+    },
+    "childName": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100,
+      "description": "孩子姓名"
+    },
+    "parentName": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100,
+      "description": "家长姓名"
+    },
+    "phone": {
+      "type": "string",
+      "required": true,
+      "maxLength": 20,
+      "description": "预约电话"
+    },
+    "campus": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100,
+      "description": "选择校区"
+    },
+    "age": {
+      "type": "integer",
+      "description": "孩子年龄（选填）"
+    },
+    "course": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "意向课程（选填）"
+    },
+    "preferredDate": {
+      "type": "date",
+      "description": "期望试听日期（选填）"
+    },
+    "preferredTimeSlot": {
+      "type": "enumeration",
+      "enum": ["morning", "afternoon", "evening"],
+      "description": "期望时段（选填）"
+    },
+    "message": {
+      "type": "text",
+      "description": "备注（选填）"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["pending", "confirmed", "completed", "cancelled"],
+      "default": "pending",
+      "description": "预约状态"
+    },
+    "sourcePage": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "提交来源页面"
+    },
+    "ipAddress": {
+      "type": "string",
+      "maxLength": 45,
+      "description": "提交者 IP 地址"
+    },
+    "userAgent": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "提交者浏览器信息"
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "common": {
+    "i18nFallbackNotice": "This content is not available in English yet. Showing the Chinese version.",
+    "emptyList": "No content available",
+    "loading": "Loading..."
+  },
+  "navigation": {
+    "home": "Home",
+    "courses": "Courses",
+    "news": "News",
+    "campuses": "Campuses",
+    "teachers": "Teachers",
+    "about": "About Us",
+    "contact": "Contact",
+    "faq": "FAQ",
+    "appointment": "Book a Trial",
+    "onlineConsult": "Online Consult"
+  },
+  "footer": {
+    "copyright": "All rights reserved",
+    "quickLinks": "Quick Links",
+    "contactUs": "Contact Us"
+  },
+  "chat": {
+    "welcome": "Hello! I'm the Yousen AI assistant. How can I help you?",
+    "transferPrompt": "Sure, transferring you to a human agent. Please wait...",
+    "thresholdPrompt": "You've asked many questions today. To serve you better, we suggest booking a free trial class. Our consultant will assist you in detail.",
+    "guidancePrompt": "I need to transfer this question to a human agent. You can also leave your contact information and our consultant will reach out soon.",
+    "fallbackAnswer": "Sorry, I cannot answer this question. Would you like to transfer to a human agent?",
+    "inputPlaceholder": "Type your question...",
+    "sendButton": "Send"
+  },
+  "languageSwitcher": {
+    "label": "Switch Language",
+    "chinese": "中文",
+    "english": "English"
+  },
+  "courses": {
+    "title": "Our Courses",
+    "viewDetails": "View Details"
+  },
+  "news": {
+    "title": "News & Updates"
+  },
+  "appointment": {
+    "title": "Book a Trial Class",
+    "parentName": "Parent Name",
+    "childName": "Child Name",
+    "phone": "Phone Number",
+    "campus": "Select Campus",
+    "submit": "Submit Booking"
+  }
+}

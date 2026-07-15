@@ -1,0 +1,73 @@
+{
+  "kind": "collectionType",
+  "collectionName": "news_articles",
+  "info": {
+    "singularName": "news-article",
+    "pluralName": "news-articles",
+    "displayName": "新闻文章",
+    "description": "新闻动态文章"
+  },
+  "options": {
+    "draftAndPublish": true,
+    "singleton": false
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200,
+      "description": "文章标题"
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true,
+      "description": "URL 路径（由标题自动生成）"
+    },
+    "excerpt": {
+      "type": "text",
+      "maxLength": 500,
+      "description": "文章摘要（列表页展示）"
+    },
+    "content": {
+      "type": "richtext",
+      "description": "文章正文（详情页展示）"
+    },
+    "coverImage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"],
+      "description": "封面图"
+    },
+    "category": {
+      "type": "enumeration",
+      "enum": ["company_news", "industry_news", "event_notice"],
+      "default": "company_news",
+      "description": "文章分类"
+    },
+    "isFeatured": {
+      "type": "boolean",
+      "default": false,
+      "description": "是否为头条新闻"
+    },
+    "viewCount": {
+      "type": "integer",
+      "default": 0,
+      "description": "阅读量"
+    },
+    "sortOrder": {
+      "type": "integer",
+      "default": 0,
+      "description": "排序"
+    },
+    "tags": {
+      "type": "string",
+      "description": "逗号分隔的标签"
+    },
+    "seo": {
+      "type": "component",
+      "component": "common.seo",
+      "description": "SEO 配置"
+    }
+  }
+}

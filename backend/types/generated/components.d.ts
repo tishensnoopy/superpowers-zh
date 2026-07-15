@@ -10,6 +10,16 @@ export interface CommonAdvantage extends Struct.ComponentSchema {
     singularName: 'advantage';
   };
   attributes: {
+    bgColor: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 20;
+      }> &
+      Schema.Attribute.DefaultTo<'#FFF3E5'>;
+    color: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 20;
+      }> &
+      Schema.Attribute.DefaultTo<'#F5851F'>;
     description: Schema.Attribute.String &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 500;
@@ -258,6 +268,65 @@ export interface CommonTestimonial extends Struct.ComponentSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 200;
       }>;
+  };
+}
+
+export interface CourseModule extends Struct.ComponentSchema {
+  collectionName: 'components_course_modules';
+  info: {
+    description: '\u8BFE\u7A0B\u5927\u7EB2\u5206\u9636\u6BB5\u6A21\u5757';
+    displayName: '\u8BFE\u7A0B\u6A21\u5757';
+    icon: 'BookOpen';
+    pluralName: 'modules';
+    singularName: 'module';
+  };
+  attributes: {
+    description: Schema.Attribute.Text;
+    lessonCount: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    title: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+  };
+}
+
+export interface CourseObjective extends Struct.ComponentSchema {
+  collectionName: 'components_course_objectives';
+  info: {
+    description: '\u8BFE\u7A0B\u5B66\u4E60\u76EE\u6807\u9879';
+    displayName: '\u5B66\u4E60\u76EE\u6807';
+    icon: 'Target';
+    pluralName: 'objectives';
+    singularName: 'objective';
+  };
+  attributes: {
+    description: Schema.Attribute.Text;
+    title: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+  };
+}
+
+export interface CourseTestimonial extends Struct.ComponentSchema {
+  collectionName: 'components_course_testimonials';
+  info: {
+    description: '\u5BB6\u957F\u5BF9\u8BFE\u7A0B\u7684\u8BC4\u4EF7';
+    displayName: '\u8BFE\u7A0B\u8BC4\u4EF7';
+    icon: 'MessageSquare';
+    pluralName: 'course-testimonials';
+    singularName: 'course-testimonial';
+  };
+  attributes: {
+    content: Schema.Attribute.Text & Schema.Attribute.Required;
+    parentName: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 50;
+      }>;
+    rating: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<5>;
   };
 }
 
@@ -565,6 +634,9 @@ declare module '@strapi/strapi' {
       'common.social-link': CommonSocialLink;
       'common.team-member': CommonTeamMember;
       'common.testimonial': CommonTestimonial;
+      'course.module': CourseModule;
+      'course.objective': CourseObjective;
+      'course.testimonial': CourseTestimonial;
       'section.advantages': SectionAdvantages;
       'section.contact-form': SectionContactForm;
       'section.faq': SectionFaq;

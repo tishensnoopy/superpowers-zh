@@ -1,0 +1,29 @@
+{
+  "kind": "component",
+  "collectionName": "components_course_testimonials",
+  "info": {
+    "singularName": "course-testimonial",
+    "pluralName": "course-testimonials",
+    "displayName": "课程评价",
+    "description": "家长对课程的评价",
+    "icon": "MessageSquare"
+  },
+  "attributes": {
+    "parentName": {
+      "type": "string",
+      "required": true,
+      "maxLength": 50,
+      "description": "家长称呼"
+    },
+    "content": {
+      "type": "text",
+      "required": true,
+      "description": "评价内容"
+    },
+    "rating": {
+      "type": "integer",
+      "default": 5,
+      "description": "评分（1-5）"
+    }
+  }
+}

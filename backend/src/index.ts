@@ -1,8 +1,68 @@
 import type { Core } from '@strapi/strapi';
 
 export default {
+  async register({ strapi }: { strapi: Core.Strapi }) {
+    console.log('[Register] Registering lifecycle hooks...');
+
+    const { syncSingleContent, deleteSyncedContent } = await import('./services/knowledge-sync-service');
+
+    const SYNCED_CONTENT_TYPES = [
+      'api::course.course',
+      'api::news-article.news-article',
+      'api::teacher.teacher',
+      'api::campus.campus',
+      'api::faq-item.faq-item',
+    ];
+
+    for (const uid of SYNCED_CONTENT_TYPES) {
+      try {
+        strapi.db.lifecycles.subscribe({
+          models: [uid],
+          afterCreate: async (event) => {
+            const record = event.result;
+            if (record) {
+              await syncSingleContent(strapi, uid, record);
+              console.log(`[Lifecycle] Synced new ${uid}`);
+            }
+          },
+          afterUpdate: async (event) => {
+            const record = event.result;
+            if (record) {
+              await syncSingleContent(strapi, uid, record);
+              console.log(`[Lifecycle] Synced updated ${uid}`);
+            }
+          },
+          afterDelete: async (event) => {
+            const record = event.result;
+            if (record) {
+              await deleteSyncedContent(strapi, uid, record);
+              console.log(`[Lifecycle] Deleted synced ${uid}`);
+            }
+          },
+        });
+      } catch (err) {
+        console.warn(`[Register] Failed to subscribe lifecycle for ${uid}:`, err);
+      }
+    }
+
+    console.log('[Register] Lifecycle hooks registered');
+  },
+
   async bootstrap({ strapi }: { strapi: Core.Strapi }) {
     console.log('[Bootstrap] Starting up...');
+
+    // 注入 strapi 到 llm-service 和 rag-service（生产环境必须）
+    try {
+      const { setStrapi: setLlmStrapi } = await import('./services/llm-service');
+      setLlmStrapi(strapi);
+      console.log('[Bootstrap] strapi injected into llm-service');
+
+      const { setStrapi: setRagStrapi } = await import('./services/rag-service');
+      setRagStrapi(strapi);
+      console.log('[Bootstrap] strapi injected into rag-service');
+    } catch (err) {
+      console.warn('[Bootstrap] Failed to inject strapi into services:', err);
+    }
 
     if (process.env.REDIS_HOST) {
       try {
@@ -10,13 +70,17 @@ export default {
         await registerQueues(strapi);
         console.log('[Bootstrap] Queues registered');
 
-        const { setStrapi: setDocumentStrapi, processDocument } = await import('./workers/document-processor');
-        setDocumentStrapi(strapi);
-        const documentWorker = createWorker('document-processing', processDocument, { concurrency: 2 });
-        if (documentWorker) {
-          console.log('[Bootstrap] Document processor worker registered');
-        } else {
-          console.log('[Bootstrap] Document processor worker skipped - Redis not available');
+        // Real document vectorization worker (BullMQ queue -> text extraction ->
+        // cleaning -> chunking -> embedding -> pgvector). Replaces the stub worker.
+        // Guarded so tests don't spin up a Redis worker.
+        if (process.env.NODE_ENV !== 'test') {
+          const { startDocumentWorker } = await import('./queues/document-processor');
+          const documentWorker = startDocumentWorker(strapi);
+          if (documentWorker) {
+            console.log('[Bootstrap] Document processor worker registered');
+          } else {
+            console.log('[Bootstrap] Document processor worker skipped - Redis not available');
+          }
         }
 
         const { setStrapi: setFaqStrapi, processFaqFeedback } = await import('./workers/faq-feedback');
@@ -121,6 +185,14 @@ export default {
 
   async destroy({ strapi }: { strapi: Core.Strapi }) {
     console.log('[Destroy] Shutting down...');
+
+    // 关闭文档向量化 Worker（独立于 utils/queue 的 workers 字典管理）
+    try {
+      const { closeDocumentWorker } = await import('./queues/document-processor');
+      await closeDocumentWorker();
+    } catch (err) {
+      console.warn('[Destroy] Document worker cleanup failed:', err instanceof Error ? err.message : err);
+    }
 
     try {
       const { closeAllQueues } = await import('./utils/queue');

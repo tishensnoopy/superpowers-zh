@@ -29,24 +29,24 @@ export default function ProductComparison({ section }: { section: Section }) {
                 <th className="p-4 text-left font-bold text-[#1C2B3A] bg-muted/50">规格</th>
                 {productData.map((product: any) => (
                   <th key={product.id} className="p-4 text-center font-bold text-[#1C2B3A] bg-muted/50 min-w-[200px]">
-                    {product.attributes.name}
+                    {product.name}
                   </th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {specData.map((spec: any) => {
-                const specName = spec.attributes.name;
+                const specName = spec.name;
                 return (
                   <tr key={spec.id} className="border-t border-border">
                     <td className="p-4 text-muted-foreground">{specName}</td>
                     {productData.map((product: any) => {
-                      const productSpec = product.attributes.specs?.data?.find(
-                        (s: any) => s.attributes.name === specName
+                      const productSpec = product.specs?.find(
+                        (s: any) => s.name === specName
                       );
                       return (
                         <td key={product.id} className="p-4 text-center">
-                          {productSpec?.attributes.value || '-'}
+                          {productSpec?.value || '-'}
                         </td>
                       );
                     })}

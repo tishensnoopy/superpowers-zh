@@ -4,14 +4,12 @@ export default factories.createCoreController('api::site-settings.site-settings'
   async find(ctx) {
     console.log('[SiteSettings] find() called - getting global site settings');
     try {
+      ctx.query = {
+        ...ctx.query,
+        populate: ['logo', 'favicon', 'seo'],
+      };
       const result = await super.find(ctx);
       console.log('[SiteSettings] find() completed successfully');
-      if (result.data && Array.isArray(result.data)) {
-        result.data = result.data.map(item => {
-          const { id, ...attributes } = item;
-          return { id, attributes };
-        });
-      }
       return result;
     } catch (err) {
       console.error('[SiteSettings] find() failed:', err instanceof Error ? err.message : err);

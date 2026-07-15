@@ -4,14 +4,12 @@ export default factories.createCoreController('api::navigation.navigation', ({ s
   async find(ctx) {
     console.log('[Navigation] find() called');
     try {
+      ctx.query = {
+        ...ctx.query,
+        populate: ['children'],
+      };
       const result = await super.find(ctx);
       console.log('[Navigation] find() completed, count:', result.data?.length);
-      if (result.data && Array.isArray(result.data)) {
-        result.data = result.data.map(item => {
-          const { id, ...attributes } = item;
-          return { id, attributes };
-        });
-      }
       return result;
     } catch (err) {
       console.error('[Navigation] find() failed:', err instanceof Error ? err.message : err);
@@ -44,15 +42,8 @@ export default factories.createCoreController('api::navigation.navigation', ({ s
         },
       });
 
-      const formatItem = (item) => {
-        const { id, children, ...attributes } = item;
-        const formattedChildren = children?.map(child => formatItem(child)) || [];
-        return { id, attributes: { ...attributes, children: { data: formattedChildren } } };
-      };
-
-      const formattedItems = items.map(item => formatItem(item));
-      console.log('[Navigation] getNavigationTree() completed, root items:', formattedItems.length);
-      return { data: formattedItems, meta: {} };
+      console.log('[Navigation] getNavigationTree() completed, root items:', items.length);
+      return { data: items, meta: {} };
     } catch (err) {
       console.error('[Navigation] getNavigationTree() failed:', err instanceof Error ? err.message : err);
       throw err;

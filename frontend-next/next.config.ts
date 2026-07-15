@@ -1,0 +1,78 @@
+import type { NextConfig } from 'next';
+import { withSentryConfig } from '@sentry/nextjs';
+import createNextIntlPlugin from 'next-intl/plugin';
+
+const cmsUrl = process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
+const cmsParsedUrl = new URL(cmsUrl);
+
+const nextConfig: NextConfig = {
+  output: 'standalone',
+
+  images: {
+    // Docker 容器内 /_next/image 代理无法访问 localhost:1337（localhost 指向容器自身）
+    // 改用 unoptimized: true 让 <Image> 直接输出原始 URL，由浏览器直接请求 Strapi
+    // 生产环境用 CDN 时这也是最佳实践
+    unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: cmsParsedUrl.protocol.replace(':', '') as 'http' | 'https',
+        hostname: cmsParsedUrl.hostname,
+        port: cmsParsedUrl.port || undefined,
+        pathname: '/uploads/**',
+      },
+    ],
+  },
+
+  async headers() {
+    return [
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
+      {
+        source: '/_next/image/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=31536000' },
+        ],
+      },
+      {
+        source: '/llms.txt',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=3600, stale-while-revalidate=86400' },
+        ],
+      },
+    ];
+  },
+
+  async redirects() {
+    return [
+      {
+        source: '/team',
+        destination: '/teachers',
+        permanent: true,
+      },
+    ];
+  },
+};
+
+const sentryConfig = {
+  silent: true,
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  hideSourceMaps: true,
+  disableLogger: true,
+};
+
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
+
+export default withSentryConfig(
+  withBundleAnalyzer(withNextIntl(nextConfig)),
+  sentryConfig
+);

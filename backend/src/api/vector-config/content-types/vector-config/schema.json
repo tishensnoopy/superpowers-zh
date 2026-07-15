@@ -1,0 +1,46 @@
+{
+  "kind": "contentType",
+  "collectionName": "vector_configs",
+  "info": {
+    "singularName": "vector-config",
+    "pluralName": "vector-configs",
+    "displayName": "Vector Config",
+    "description": "Vector database configuration",
+    "icon": "Database"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100
+    },
+    "provider": {
+      "type": "enumeration",
+      "enum": ["pgvector", "qdrant", "milvus"],
+      "default": "pgvector"
+    },
+    "dimension": {
+      "type": "integer",
+      "default": 1536
+    },
+    "indexType": {
+      "type": "enumeration",
+      "enum": ["ivfflat", "hnsw"],
+      "default": "ivfflat"
+    },
+    "indexParams": {
+      "type": "json"
+    },
+    "connectionConfig": {
+      "type": "json",
+      "private": true
+    },
+    "isActive": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}

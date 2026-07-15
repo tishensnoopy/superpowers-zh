@@ -1,0 +1,183 @@
+# ============================================================================
+# 统一 Docker Compose 编排
+# 包含: postgres + redis + meilisearch + backend + frontend
+# ============================================================================
+#
+# 用法:
+#   首次启动（分步，确保 backend 先启动供 frontend 构建时 SSG 取数据）:
+#     1. cp .env.example .env  并填入实际值
+#     2. docker compose up -d postgres redis meilisearch backend
+#     3. 等 backend 健康后: docker compose up -d --build frontend
+#
+#   后续启动（镜像已构建）:
+#     docker compose up -d
+#
+#   查看日志:
+#     docker compose logs -f backend
+#
+#   停止:
+#     docker compose down
+#
+#   清理数据卷（慎用，会丢失数据）:
+#     docker compose down -v
+# ============================================================================
+
+services:
+  # ---- PostgreSQL 数据库（pgvector 扩展支持向量搜索）----
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: yousen-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME:-strapi}
+      POSTGRES_USER: ${DATABASE_USERNAME:-strapi}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-changeme}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME:-strapi} -d ${DATABASE_NAME:-strapi}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ---- Redis（BullMQ 队列 + 缓存）----
+  redis:
+    image: redis:7-alpine
+    container_name: yousen-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-changeme}
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-changeme}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---- Meilisearch（产品搜索）----
+  meilisearch:
+    image: getmeili/meilisearch:v1.12
+    container_name: yousen-meilisearch
+    restart: unless-stopped
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-changeme_master_key_12345}
+      MEILI_ENV: ${MEILI_ENV:-development}
+    ports:
+      - "${MEILI_PORT:-7700}:7700"
+    volumes:
+      - msdata:/meili_data
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:7700/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---- Strapi 后端 ----
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      network: host
+    container_name: yousen-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      meilisearch:
+        condition: service_healthy
+    environment:
+      # 数据库
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${DATABASE_NAME:-strapi}
+      DATABASE_USERNAME: ${DATABASE_USERNAME:-strapi}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-changeme}
+      DATABASE_SSL: ${DATABASE_SSL:-false}
+      # 服务器
+      HOST: 0.0.0.0
+      PORT: 1337
+      NODE_ENV: ${NODE_ENV:-production}
+      # 安全密钥
+      APP_KEYS: ${APP_KEYS:-key1_change_me,key2_change_me,key3_change_me,key4_change_me}
+      API_TOKEN_SALT: ${API_TOKEN_SALT:-changeme_api_token_salt}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET:-changeme_admin_jwt_secret}
+      TRANSFER_TOKEN_SALT: ${TRANSFER_TOKEN_SALT:-changeme_transfer_token_salt}
+      JWT_SECRET: ${JWT_SECRET:-changeme_jwt_secret}
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-changeme}
+      # Meilisearch
+      MEILI_HOST: http://meilisearch:7700
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-changeme_master_key_12345}
+      # 文件上传
+      UPLOAD_PROVIDER: ${UPLOAD_PROVIDER:-local}
+      # AI 客服
+      DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
+      QWEN_MODEL: ${QWEN_MODEL:-qwen-plus}
+      QWEN_EMBEDDING_MODEL: ${QWEN_EMBEDDING_MODEL:-text-embedding-v2}
+      AI_CHAT_SYSTEM_PROMPT: ${AI_CHAT_SYSTEM_PROMPT:-你是佑森小课堂的AI客服助手，负责回答家长关于幼小衔接课程、校区、预约等问题。请基于知识库内容回答，不确定时建议转人工客服。}
+    ports:
+      - "${BACKEND_PORT:-1337}:1337"
+    volumes:
+      - uploads:/opt/app/public/uploads
+      - ./佑森:/data/yousen:ro
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:1337/_health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  # ---- Next.js 前端 ----
+  frontend:
+    build:
+      context: ./frontend-next
+      dockerfile: Dockerfile
+      network: host
+      args:
+        NEXT_PUBLIC_STRAPI_API_URL: ${NEXT_PUBLIC_STRAPI_API_URL:-http://localhost:1337}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+        NEXT_PUBLIC_SENTRY_DSN: ${NEXT_PUBLIC_SENTRY_DSN:-}
+        SENTRY_DSN: ${SENTRY_DSN:-}
+        SENTRY_ORG: ${SENTRY_ORG:-}
+        SENTRY_PROJECT: ${SENTRY_PROJECT:-}
+        SENTRY_AUTH_TOKEN: ${SENTRY_AUTH_TOKEN:-}
+        NEXT_PUBLIC_SENTRY_RELEASE: ${NEXT_PUBLIC_SENTRY_RELEASE:-}
+    container_name: yousen-frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      - NEXT_PUBLIC_STRAPI_API_URL=${NEXT_PUBLIC_STRAPI_API_URL:-http://localhost:1337}
+      - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+      - STRAPI_API_URL_SSR=${STRAPI_API_URL_SSR:-http://backend:1337}
+      - SENTRY_DSN=${SENTRY_DSN:-}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+# ---- 数据卷 ----
+volumes:
+  pgdata:
+    driver: local
+  redisdata:
+    driver: local
+  msdata:
+    driver: local
+  uploads:
+    driver: local

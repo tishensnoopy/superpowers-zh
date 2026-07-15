@@ -61,6 +61,29 @@
       "type": "integer",
       "default": 0,
       "description": "Helpful feedback count"
+    },
+    "sourceType": {
+      "type": "enumeration",
+      "enum": ["manual", "ai-generated", "chat-feedback"],
+      "default": "manual",
+      "description": "How this FAQ was created"
+    },
+    "sourceSession": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::chat-session.chat-session",
+      "description": "Source chat session for AI-generated FAQs"
+    },
+    "reviewStatus": {
+      "type": "enumeration",
+      "enum": ["pending", "approved", "rejected"],
+      "default": "approved",
+      "description": "Review status for AI-generated FAQs"
+    },
+    "vectorSynced": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this FAQ is synced to vector DB"
     }
   }
 }

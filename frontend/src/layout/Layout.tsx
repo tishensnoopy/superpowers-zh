@@ -1,7 +1,53 @@
 import { useState, useEffect } from 'react';
 import { Phone, Menu, X, MapPin, Mail, ChevronDown } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { getSiteSettings, getNavigation, getFooter } from '../lib/api';
+import { getSiteSettings, getNavigationTree, getFooter } from '../lib/api';
+
+const DEFAULT_SOCIAL_LINKS = [
+  { id: 'default-wechat', platform: 'wechat', url: 'https://wechat.example.com', label: '微信' },
+  { id: 'default-weibo', platform: 'weibo', url: 'https://weibo.example.com', label: '微博' },
+  { id: 'default-douyin', platform: 'douyin', url: 'https://douyin.example.com', label: '抖音' },
+  { id: 'default-qq', platform: 'qq', url: 'https://qq.example.com', label: 'QQ' },
+];
+
+const platformColors: Record<string, string> = {
+  wechat: 'bg-[#07C160]',
+  weibo: 'bg-[#E6162D]',
+  douyin: 'bg-[#FE2C55]',
+  qq: 'bg-[#12B7F5]',
+  linkedin: 'bg-[#0077B5]',
+  twitter: 'bg-[#1DA1F2]',
+  facebook: 'bg-[#1877F2]',
+  instagram: 'bg-gradient-to-br from-[#405DE6] via-[#5851DB] to-[#833AB4]',
+  youtube: 'bg-[#FF0000]',
+};
+
+const renderSocialLink = (social: any) => {
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=64x64&data=${encodeURIComponent(social.url)}`;
+
+  return (
+    <a
+      key={social.id || Math.random()}
+      href={social.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex flex-col items-center gap-1.5 group"
+      title={social.label}
+    >
+      <div className="w-16 h-16 bg-white rounded-lg p-0.5 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg">
+        <img
+          src={qrCodeUrl}
+          alt={`${social.label}二维码`}
+          className="w-full h-full rounded-md"
+          loading="lazy"
+        />
+      </div>
+      <span className="text-white/60 text-xs group-hover:text-white transition-colors">
+        {social.label}
+      </span>
+    </a>
+  );
+};
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
@@ -26,7 +72,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       try {
         const [settingsRes, navRes, footerRes] = await Promise.all([
           getSiteSettings(),
-          getNavigation(),
+          getNavigationTree(),
           getFooter(),
         ]);
         setSiteSettings(Array.isArray(settingsRes.data) ? settingsRes.data[0] : settingsRes.data);
@@ -46,8 +92,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     setDropdownOpen(null);
   }, [location.pathname]);
 
-  const settings = siteSettings?.attributes || {};
-  const footerAttrs = footer?.attributes || {};
+  const settings = siteSettings || {};
+  const footerAttrs = footer || {};
 
   const isActive = (url: string) => {
     if (url === '/') {
@@ -95,9 +141,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
           <nav className="hidden lg:flex items-center gap-1">
             {navigation.map((item: any) => {
-              const itemAttrs = item.attributes || item;
-              const hasChildren = itemAttrs.children?.data?.length > 0;
-              const active = isActive(itemAttrs.url);
+              const hasChildren = item.children?.length > 0;
+              const active = isActive(item.url);
 
               if (hasChildren) {
                 return (
@@ -115,27 +160,28 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       }`}
                       onClick={() => handleDropdownToggle(item.id)}
                     >
-                      {itemAttrs.name}
+                      {item.name}
                       <ChevronDown size={14} className={`transition-transform duration-200 ${dropdownOpen === item.id ? 'rotate-180' : ''}`} />
                     </button>
                     {dropdownOpen === item.id && (
-                      <div className="absolute top-full left-0 mt-1 bg-white rounded-xl shadow-xl border border-border py-2 min-w-[180px] z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                        {itemAttrs.children.data.map((child: any) => {
-                          const childAttrs = child.attributes || child;
-                          return (
-                            <Link
-                              key={child.id}
-                              to={childAttrs.url}
-                              className={`block px-4 py-2.5 text-sm transition-all duration-200 ${
-                                isActive(childAttrs.url)
-                                  ? 'text-[#F5851F] bg-[#FFF3E5]'
-                                  : 'text-[#4A5568] hover:text-[#F5851F] hover:bg-[#FFF3E5]'
-                              }`}
-                            >
-                              {childAttrs.name}
-                            </Link>
-                          );
-                        })}
+                      <div className="absolute top-full left-0 pt-1 min-w-[180px] z-50">
+                        <div className="bg-white rounded-xl shadow-xl border border-border py-2 animate-in fade-in slide-in-from-top-2 duration-150">
+                          {item.children.map((child: any) => {
+                            return (
+                              <Link
+                                key={child.id}
+                                to={child.url}
+                                className={`block px-4 py-2.5 text-sm transition-all duration-200 ${
+                                  isActive(child.url)
+                                    ? 'text-[#F5851F] bg-[#FFF3E5]'
+                                    : 'text-[#4A5568] hover:text-[#F5851F] hover:bg-[#FFF3E5]'
+                                }`}
+                              >
+                                {child.name}
+                              </Link>
+                            );
+                          })}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -145,14 +191,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               return (
                 <Link
                   key={item.id}
-                  to={itemAttrs.url}
+                  to={item.url}
                   className={`px-4 py-2 text-sm rounded-lg transition-all duration-200 ${
                     active
                       ? 'text-[#F5851F] bg-[#FFF3E5] font-medium'
                       : 'text-[#4A5568] hover:text-[#F5851F] hover:bg-[#FFF3E5]'
                   }`}
                 >
-                  {itemAttrs.name}
+                  {item.name}
                 </Link>
               );
             })}
@@ -187,9 +233,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {mobileMenuOpen && (
           <div className="lg:hidden bg-white border-t border-border px-8 py-4 flex flex-col gap-1">
             {navigation.map((item: any) => {
-              const itemAttrs = item.attributes || item;
-              const hasChildren = itemAttrs.children?.data?.length > 0;
-              const active = isActive(itemAttrs.url);
+              const hasChildren = item.children?.length > 0;
+              const active = isActive(item.url);
 
               if (hasChildren) {
                 return (
@@ -200,24 +245,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       }`}
                       onClick={() => handleDropdownToggle(item.id)}
                     >
-                      <span>{itemAttrs.name}</span>
+                      <span>{item.name}</span>
                       <ChevronDown size={16} className={`transition-transform duration-200 ${dropdownOpen === item.id ? 'rotate-180' : ''}`} />
                     </button>
                     {dropdownOpen === item.id && (
                       <div className="pl-6 mt-1 space-y-1">
-                        {itemAttrs.children.data.map((child: any) => {
-                          const childAttrs = child.attributes || child;
+                        {item.children.map((child: any) => {
                           return (
                             <button
                               key={child.id}
-                              onClick={() => handleMobileNavClick(childAttrs.url)}
+                              onClick={() => handleMobileNavClick(child.url)}
                               className={`block w-full text-left py-2 text-sm transition-colors ${
-                                isActive(childAttrs.url)
+                                isActive(child.url)
                                   ? 'text-[#F5851F] font-medium'
                                   : 'text-muted-foreground hover:text-[#F5851F]'
                               }`}
                             >
-                              {childAttrs.name}
+                              {child.name}
                             </button>
                           );
                         })}
@@ -230,12 +274,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               return (
                 <button
                   key={item.id}
-                  onClick={() => handleMobileNavClick(itemAttrs.url)}
+                  onClick={() => handleMobileNavClick(item.url)}
                   className={`block w-full text-left py-2.5 text-sm transition-colors ${
                     active ? 'text-[#F5851F] font-medium' : 'text-foreground hover:text-[#F5851F]'
                   }`}
                 >
-                  {itemAttrs.name}
+                  {item.name}
                 </button>
               );
             })}
@@ -298,22 +342,58 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </div>
             </div>
 
-            {(footerAttrs.quickLinks?.data || []).map((group: any) => (
-              <div key={group.id} className="col-span-6 sm:col-span-4 lg:col-span-2">
-                <h4 className="text-white font-bold text-sm mb-5 pb-2 border-b border-white/10">
-                  {group.name || '链接'}
-                </h4>
-                <ul className="space-y-3">
-                  {group.links?.map((link: any) => (
-                    <li key={link.name}>
-                      <a href={link.url} className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">
-                        {link.name}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
+            <div className="col-span-12 lg:col-span-6">
+              <div className="flex flex-wrap gap-8">
+                <div className="flex-1 min-w-[120px]">
+                  <h4 className="text-white font-bold text-sm mb-5 pb-2 border-b border-white/10">
+                    课程体系
+                  </h4>
+                  <ul className="space-y-3">
+                    <li><a href="/courses/language" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">语言启蒙</a></li>
+                    <li><a href="/courses/math" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">数学思维</a></li>
+                    <li><a href="/courses/english" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">英语口语</a></li>
+                    <li><a href="/courses/comprehensive" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">综合素养</a></li>
+                  </ul>
+                </div>
+                <div className="flex-1 min-w-[120px]">
+                  <h4 className="text-white font-bold text-sm mb-5 pb-2 border-b border-white/10">
+                    关于我们
+                  </h4>
+                  <ul className="space-y-3">
+                    <li><a href="/about/school" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">学校介绍</a></li>
+                    <li><a href="/about/philosophy" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">办学理念</a></li>
+                    <li><a href="/team" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">师资团队</a></li>
+                    <li><a href="/campuses" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">校区环境</a></li>
+                  </ul>
+                </div>
+                <div className="flex-1 min-w-[120px]">
+                  <h4 className="text-white font-bold text-sm mb-5 pb-2 border-b border-white/10">
+                    帮助中心
+                  </h4>
+                  <ul className="space-y-3">
+                    <li><a href="#" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">常见问题</a></li>
+                    <li><a href="#" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">预约流程</a></li>
+                    <li><a href="/refund-policy" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">退费政策</a></li>
+                    <li><a href="/contact" className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">联系客服</a></li>
+                  </ul>
+                </div>
               </div>
-            ))}
+            </div>
+
+            {(() => {
+              const socialData = footerAttrs.socialLinks;
+              const links = (socialData && socialData.length > 0) ? socialData : DEFAULT_SOCIAL_LINKS;
+              return links.length > 0 && (
+                <div className="col-span-12 lg:col-span-2">
+                  <h4 className="text-white font-bold text-sm mb-5 pb-2 border-b border-white/10">
+                    关注我们
+                  </h4>
+                  <div data-testid="social-links" className="flex flex-wrap gap-3">
+                    {links.map(renderSocialLink)}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -325,8 +405,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               {settings.publicSecurityRecord && <span>{settings.publicSecurityRecord}</span>}
             </p>
             <div className="flex items-center gap-6 text-white/35 text-sm">
-              <a href="#" className="hover:text-white/60 transition-colors">隐私政策</a>
-              <a href="#" className="hover:text-white/60 transition-colors">用户协议</a>
+              <a href="/privacy-policy" className="hover:text-white/60 transition-colors">隐私政策</a>
+              <a href="/user-agreement" className="hover:text-white/60 transition-colors">用户协议</a>
               <a href="#" className="hover:text-white/60 transition-colors">举报中心</a>
             </div>
           </div>

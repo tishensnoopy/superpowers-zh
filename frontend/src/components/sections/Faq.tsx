@@ -10,8 +10,8 @@ export default function Faq({ section }: { section: Section }) {
   const filteredFaqs = faqs?.data?.filter((faq: any) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
-    return faq.attributes.question.toLowerCase().includes(query) ||
-           faq.attributes.answer.toLowerCase().includes(query);
+    return faq.question.toLowerCase().includes(query) ||
+           faq.answer.toLowerCase().includes(query);
   }) || [];
   
   return (
@@ -55,7 +55,7 @@ export default function Faq({ section }: { section: Section }) {
                 className="w-full flex items-center justify-between p-6 text-left hover:bg-muted/30 transition-colors"
                 onClick={() => setOpenId(openId === faq.id ? null : faq.id)}
               >
-                <span className="font-semibold text-[#1C2B3A]">{faq.attributes.question}</span>
+                <span className="font-semibold text-[#1C2B3A]">{faq.question}</span>
                 <ChevronDown
                   size={20}
                   className={`text-muted-foreground transition-transform duration-200 ${openId === faq.id ? 'rotate-180' : ''}`}
@@ -65,7 +65,7 @@ export default function Faq({ section }: { section: Section }) {
                 className={`overflow-hidden transition-all duration-200 ${openId === faq.id ? 'max-h-96' : 'max-h-0'}`}
               >
                 <div className="p-6 pt-0 text-muted-foreground text-sm leading-relaxed">
-                  {faq.attributes.answer}
+                  {faq.answer}
                 </div>
               </div>
             </div>

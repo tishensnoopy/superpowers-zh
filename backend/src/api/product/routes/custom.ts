@@ -2,7 +2,7 @@ export default {
   routes: [
     {
       method: 'GET',
-      path: '/api/products/search',
+      path: '/products/search',
       handler: 'product.search',
       config: {
         auth: false,
@@ -10,7 +10,7 @@ export default {
     },
     {
       method: 'POST',
-      path: '/api/products/sync',
+      path: '/products/sync',
       handler: 'product.sync',
       config: {
         auth: {
@@ -20,7 +20,7 @@ export default {
     },
     {
       method: 'GET',
-      path: '/api/products/compare',
+      path: '/products/compare',
       handler: 'product.compare',
       config: {
         auth: false,
@@ -28,7 +28,7 @@ export default {
     },
     {
       method: 'GET',
-      path: '/api/products/featured',
+      path: '/products/featured',
       handler: 'product.featured',
       config: {
         auth: false,
@@ -36,8 +36,16 @@ export default {
     },
     {
       method: 'GET',
-      path: '/api/products/category/:categorySlug',
+      path: '/products/category/:categorySlug',
       handler: 'product.withCategory',
+      config: {
+        auth: false,
+      },
+    },
+    {
+      method: 'GET',
+      path: '/products/slug/:slug',
+      handler: 'product.findBySlug',
       config: {
         auth: false,
       },

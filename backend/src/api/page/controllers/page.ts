@@ -1,144 +1,109 @@
-import { factories } from '@strapi/strapi';
+import type { Core } from '@strapi/strapi';
 
-export default factories.createCoreController('api::page.page', ({ strapi }) => ({
+const UID = 'api::page.page';
+
+const PAGE_POPULATE = {
+  sections: {
+    populate: '*',
+  },
+  seo: true,
+} as const;
+
+export default {
   async find(ctx) {
-    console.log('[Page] find() called');
-    try {
-      ctx.query = {
-        ...ctx.query,
-        populate: {
-          sections: {
-            populate: '*',
-          },
-          seo: {
-            fields: ['metaTitle', 'metaDescription'],
-          },
+    const { filters } = ctx.query as any;
+
+    const pages = await strapi.documents(UID).findMany({
+      filters: filters || {},
+      populate: PAGE_POPULATE,
+      status: 'published',
+    });
+
+    const data = pages || [];
+    ctx.body = {
+      data,
+      meta: {
+        pagination: {
+          page: 1,
+          pageSize: data.length,
+          pageCount: 1,
+          total: data.length,
         },
-      };
-      const result = await super.find(ctx);
-      if (result.data && Array.isArray(result.data)) {
-        result.data = result.data.map(item => {
-          const { id, ...attributes } = item;
-          return { id, attributes };
-        });
-      }
-      console.log('[Page] find() completed, count:', result.data?.length);
-      return result;
-    } catch (err) {
-      console.error('[Page] find() failed:', err instanceof Error ? err.message : err);
-      throw err;
-    }
+      },
+    };
   },
 
   async findOne(ctx) {
-    console.log('[Page] findOne() called, id:', ctx.params.id);
-    try {
-      ctx.query = {
-        ...ctx.query,
-        populate: {
-          sections: {
-            populate: '*',
-          },
-          seo: {
-            fields: ['metaTitle', 'metaDescription'],
-          },
-        },
-      };
-      const result = await super.findOne(ctx);
-      console.log('[Page] findOne() completed');
-      if (result.data) {
-        const { id, ...attributes } = result.data;
-        result.data = { id, attributes };
-      }
-      return result;
-    } catch (err) {
-      console.error('[Page] findOne() failed:', err instanceof Error ? err.message : err);
-      throw err;
+    const { id } = ctx.params;
+    const page = await strapi.documents(UID).findOne({
+      documentId: id,
+      populate: PAGE_POPULATE,
+      status: 'published',
+    });
+
+    if (!page) {
+      ctx.notFound('Page not found');
+      return;
     }
+    ctx.body = { data: page, meta: {} };
   },
 
   async findBySlug(ctx) {
-    console.log('[Page] findBySlug() called, slug:', ctx.params.slug);
-    try {
-      const page = await strapi.db.query('api::page.page').findOne({
-        where: { slug: ctx.params.slug },
-        populate: {
-          sections: {
-            populate: '*',
-          },
-          seo: {
-            fields: ['metaTitle', 'metaDescription'],
-          },
-        },
-      });
-      if (!page) {
-        console.warn('[Page] findBySlug() page not found:', ctx.params.slug);
-        return ctx.notFound('Page not found');
-      }
-      const { id, ...attributes } = page;
-      console.log('[Page] findBySlug() completed, id:', page.id);
-      return { data: { id, attributes }, meta: {} };
-    } catch (err) {
-      console.error('[Page] findBySlug() failed:', err instanceof Error ? err.message : err);
-      throw err;
+    const { slug } = ctx.params;
+    const pages = await strapi.documents(UID).findMany({
+      filters: { slug: { $eq: slug } },
+      populate: PAGE_POPULATE,
+      status: 'published',
+      limit: 1,
+    });
+
+    const page = pages?.[0];
+    if (!page) {
+      ctx.notFound('Page not found');
+      return;
     }
+    ctx.body = { data: page, meta: {} };
   },
 
   async getHomepage(ctx) {
-    console.log('[Page] getHomepage() called');
-    try {
-      const page = await strapi.db.query('api::page.page').findOne({
-        where: { isHomepage: true },
-        populate: ['sections'],
-      });
-      if (!page) {
-        console.warn('[Page] getHomepage() homepage not found');
-        return ctx.notFound('Homepage not found');
-      }
-      const { id, ...attributes } = page;
-      console.log('[Page] getHomepage() completed, id:', page.id);
-      return { data: { id, attributes }, meta: {} };
-    } catch (err) {
-      console.error('[Page] getHomepage() failed:', err instanceof Error ? err.message : err);
-      throw err;
+    const pages = await strapi.documents(UID).findMany({
+      filters: { isHomepage: { $eq: true } },
+      populate: PAGE_POPULATE,
+      status: 'published',
+      limit: 1,
+    });
+
+    const page = pages?.[0];
+    if (!page) {
+      ctx.notFound('Homepage not found');
+      return;
     }
+    ctx.body = { data: page, meta: {} };
   },
 
   async create(ctx) {
-    console.log('[Page] create() called');
-    console.log('[Page] create() data:', JSON.stringify(ctx.request.body));
-    try {
-      const result = await super.create(ctx);
-      console.log('[Page] create() completed successfully, id:', result.data?.id);
-      return result;
-    } catch (err) {
-      console.error('[Page] create() failed:', err instanceof Error ? err.message : err);
-      throw err;
-    }
+    const page = await strapi.documents(UID).create({
+      data: ctx.request.body,
+      status: 'published',
+    });
+    ctx.body = { data: page, meta: {} };
   },
 
   async update(ctx) {
-    console.log('[Page] update() called, id:', ctx.params.id);
-    console.log('[Page] update() data:', JSON.stringify(ctx.request.body));
-    try {
-      const result = await super.update(ctx);
-      console.log('[Page] update() completed successfully');
-      return result;
-    } catch (err) {
-      console.error('[Page] update() failed:', err instanceof Error ? err.message : err);
-      throw err;
-    }
+    const { id } = ctx.params;
+    const page = await strapi.documents(UID).update({
+      documentId: id,
+      data: ctx.request.body,
+      status: 'published',
+    });
+    ctx.body = { data: page, meta: {} };
   },
 
   async delete(ctx) {
-    console.log('[Page] delete() called, id:', ctx.params.id);
-    try {
-      const result = await super.delete(ctx);
-      console.log('[Page] delete() completed successfully');
-      return result;
-    } catch (err) {
-      console.error('[Page] delete() failed:', err instanceof Error ? err.message : err);
-      throw err;
-    }
+    const { id } = ctx.params;
+    await strapi.documents(UID).delete({
+      documentId: id,
+    });
+    ctx.body = { data: null, meta: {} };
   },
-}));
+} satisfies Core.Controller;

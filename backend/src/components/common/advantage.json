@@ -24,6 +24,18 @@
       "type": "string",
       "maxLength": 100,
       "description": "Icon name"
+    },
+    "color": {
+      "type": "string",
+      "maxLength": 20,
+      "description": "Icon color (hex)",
+      "default": "#F5851F"
+    },
+    "bgColor": {
+      "type": "string",
+      "maxLength": 20,
+      "description": "Icon background color (hex)",
+      "default": "#FFF3E5"
     }
   }
 }

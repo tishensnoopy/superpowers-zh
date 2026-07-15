@@ -1,0 +1,54 @@
+# 依赖
+node_modules
+
+# 构建产物
+dist
+.tmp
+
+# 环境配置
+.env
+.env.local
+.env.*.local
+
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# 日志
+*.log
+logs
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+docker-compose.*.yml
+
+# 文档
+*.md
+docs
+
+# 测试
+tests
+__tests__
+*.test.js
+*.spec.js
+coverage
+
+# Strapi 缓存
+.cache
+.strapi
+
+# 数据库文件（避免将本地 SQLite 带入镜像）
+*.db
+*.db-journal

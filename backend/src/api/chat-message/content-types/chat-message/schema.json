@@ -1,0 +1,45 @@
+{
+  "kind": "contentType",
+  "collectionName": "chat_messages",
+  "info": {
+    "singularName": "chat-message",
+    "pluralName": "chat-messages",
+    "displayName": "Chat Message",
+    "description": "Individual chat message in a session",
+    "icon": "MessageSquare"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "session": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::chat-session.chat-session",
+      "inversedBy": "messages"
+    },
+    "role": {
+      "type": "enumeration",
+      "enum": ["user", "assistant", "system"],
+      "required": true
+    },
+    "content": {
+      "type": "text",
+      "required": true
+    },
+    "tokenCount": {
+      "type": "integer",
+      "default": 0
+    },
+    "latencyMs": {
+      "type": "integer",
+      "default": 0
+    },
+    "retrievedDocs": {
+      "type": "json"
+    },
+    "metadata": {
+      "type": "json"
+    }
+  }
+}
