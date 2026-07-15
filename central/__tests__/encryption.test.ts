@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { encrypt, decrypt } from '@/lib/encryption';
+import { encrypt, decrypt, isEncrypted } from '@/lib/encryption';
 
 describe('encryption', () => {
   beforeEach(() => {
@@ -26,5 +26,23 @@ describe('encryption', () => {
     const cipher = encrypt('secret');
     const tampered = cipher.slice(0, -4) + 'XXXX';
     expect(() => decrypt(tampered)).toThrow();
+  });
+
+  it('isEncrypted correctly identifies encrypted values', () => {
+    expect(isEncrypted(encrypt('test'))).toBe(true);
+    expect(isEncrypted('plain-text')).toBe(false);
+    expect(isEncrypted('enc:invalid-base64')).toBe(true);  // 只检查前缀
+    expect(isEncrypted('')).toBe(false);
+  });
+
+  it('decrypt throws on non-enc-prefixed input', () => {
+    expect(() => decrypt('plain-text')).toThrow(/not an encrypted payload/);
+    expect(() => decrypt('')).toThrow(/not an encrypted payload/);
+  });
+
+  it('throws when AES_KEY is missing', () => {
+    delete process.env.AES_KEY;
+    expect(() => encrypt('test')).toThrow(/AES_KEY env var is required/);
+    expect(() => decrypt('enc:dGVzdA==')).toThrow(/AES_KEY env var is required/);
   });
 });
