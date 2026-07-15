@@ -60,4 +60,28 @@ test.describe('SEO structured data', () => {
     expect(content).toContain('/teachers/');
     expect(content).toContain('hreflang');
   });
+
+  test('llms.txt contains course names (not just links)', async ({ page }) => {
+    const response = await page.request.get('/llms.txt');
+    expect(response.status()).toBe(200);
+    const text = await response.text();
+    expect(text).toContain('## 课程体系');
+    // Should contain actual course content, not just URLs
+    expect(text).toContain('简介:');
+  });
+
+  test('llms.txt contains teacher information', async ({ page }) => {
+    const response = await page.request.get('/llms.txt');
+    expect(response.status()).toBe(200);
+    const text = await response.text();
+    expect(text).toContain('## 师资团队');
+  });
+
+  test('llms.txt contains campus addresses', async ({ page }) => {
+    const response = await page.request.get('/llms.txt');
+    expect(response.status()).toBe(200);
+    const text = await response.text();
+    expect(text).toContain('## 校区信息');
+    expect(text).toContain('地址:');
+  });
 });
