@@ -1,0 +1,25 @@
+{
+  "name": "yousen-agent",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": { "yousen-agent": "dist/index.js" },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "register": "tsx src/index.ts register",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "ws": "^8.16.0",
+    "execa": "^8.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "tsx": "^4.6.2",
+    "vitest": "^1.0.0",
+    "@types/ws": "^8.5.10",
+    "@types/node": "^20.0.0",
+    "@sinonjs/fake-timers": "^11.2.2"
+  }
+}

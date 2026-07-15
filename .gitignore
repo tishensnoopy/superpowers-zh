@@ -58,6 +58,11 @@ frontend-next/e2e/screenshots/
 # Node 包依赖
 **/node_modules/
 
+# Agent 构建产物与环境文件
+agent/dist/
+agent/.env
+agent/agent.env
+
 # 编辑器
 .vscode/
 .idea/
