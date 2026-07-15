@@ -30,9 +30,10 @@ export function broadcastToJob(jobId: string, event: string, data: unknown): voi
   const encoded = new TextEncoder().encode(payload);
   for (const writer of set) {
     try {
-      writer.write(encoded);
+      // writer.write() 返回 Promise；同步 throw 立即捕获，异步 reject 通过 .catch 清理
+      writer.write(encoded).catch(() => set.delete(writer));
     } catch {
-      // 写入失败（客户端已断开），由 Route Handler 的清理逻辑 removeSSEClient
+      // 同步失败（writer 已 closed/errored），立即清理
       set.delete(writer);
     }
   }
