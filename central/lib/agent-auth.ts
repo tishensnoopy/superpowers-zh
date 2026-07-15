@@ -1,0 +1,35 @@
+import crypto from 'node:crypto';
+import { query } from './db';
+
+export function hashAgentToken(token: string): string {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+export async function generateAgentToken(serverId: string): Promise<string> {
+  const token = crypto.randomBytes(30).toString('base64url');
+  await query(
+    `INSERT INTO agent_tokens (server_id, token_hash) VALUES ($1, $2)`,
+    [serverId, hashAgentToken(token)]
+  );
+  return token;
+}
+
+export async function verifyAgentToken(token: string): Promise<{ id: string; customer_id: string } | null> {
+  const hash = hashAgentToken(token);
+  const result = await query<{ id: string; customer_id: string }>(
+    `SELECT s.id, s.customer_id
+     FROM agent_tokens t
+     JOIN customer_servers s ON s.id = t.server_id
+     WHERE t.token_hash = $1 AND t.revoked_at IS NULL`,
+    [hash]
+  );
+  if (result.rows.length === 0) return null;
+
+  query(`UPDATE agent_tokens SET last_used_at = now() WHERE token_hash = $1`, [hash]).catch(() => {});
+
+  return result.rows[0];
+}
+
+export async function revokeAgentToken(tokenId: string): Promise<void> {
+  await query(`UPDATE agent_tokens SET revoked_at = now() WHERE id = $1`, [tokenId]);
+}
