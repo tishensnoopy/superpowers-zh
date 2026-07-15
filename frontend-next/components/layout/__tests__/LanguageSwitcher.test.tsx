@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import LanguageSwitcher from '../LanguageSwitcher';
 
@@ -14,7 +14,6 @@ describe('LanguageSwitcher', () => {
 
   it('renders with aria-label', () => {
     (useLocale as any).mockReturnValue('zh-CN');
-    (useRouter as any).mockReturnValue({ replace: vi.fn() });
     (usePathname as any).mockReturnValue('/courses');
 
     render(<LanguageSwitcher />);
@@ -23,7 +22,6 @@ describe('LanguageSwitcher', () => {
 
   it('highlights current locale zh-CN', () => {
     (useLocale as any).mockReturnValue('zh-CN');
-    (useRouter as any).mockReturnValue({ replace: vi.fn() });
     (usePathname as any).mockReturnValue('/courses');
 
     render(<LanguageSwitcher />);
@@ -31,20 +29,30 @@ describe('LanguageSwitcher', () => {
     expect(zhButton).toHaveAttribute('aria-current', 'true');
   });
 
-  it('calls router.replace with en-US when clicking English', () => {
+  it('sets window.location.href when clicking English', () => {
     (useLocale as any).mockReturnValue('zh-CN');
-    const mockReplace = vi.fn();
-    (useRouter as any).mockReturnValue({ replace: mockReplace });
     (usePathname as any).mockReturnValue('/courses');
+
+    // Mock window.location.href setter
+    const hrefSetter = vi.fn();
+    Object.defineProperty(window, 'location', {
+      value: { href: '' },
+      writable: true,
+    });
+    const locationDesc = Object.getOwnPropertyDescriptor(window, 'location');
+    Object.defineProperty(window.location, 'href', {
+      set: hrefSetter,
+      get: () => '',
+      configurable: true,
+    });
 
     render(<LanguageSwitcher />);
     fireEvent.click(screen.getByText('English'));
-    expect(mockReplace).toHaveBeenCalledWith('/courses');
+    expect(hrefSetter).toHaveBeenCalledWith('/courses');
   });
 
   it('writes NEXT_LOCALE cookie on switch', () => {
     (useLocale as any).mockReturnValue('zh-CN');
-    (useRouter as any).mockReturnValue({ replace: vi.fn() });
     (usePathname as any).mockReturnValue('/courses');
 
     render(<LanguageSwitcher />);

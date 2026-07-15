@@ -1,13 +1,12 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useLocale } from 'next-intl';
 import { Globe, ChevronDown } from 'lucide-react';
 
 export default function LanguageSwitcher() {
   const locale = useLocale() as 'zh-CN' | 'en-US';
-  const router = useRouter();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -27,12 +26,14 @@ export default function LanguageSwitcher() {
       setIsOpen(false);
       return;
     }
-    // Locale switch relies on NEXT_LOCALE cookie + next-intl middleware redirect,
-    // not on router.replace options (standard Next.js router ignores { locale }).
+    // Locale switch relies on NEXT_LOCALE cookie + next-intl middleware redirect.
+    // Must use window.location (full page load) instead of router.replace
+    // (client-side navigation) because the middleware only runs on server-side
+    // requests — client-side router.replace bypasses it entirely.
     document.cookie = `NEXT_LOCALE=${targetLocale}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
-    // Strip current locale prefix from pathname for next-intl router.replace
+    // Strip current locale prefix from pathname for next-intl middleware redirect
     const cleanPath = pathname.replace(/^\/en-US/, '') || '/';
-    router.replace(cleanPath);
+    window.location.href = cleanPath;
     setIsOpen(false);
   }
 

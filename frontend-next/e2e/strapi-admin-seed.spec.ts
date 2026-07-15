@@ -102,6 +102,8 @@ test.describe('Strapi REST API 录入测试数据（真实后端）', () => {
 
     const { documentId } = await createViaContentManager(request, 'api::appointment.appointment', {
       name: '测试家长',
+      childName: '测试孩子',
+      parentName: '测试家长',
       phone: testPhone,
       campus: 'yousen-baibuting',
       age: 6,
@@ -113,7 +115,8 @@ test.describe('Strapi REST API 录入测试数据（真实后端）', () => {
     expect(documentId).toBeDefined();
 
     await verifyViaContentManager(request, 'api::appointment.appointment', documentId, {
-      name: '测试家长',
+      childName: '测试孩子',
+      parentName: '测试家长',
       phone: testPhone,
       campus: 'yousen-baibuting',
       course: 'language',

@@ -216,6 +216,7 @@ export function buildLlmsTxtContent(
       sections.push(`### ${product.name}`);
       sections.push(buildCourseSummary(product, locale));
       sections.push(`- 链接: ${baseUrl}/courses/${product.slug}`);
+      sections.push(`- English: ${baseUrl}/en-US/courses/${product.slug}`);
       sections.push('');
     }
   }
@@ -228,6 +229,7 @@ export function buildLlmsTxtContent(
       sections.push(`### ${teacher.name}`);
       sections.push(buildTeacherSummary(teacher, locale));
       sections.push(`- 链接: ${baseUrl}/teachers/${teacher.slug}`);
+      sections.push(`- English: ${baseUrl}/en-US/teachers/${teacher.slug}`);
       sections.push('');
     }
   }
@@ -240,6 +242,7 @@ export function buildLlmsTxtContent(
       sections.push(`### ${campus.name}`);
       sections.push(buildCampusSummary(campus, locale));
       sections.push(`- 链接: ${baseUrl}/campuses/${campus.slug}`);
+      sections.push(`- English: ${baseUrl}/en-US/campuses/${campus.slug}`);
       sections.push('');
     }
   }
@@ -262,6 +265,7 @@ export function buildLlmsTxtContent(
       const date = item.publishedAt ? item.publishedAt.split('T')[0] : '';
       const datePrefix = date ? `[${date}] ` : '';
       sections.push(`- ${datePrefix}${item.title}: ${baseUrl}/news/${item.slug}`);
+      sections.push(`- English: ${baseUrl}/en-US/news/${item.slug}`);
     }
     sections.push('');
   }
