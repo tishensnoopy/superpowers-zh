@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { getProducts, getNews } from '@/lib/api';
+import { getProducts, getNews, getCampuses, getTeachers } from '@/lib/api';
 
 export const revalidate = 3600;
 
@@ -60,6 +60,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       entries.push({
         url,
         lastModified: n.publishedAt ? new Date(n.publishedAt) : new Date(),
+        priority: 0.6,
+        alternates: { languages: { 'zh-CN': zhUrl, 'en-US': enUrl } },
+      });
+    });
+  });
+
+  const { data: campuses } = await getCampuses().catch(() => ({ data: [] as never[] }));
+  campuses.forEach((c) => {
+    const zhUrl = `${baseUrl}/campuses/${c.slug}`;
+    const enUrl = `${baseUrl}/en-US/campuses/${c.slug}`;
+    [zhUrl, enUrl].forEach((url) => {
+      entries.push({
+        url,
+        lastModified: new Date(),
+        priority: 0.7,
+        alternates: { languages: { 'zh-CN': zhUrl, 'en-US': enUrl } },
+      });
+    });
+  });
+
+  const { data: teachers } = await getTeachers().catch(() => ({ data: [] as never[] }));
+  teachers.forEach((t) => {
+    const zhUrl = `${baseUrl}/teachers/${t.slug}`;
+    const enUrl = `${baseUrl}/en-US/teachers/${t.slug}`;
+    [zhUrl, enUrl].forEach((url) => {
+      entries.push({
+        url,
+        lastModified: new Date(),
         priority: 0.6,
         alternates: { languages: { 'zh-CN': zhUrl, 'en-US': enUrl } },
       });
