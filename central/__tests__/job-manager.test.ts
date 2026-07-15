@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { pool } from '@/lib/db';
 import { createJob, updateJobStatus, getJob, markStaleJobsFailed } from '@/lib/job-manager';
 

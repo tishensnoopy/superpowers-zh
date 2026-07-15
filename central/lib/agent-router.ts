@@ -1,6 +1,7 @@
 import type { WebSocket } from 'ws';
 import { query } from '@/lib/db';
 import { broadcastToAdmins } from './connections';
+import { updateJobStatus } from './job-manager';
 
 export type AgentMessage =
   | { type: 'agent:register'; serverId: string; agentVersion: string; hostname: string; dockerVersion: string }
@@ -29,13 +30,22 @@ export async function handleAgentMessage(ws: WebSocket, serverId: string, msg: A
       broadcastToAdmins('server:heartbeat', { serverId, ...msg });
       break;
 
-    case 'command:result':
-      await query(
-        `UPDATE deploy_jobs SET status=$1, finished_at=now(), exit_code=$2, error_message=$3 WHERE id=$4`,
-        [msg.success ? 'success' : 'failed', msg.exitCode ?? null, msg.stderr ?? null, msg.commandId]
-      );
+    case 'command:result': {
+      // 通过状态机更新 job 状态（网络乱序/重复 result 时容忍冲突）
+      try {
+        await updateJobStatus(
+          msg.commandId,
+          msg.success ? 'success' : 'failed',
+          { exitCode: msg.exitCode, errorMessage: msg.stderr }
+        );
+      } catch (err: unknown) {
+        const msg_ = err instanceof Error ? err.message : String(err);
+        if (!/invalid transition|job not found/.test(msg_)) throw err;
+        console.warn(`[agent-router] command:result status conflict for ${msg.commandId}:`, msg_);
+      }
       broadcastToAdmins('job:update', { jobId: msg.commandId, ...msg });
       break;
+    }
 
     case 'command:progress':
       broadcastToAdmins('job:progress', { jobId: msg.commandId, ...msg });
@@ -49,8 +59,15 @@ export async function handleAgentMessage(ws: WebSocket, serverId: string, msg: A
       broadcastToAdmins('job:log', { ...msg, jobId: msg.jobId });
       break;
 
-    case 'command:ack':
-      await query(`UPDATE deploy_jobs SET status='running', started_at=now() WHERE id=$1`, [msg.commandId]);
+    case 'command:ack': {
+      try {
+        await updateJobStatus(msg.commandId, 'running');
+      } catch (err: unknown) {
+        const msg_ = err instanceof Error ? err.message : String(err);
+        if (!/invalid transition|job not found/.test(msg_)) throw err;
+        console.warn(`[agent-router] command:ack status conflict for ${msg.commandId}:`, msg_);
+      }
       break;
+    }
   }
 }

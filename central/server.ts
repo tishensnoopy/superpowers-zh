@@ -59,10 +59,13 @@ app.prepare().then(() => {
       if (client.readyState === client.OPEN) client.ping();
     }
   }, 30000);
-  wss.on('close', () => clearInterval(pingInterval));
+  const jobMonitor = startJobTimeoutMonitor(5 * 60 * 1000, 60000);
+  wss.on('close', () => {
+    clearInterval(pingInterval);
+    clearInterval(jobMonitor);
+  });
 
   startHeartbeatMonitor(60, 10000);
-  startJobTimeoutMonitor(5 * 60 * 1000, 60000);
 
   server.listen(port);
   console.log(`> Ready on http://localhost:${port} (dev=${dev})`);
