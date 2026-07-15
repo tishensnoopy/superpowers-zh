@@ -33,3 +33,27 @@ export async function verifyAgentToken(token: string): Promise<{ id: string; cus
 export async function revokeAgentToken(tokenId: string): Promise<void> {
   await query(`UPDATE agent_tokens SET revoked_at = now() WHERE id = $1`, [tokenId]);
 }
+
+export async function generateEnrollmentCode(customerId: string): Promise<string> {
+  const code = crypto.randomBytes(24).toString('base64url').toUpperCase().slice(0, 32);
+  await query(
+    `INSERT INTO enrollment_codes (customer_id, code, expires_at)
+     VALUES ($1, $2, now() + make_interval(hours => $3))`,
+    [customerId, code, 24]
+  );
+  return code;
+}
+
+export async function consumeEnrollmentCode(code: string): Promise<{ customerId: string } | null> {
+  const result = await query<{ customer_id: string; expires_at: string; used_at: string | null }>(
+    `SELECT customer_id, expires_at, used_at FROM enrollment_codes WHERE code = $1`,
+    [code]
+  );
+  if (result.rows.length === 0) return null;
+  const row = result.rows[0];
+  if (row.used_at !== null) return null;
+  if (new Date(row.expires_at).getTime() < Date.now()) return null;
+
+  await query(`UPDATE enrollment_codes SET used_at = now() WHERE code = $1`, [code]);
+  return { customerId: row.customer_id };
+}
