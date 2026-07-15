@@ -2,6 +2,7 @@ import type { WebSocket } from 'ws';
 import { query } from '@/lib/db';
 import { broadcastToAdmins } from './connections';
 import { updateJobStatus } from './job-manager';
+import { broadcastJobUpdate, broadcastJobLog, broadcastJobProgress } from './sse-broadcaster';
 
 export type AgentMessage =
   | { type: 'agent:register'; serverId: string; agentVersion: string; hostname: string; dockerVersion: string }
@@ -43,12 +44,18 @@ export async function handleAgentMessage(ws: WebSocket, serverId: string, msg: A
         if (!/invalid transition|job not found/.test(msg_)) throw err;
         console.warn(`[agent-router] command:result status conflict for ${msg.commandId}:`, msg_);
       }
-      broadcastToAdmins('job:update', { jobId: msg.commandId, ...msg });
+      broadcastJobUpdate(msg.commandId, {
+        jobId: msg.commandId,
+        status: msg.success ? 'success' : 'failed',
+        exitCode: msg.exitCode,
+        stderr: msg.stderr,
+        durationMs: msg.durationMs,
+      });
       break;
     }
 
     case 'command:progress':
-      broadcastToAdmins('job:progress', { jobId: msg.commandId, ...msg });
+      broadcastJobProgress(msg.commandId, { stage: msg.stage, message: msg.message });
       break;
 
     case 'log:line':
@@ -56,7 +63,7 @@ export async function handleAgentMessage(ws: WebSocket, serverId: string, msg: A
         `INSERT INTO job_logs (job_id, stream, line) VALUES ($1,$2,$3)`,
         [msg.jobId, msg.stream, msg.line]
       );
-      broadcastToAdmins('job:log', { ...msg, jobId: msg.jobId });
+      broadcastJobLog(msg.jobId, { stream: msg.stream, line: msg.line, ts: msg.ts });
       break;
 
     case 'command:ack': {
