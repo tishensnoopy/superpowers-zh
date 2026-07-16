@@ -173,7 +173,7 @@ echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 | A12 | 联系我们     | 表单提交 → 成功反馈 → **数据是否存储**                | 前端 → API → DB             |
 | A13 | AI 客服咨询  | 聊天 → RAG 回复 → 转人工 → 留资                  | 前端 → API → 向量库 → LLM      |
 | A14 | 微信公众号    | 二维码显示、关注引导                              | 静态                        |
-| A15 | SEO/GEO  | sitemap、robots、llms.txt、structured data | Route Handler → Strapi    |
+| A15 | SEO/GEO 基础检查 | sitemap/robots 可访问、llms.txt 可访问（详见场景 E） | Route Handler → Strapi |
 
 ### 4.3 场景 B：客户管理员（Strapi Admin）真实操作流程
 
@@ -227,7 +227,43 @@ echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 | D6 | **知识库同步链路**    | 网站内容变更 → lifecycle → 序列化 → 向量化 → AI 客服使用                                        |
 | D7 | **Agent 注册链路** | Central 创建客户 → 生成 code → Agent 注册 → 心跳监控                                        |
 
-### 4.6 UI/UX 测试点（贯穿所有场景）
+### 4.6 场景 E：SEO/GEO 真实验证流程
+
+SEO 和 GEO 是项目的硬约束，需要独立的业务审查场景。
+
+#### SEO（搜索引擎优化）
+
+| #   | 操作                    | 验证点                                              | 数据流                    |
+| --- | --------------------- | ------------------------------------------------ | ---------------------- |
+| E1  | 访问 `/sitemap.xml`     | 包含所有已发布页面、中英文 URL、hreflang 标签                    | Strapi → Route Handler  |
+| E2  | 访问 `/robots.txt`      | 爬取规则正确、引用 sitemap URL                            | 静态                     |
+| E3  | 检查每页 meta 标签         | title/description 独立且准确（不是全站统一）                  | Next.js metadata → HTML |
+| E4  | 检查 hreflang 标签        | 中英文互指正确、x-default 存在、不冲突                         | Next.js metadata       |
+| E5  | 检查 canonical URL      | 避免重复内容、多语言 canonical 正确                          | Next.js metadata       |
+| E6  | 检查 Open Graph         | 分享到微信/微博/社交媒体时预览正确（标题+图+摘要）                      | Next.js metadata       |
+| E7  | 检查 Twitter Card      | 分享到 Twitter/X 时预览正确                              | Next.js metadata       |
+| E8  | 检查结构化数据（JSON-LD）    | Course/FAQ/BreadcrumbList/Organization/LocalBusiness schema 正确 | Next.js → JSON-LD      |
+| E9  | 发布新课程后 sitemap 更新    | sitemap 自动包含新课程（ISR revalidate=3600）             | lifecycle → sitemap    |
+| E10 | 多语言 SEO               | 中英文页面独立 URL（/zh/... vs /en-US/...）、不重复            | Next.js i18n           |
+| E11 | Core Web Vitals       | LCP < 2.5s、FID < 100ms、CLS < 0.1                 | Lighthouse             |
+| E12 | 图片优化                  | next/image 生成 WebP、lazy load、尺寸正确               | Next.js Image          |
+| E13 | Google Search Console | 提交 sitemap、检查索引状态、无错误                            | 外部工具                   |
+| E14 | 死链检查                  | 全站无 404 内部链接                                     | 爬虫工具                   |
+
+#### GEO（生成式引擎优化）
+
+| #  | 操作             | 验证点                                      | 数据流                         |
+| -- | -------------- | ---------------------------------------- | --------------------------- |
+| G1 | 访问 `/llms.txt`  | AI 友好的内容摘要、结构化、包含核心业务信息                  | Strapi → Route Handler      |
+| G2 | llms.txt 中英文版本 | `?locale=en-US` 返回英文版、内容准确               | Route Handler（force-dynamic）|
+| G3 | llms.txt 动态更新  | 发布新课程/新闻后，llms.txt 包含最新内容                 | lifecycle → llms.txt       |
+| G4 | AI 搜索引擎测试      | 在 ChatGPT/Claude/Perplexity 中搜索"佑森小课堂"能找到 | 外部 AI                       |
+| G5 | AI 摘要质量        | 每个页面有 AI 友好的摘要（不是简单的 meta description）   | Strapi aiSummary 字段         |
+| G6 | 结构化数据增强        | 实体关系标注（课程→教师→校区）、便于 AI 理解               | JSON-LD                     |
+| G7 | 内容语义化          | HTML 语义化标签（article/section/nav/aside）、标题层级清晰 | Next.js                     |
+| G8 | API 可访问性        | AI 爬虫可以访问公开 API 获取结构化数据                   | Strapi public API           |
+
+### 4.7 UI/UX 测试点（贯穿所有场景）
 
 | #   | 类别            | 验证点                              |
 | --- | ------------- | -------------------------------- |
@@ -850,7 +886,7 @@ P5 (三端同步 + 文档)
 
 * ✅ 服务器 swap 已创建
 
-* ✅ P2 端到端业务流程审查报告完成（场景 A/B/C/D + UI/UX）
+* ✅ P2 端到端业务流程审查报告完成（场景 A/B/C/D/E + UI/UX）
 
 * ✅ P2.5 代码质量审查报告完成（npm audit/版本/lint）
 
@@ -903,6 +939,7 @@ P5 (三端同步 + 文档)
 11. **DASHSCOPE_API_KEY**：明文记录到 project_memory（有 Strapi Admin 修改入口）
 12. **域名**：用户配置 yousen.tishensnoopy.cloud 指向 3001，部署完成时提醒
 13. **服务器部署 commit SHA**：需要记录
+14. **SEO/GEO 审查**：独立为场景 E，SEO 14 项 + GEO 8 项，是项目硬约束
 
 ***
 
