@@ -6,6 +6,9 @@ const NAV = [
   { href: '/customers', label: '客户' },
   { href: '/servers', label: '服务器' },
   { href: '/configs', label: '配置' },
+  { href: '/jobs', label: '任务管理' },
+  { href: '/admins', label: '用户管理' },
+  { href: '/audit-logs', label: '审计日志' },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
