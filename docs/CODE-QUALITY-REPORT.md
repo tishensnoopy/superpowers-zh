@@ -11,11 +11,11 @@
 ### backend
 | 漏洞级别 | 数量 | 修复方式 | 修复后 |
 |----------|------|----------|--------|
-| high | 4 | npm audit fix（非破坏性） | 1 |
-| medium | 11 | npm audit fix（非破坏性） | 8 |
-| low | 7 | npm audit fix（非破坏性） | 7 |
+| high | 4 | npm audit fix（非破坏性） | 4（回滚） |
+| medium | 11 | npm audit fix（非破坏性） | 11（回滚） |
+| low | 7 | npm audit fix（非破坏性） | 7（回滚） |
 
-**说明：** `npm audit fix` 修复了 3 high + 3 medium 漏洞（更新 @ai-sdk 系列包）。剩余 16 个漏洞（7 low, 8 moderate, 1 high）均需 `npm audit fix --force` 修复，但会降级 `@strapi/strapi` v5 → v4（违反技术栈要求），标记为 **manual review required**。package-lock.json 已更新。
+**说明：** 初步执行 `npm audit fix` 修复了 3 high + 3 medium 漏洞（更新 @ai-sdk 系列包），但导致 `@radix-ui/react-tooltip` 的 npm hoisting 失败，Strapi admin panel 构建报 `Cannot find module '@radix-ui/react-tooltip'`。**已回滚 package-lock.json 到 audit fix 之前状态**（commit 64583cb），所有 22 个漏洞恢复。剩余漏洞均需 `npm audit fix --force` 修复，但会降级 `@strapi/strapi` v5 → v4（违反技术栈要求），标记为 **manual review required**，待 Strapi 官方升级依赖后处理。
 
 ### frontend-next
 | 漏洞级别 | 数量 | 修复方式 | 修复后 |
@@ -83,15 +83,15 @@
 
 | 项目 | 构建结果 | 说明 |
 |------|----------|------|
-| backend | ❌ 失败（预先存在） | `src/api/appointment/controllers/appointment.ts:244,245` TypeScript 错误：`ctx.header()` 不可调用（应为 `ctx.set()`）。**预先存在，非 npm audit fix 引起**（已通过回滚 package-lock.json 验证）。属于功能代码 bug，不在本次 lint/audit 范围内，需单独修复。 |
-| frontend-next | ⏭️ 跳过 | 构建需要 Strapi 后端运行（SSG 预渲染取数据），环境依赖导致跳过。已在 P3 严格测试阶段验证。 |
+| backend | ✅ 通过 | 修复 `ctx.header()` → `ctx.set()` 后，回滚 npm audit fix，`npm run build` 成功（TS 编译 + admin panel 构建均通过）。commit 64583cb。 |
+| frontend-next | ⏭️ 跳过 | 构建需要 Strapi 后端运行（SSG 预渲染取数据），环境依赖导致跳过。将在 P3 严格测试阶段验证。 |
 | central | ✅ 通过 | `npm run build` 成功，exit code 0，所有路由正常生成。 |
 | agent | N/A | 构建为 `tsc` 编译，未单独验证（无 lint/audit 变更）。 |
 
 ## 6. 已知问题与后续行动
 
-1. **backend appointment.ts 构建错误**（高优先级）：`ctx.header('Content-Type', ...)` 应改为 `ctx.set('Content-Type', ...)`。这是 commit `e5399ed` 引入的预先存在 bug，需单独修复。
-2. **backend 残余 16 漏洞**：需 Strapi 官方升级依赖后才能修复，不能降级到 v4。
+1. **✅ 已修复：backend appointment.ts 构建错误**：`ctx.header('Content-Type', ...)` 已改为 `ctx.set('Content-Type', ...)`（commit 64583cb）。
+2. **backend 残余 22 漏洞**：npm audit fix 因 hoisting 问题回滚，需 Strapi 官方升级依赖后才能修复，不能降级到 v4。
 3. **frontend-next 残余 26 漏洞**：需 Sentry SDK 升级或 Next.js 15 生态更新后修复。
 4. **central 残余 2 漏洞**：需 Next.js 14 → 16 大版本升级（破坏性变更），应规划单独升级任务。
 5. **lint 配置缺失**：backend、central、agent 均未配置 eslint，建议后续统一添加 lint 能力。
