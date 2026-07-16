@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { pool } from '@/lib/db';
+import { pool } from '../lib/db';
 
 async function migrate() {
   const sql = readFileSync(join(__dirname, 'schema.sql'), 'utf8');

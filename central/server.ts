@@ -2,11 +2,11 @@ import { createServer } from 'node:http';
 import { parse } from 'node:url';
 import next from 'next';
 import { WebSocketServer } from 'ws';
-import { verifyAgentToken } from '@/lib/agent-auth';
-import { addConnection } from '@/lib/connections';
-import { handleAgentMessage } from '@/lib/agent-router';
-import { startHeartbeatMonitor } from '@/lib/heartbeat-monitor';
-import { startJobTimeoutMonitor } from '@/lib/job-manager';
+import { verifyAgentToken } from './lib/agent-auth';
+import { addConnection } from './lib/connections';
+import { handleAgentMessage } from './lib/agent-router';
+import { startHeartbeatMonitor } from './lib/heartbeat-monitor';
+import { startJobTimeoutMonitor } from './lib/job-manager';
 
 const dev = process.env.NODE_ENV !== 'production';
 const port = parseInt(process.env.PORT ?? '3000', 10);

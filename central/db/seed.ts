@@ -1,5 +1,5 @@
-import { pool } from '@/lib/db';
-import { hashPassword } from '@/lib/auth';
+import { pool } from '../lib/db';
+import { hashPassword } from '../lib/auth';
 
 async function seed() {
   const email = process.env.SEED_ADMIN_EMAIL ?? 'admin@yousen.local';

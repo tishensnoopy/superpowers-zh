@@ -1,5 +1,5 @@
 import type { WebSocket } from 'ws';
-import { query } from '@/lib/db';
+import { query } from './db';
 import { broadcastToAdmins } from './connections';
 import { updateJobStatus } from './job-manager';
 import { broadcastJobUpdate, broadcastJobLog, broadcastJobProgress } from './sse-broadcaster';

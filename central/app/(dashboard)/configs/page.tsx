@@ -1,9 +1,9 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
-export default function ConfigsPage() {
+function ConfigsContent() {
   const params = useSearchParams();
   const customerId = params.get('customerId');
   const [items, setItems] = useState<any[]>([]);
@@ -27,5 +27,13 @@ export default function ConfigsPage() {
         ))}
       </ul>
     </div>
+  );
+}
+
+export default function ConfigsPage() {
+  return (
+    <Suspense fallback={<div className="text-gray-500">加载中...</div>}>
+      <ConfigsContent />
+    </Suspense>
   );
 }
