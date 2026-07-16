@@ -28,7 +28,7 @@ test.describe('i18n AI customer service', () => {
     });
 
     await page.goto('/en-US');
-    await page.getByRole('button', { name: /consult|在线咨询/i }).click();
+    await page.getByRole('button', { name: 'Online Consult' }).click();
     await page.getByPlaceholder(/type your question/i).fill('What courses do you have?');
     await page.getByPlaceholder(/type your question/i).press('Enter');
 

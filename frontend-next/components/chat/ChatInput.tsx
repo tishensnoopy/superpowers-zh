@@ -13,7 +13,7 @@ interface ChatInputProps {
   locale?: 'zh-CN' | 'en-US';
 }
 
-export default function ChatInput({ onSend, isLoading, disabled = false, locale = 'zh-CN' }: ChatInputProps) {
+export default function ChatInput({ onSend, isLoading, disabled = false }: ChatInputProps) {
   const [value, setValue] = useState('');
   const [error, setError] = useState('');
   const t = useTranslations('chat');

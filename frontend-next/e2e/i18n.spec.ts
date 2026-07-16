@@ -21,7 +21,7 @@ test.describe('i18n routing', () => {
 
   test('LanguageSwitcher switches en-US back to zh-CN', async ({ page }) => {
     await page.goto('/en-US/courses');
-    await page.getByLabel('切换语言').click();
+    await page.getByLabel('Switch Language').click();
     await page.getByRole('button', { name: '中文' }).click();
     await expect(page).toHaveURL(/\/courses$/);
   });
@@ -39,7 +39,7 @@ test.describe('i18n routing', () => {
     await page.goto('/en-US/courses/nonexistent-slug-12345');
     // dynamicParams=false triggers Next.js static 404, which may bypass the
     // [locale] layout (lang attribute not guaranteed). Check 404 text only.
-    await expect(page.getByText(/not found|404|页面未找到/i)).toBeVisible();
+    await expect(page.getByText(/not found|404|页面未找到/i).first()).toBeVisible();
   });
 
   test('en-US page with content shows no fallback banner', async ({ page }) => {

@@ -46,7 +46,6 @@ describe('LanguageSwitcher', () => {
       value: { href: '' },
       writable: true,
     });
-    const locationDesc = Object.getOwnPropertyDescriptor(window, 'location');
     Object.defineProperty(window.location, 'href', {
       set: hrefSetter,
       get: () => '',
