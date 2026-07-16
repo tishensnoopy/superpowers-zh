@@ -1,0 +1,26 @@
+{
+  "kind": "contentType",
+  "collectionName": "feedbacks",
+  "info": {
+    "singularName": "feedback",
+    "pluralName": "feedbacks",
+    "displayName": "反馈/联系表单",
+    "description": "访客通过联系表单提交的反馈",
+    "icon": "Envelope"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "name": { "type": "string", "required": true, "maxLength": 100 },
+    "email": { "type": "email", "required": true },
+    "phone": { "type": "string", "maxLength": 20 },
+    "subject": { "type": "string", "maxLength": 200 },
+    "message": { "type": "text", "required": true },
+    "status": { "type": "enumeration", "enum": ["pending", "replied", "closed"], "default": "pending" },
+    "reply": { "type": "text" },
+    "sourcePage": { "type": "string", "maxLength": 100 },
+    "ipAddress": { "type": "string", "maxLength": 45 },
+    "userAgent": { "type": "string", "maxLength": 500 }
+  }
+}
