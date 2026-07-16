@@ -44,16 +44,49 @@ export async function generateEnrollmentCode(customerId: string): Promise<string
   return code;
 }
 
+const MAX_CODE_FAILURES = 5;
+
+/**
+ * 消费 enrollment code。
+ * - code 不存在/已过期/已使用 → 返回 null，并递增 failed_attempts
+ * - failed_attempts 达到 5 → 自动作废（设 used_at = now()）
+ * - 成功 → 设 used_at = now()，返回 customerId
+ */
 export async function consumeEnrollmentCode(code: string): Promise<{ customerId: string } | null> {
-  const result = await query<{ customer_id: string; expires_at: string; used_at: string | null }>(
-    `SELECT customer_id, expires_at, used_at FROM enrollment_codes WHERE code = $1`,
+  // 先查 code
+  const selectResult = await query<{ customer_id: string; expires_at: string; used_at: string | null; failed_attempts: number }>(
+    `SELECT customer_id, expires_at, used_at, failed_attempts FROM enrollment_codes WHERE code = $1`,
     [code]
   );
-  if (result.rows.length === 0) return null;
-  const row = result.rows[0];
-  if (row.used_at !== null) return null;
-  if (new Date(row.expires_at).getTime() < Date.now()) return null;
+  if (selectResult.rows.length === 0) return null;
 
-  await query(`UPDATE enrollment_codes SET used_at = now() WHERE code = $1`, [code]);
-  return { customerId: row.customer_id };
+  const row = selectResult.rows[0];
+  if (row.used_at) return null;  // 已使用
+  if (new Date(row.expires_at).getTime() < Date.now()) return null;  // 已过期
+  if (row.failed_attempts >= MAX_CODE_FAILURES) {
+    // 自动作废
+    await query(`UPDATE enrollment_codes SET used_at = now() WHERE code = $1`, [code]);
+    return null;
+  }
+
+  // 尝试消费：用原子 UPDATE 确保 code 未被并发使用
+  const updateResult = await query<{ customer_id: string }>(
+    `UPDATE enrollment_codes
+     SET used_at = now(), failed_attempts = failed_attempts + 1
+     WHERE code = $1 AND used_at IS NULL AND expires_at > now() AND failed_attempts < $2
+     RETURNING customer_id`,
+    [code, MAX_CODE_FAILURES]
+  );
+
+  if (updateResult.rows.length === 0) {
+    // 消费失败：递增 failed_attempts
+    await query(
+      `UPDATE enrollment_codes SET failed_attempts = failed_attempts + 1
+       WHERE code = $1 AND used_at IS NULL`,
+      [code]
+    );
+    return null;
+  }
+
+  return { customerId: updateResult.rows[0].customer_id };
 }
