@@ -121,6 +121,29 @@ export default function ServerDetailPage() {
           >
             部署
           </button>
+          <button
+            disabled={busy}
+            onClick={async () => {
+              if (!confirm('确认吊销此服务器的 Agent token？Agent 将在下次重连时被拒绝。需重新颁发 enrollment code 才能恢复。')) return;
+              setBusy(true);
+              try {
+                const res = await fetch(`/api/admin/servers/${id}/token`, { method: 'POST' });
+                const body = await res.json();
+                if (res.ok) {
+                  alert(`已吊销 ${body.revoked} 个 token`);
+                } else {
+                  alert(`失败: ${body.error}`);
+                }
+              } catch (e) {
+                alert(`网络错误: ${e instanceof Error ? e.message : String(e)}`);
+              } finally {
+                setBusy(false);
+              }
+            }}
+            className="bg-red-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
+          >
+            吊销 Token
+          </button>
           <Link href={`/servers/${id}/sync-config`}
             className="inline-block bg-blue-600 text-white px-3 py-1 rounded text-sm">
             同步配置

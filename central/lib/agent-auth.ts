@@ -30,8 +30,12 @@ export async function verifyAgentToken(token: string): Promise<{ id: string; cus
   return result.rows[0];
 }
 
-export async function revokeAgentToken(tokenId: string): Promise<void> {
-  await query(`UPDATE agent_tokens SET revoked_at = now() WHERE id = $1`, [tokenId]);
+export async function revokeAgentToken(serverId: string): Promise<number> {
+  const result = await query(
+    `UPDATE agent_tokens SET revoked_at = now() WHERE server_id = $1 AND revoked_at IS NULL`,
+    [serverId]
+  );
+  return result.rowCount ?? 0;
 }
 
 export async function generateEnrollmentCode(customerId: string): Promise<string> {
