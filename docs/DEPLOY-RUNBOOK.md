@@ -500,6 +500,483 @@ echo "✅ 离线部署完成"
 
 ---
 
+## 10. Central + 客户业务同机部署运维
+
+> **适用场景**：Central 管理后台与客户业务系统部署在同一台服务器（如当前 `124.223.1.67`），需要统一运维管理。
+> **当前部署**：
+> - Central：`/opt/central/`（3 容器：central-postgres / central-app / central-nginx）
+> - 客户业务：`/opt/customer-site/`（6 容器：yousen-postgres / yousen-redis / yousen-meilisearch / yousen-backend / yousen-frontend / agent）
+> - 共 9 个 Docker 容器同时运行
+
+### 10.1 资源监控
+
+同机部署需关注内存、CPU、磁盘三项资源，避免因资源耗尽导致 OOM 或服务降级。
+
+#### 10.1.1 实时资源查看
+
+```bash
+# 内存（关注 available，应保持 ≥ 500MB）
+free -h
+
+# CPU 负载（关注 1/5/15 分钟平均负载，应 < CPU 核数 × 2）
+uptime
+
+# 磁盘使用（关注 / 分区，应保持 ≥ 20% 可用）
+df -h
+
+# Docker 容器资源占用（实时刷新）
+docker stats --no-stream
+```
+
+#### 10.1.2 容器内存占用排序
+
+```bash
+# 按内存占用从高到低列出所有容器
+docker stats --no-stream --format "table {{.Name}}\t{{.MemUsage}}\t{{.MemPerc}}\t{{.CPUPerc}}" | sort -k2 -h -r
+```
+
+#### 10.1.3 资源告警阈值
+
+| 指标 | 告警阈值 | 处理方式 |
+|------|---------|---------|
+| 可用内存 | < 300MB | 见 10.1.4 内存不足处理 |
+| CPU 15 分钟负载 | > 4.0 | 排查高负载容器：`docker stats` |
+| 磁盘可用 | < 10GB | 清理：`docker system prune -f` + 清理日志 |
+| Swap 使用率 | > 50% | 检查内存压力，考虑加 swap |
+
+#### 10.1.4 内存不足处理
+
+```bash
+# 1. 查看是否有 OOM 记录
+dmesg | grep -i 'killed process' | tail -20
+
+# 2. 清理无用镜像/构建缓存
+docker system prune -f
+
+# 3. 重启内存占用高的容器（如 Strapi 长期运行内存增长）
+docker restart yousen-backend
+sleep 60
+docker compose -f /opt/customer-site/docker-compose.yml ps
+
+# 4. 增加 swap（如尚未配置 2G）
+fallocate -l 2G /swapfile
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab
+
+# 5. 限制容器内存（编辑 docker-compose.yml）
+#   backend 服务追加：
+#   deploy:
+#     resources:
+#       limits:
+#         memory: 1G
+```
+
+#### 10.1.5 磁盘清理
+
+```bash
+# 清理停止的容器、无用网络、悬空镜像
+docker system prune -f
+
+# 清理无用的卷（谨慎！会删除未被任何容器使用的卷）
+# 先查看有哪些卷：
+docker volume ls -f dangling=true
+# 确认无用后再删除：
+docker volume prune -f
+
+# 清理 Central 日志（保留最近 7 天）
+find /var/log/central-backup.log* -mtime +7 -delete 2>/dev/null || true
+
+# 清理 Docker 容器日志（限制单个日志文件大小）
+# 编辑 /etc/docker/daemon.json 追加：
+#   "log-opts": { "max-size": "50m", "max-file": "3" }
+# 重启 Docker：systemctl restart docker（注意：会重启所有容器）
+```
+
+### 10.2 端口冲突排查
+
+#### 10.2.1 端口规划（当前配置）
+
+| 服务 | 端口 | 容器名 | 说明 |
+|------|------|--------|------|
+| Central Nginx | 80, 443 | central-nginx | 已占用 |
+| Central App | 3000（容器内） | central-app | 不映射宿主机 |
+| Central PostgreSQL | 仅容器内部 | central-postgres | 不映射宿主机 |
+| 客户 PostgreSQL | 5432 | yousen-postgres | 不冲突 |
+| 客户 Redis | 6379 | yousen-redis | 不冲突 |
+| 客户 MeiliSearch | 7700 | yousen-meilisearch | 不冲突 |
+| 客户 Strapi | 1337 | yousen-backend | 不冲突 |
+| 客户 Next.js | 3001 | yousen-frontend | 不冲突（Central 3000 不映射宿主） |
+| Agent | 无外部端口 | agent | WebSocket 连 Central |
+
+> **关键**：客户业务 `FRONTEND_PORT=3001` 而非 3000，避免与 Central 容器内的 3000 端口冲突。
+
+#### 10.2.2 端口占用排查
+
+```bash
+# 查看所有容器端口映射
+docker ps --format "table {{.Names}}\t{{.Ports}}"
+
+# 排查某端口占用（以 3001 为例）
+sudo lsof -i :3001
+sudo lsof -i :1337
+sudo lsof -i :80
+sudo lsof -i :443
+
+# 或使用 netstat
+sudo netstat -tulpn | grep -E ':(3001|1337|80|443|5432|6379|7700)'
+
+# 测试端口连通性
+curl -I http://localhost:3001/
+curl http://localhost:1337/_health
+curl -I https://central.tishensnoopy.cloud/
+```
+
+#### 10.2.3 端口冲突解决
+
+如果 `docker compose up` 报 `port is already allocated`：
+
+```bash
+# 1. 找出占用进程
+sudo lsof -i :<端口号>
+
+# 2a. 如果是其他 Docker 容器占用
+docker ps -a | grep <端口号>
+docker stop <容器名>
+
+# 2b. 如果是宿主机进程占用
+sudo kill <PID>
+
+# 3. 如果需要修改客户业务端口（编辑 /opt/customer-site/.env）
+nano /opt/customer-site/.env
+# 修改 FRONTEND_PORT=3002 或 BACKEND_PORT=1338
+
+# 4. 重新启动
+cd /opt/customer-site
+docker compose up -d frontend
+```
+
+### 10.3 Docker 容器统一管理
+
+#### 10.3.1 查看所有容器（Central + 客户业务）
+
+```bash
+# 查看所有运行中的容器（跨 compose 项目）
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+# 查看所有容器（含已停止）
+docker ps -a --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+# 按名称前缀过滤
+docker ps -a --filter "name=central-" --format "table {{.Names}}\t{{.Status}}"
+docker ps -a --filter "name=yousen-" --format "table {{.Names}}\t{{.Status}}"
+docker ps -a --filter "name=^agent$" --format "table {{.Names}}\t{{.Status}}"
+```
+
+#### 10.3.2 分组管理命令
+
+```bash
+# === Central 容器组 ===
+cd /opt/central
+docker compose ps              # 查看状态
+docker compose restart         # 全量重启 Central
+docker compose restart app     # 仅重启 app
+docker compose down            # 停止全部 Central 容器
+docker compose up -d           # 启动全部 Central 容器
+
+# === 客户业务容器组 ===
+cd /opt/customer-site
+docker compose ps
+docker compose restart
+docker compose restart backend
+docker compose down
+docker compose up -d
+
+# === Agent 单独管理 ===
+docker restart agent           # 重启
+docker stop agent              # 停止
+DEPLOY_PATH=/opt/customer-site docker compose -f /opt/customer-site/scripts/agent-compose.yml up -d  # 启动
+```
+
+#### 10.3.3 容器健康检查
+
+```bash
+# 查看所有容器健康状态
+docker ps --format "table {{.Names}}\t{{.Status}}" | grep -v "^NAMES"
+
+# 单独检查
+docker inspect --format='{{.Name}}: {{.State.Health.Status}}' $(docker ps -q)
+```
+
+### 10.4 备份策略
+
+#### 10.4.1 备份规划
+
+| 系统 | 备份对象 | 频率 | 保留 | 备份方式 |
+|------|---------|------|------|---------|
+| Central | PostgreSQL 数据 | 每天 3:00 | 7 天 | crontab + `scripts/backup.sh`（已配置） |
+| Central | SSL 证书 | 一次性 + 续期时 | 永久 | `/etc/letsencrypt/` |
+| 客户业务 | PostgreSQL 数据 | 建议每天 3:30 | 7 天 | crontab + `pg_dump` |
+| 客户业务 | Strapi 上传文件 | 建议每周 | 4 周 | tar 打包 uploads 卷 |
+| 客户业务 | .env 配置 | 变更时 | 永久 | 手动备份 |
+
+#### 10.4.2 Central 备份（已配置）
+
+```bash
+# 查看 Central 备份任务
+crontab -l | grep central
+
+# 手动触发 Central 备份
+cd /opt/central && bash scripts/backup.sh
+
+# 查看备份日志
+tail -50 /var/log/central-backup.log
+
+# 查看备份文件
+ls -lh /opt/central/backups/ 2>/dev/null || ls -lh /opt/backups/ 2>/dev/null
+```
+
+#### 10.4.3 客户业务备份（需配置）
+
+```bash
+# 创建备份目录
+mkdir -p /opt/backups/customer-site
+
+# 手动备份客户业务数据库
+docker compose -f /opt/customer-site/docker-compose.yml exec -T postgres \
+  pg_dump -U strapi strapi > /opt/backups/customer-site/customer_$(date +%Y%m%d_%H%M%S).sql
+
+# 配置自动备份（每天 3:30，保留 7 天）
+crontab -e
+# 追加以下内容：
+30 3 * * * docker exec yousen-postgres pg_dump -U strapi strapi | gzip > /opt/backups/customer-site/customer_$(date +\%Y\%m\%d).sql.gz && find /opt/backups/customer-site/ -name 'customer_*.sql.gz' -mtime +7 -delete
+
+# 验证 crontab
+crontab -l | grep customer
+
+# 备份 Strapi 上传文件（建议每周日 4:00）
+0 4 * * 0 tar czf /opt/backups/customer-site/uploads_$(date +\%Y\%m\%d).tar.gz -C /var/lib/docker/volumes/ uploads/_data 2>/dev/null && find /opt/backups/customer-site/ -name 'uploads_*.tar.gz' -mtime +28 -delete
+```
+
+#### 10.4.4 备份恢复
+
+```bash
+# === 恢复 Central 数据库 ===
+cd /opt/central
+docker compose cp /opt/central/backups/<backup-file>.sql central-postgres:/tmp/
+docker compose exec central-postgres psql -U central -d central -f /tmp/<backup-file>.sql
+
+# === 恢复客户业务数据库 ===
+cd /opt/customer-site
+gunzip < /opt/backups/customer-site/<backup-file>.sql.gz | docker compose exec -T postgres psql -U strapi -d strapi
+```
+
+### 10.5 故障恢复
+
+#### 10.5.1 单个容器重启
+
+```bash
+# Central 容器
+docker restart central-postgres
+docker restart central-app
+docker restart central-nginx
+
+# 客户业务容器
+docker restart yousen-postgres
+docker restart yousen-redis
+docker restart yousen-meilisearch
+docker restart yousen-backend
+docker restart yousen-frontend
+docker restart agent
+```
+
+#### 10.5.2 全量重启（按系统）
+
+```bash
+# 重启整个 Central
+cd /opt/central
+docker compose restart
+
+# 重启整个客户业务
+cd /opt/customer-site
+docker compose restart
+
+# 重启所有 9 个容器（一条命令）
+docker restart central-postgres central-app central-nginx \
+  yousen-postgres yousen-redis yousen-meilisearch \
+  yousen-backend yousen-frontend agent
+```
+
+#### 10.5.3 容器降级/回滚
+
+```bash
+# === Central 回滚 ===
+cd /opt/central
+# 查看镜像历史（如果有多个版本）
+docker images | grep central-app
+
+# 回滚到上一个镜像版本（假设有 tag）
+docker compose down app
+docker tag central-app:previous central-app:latest
+docker compose up -d app
+
+# === 客户业务回滚 ===
+cd /opt/customer-site
+# 回滚到上一个 commit
+git log --oneline -5
+git checkout <previous-commit-sha>
+docker compose up -d --build --no-deps backend frontend
+
+# === 数据库回滚（如涉及 schema 变更）===
+docker compose exec backend npm run strapi migration:down
+```
+
+#### 10.5.4 全量重启后的健康检查流程
+
+```bash
+# 1. 等待 60 秒让所有容器启动
+sleep 60
+
+# 2. 查看所有容器状态
+docker ps --format "table {{.Names}}\t{{.Status}}"
+
+# 3. 验证 Central
+curl -I https://central.tishensnoopy.cloud/
+
+# 4. 验证客户业务
+curl http://localhost:1337/_health
+curl -I http://localhost:3001/
+
+# 5. 验证 Agent 连接
+docker logs --tail 20 agent | grep -i 'connected\|error'
+
+# 6. 验证 Central 后台能看到 Agent 在线
+# 浏览器登录 https://central.tishensnoopy.cloud → 服务器管理
+```
+
+### 10.6 日志查看
+
+#### 10.6.1 Central 日志
+
+```bash
+# === 实时查看所有 Central 日志 ===
+cd /opt/central
+docker compose logs -f
+
+# === 查看 Central app 日志（最近 100 行）===
+docker compose logs --tail 100 app
+
+# === 查看 Central nginx 访问日志 ===
+docker compose exec nginx tail -f /var/log/nginx/access.log
+
+# === 查看 Central nginx 错误日志 ===
+docker compose exec nginx tail -f /var/log/nginx/error.log
+
+# === 查看 Central PostgreSQL 慢查询日志 ===
+docker compose exec postgres tail -f /var/lib/postgresql/data/log/*.log 2>/dev/null || \
+  docker compose logs --tail 100 postgres
+```
+
+#### 10.6.2 客户业务日志
+
+```bash
+# === 实时查看所有客户业务日志 ===
+cd /opt/customer-site
+docker compose logs -f
+
+# === 查看 Strapi backend 日志（最近 200 行）===
+docker compose logs --tail 200 backend
+
+# === 查看 Next.js frontend 日志 ===
+docker compose logs --tail 100 frontend
+
+# === 查看 PostgreSQL 日志 ===
+docker compose logs --tail 100 postgres
+
+# === 查看 Redis 日志 ===
+docker compose logs --tail 50 redis
+
+# === 查看 MeiliSearch 日志 ===
+docker compose logs --tail 50 meilisearch
+
+# === 查看 Agent 日志（连接 Central 的 WebSocket）===
+docker logs --tail 100 agent
+docker logs -f agent
+```
+
+#### 10.6.3 日志聚合查看
+
+```bash
+# 同时查看 Central app + 客户业务 backend 的最近日志
+docker logs --tail 50 central-app
+docker logs --tail 50 yousen-backend
+
+# 查看 Agent 与 Central 的连接日志
+docker logs agent 2>&1 | grep -iE 'connect|disconnect|error|heartbeat'
+
+# 查看所有容器的最近错误日志
+for c in central-postgres central-app central-nginx \
+         yousen-postgres yousen-redis yousen-meilisearch \
+         yousen-backend yousen-frontend agent; do
+  echo "=== $c ==="
+  docker logs --tail 20 "$c" 2>&1 | grep -iE 'error|fail|fatal' | tail -5
+done
+```
+
+#### 10.6.4 日志轮转配置
+
+避免日志撑爆磁盘，建议配置 Docker 日志轮转：
+
+```bash
+# 编辑 /etc/docker/daemon.json（追加 log-opts）
+cat /etc/docker/daemon.json
+
+# 修改为（在原有配置基础上追加 log-opts）：
+tee /etc/docker/daemon.json <<'EOF'
+{
+  "registry-mirrors": [
+    "https://docker.1ms.run",
+    "https://docker.xuanyuan.me",
+    "https://docker.m.daocloud.io"
+  ],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "50m",
+    "max-file": "3"
+  }
+}
+EOF
+
+# 重启 Docker 生效（注意：会重启所有容器）
+systemctl daemon-reload
+systemctl restart docker
+```
+
+### 10.7 同机部署运维速查
+
+| 任务 | 命令 |
+|------|------|
+| 查看所有 9 个容器 | `docker ps --format "table {{.Names}}\t{{.Status}}"` |
+| 查看内存 | `free -h` |
+| 查看磁盘 | `df -h` |
+| 查看 CPU 负载 | `uptime` |
+| 容器资源占用 | `docker stats --no-stream` |
+| Central 日志 | `cd /opt/central && docker compose logs -f app` |
+| 客户业务日志 | `cd /opt/customer-site && docker compose logs -f backend` |
+| Agent 日志 | `docker logs -f agent` |
+| 重启单个容器 | `docker restart <容器名>` |
+| 重启 Central | `cd /opt/central && docker compose restart` |
+| 重启客户业务 | `cd /opt/customer-site && docker compose restart` |
+| Central 备份 | `cd /opt/central && bash scripts/backup.sh` |
+| 客户业务备份 | `docker exec yousen-postgres pg_dump -U strapi strapi \| gzip > /opt/backups/customer-site/customer_$(date +%Y%m%d).sql.gz` |
+| 验证 Central | `curl -I https://central.tishensnoopy.cloud/` |
+| 验证客户前端 | `curl -I http://localhost:3001/` |
+| 验证客户后端 | `curl http://localhost:1337/_health` |
+| 验证 Agent | `docker logs --tail 20 agent \| grep -i connected` |
+
+---
+
 ## 附录：密钥生成速查
 
 ```bash
