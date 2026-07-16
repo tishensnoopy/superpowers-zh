@@ -55,6 +55,10 @@ frontend-next/playwright-report/
 frontend-next/test-results/
 frontend-next/e2e/screenshots/
 
+# Playwright 测试产物（Central 版本）
+central/playwright-report/
+central/test-results/
+
 # Node 包依赖
 **/node_modules/
 
