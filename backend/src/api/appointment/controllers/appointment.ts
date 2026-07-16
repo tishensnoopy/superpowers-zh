@@ -46,9 +46,12 @@ export default {
         return ctx.badRequest('Invalid phone number format');
       }
 
-      const validCampuses = ['chaoyang', 'haidian', 'xicheng', 'fengtai'];
-      if (!validCampuses.includes(campus)) {
-        console.warn(`${LOG_PREFIX} [create] 校验失败: 无效校区=${campus}`);
+      // 校区校验：schema 已约束 required + maxLength=100，前端通过下拉选项限制为实际校区 slug。
+      // 此前曾硬编码 ['chaoyang','haidian','xicheng','fengtai']（北京校区），与实际武汉校区
+      // (yousen-baibuting / yousen-sanyanglu / ...) 不匹配，导致所有预约提交被拒。
+      // 移除硬编码校验，改由前端选项 + schema 约束 + 后端非空校验（已在 missing 检查中覆盖）。
+      if (typeof campus !== 'string' || campus.trim().length === 0) {
+        console.warn(`${LOG_PREFIX} [create] 校验失败: campus 为空`);
         return ctx.badRequest('Invalid campus value');
       }
 
