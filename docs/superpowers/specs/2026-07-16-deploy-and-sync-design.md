@@ -263,7 +263,36 @@ SEO 和 GEO 是项目的硬约束，需要独立的业务审查场景。
 | G7 | 内容语义化          | HTML 语义化标签（article/section/nav/aside）、标题层级清晰 | Next.js                     |
 | G8 | API 可访问性        | AI 爬虫可以访问公开 API 获取结构化数据                   | Strapi public API           |
 
-### 4.7 UI/UX 测试点（贯穿所有场景）
+### 4.7 场景 F：Strapi 超级管理员管理客户管理员权限
+
+**背景**：Strapi 超级管理员（Super Admin）需要管理客户管理员（client-admin 角色）的权限，确保客户管理员只能管理自己有权限的内容。这与 Central 后台的 admins 管理（场景 C6）是**两套独立的体系**。
+
+**现状**（已验证）：
+- [backend/src/services/rbac.ts](file:///home/tishensnoopy/project/superpowers-zh/backend/src/services/rbac.ts) 已实现 `client-admin` 角色创建和权限配置
+- [backend/src/policies/is-client-admin.ts](file:///home/tishensnoopy/project/superpowers-zh/backend/src/policies/is-client-admin.ts) 已实现权限检查 policy
+- **但 `contentTypesToAllow` 列表不完整**：缺少 appointment、feedback、teacher、campus、news、ai-config 等 content type
+
+**Strapi 内置 UI**：Settings → Administration panel → Roles，可管理角色和权限。
+
+| #   | 操作                          | 验证点                                                                    | 数据流          |
+| --- | --------------------------- | ---------------------------------------------------------------------- | ------------ |
+| F1  | 登录 Strapi Admin（超级管理员）     | 账号可用、可访问 Settings                                                     | -            |
+| F2  | 查看 Roles 列表                 | 是否有 client-admin 角色                                                   | DB → Strapi  |
+| F3  | 检查 client-admin 角色权限       | 课程/教师/校区/新闻/FAQ/预约/反馈/知识库/AI 配置 的 CRUD 权限正确                            | DB → Strapi  |
+| F4  | 补全缺失权限（rbac.ts）           | appointment/feedback/teacher/campus/news/ai-config 等加入 contentTypesToAllow | 代码修改         |
+| F5  | 创建客户管理员账号                   | 分配 client-admin 角色、邮箱密码正确                                              | Strapi Admin → DB |
+| F6  | 客户管理员登录验证                   | 权限正确：能看到内容管理、看不到 Settings、不能删除提交数据                                     | 登录验证        |
+| F7  | 验证预约权限                      | client-admin 可查看/更新状态预约，但**不可删除**（硬约束）                                | RBAC policy |
+| F8  | 验证反馈权限                      | client-admin 可查看/更新状态反馈，但**不可删除**（硬约束）                                | RBAC policy |
+| F9  | 验证知识库权限                     | client-admin 可上传文档、查看向量化状态                                             | RBAC policy |
+| F10 | 验证 AI 配置权限                  | client-admin 可修改 AI 配置（systemPrompt/temperature/maxTokens）            | RBAC policy |
+| F11 | 验证媒体库权限                     | client-admin 可上传/管理图片                                                  | RBAC policy |
+| F12 | 验证多语言权限                     | client-admin 可创建/编辑中英文内容                                               | RBAC policy |
+| F13 | 禁用客户管理员账号                   | 禁用后无法登录                                                                | Strapi Admin → DB |
+| F14 | 重置客户管理员密码                   | 重置后可用新密码登录                                                             | Strapi Admin → DB |
+| F15 | 验证权限隔离                      | client-admin **不能**管理用户、角色、插件配置、数据库导入导出                                | RBAC policy |
+
+### 4.8 UI/UX 测试点（贯穿所有场景）
 
 | #   | 类别            | 验证点                              |
 | --- | ------------- | -------------------------------- |
@@ -278,20 +307,21 @@ SEO 和 GEO 是项目的硬约束，需要独立的业务审查场景。
 | U9  | 后端操作便利性       | Strapi Admin 布局、字段顺序、批量操作        |
 | U10 | 后端输入保存的数据前端显示 | **数据一致性**（格式、顺序、完整性）             |
 
-### 4.7 业务功能补全清单（已与用户确认）
+### 4.9 业务功能补全清单（已与用户确认）
 
 **架构决策**：客户管理员继续使用 Strapi Admin（/admin）管理业务，不开发独立后台。
 
 #### 高优先级（本次必须完成）
 
-| # | 功能                | 现状                 | 方案                                                                                                                                  |
-| - | ----------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| 1 | **admins 用户管理扩展** | 本地已有基础 CRUD        | 补：角色权限编辑、密码重置、锁定/解锁                                                                                                                 |
-| 2 | **预约管理 API 开放**   | 仅 `create` public  | 补：`find`/`findOne` 给 client-admin，加 RBAC policy                                                                                     |
-| 3 | **反馈/联系表单管理 API** | 后端有 model，路由未开放    | 补：client-admin 可查看/更新状态                                                                                                             |
-| 4 | **知识库文档管理 UI**    | 后端有 model + worker | 通过 Strapi Admin Content Manager 管理文档；在 knowledge\_base schema 中加 `vectorizationStatus`（enum: pending/processing/completed/failed）字段 |
-| 5 | **数据统计仪表盘**       | 无                  | 后端加 stats API + Strapi Admin 自定义仪表盘（customizeWebpackPlugin）                                                                         |
-| 6 | **报表导出（CSV）**     | 无                  | 后端加 `/appointments/export` 接口                                                                                                       |
+| #  | 功能                    | 现状                   | 方案                                                                                                                                  |
+| -- | --------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 1  | **admins 用户管理扩展**     | 本地已有基础 CRUD          | 补：角色权限编辑、密码重置、锁定/解锁                                                                                                                 |
+| 2  | **预约管理 API 开放**       | 仅 `create` public    | 补：`find`/`findOne` 给 client-admin，加 RBAC policy                                                                                     |
+| 3  | **反馈/联系表单管理 API**     | 后端有 model，路由未开放      | 补：client-admin 可查看/更新状态                                                                                                             |
+| 4  | **知识库文档管理 UI**        | 后端有 model + worker   | 通过 Strapi Admin Content Manager 管理文档；在 knowledge\_base schema 中加 `vectorizationStatus`（enum: pending/processing/completed/failed）字段 |
+| 5  | **数据统计仪表盘**           | 无                    | 后端加 stats API + Strapi Admin 自定义仪表盘（customizeWebpackPlugin）                                                                         |
+| 6  | **报表导出（CSV）**         | 无                    | 后端加 `/appointments/export` 接口                                                                                                       |
+| 7  | **rbac.ts 权限补全**      | contentTypesToAllow 不完整 | 补：appointment/feedback/teacher/campus/news/ai-config 等加入列表，确保 client-admin 角色有完整权限                                                |
 
 #### admins 用户管理扩展详细
 
@@ -325,13 +355,13 @@ SEO 和 GEO 是项目的硬约束，需要独立的业务审查场景。
 
 * `central/__tests__/api-admins-lock.test.ts`
 
-### 4.8 非阻断问题处理
+### 4.10 非阻断问题处理
 
 **立即修复**（用户要求），不留到 P5 文档化。
 
-### 4.9 P2 产出物
+### 4.11 P2 产出物
 
-* `docs/BUSINESS-AUDIT-REPORT.md`：端到端业务流程审查报告（按场景 A/B/C/D 分章节，附截图和修复建议）
+* `docs/BUSINESS-AUDIT-REPORT.md`：端到端业务流程审查报告（按场景 A/B/C/D/E/F 分章节，附截图和修复建议）
 
 * UI/UX 问题清单
 
@@ -886,11 +916,13 @@ P5 (三端同步 + 文档)
 
 * ✅ 服务器 swap 已创建
 
-* ✅ P2 端到端业务流程审查报告完成（场景 A/B/C/D/E + UI/UX）
+* ✅ P2 端到端业务流程审查报告完成（场景 A/B/C/D/E/F + UI/UX）
 
 * ✅ P2.5 代码质量审查报告完成（npm audit/版本/lint）
 
 * ✅ admins 用户管理扩展完成（角色/密码重置/锁定）
+
+* ✅ rbac.ts 权限补全（client-admin 角色完整权限）
 
 * ✅ 预约/反馈 API 开放 + RBAC
 
@@ -940,6 +972,7 @@ P5 (三端同步 + 文档)
 12. **域名**：用户配置 yousen.tishensnoopy.cloud 指向 3001，部署完成时提醒
 13. **服务器部署 commit SHA**：需要记录
 14. **SEO/GEO 审查**：独立为场景 E，SEO 14 项 + GEO 8 项，是项目硬约束
+15. **Strapi 权限管理**：场景 F，Strapi 超级管理员管理 client-admin 角色权限（与 Central admins 是两套体系），rbac.ts 需补全 contentTypesToAllow
 
 ***
 
