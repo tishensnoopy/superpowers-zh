@@ -6,7 +6,7 @@ export default {
       handler: 'stats.appointments',
       config: {
         auth: { enabled: true },
-        policies: ['is-client-admin'],
+        policies: ['global::is-client-admin'],
       },
     },
     {
@@ -15,7 +15,7 @@ export default {
       handler: 'stats.feedbacks',
       config: {
         auth: { enabled: true },
-        policies: ['is-client-admin'],
+        policies: ['global::is-client-admin'],
       },
     },
     {
@@ -24,7 +24,7 @@ export default {
       handler: 'stats.overview',
       config: {
         auth: { enabled: true },
-        policies: ['is-client-admin'],
+        policies: ['global::is-client-admin'],
       },
     },
   ],

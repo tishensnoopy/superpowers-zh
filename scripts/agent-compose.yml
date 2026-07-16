@@ -3,7 +3,7 @@
 # 注意：env_file 中的 .env 必须包含 AGENT_TOKEN、SERVER_ID、CENTRAL_WS_URL
 services:
   agent:
-    image: registry.cn-hangzhou.aliyuncs.com/yousen/agent:latest
+    image: yousen-agent:latest
     container_name: yousen-agent
     restart: unless-stopped
     env_file: ${DEPLOY_PATH}/.env

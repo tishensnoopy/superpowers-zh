@@ -28,7 +28,7 @@ export default {
       path: '/appointments',
       handler: 'appointment.find',
       config: {
-        policies: ['is-client-admin'],
+        policies: ['global::is-client-admin'],
         middlewares: [],
       },
     },
@@ -38,7 +38,7 @@ export default {
       handler: 'appointment.export',
       config: {
         auth: { enabled: true },
-        policies: ['is-client-admin'],
+        policies: ['global::is-client-admin'],
       },
     },
     {
@@ -46,7 +46,7 @@ export default {
       path: '/appointments/:documentId',
       handler: 'appointment.findOne',
       config: {
-        policies: ['is-client-admin'],
+        policies: ['global::is-client-admin'],
         middlewares: [],
       },
     },

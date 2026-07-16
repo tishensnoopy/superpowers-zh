@@ -10,16 +10,16 @@ export default factories.createCoreRouter('api::feedback.feedback', {
     },
     // client-admin 可查看列表和详情；Strapi v5 默认要求 auth，policy 强制 client-admin 角色
     find: {
-      policies: ['is-client-admin'],
+      policies: ['global::is-client-admin'],
       middlewares: [],
     },
     findOne: {
-      policies: ['is-client-admin'],
+      policies: ['global::is-client-admin'],
       middlewares: [],
     },
     // client-admin 可更新状态/回复
     update: {
-      policies: ['is-client-admin'],
+      policies: ['global::is-client-admin'],
       middlewares: [],
     },
   },

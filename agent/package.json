@@ -1,7 +1,6 @@
 {
   "name": "yousen-agent",
   "version": "0.1.0",
-  "type": "module",
   "bin": { "yousen-agent": "dist/index.js" },
   "scripts": {
     "dev": "tsx src/index.ts",
