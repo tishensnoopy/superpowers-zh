@@ -15,7 +15,7 @@ export async function GET() {
   const admin = await requireAdmin();
   if (admin instanceof Response) return admin;
   const result = await query(
-    `SELECT id, email, role, created_at
+    `SELECT id, email, role, locked, locked_at, created_at
      FROM admin_users
      ORDER BY created_at DESC`
   );

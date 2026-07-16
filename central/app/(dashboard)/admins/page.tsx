@@ -6,6 +6,8 @@ interface AdminUser {
   id: string;
   email: string;
   role: 'superadmin' | 'admin' | 'viewer';
+  locked: boolean | null;
+  locked_at: string | null;
   created_at: string;
 }
 
@@ -59,6 +61,7 @@ export default function AdminsPage() {
             <tr>
               <th className="p-3 text-left">邮箱</th>
               <th className="p-3 text-left">角色</th>
+              <th className="p-3 text-left">状态</th>
               <th className="p-3 text-left">创建时间</th>
               <th className="p-3 text-left">操作</th>
             </tr>
@@ -72,6 +75,17 @@ export default function AdminsPage() {
                     {ROLE_LABEL[a.role]}
                   </span>
                 </td>
+                <td className="p-3">
+                  {a.locked ? (
+                    <span className="text-xs px-2 py-0.5 rounded bg-orange-100 text-orange-700">
+                      已锁定
+                    </span>
+                  ) : (
+                    <span className="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700">
+                      正常
+                    </span>
+                  )}
+                </td>
                 <td className="p-3 text-sm text-gray-500">
                   {new Date(a.created_at).toLocaleString()}
                 </td>
@@ -84,7 +98,7 @@ export default function AdminsPage() {
             ))}
             {items.length === 0 && (
               <tr>
-                <td colSpan={4} className="p-6 text-center text-gray-500">
+                <td colSpan={5} className="p-6 text-center text-gray-500">
                   暂无管理员账号
                 </td>
               </tr>

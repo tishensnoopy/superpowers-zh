@@ -58,7 +58,8 @@ describe('POST /api/admin/admins/[id]/lock', () => {
     });
     expect(res.status).toBe(200);
     const body = await res.json();
-    expect(body.ok).toBe(true);
+    expect(body.locked).toBe(true);
+    expect(body.email).toBe(targetEmail);
 
     const dbRes = await pool.query<{ locked: boolean }>(
       'SELECT locked FROM admin_users WHERE id=$1',
@@ -92,6 +93,9 @@ describe('POST /api/admin/admins/[id]/lock', () => {
       headers: { 'Content-Type': 'application/json', cookie: `central_admin_session=${superadminToken}` },
     });
     expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.locked).toBe(false);
+    expect(body.locked_at).toBeNull();
 
     const dbRes = await pool.query<{ locked: boolean }>(
       'SELECT locked FROM admin_users WHERE id=$1',

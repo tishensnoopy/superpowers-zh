@@ -14,9 +14,13 @@ beforeAll(async () => {
       email TEXT UNIQUE NOT NULL,
       password_hash TEXT NOT NULL,
       role TEXT NOT NULL DEFAULT 'admin',
+      locked BOOLEAN NOT NULL DEFAULT false,
+      locked_at TIMESTAMPTZ,
       created_at TIMESTAMPTZ DEFAULT now()
     );
   `);
+  await pool.query(`ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS locked BOOLEAN NOT NULL DEFAULT false`);
+  await pool.query(`ALTER TABLE admin_users ADD COLUMN IF NOT EXISTS locked_at TIMESTAMPTZ`);
   await pool.query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`);
 
   const hash = await hashPassword('Test123!');

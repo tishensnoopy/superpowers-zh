@@ -15,7 +15,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   const admin = await requireAdmin();
   if (admin instanceof Response) return admin;
   const result = await query(
-    'SELECT id, email, role, created_at FROM admin_users WHERE id=$1',
+    'SELECT id, email, role, locked, locked_at, created_at FROM admin_users WHERE id=$1',
     [params.id]
   );
   if (result.rows.length === 0) return errorResponse('Not found', 404);
@@ -103,7 +103,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   values.push(params.id);
   const result = await query(
     `UPDATE admin_users SET ${sets.join(', ')} WHERE id=$${idx}
-     RETURNING id, email, role, created_at`,
+     RETURNING id, email, role, locked, locked_at, created_at`,
     values
   );
 

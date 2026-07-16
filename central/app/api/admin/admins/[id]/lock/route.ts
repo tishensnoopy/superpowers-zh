@@ -21,8 +21,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   );
   if (current.rows.length === 0) return errorResponse('Not found', 404);
 
-  await query(
-    'UPDATE admin_users SET locked=true, locked_at=now() WHERE id=$1',
+  const result = await query(
+    `UPDATE admin_users SET locked=true, locked_at=now() WHERE id=$1
+     RETURNING id, email, role, locked, locked_at, created_at`,
     [params.id]
   );
 
@@ -35,5 +36,5 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     userAgent: req.headers.get('user-agent') ?? undefined,
   });
 
-  return json({ ok: true });
+  return json(result.rows[0]);
 }

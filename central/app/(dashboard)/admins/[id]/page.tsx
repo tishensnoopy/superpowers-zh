@@ -7,6 +7,8 @@ interface AdminUser {
   id: string;
   email: string;
   role: 'superadmin' | 'admin' | 'viewer';
+  locked: boolean | null;
+  locked_at: string | null;
   created_at: string;
 }
 
@@ -34,6 +36,7 @@ export default function AdminDetailPage() {
   const [password, setPassword] = useState('');
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [togglingLock, setTogglingLock] = useState(false);
 
   useEffect(() => {
     fetch(`/api/admin/admins/${id}`)
@@ -92,6 +95,26 @@ export default function AdminDetailPage() {
     }
   }
 
+  async function onToggleLock() {
+    if (!admin) return;
+    const action = admin.locked ? '解锁' : '锁定';
+    if (!confirm(`确认${action}管理员 ${admin.email}？`)) return;
+    setTogglingLock(true);
+    setError(null);
+    setSuccess(null);
+    const endpoint = admin.locked ? 'unlock' : 'lock';
+    const res = await fetch(`/api/admin/admins/${id}/${endpoint}`, { method: 'POST' });
+    if (res.ok) {
+      const updated = await res.json();
+      setAdmin(updated);
+      setSuccess(`${action}成功`);
+    } else {
+      const d = await res.json().catch(() => ({}));
+      setError(d.error ?? `${action}失败 (${res.status})`);
+    }
+    setTogglingLock(false);
+  }
+
   if (!admin && !error) return <p>加载中...</p>;
   if (!admin) {
     return (
@@ -112,8 +135,18 @@ export default function AdminDetailPage() {
       {error && <div className="text-red-600 bg-red-50 p-2 rounded">{error}</div>}
       {success && <div className="text-green-700 bg-green-50 p-2 rounded">{success}</div>}
 
-      <div className="bg-white rounded shadow p-4 text-sm text-gray-600">
+      <div className="bg-white rounded shadow p-4 text-sm text-gray-600 space-y-1">
         <div>当前角色：<span className="font-semibold">{ROLE_LABEL[admin.role]}</span></div>
+        <div>
+          账号状态：
+          {admin.locked ? (
+            <span className="font-semibold text-orange-700">
+              已锁定{admin.locked_at ? `（${new Date(admin.locked_at).toLocaleString()}）` : ''}
+            </span>
+          ) : (
+            <span className="font-semibold text-green-700">正常</span>
+          )}
+        </div>
         <div>创建时间：{new Date(admin.created_at).toLocaleString()}</div>
       </div>
 
@@ -162,10 +195,23 @@ export default function AdminDetailPage() {
         </button>
       </form>
 
-      <div className="border-t pt-4">
+      <div className="border-t pt-4 space-y-3">
+        <button
+          onClick={onToggleLock}
+          className={`text-white px-4 py-2 rounded disabled:opacity-50 ${
+            admin.locked ? 'bg-green-600' : 'bg-orange-600'
+          }`}
+          disabled={togglingLock}
+        >
+          {togglingLock
+            ? '处理中...'
+            : admin.locked
+              ? '解锁账号'
+              : '锁定账号'}
+        </button>
         <button
           onClick={onDelete}
-          className="bg-red-600 text-white px-4 py-2 rounded disabled:opacity-50"
+          className="bg-red-600 text-white px-4 py-2 rounded disabled:opacity-50 ml-2"
           disabled={deleting}
         >
           {deleting ? '删除中...' : '删除账号'}
