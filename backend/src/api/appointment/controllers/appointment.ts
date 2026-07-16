@@ -1,10 +1,13 @@
-import { factories } from '@strapi/strapi';
+import type { Core } from '@strapi/strapi';
 
+const UID = 'api::appointment.appointment';
 const RATE_LIMIT_MAX = 5;
 const RATE_LIMIT_WINDOW_MS = 3600000;
 const LOG_PREFIX = '[Appointment]';
+const DEFAULT_PAGE_SIZE = 25;
+const MAX_PAGE_SIZE = 100;
 
-export default factories.createCoreController('api::appointment.appointment', ({ strapi }) => ({
+export default {
   async create(ctx) {
     const startTime = Date.now();
     console.log(`${LOG_PREFIX} [create] 收到预约提交请求`);
@@ -54,7 +57,7 @@ export default factories.createCoreController('api::appointment.appointment', ({
 
       console.log(`${LOG_PREFIX} [create] 客户端信息: ip=${clientIp}, userAgent长度=${userAgent.length}`);
 
-      const recentCount = await strapi.db.query('api::appointment.appointment').count({
+      const recentCount = await strapi.db.query(UID).count({
         where: {
           ipAddress: clientIp,
           createdAt: { $gte: new Date(Date.now() - RATE_LIMIT_WINDOW_MS) },
@@ -75,10 +78,14 @@ export default factories.createCoreController('api::appointment.appointment', ({
         userAgent: userAgent,
       };
 
-      const result = await super.create(ctx);
+      const doc = await strapi.documents(UID).create({
+        data: ctx.request.body.data,
+      });
+
+      ctx.body = { data: doc, meta: {} };
       const duration = Date.now() - startTime;
-      console.log(`${LOG_PREFIX} [create] ✅ 创建成功, id=${result.data?.id}, 耗时=${duration}ms`);
-      return result;
+      console.log(`${LOG_PREFIX} [create] ✅ 创建成功, id=${doc?.id}, 耗时=${duration}ms`);
+      return ctx.body;
     } catch (err) {
       const duration = Date.now() - startTime;
       console.error(`${LOG_PREFIX} [create] ❌ 创建失败, 耗时=${duration}ms:`, err instanceof Error ? err.message : err);
@@ -88,4 +95,109 @@ export default factories.createCoreController('api::appointment.appointment', ({
       throw err;
     }
   },
-}));
+
+  async find(ctx) {
+    const startTime = Date.now();
+    console.log(`${LOG_PREFIX} [find] 收到列表查询请求`);
+
+    try {
+      const query = ctx.query as any;
+      const page = Math.max(1, parseInt(query.page || '1', 10) || 1);
+      const pageSize = Math.min(
+        MAX_PAGE_SIZE,
+        Math.max(1, parseInt(query.pageSize || String(DEFAULT_PAGE_SIZE), 10) || DEFAULT_PAGE_SIZE)
+      );
+
+      // 解析筛选条件：支持 ctx.query.filters 对象形式或扁平 filters[xxx]=yyy 形式
+      const filters: any = {};
+      if (query.filters && typeof query.filters === 'object') {
+        for (const key of ['status', 'campus', 'parentName', 'phone']) {
+          const v = (query.filters as any)[key];
+          if (v !== undefined && v !== null && v !== '') {
+            filters[key] = typeof v === 'object' ? v : { $eq: v };
+          }
+        }
+      } else {
+        for (const key of ['status', 'campus', 'parentName', 'phone']) {
+          const flatKey = `filters[${key}]`;
+          if (query[flatKey] !== undefined && query[flatKey] !== '') {
+            filters[key] = { $eq: query[flatKey] };
+          }
+        }
+      }
+
+      const sort = query.sort
+        ? Array.isArray(query.sort)
+          ? query.sort
+          : [query.sort]
+        : [{ createdAt: 'desc' }];
+
+      console.log(`${LOG_PREFIX} [find] 查询参数: page=${page}, pageSize=${pageSize}, filters=${JSON.stringify(filters)}`);
+
+      const [results, total] = await Promise.all([
+        strapi.documents(UID).findMany({
+          filters,
+          sort: sort as any,
+          page,
+          pageSize,
+        }),
+        strapi.db.query(UID).count({ where: filters }),
+      ]);
+
+      const pageCount = Math.ceil(total / pageSize) || 1;
+
+      ctx.body = {
+        data: results || [],
+        meta: {
+          pagination: {
+            page,
+            pageSize,
+            pageCount,
+            total,
+          },
+        },
+      };
+
+      const duration = Date.now() - startTime;
+      console.log(`${LOG_PREFIX} [find] ✅ 查询成功, 返回${results?.length || 0}条/共${total}条, 耗时=${duration}ms`);
+      return ctx.body;
+    } catch (err) {
+      const duration = Date.now() - startTime;
+      console.error(`${LOG_PREFIX} [find] ❌ 查询失败, 耗时=${duration}ms:`, err instanceof Error ? err.message : err);
+      throw err;
+    }
+  },
+
+  async findOne(ctx) {
+    const startTime = Date.now();
+    console.log(`${LOG_PREFIX} [findOne] 收到详情查询请求`);
+
+    try {
+      const { documentId } = ctx.params as any;
+
+      if (!documentId) {
+        return ctx.badRequest('Missing documentId');
+      }
+
+      console.log(`${LOG_PREFIX} [findOne] 查询: documentId=${documentId}`);
+
+      const result = await strapi.documents(UID).findOne({
+        documentId,
+      });
+
+      if (!result) {
+        console.warn(`${LOG_PREFIX} [findOne] 未找到: documentId=${documentId}`);
+        return ctx.notFound('Appointment not found');
+      }
+
+      ctx.body = { data: result, meta: {} };
+      const duration = Date.now() - startTime;
+      console.log(`${LOG_PREFIX} [findOne] ✅ 查询成功, documentId=${documentId}, 耗时=${duration}ms`);
+      return ctx.body;
+    } catch (err) {
+      const duration = Date.now() - startTime;
+      console.error(`${LOG_PREFIX} [findOne] ❌ 查询失败, 耗时=${duration}ms:`, err instanceof Error ? err.message : err);
+      throw err;
+    }
+  },
+} satisfies Core.Controller;
