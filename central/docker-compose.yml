@@ -26,10 +26,20 @@ services:
       DATABASE_URL: postgres://central:${DATABASE_PASSWORD:-changeme}@postgres:5432/control_db
       JWT_SECRET: ${JWT_SECRET}
       AES_KEY: ${AES_KEY}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+      INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD}
+      CENTRAL_DOMAIN: ${CENTRAL_DOMAIN}
       NODE_ENV: production
     ports:
       - "${CENTRAL_PORT:-3000}:3000"
-    command: sh -c "npx tsx db/migrate.ts && npx tsx db/seed.ts && npm start"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/login"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    # seed 仅首次手动执行（npx tsx db/seed.ts），避免每次重启重复写入
+    command: sh -c "npx tsx db/migrate.ts && npm start"
 
 volumes:
   central_pgdata:

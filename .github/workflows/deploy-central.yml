@@ -1,0 +1,96 @@
+name: Deploy central
+
+# Central 管理后台自动部署：push 到 main 分支（触及 central/ 路径）时触发
+# Runner rsync 代码到 central 服务器，SSH 远程执行 deploy.sh --no-pull -d
+# 必需 Secrets（在仓库 Settings → Secrets 中配置，前缀 CENTRAL_ 避免与客户部署冲突）：
+#   - CENTRAL_SSH_PRIVATE_KEY: SSH 登录私钥（runner → central 服务器）
+#   - CENTRAL_SERVER_IP: central 服务器公网 IP
+#   - CENTRAL_DEPLOY_PATH: 服务器项目路径（如 /opt/central）
+# 可选 Secrets:
+#   - CENTRAL_DEPLOY_SSH_PORT: SSH 端口（默认 22）
+#   - CENTRAL_DEPLOY_USER: SSH 登录用户（默认 root）
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'central/**'
+      - '.github/workflows/deploy-central.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-central-${{ secrets.CENTRAL_SERVER_IP }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@dc588b781dcf0c1a0b1e033ea7b4e5b43686a9f3 # v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.CENTRAL_SSH_PRIVATE_KEY }}
+
+      - name: Add server to known_hosts
+        run: |
+          ssh-keyscan -p ${{ secrets.CENTRAL_DEPLOY_SSH_PORT || 22 }} ${{ secrets.CENTRAL_SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Validate required secrets
+        run: |
+          if [ -z "${{ secrets.CENTRAL_SERVER_IP }}" ]; then
+            echo "::error::Secret CENTRAL_SERVER_IP is required"
+            exit 1
+          fi
+          if [ -z "${{ secrets.CENTRAL_DEPLOY_PATH }}" ]; then
+            echo "::error::Secret CENTRAL_DEPLOY_PATH is required"
+            exit 1
+          fi
+          echo "Deploy target: ${{ secrets.CENTRAL_DEPLOY_USER || 'root' }}@${{ secrets.CENTRAL_SERVER_IP }}:${{ secrets.CENTRAL_DEPLOY_PATH }}"
+
+      - name: Rsync code to server
+        run: |
+          rsync -avz --delete \
+            --exclude='.git/' \
+            --exclude='node_modules/' \
+            --exclude='.next/' \
+            --exclude='dist/' \
+            --exclude='build/' \
+            --exclude='.env' \
+            --exclude='*.log' \
+            --exclude='data/' \
+            --exclude='.cache/' \
+            --exclude='.npmrc' \
+            --exclude='backend/' \
+            --exclude='frontend-next/' \
+            --exclude='agent/' \
+            --exclude='central/backups/' \
+            -e "ssh -p ${{ secrets.CENTRAL_DEPLOY_SSH_PORT || 22 }}" \
+            ./ ${{ secrets.CENTRAL_DEPLOY_USER || 'root' }}@${{ secrets.CENTRAL_SERVER_IP }}:${{ secrets.CENTRAL_DEPLOY_PATH }}/
+        # 排除 backend/frontend-next/agent：central 服务器不需要客户业务代码
+        # 排除 central/backups/：服务器端备份文件不同步回 runner
+        # 排除 .env：保护服务器端 .env
+
+      - name: Deploy via SSH
+        run: |
+          ssh -p ${{ secrets.CENTRAL_DEPLOY_SSH_PORT || 22 }} ${{ secrets.CENTRAL_DEPLOY_USER || 'root' }}@${{ secrets.CENTRAL_SERVER_IP }} \
+            "cd ${{ secrets.CENTRAL_DEPLOY_PATH }}/central && ./deploy.sh --no-pull -d 2>&1 | tee deploy.log"
+
+      - name: Fetch deploy log on failure
+        if: failure()
+        run: |
+          ssh -p ${{ secrets.CENTRAL_DEPLOY_SSH_PORT || 22 }} ${{ secrets.CENTRAL_DEPLOY_USER || 'root' }}@${{ secrets.CENTRAL_SERVER_IP }} \
+            "cat ${{ secrets.CENTRAL_DEPLOY_PATH }}/central/deploy.log" > deploy.log || true
+
+      - name: Upload deploy log artifact
+        if: failure()
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4
+        with:
+          name: central-deploy-log-${{ github.run_id }}
+          path: deploy.log
+          retention-days: 7
