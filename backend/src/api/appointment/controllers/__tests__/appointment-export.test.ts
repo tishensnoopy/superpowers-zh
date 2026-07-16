@@ -16,6 +16,9 @@ function buildMockStrapi() {
 function buildCtx() {
   const headers: Record<string, string> = {};
   return {
+    set(key: string, value: string) {
+      headers[key] = value;
+    },
     header(key: string, value: string) {
       headers[key] = value;
     },
