@@ -15,7 +15,7 @@ services:
       - "80:80"
       - "443:443"
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:80/"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost/healthz"]
       interval: 10s
       timeout: 5s
       retries: 3
