@@ -12,6 +12,8 @@
 #   ./deploy.sh --logs [svc]     # 查看日志（可选指定服务）
 #   ./deploy.sh --down           # 停止所有服务
 #   ./deploy.sh --configure-mirrors  # 仅配置 Docker 镜像加速器
+#   ./deploy.sh --no-pull        # 跳过 git pull（rsync 模式专用，C 块）
+#   ./deploy.sh --agent          # 部署完成后启动 agent 容器（C 块）
 #   ./deploy.sh -h               # 帮助
 #
 # 部署顺序:
@@ -42,6 +44,8 @@ MODE="direct"      # direct | nginx
 DETACHED=0
 NO_BUILD=0
 CLEAN=0
+NO_PULL=0          # C 块新增：跳过 git pull（rsync 模式专用，当前为语义占位）
+START_AGENT=0      # C 块新增：部署完成后启动 agent 容器
 ACTION="up"        # up | status | logs | down | configure-mirrors
 
 while [[ $# -gt 0 ]]; do
@@ -50,6 +54,9 @@ while [[ $# -gt 0 ]]; do
     -d|--detach)       DETACHED=1; shift ;;
     --no-build)        NO_BUILD=1; shift ;;
     --clean)           CLEAN=1; shift ;;
+    --no-pull)         NO_PULL=1; shift ;;           # C 块：rsync 模式语义占位
+    --agent)           START_AGENT=1; shift ;;       # C 块：启动 agent 容器
+    --no-agent)        START_AGENT=0; shift ;;       # C 块：显式跳过 agent（默认行为）
     --status)          ACTION="status"; shift ;;
     --logs)            ACTION="logs"; shift; LOG_SERVICE="${1:-}"; shift || true ;;
     --down)            ACTION="down"; shift ;;
@@ -92,6 +99,55 @@ configure_mirrors() {
   fi
   log "配置 Docker 镜像加速器..."
   bash ./frontend-next/configure-docker-mirrors.sh
+}
+
+# ============== 启动 Agent 容器（C 块新增）==============
+start_agent() {
+  local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  local agent_compose="$script_dir/scripts/agent-compose.yml"
+
+  if [ ! -f "$agent_compose" ]; then
+    err "未找到 agent-compose.yml: $agent_compose"
+    err "请确保 scripts/agent-compose.yml 已随代码同步"
+    return 1
+  fi
+
+  if [ ! -f "$script_dir/.env" ]; then
+    err "未找到 .env 文件: $script_dir/.env"
+    err "请先 cp .env.example .env 并填入 AGENT_TOKEN 和 SERVER_ID"
+    return 1
+  fi
+
+  # 检查 .env 是否包含必需变量
+  local agent_token="$(grep -E '^AGENT_TOKEN=' "$script_dir/.env" | cut -d= -f2- | tr -d '"' || true)"
+  local server_id="$(grep -E '^SERVER_ID=' "$script_dir/.env" | cut -d= -f2- | tr -d '"' || true)"
+  if [ -z "$agent_token" ] || [ -z "$server_id" ]; then
+    err ".env 缺少 AGENT_TOKEN 或 SERVER_ID"
+    err "请先执行 agent register 命令完成注册（见 agent/README.md）"
+    return 1
+  fi
+
+  log "启动 Agent 容器..."
+  # 用 envsubst 替换 ${DEPLOY_PATH} 和 ${CENTRAL_WS_URL}
+  # DEPLOY_PATH 用脚本所在目录（与 .env 一致）
+  local deploy_path="$script_dir"
+  local central_ws_url="$(grep -E '^CENTRAL_WS_URL=' "$script_dir/.env" | cut -d= -f2- | tr -d '"' || true)"
+
+  if [ -z "$central_ws_url" ]; then
+    err ".env 缺少 CENTRAL_WS_URL"
+    return 1
+  fi
+
+  if ! DEPLOY_PATH="$deploy_path" CENTRAL_WS_URL="$central_ws_url" \
+        envsubst < "$agent_compose" | $COMPOSE_CMD -f - up -d; then
+    err "Agent 容器启动失败"
+    return 1
+  fi
+
+  sleep 5
+  log "Agent 容器状态:"
+  docker ps --filter "name=yousen-agent" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+  ok "Agent 已启动（连接 central: $central_ws_url）"
 }
 
 # ============== 处理非 up 动作 ==============
@@ -281,6 +337,18 @@ if [ "$MODE" = "nginx" ]; then
   else
     warn "nginx 启动中，状态: $NGINX_HEALTHY"
   fi
+fi
+
+# ============== 启动 Agent（可选，C 块新增）==============
+if [ "$START_AGENT" -eq 1 ]; then
+  echo ""
+  log "=== 启动 Agent ==="
+  start_agent || warn "Agent 启动失败，业务容器已正常运行（Agent 与业务解耦）"
+fi
+
+# ============== no-pull 模式日志（C 块新增）==============
+if [ "$NO_PULL" -eq 1 ]; then
+  log "[mode] no-pull (rsync mode) — 代码由 rsync 同步，未执行 git pull"
 fi
 
 # ============== 输出访问信息 ==============
