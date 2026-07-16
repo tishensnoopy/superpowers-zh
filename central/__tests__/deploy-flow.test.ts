@@ -47,7 +47,7 @@ beforeAll(async () => {
 afterAll(async () => {
   __resetSSEClients();
   await pool.query(
-    `DELETE FROM job_logs; DELETE FROM deploy_jobs; DELETE FROM customer_servers; DELETE FROM customers; DELETE FROM admin_users;`
+    `TRUNCATE TABLE audit_logs, job_logs, deploy_jobs, agent_tokens, customer_servers, enrollment_codes, customer_configs, customers, admin_users CASCADE;`
   );
   await pool.end();
 });

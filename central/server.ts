@@ -17,7 +17,26 @@ app.prepare().then(() => {
   const server = createServer((req, res) => handle(req, res, parse(req.url!, true)));
   const wss = new WebSocketServer({ noServer: true });
 
-  server.on('upgrade', (req, socket, head) => {
+  const pingInterval = setInterval(() => {
+    for (const client of wss.clients) {
+      if (client.readyState === client.OPEN) client.ping();
+    }
+  }, 30000);
+  const jobMonitor = startJobTimeoutMonitor(5 * 60 * 1000, 60000);
+  wss.on('close', () => {
+    clearInterval(pingInterval);
+    clearInterval(jobMonitor);
+  });
+
+  startHeartbeatMonitor(60, 10000);
+
+  // Our WebSocket upgrade handler — bypasses Next.js's crashing upgrade handler.
+  // Next.js 14 lazily adds its upgrade handler on the first HTTP request,
+  // and it crashes with `TypeError: Cannot read properties of undefined (reading 'bind')`,
+  // destroying the socket. Using server.removeAllListeners('upgrade') is racy because
+  // Next.js adds its handler after we remove them.
+  // Fix: override server.emit to intercept 'upgrade' events and route them only to our handler.
+  const upgradeHandler = (req: any, socket: any, head: any) => {
     const { pathname, query } = parse(req.url!, true);
     if (pathname !== '/api/agent/ws') return;
 
@@ -47,26 +66,27 @@ app.prepare().then(() => {
             console.error('[ws] message handling failed:', err);
           }
         });
+        // Send welcome immediately upon connection to confirm authentication.
+        // agent:register is a separate client-initiated step that only updates DB state.
+        ws.send(JSON.stringify({ type: 'agent:welcome', serverId: serverRow.id }));
       });
     }).catch((err) => {
       console.error('[ws] upgrade failed:', err);
       socket.destroy();
     });
-  });
+  };
 
-  const pingInterval = setInterval(() => {
-    for (const client of wss.clients) {
-      if (client.readyState === client.OPEN) client.ping();
+  const originalEmit = server.emit.bind(server);
+  server.emit = function (event: string, ...args: any[]) {
+    if (event === 'upgrade') {
+      // Route upgrade events only to our handler, bypassing Next.js's crashing handler.
+      upgradeHandler(args[0], args[1], args[2]);
+      return true;
     }
-  }, 30000);
-  const jobMonitor = startJobTimeoutMonitor(5 * 60 * 1000, 60000);
-  wss.on('close', () => {
-    clearInterval(pingInterval);
-    clearInterval(jobMonitor);
-  });
-
-  startHeartbeatMonitor(60, 10000);
+    return originalEmit(event, ...args);
+  } as typeof server.emit;
 
   server.listen(port);
+
   console.log(`> Ready on http://localhost:${port} (dev=${dev})`);
 });

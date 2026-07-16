@@ -20,7 +20,7 @@ export async function handleAgentMessage(ws: WebSocket, serverId: string, msg: A
          WHERE id=$3`,
         [msg.agentVersion, JSON.stringify({ hostname: msg.hostname, dockerVersion: msg.dockerVersion }), serverId]
       );
-      ws.send(JSON.stringify({ type: 'agent:welcome', serverId }));
+      // welcome is sent by server.ts on connection; register only updates DB state.
       break;
 
     case 'agent:heartbeat':

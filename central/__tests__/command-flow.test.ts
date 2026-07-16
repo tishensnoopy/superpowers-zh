@@ -24,7 +24,7 @@ beforeAll(async () => {
   const code = await generateEnrollmentCode(c.rows[0].id);
 
   const enrollRes = await fetch(`${CENTRAL_URL}/api/agent/enroll`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'x-forwarded-for': '10.0.0.10' },
     body: JSON.stringify({ enrollmentCode: code, hostname: 'flow-srv', displayName: 'Flow测试' }),
   });
   const enrollBody = await enrollRes.json();
@@ -41,7 +41,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   if (agentWs.readyState === WebSocket.OPEN) agentWs.close();
-  await pool.query(`DELETE FROM deploy_jobs; DELETE FROM job_logs; DELETE FROM agent_tokens; DELETE FROM customer_servers; DELETE FROM enrollment_codes; DELETE FROM customers; DELETE FROM admin_users;`);
+  await pool.query(`TRUNCATE TABLE audit_logs, job_logs, deploy_jobs, agent_tokens, customer_servers, enrollment_codes, customer_configs, customers, admin_users CASCADE;`);
   await pool.end();
 });
 

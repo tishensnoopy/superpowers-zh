@@ -18,9 +18,10 @@ afterAll(async () => {
 });
 
 describe('POST /api/agent/enroll', () => {
+  // 每个测试使用不同 IP，避免触发 rate-limit（maxAttempts=3）
   it('rejects missing fields', async () => {
     const res = await fetch('http://localhost:3000/api/agent/enroll', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'x-forwarded-for': '10.0.0.1' },
       body: JSON.stringify({}),
     });
     expect(res.status).toBe(400);
@@ -28,7 +29,7 @@ describe('POST /api/agent/enroll', () => {
 
   it('rejects invalid enrollment code', async () => {
     const res = await fetch('http://localhost:3000/api/agent/enroll', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'x-forwarded-for': '10.0.0.2' },
       body: JSON.stringify({ enrollmentCode: 'INVALID', hostname: 'srv-1' }),
     });
     expect(res.status).toBe(401);
@@ -36,7 +37,7 @@ describe('POST /api/agent/enroll', () => {
 
   it('creates a server and returns token for valid code', async () => {
     const res = await fetch('http://localhost:3000/api/agent/enroll', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'x-forwarded-for': '10.0.0.3' },
       body: JSON.stringify({ enrollmentCode: code, hostname: 'srv-1', displayName: '生产1' }),
     });
     expect(res.status).toBe(200);
@@ -49,7 +50,7 @@ describe('POST /api/agent/enroll', () => {
 
   it('rejects already-used code', async () => {
     const res = await fetch('http://localhost:3000/api/agent/enroll', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'x-forwarded-for': '10.0.0.4' },
       body: JSON.stringify({ enrollmentCode: code, hostname: 'srv-2' }),
     });
     expect(res.status).toBe(401);

@@ -1,7 +1,20 @@
 import type { WebSocket } from 'ws';
 import { broadcastJobUpdate, broadcastJobLog, broadcastJobProgress } from './sse-broadcaster';
 
-const connections = new Map<string, Set<WebSocket>>();
+// Next.js dev mode loads modules in separate module graphs: the custom server
+// (tsx) and route handlers (webpack) each get their own copy of this module.
+// A plain `const connections = new Map()` would create two independent Maps,
+// so server.ts adds to one Map while route handlers read from another (empty) Map.
+// Fix: store the Map on globalThis so both module instances share the same one.
+const globalForConnections = globalThis as unknown as {
+  __centralConnections?: Map<string, Set<WebSocket>>;
+};
+
+const connections: Map<string, Set<WebSocket>> =
+  globalForConnections.__centralConnections ?? new Map<string, Set<WebSocket>>();
+if (!globalForConnections.__centralConnections) {
+  globalForConnections.__centralConnections = connections;
+}
 
 export function addConnection(serverId: string, ws: WebSocket): () => void {
   if (!connections.has(serverId)) connections.set(serverId, new Set());

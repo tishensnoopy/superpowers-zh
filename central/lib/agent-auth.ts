@@ -25,7 +25,7 @@ export async function verifyAgentToken(token: string): Promise<{ id: string; cus
   );
   if (result.rows.length === 0) return null;
 
-  query(`UPDATE agent_tokens SET last_used_at = now() WHERE token_hash = $1`, [hash]).catch(() => {});
+  await query(`UPDATE agent_tokens SET last_used_at = now() WHERE token_hash = $1`, [hash]).catch(() => {});
 
   return result.rows[0];
 }

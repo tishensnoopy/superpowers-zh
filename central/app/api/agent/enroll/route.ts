@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     return errorResponse('hostname must match /^[A-Za-z0-9_-]{1,64}$/', 400);
   }
   // displayName 允许字母数字-_、中文、空格（最长 128）
-  if (displayName && !/^[A-Za-z0-9_-\u4e00-\u9fa5 ]{1,128}$/.test(displayName)) {
+  if (displayName && !/^[A-Za-z0-9_\u4e00-\u9fa5 -]{1,128}$/.test(displayName)) {
     return errorResponse('displayName contains invalid characters', 400);
   }
 

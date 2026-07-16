@@ -16,7 +16,7 @@ beforeAll(async () => {
   const code = await generateEnrollmentCode(customerId);
 
   const res = await fetch(`${CENTRAL_URL}/api/agent/enroll`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'x-forwarded-for': '10.0.0.11' },
     body: JSON.stringify({ enrollmentCode: code, hostname: 'ws-test', displayName: 'WS测试' }),
   });
   const body = await res.json();
@@ -25,7 +25,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await pool.query(`DELETE FROM agent_tokens; DELETE FROM customer_servers; DELETE FROM enrollment_codes; DELETE FROM customers;`);
+  await pool.query(`TRUNCATE TABLE audit_logs, job_logs, deploy_jobs, agent_tokens, customer_servers, enrollment_codes, customer_configs, customers, admin_users CASCADE;`);
   await pool.end();
 });
 
@@ -77,7 +77,8 @@ describe('WebSocket integration', () => {
     await new Promise((r) => setTimeout(r, 500));
     const row = await pool.query(`SELECT last_heartbeat, meta FROM customer_servers WHERE id=$1`, [serverId]);
     expect(row.rows[0].last_heartbeat).not.toBeNull();
-    expect(JSON.parse(row.rows[0].meta).cpu).toBe(0.5);
+    // pg driver parses jsonb columns into JS objects by default; no JSON.parse needed.
+    expect(row.rows[0].meta.cpu).toBe(0.5);
     ws.close();
   });
 });
