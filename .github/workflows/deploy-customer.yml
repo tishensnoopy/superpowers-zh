@@ -1,0 +1,118 @@
+name: Deploy customer site
+
+# 客户业务自动部署：push 到 main 分支（触及业务相关路径）时触发
+# Runner 在境外主动 rsync 代码到国内客户服务器，规避服务器连 GitHub 不稳定问题
+# 必需 Secrets（在仓库 Settings → Secrets 中配置）：
+#   - SSH_PRIVATE_KEY: SSH 登录私钥（runner → 客户服务器）
+#   - SERVER_IP: 客户服务器公网 IP
+#   - DEPLOY_PATH: 服务器项目路径（如 /opt/yousen）
+# 可选 Secrets:
+#   - DEPLOY_SSH_PORT: SSH 端口（默认 22）
+#   - DEPLOY_USER: SSH 登录用户（默认 root）
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'frontend-next/**'
+      - 'docker-compose.yml'
+      - 'docker-compose.nginx.yml'
+      - 'nginx/**'
+      - 'deploy.sh'
+      - 'scripts/agent-compose.yml'
+      - '.github/workflows/deploy-customer.yml'
+  workflow_dispatch:
+    inputs:
+      restart_agent:
+        description: '部署完成后重启 Agent 容器'
+        required: false
+        type: boolean
+        default: false
+
+# 同一服务器同时只跑一个部署，避免并发冲突
+concurrency:
+  group: deploy-customer-${{ secrets.SERVER_IP }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write  # upload-artifact 需要
+    steps:
+      # Action 全部 SHA 固定（防供应链/标签劫持）
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@dc588b781dcf0c1a0b1e033ea7b4e5b43686a9f3 # v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add server to known_hosts
+        run: |
+          ssh-keyscan -p ${{ secrets.DEPLOY_SSH_PORT || 22 }} ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Validate required secrets
+        run: |
+          if [ -z "${{ secrets.SERVER_IP }}" ]; then
+            echo "::error::Secret SERVER_IP is required"
+            exit 1
+          fi
+          if [ -z "${{ secrets.DEPLOY_PATH }}" ]; then
+            echo "::error::Secret DEPLOY_PATH is required"
+            exit 1
+          fi
+          echo "Deploy target: ${{ secrets.DEPLOY_USER || 'root' }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_PATH }}"
+
+      - name: Rsync code to server
+        run: |
+          rsync -avz --delete \
+            --exclude='.git/' \
+            --exclude='node_modules/' \
+            --exclude='.next/' \
+            --exclude='dist/' \
+            --exclude='build/' \
+            --exclude='.env' \
+            --exclude='*.log' \
+            --exclude='data/' \
+            --exclude='strapi_uploads/' \
+            --exclude='strapi_pg_data/' \
+            --exclude='strapi_redis_data/' \
+            --exclude='strapi_meili_data/' \
+            --exclude='.cache/' \
+            --exclude='.npmrc' \
+            --exclude='central/' \
+            --exclude='agent/' \
+            -e "ssh -p ${{ secrets.DEPLOY_SSH_PORT || 22 }}" \
+            ./ ${{ secrets.DEPLOY_USER || 'root' }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_PATH }}/
+        # 关键：--exclude='.env' 确保服务器端 .env 不被覆盖
+        # 排除 central/ 和 agent/：这两个目录是 A 块产物，不属于客户业务部署范围
+
+      - name: Deploy via SSH (without agent)
+        if: ${{ github.event.inputs.restart_agent != 'true' }}
+        run: |
+          ssh -p ${{ secrets.DEPLOY_SSH_PORT || 22 }} ${{ secrets.DEPLOY_USER || 'root' }}@${{ secrets.SERVER_IP }} \
+            "cd ${{ secrets.DEPLOY_PATH }} && ./deploy.sh --no-pull --nginx -d 2>&1 | tee deploy.log"
+
+      - name: Deploy via SSH (with agent restart)
+        if: ${{ github.event.inputs.restart_agent == 'true' }}
+        run: |
+          ssh -p ${{ secrets.DEPLOY_SSH_PORT || 22 }} ${{ secrets.DEPLOY_USER || 'root' }}@${{ secrets.SERVER_IP }} \
+            "cd ${{ secrets.DEPLOY_PATH }} && ./deploy.sh --no-pull --nginx -d --agent 2>&1 | tee deploy.log"
+
+      - name: Fetch deploy log on failure
+        if: failure()
+        run: |
+          ssh -p ${{ secrets.DEPLOY_SSH_PORT || 22 }} ${{ secrets.DEPLOY_USER || 'root' }}@${{ secrets.SERVER_IP }} \
+            "cat ${{ secrets.DEPLOY_PATH }}/deploy.log" > deploy.log || true
+
+      - name: Upload deploy log artifact
+        if: failure()
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4
+        with:
+          name: deploy-log-${{ github.run_id }}
+          path: deploy.log
+          retention-days: 7
