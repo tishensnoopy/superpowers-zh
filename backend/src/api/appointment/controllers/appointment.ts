@@ -200,4 +200,65 @@ export default {
       throw err;
     }
   },
+
+  async export(ctx) {
+    const startTime = Date.now();
+    console.log(`${LOG_PREFIX} [export] 收到 CSV 导出请求`);
+
+    try {
+      const results = await strapi.documents(UID).findMany({
+        limit: 1000,
+        sort: 'createdAt:desc',
+      });
+
+      const headers = [
+        'documentId',
+        'parentName',
+        'childName',
+        'phone',
+        'campus',
+        'course',
+        'preferredDate',
+        'status',
+        'createdAt',
+      ];
+      const csvRows = [headers.join(',')];
+
+      for (const r of results) {
+        const row = [
+          r.documentId || '',
+          `"${(r.parentName || '').replace(/"/g, '""')}"`,
+          `"${(r.childName || '').replace(/"/g, '""')}"`,
+          r.phone || '',
+          r.campus || '',
+          `"${(r.course || '').replace(/"/g, '""')}"`,
+          r.preferredDate || '',
+          r.status || '',
+          r.createdAt ? new Date(r.createdAt).toISOString() : '',
+        ];
+        csvRows.push(row.join(','));
+      }
+
+      const csv = csvRows.join('\n');
+
+      ctx.header('Content-Type', 'text/csv; charset=utf-8');
+      ctx.header(
+        'Content-Disposition',
+        `attachment; filename="appointments_${Date.now()}.csv"`
+      );
+      ctx.body = csv;
+
+      console.log(
+        `${LOG_PREFIX} [export] ✅ 导出 ${results.length} 条, 耗时=${Date.now() - startTime}ms`
+      );
+      return ctx.body;
+    } catch (err) {
+      const duration = Date.now() - startTime;
+      console.error(
+        `${LOG_PREFIX} [export] ❌ 导出失败, 耗时=${duration}ms:`,
+        err instanceof Error ? err.message : err
+      );
+      throw err;
+    }
+  },
 } satisfies Core.Controller;
