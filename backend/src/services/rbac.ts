@@ -48,7 +48,20 @@ export default ({ strapi }: { strapi: any }) => {
         'api::product-spec.product-spec',
         'api::faq-item.faq-item',
         'api::knowledge-base.knowledge-base',
+        'api::appointment.appointment',
+        'api::campus.campus',
+        'api::chat-message.chat-message',
+        'api::chat-session.chat-session',
+        'api::news-article.news-article',
+        'api::teacher.teacher',
+        'api::translation.translation',
+        'api::vector-config.vector-config',
+        'api::wechat.wechat',
+        'api::ai-config.ai-config',
       ];
+
+      // appointment 和 feedback 不可 delete（硬约束）
+      const noDeleteContentTypes = ['appointment', 'feedback'];
 
       const allowedPermissions = allPermissions.filter(perm => {
         const action = perm.action?.name;
@@ -57,9 +70,16 @@ export default ({ strapi }: { strapi: any }) => {
         const isUserManagement = action.startsWith('plugin::users-permissions');
         if (isUserManagement) return false;
 
-        const contentType = action.split('.')[1];
-        const contentTypeFull = action.startsWith('api::') ? action : `api::${action.split('.')[0]}.${contentType}`;
-        return contentTypesToAllow.some(ct => action.includes(ct.split('.')[1]));
+        const isAllowed = contentTypesToAllow.some(ct => action.includes(ct.split('.')[1]));
+
+        if (!isAllowed) return false;
+
+        // 硬约束：appointment 和 feedback 不可 delete
+        if (noDeleteContentTypes.some(ct => action.includes(ct)) && action.endsWith('.delete')) {
+          return false;
+        }
+
+        return true;
       });
 
       console.log('[RBAC] configureClientAdminPermissions() found', allowedPermissions.length, 'permissions to allow');
