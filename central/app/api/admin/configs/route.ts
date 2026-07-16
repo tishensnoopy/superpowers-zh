@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { json, errorResponse, requireAdmin } from '@/lib/api-helpers';
 import { query, withTransaction } from '@/lib/db';
 import { encryptSensitiveFields, maskSensitiveFields } from '@/lib/config-sanitizer';
+import { writeAuditLog } from '@/lib/audit';
 
 export async function GET(req: NextRequest) {
   const admin = await requireAdmin();
@@ -36,6 +37,15 @@ export async function POST(req: NextRequest) {
         [customerId, version, encrypted.brand ?? {}, encrypted.ai ?? {}, encrypted.deployment ?? {}, encrypted.envOverrides ?? {}]
       );
       return insertResult.rows[0];
+    });
+    await writeAuditLog({
+      adminId: admin.sub,
+      action: 'config:publish',
+      targetType: 'config',
+      targetId: result.id,
+      ip: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim(),
+      userAgent: req.headers.get('user-agent') ?? undefined,
+      detail: { customerId, version: result.version },
     });
     return json(maskApiRow(result), 201);
   } catch (err: any) {

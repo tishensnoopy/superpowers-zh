@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { json, errorResponse, requireAdmin } from '@/lib/api-helpers';
 import { query } from '@/lib/db';
+import { writeAuditLog } from '@/lib/audit';
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
   const admin = await requireAdmin();
@@ -24,13 +25,30 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     [name ?? null, contactName ?? null, contactPhone ?? null, params.id]
   );
   if (result.rows.length === 0) return errorResponse('Not found', 404);
+  await writeAuditLog({
+    adminId: admin.sub,
+    action: 'customer:update',
+    targetType: 'customer',
+    targetId: params.id,
+    ip: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim(),
+    userAgent: req.headers.get('user-agent') ?? undefined,
+    detail: { name, contactName, contactPhone },
+  });
   return json(result.rows[0]);
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const admin = await requireAdmin();
   if (admin instanceof Response) return admin;
   const result = await query('DELETE FROM customers WHERE id=$1 RETURNING id', [params.id]);
   if (result.rows.length === 0) return errorResponse('Not found', 404);
+  await writeAuditLog({
+    adminId: admin.sub,
+    action: 'customer:delete',
+    targetType: 'customer',
+    targetId: params.id,
+    ip: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim(),
+    userAgent: req.headers.get('user-agent') ?? undefined,
+  });
   return json({ ok: true });
 }

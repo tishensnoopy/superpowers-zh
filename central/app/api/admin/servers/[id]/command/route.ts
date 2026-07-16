@@ -3,6 +3,7 @@ import { json, errorResponse, requireAdmin } from '@/lib/api-helpers';
 import { query } from '@/lib/db';
 import { createJob, updateJobStatus, type JobType } from '@/lib/job-manager';
 import { sendToServer, isOnline } from '@/lib/connections';
+import { writeAuditLog } from '@/lib/audit';
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const admin = await requireAdmin();
@@ -44,6 +45,16 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     await updateJobStatus(job.id, 'cancelled', { errorMessage: 'send failed: agent disconnected' });
     return errorResponse('Failed to send command (agent disconnected)', 503);
   }
+
+  await writeAuditLog({
+    adminId: admin.sub,
+    action: `job:${type}`,
+    targetType: 'server',
+    targetId: params.id,
+    ip: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim(),
+    userAgent: req.headers.get('user-agent') ?? undefined,
+    detail: { jobId: job.id, type },
+  });
 
   return json({ jobId: job.id, status: 'queued' }, 202);
 }

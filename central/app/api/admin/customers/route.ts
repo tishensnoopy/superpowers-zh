@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { json, errorResponse, requireAdmin } from '@/lib/api-helpers';
 import { query } from '@/lib/db';
+import { writeAuditLog } from '@/lib/audit';
 
 export async function GET() {
   const admin = await requireAdmin();
@@ -22,5 +23,14 @@ export async function POST(req: NextRequest) {
      RETURNING id, name, contact_name, contact_phone, created_at`,
     [name, contactName ?? null, contactPhone ?? null]
   );
+  await writeAuditLog({
+    adminId: admin.sub,
+    action: 'customer:create',
+    targetType: 'customer',
+    targetId: result.rows[0].id,
+    ip: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim(),
+    userAgent: req.headers.get('user-agent') ?? undefined,
+    detail: { name },
+  });
   return json(result.rows[0], 201);
 }
