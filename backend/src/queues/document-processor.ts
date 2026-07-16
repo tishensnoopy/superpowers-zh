@@ -184,6 +184,148 @@ export function chunkText(text: string, chunkSize: number, overlap: number): str
 /* -------------------------------------------------------------------------- */
 
 /**
+ * Injectable LLM service reference. Tests use setLlmService() to supply a mock
+ * so processDocumentJob doesn't hit the deferred require() (vitest's CJS
+ * require can't resolve the .ts module). In production this stays null and the
+ * deferred require('../services/llm-service') is used, preserving the original
+ * bootstrap-safe behavior.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let injectedLlmService: any = null;
+export function setLlmService(mod: any): void {
+  injectedLlmService = mod;
+}
+
+/**
+ * Document vectorization job handler. Extracted from the BullMQ Worker so the
+ * status-update logic is unit-testable without a running Redis/Worker.
+ *
+ * Side effects on the knowledge-base document:
+ *   - processing start: status='processing', vectorizationStatus='processing'
+ *   - success:           status='ready',     vectorizationStatus='completed'
+ *   - failure:           status='failed',    vectorizationStatus='failed'
+ */
+export async function processDocumentJob(strapi: any, job: any): Promise<void> {
+  const data = job.data || {};
+
+  // Accept both { knowledgeBaseId } and the existing { documentId, type }.
+  const rawId = data.knowledgeBaseId ?? data.documentId;
+  const knowledgeBaseId = Number(rawId);
+  const action = data.type || data.action || 'vectorize';
+
+  if (!Number.isFinite(knowledgeBaseId)) {
+    throw new Error(`Invalid knowledge base id: ${String(rawId)}`);
+  }
+
+  console.log(`[Queue] Processing document ${knowledgeBaseId} (action=${action})`);
+
+  // Make sure the embeddings table exists before doing any work.
+  await ensureSchemaOnce(strapi);
+
+  try {
+    // 1. Mark as processing.
+    await strapi.db.query('api::knowledge-base.knowledge-base').update({
+      where: { id: knowledgeBaseId },
+      data: {
+        status: 'processing',
+        vectorizationStatus: 'processing',
+        statusMessage: null,
+        failedAt: null,
+      },
+    });
+
+    // 2. Fetch document.
+    const doc = await strapi.db.query('api::knowledge-base.knowledge-base').findOne({
+      where: { id: knowledgeBaseId },
+    });
+
+    if (!doc || !doc.content) {
+      throw new Error('Document has no content');
+    }
+
+    // 3. Clean + chunk.
+    const cleanText = cleanTextContent(doc.content);
+    const chunks = chunkText(cleanText, CHUNK_SIZE, CHUNK_OVERLAP);
+    console.log(`[Queue] Document ${knowledgeBaseId}: ${chunks.length} chunks`);
+
+    // 4. On re-vectorize, clear previous embeddings to avoid stale dupes.
+    if (action === 'revectorize') {
+      await strapi.db.connection.raw(
+        'DELETE FROM knowledge_embeddings WHERE knowledge_base_id = ?',
+        [knowledgeBaseId]
+      );
+      console.log(`[Queue] Document ${knowledgeBaseId}: cleared old embeddings`);
+    }
+
+    // 5. Embed + insert each chunk.
+    // Deferred require so this module loads even if llm-service is not yet
+    // present (keeps bootstrap + other workers healthy during incremental dev).
+    const llmMod = (injectedLlmService ?? require('../services/llm-service')) as {
+          generateEmbedding: (text: string) => Promise<{ embedding: number[] }>;
+        };
+        const { generateEmbedding } = llmMod;
+
+    let inserted = 0;
+    for (let i = 0; i < chunks.length; i++) {
+      const { embedding } = await generateEmbedding(chunks[i]);
+      if (embedding && embedding.length > 0) {
+        await strapi.db.connection.raw(
+          `INSERT INTO knowledge_embeddings (knowledge_base_id, chunk_index, chunk_text, embedding, source_type)
+           VALUES (?, ?, ?, ?::vector, 'document')`,
+          [knowledgeBaseId, i, chunks[i], JSON.stringify(embedding)]
+        );
+        inserted++;
+      }
+    }
+
+    // 6. Mark as ready.
+    await strapi.db.query('api::knowledge-base.knowledge-base').update({
+      where: { id: knowledgeBaseId },
+      data: {
+        status: 'ready',
+        vectorizationStatus: 'completed',
+        chunkCount: chunks.length,
+        processedAt: new Date().toISOString(),
+        statusMessage: null,
+        failedAt: null,
+      },
+    });
+
+    console.log(
+      `[Queue] Document ${knowledgeBaseId} processed (${inserted}/${chunks.length} embedded)`
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`[Queue] Document ${knowledgeBaseId} failed:`, message);
+
+    // Increment retryCount and record failure metadata.
+    try {
+      const existing = await strapi.db
+        .query('api::knowledge-base.knowledge-base')
+        .findOne({ where: { id: knowledgeBaseId }, select: ['retryCount'] });
+
+      await strapi.db.query('api::knowledge-base.knowledge-base').update({
+        where: { id: knowledgeBaseId },
+        data: {
+          status: 'failed',
+          vectorizationStatus: 'failed',
+          statusMessage: message.slice(0, 500),
+          failedAt: new Date().toISOString(),
+          retryCount: (existing?.retryCount || 0) + 1,
+        },
+      });
+    } catch (updateErr) {
+      console.error(
+        `[Queue] Failed to mark document ${knowledgeBaseId} as failed:`,
+        updateErr instanceof Error ? updateErr.message : updateErr
+      );
+    }
+
+    throw error;
+  }
+}
+
+/**
  * Starts the BullMQ worker that processes document vectorization jobs.
  * Returns the worker instance, or null when Redis is not configured.
  */
@@ -197,121 +339,7 @@ export function startDocumentWorker(strapi: any): Worker | null {
 
   const worker = new Worker(
     QUEUE_NAME,
-    async (job) => {
-      const data = job.data || {};
-
-      // Accept both { knowledgeBaseId } and the existing { documentId, type }.
-      const rawId = data.knowledgeBaseId ?? data.documentId;
-      const knowledgeBaseId = Number(rawId);
-      const action = data.type || data.action || 'vectorize';
-
-      if (!Number.isFinite(knowledgeBaseId)) {
-        throw new Error(`Invalid knowledge base id: ${String(rawId)}`);
-      }
-
-      console.log(`[Queue] Processing document ${knowledgeBaseId} (action=${action})`);
-
-      // Make sure the embeddings table exists before doing any work.
-      await ensureSchemaOnce(strapi);
-
-      try {
-        // 1. Mark as processing.
-        await strapi.db.query('api::knowledge-base.knowledge-base').update({
-          where: { id: knowledgeBaseId },
-          data: {
-            status: 'processing',
-            statusMessage: null,
-            failedAt: null,
-          },
-        });
-
-        // 2. Fetch document.
-        const doc = await strapi.db.query('api::knowledge-base.knowledge-base').findOne({
-          where: { id: knowledgeBaseId },
-        });
-
-        if (!doc || !doc.content) {
-          throw new Error('Document has no content');
-        }
-
-        // 3. Clean + chunk.
-        const cleanText = cleanTextContent(doc.content);
-        const chunks = chunkText(cleanText, CHUNK_SIZE, CHUNK_OVERLAP);
-        console.log(`[Queue] Document ${knowledgeBaseId}: ${chunks.length} chunks`);
-
-        // 4. On re-vectorize, clear previous embeddings to avoid stale dupes.
-        if (action === 'revectorize') {
-          await strapi.db.connection.raw(
-            'DELETE FROM knowledge_embeddings WHERE knowledge_base_id = ?',
-            [knowledgeBaseId]
-          );
-          console.log(`[Queue] Document ${knowledgeBaseId}: cleared old embeddings`);
-        }
-
-        // 5. Embed + insert each chunk.
-        // Deferred require so this module loads even if llm-service is not yet
-        // present (keeps bootstrap + other workers healthy during incremental dev).
-        const { generateEmbedding } = require('../services/llm-service') as {
-          generateEmbedding: (text: string) => Promise<{ embedding: number[] }>;
-        };
-
-        let inserted = 0;
-        for (let i = 0; i < chunks.length; i++) {
-          const { embedding } = await generateEmbedding(chunks[i]);
-          if (embedding && embedding.length > 0) {
-            await strapi.db.connection.raw(
-              `INSERT INTO knowledge_embeddings (knowledge_base_id, chunk_index, chunk_text, embedding, source_type)
-               VALUES (?, ?, ?, ?::vector, 'document')`,
-              [knowledgeBaseId, i, chunks[i], JSON.stringify(embedding)]
-            );
-            inserted++;
-          }
-        }
-
-        // 6. Mark as ready.
-        await strapi.db.query('api::knowledge-base.knowledge-base').update({
-          where: { id: knowledgeBaseId },
-          data: {
-            status: 'ready',
-            chunkCount: chunks.length,
-            processedAt: new Date().toISOString(),
-            statusMessage: null,
-            failedAt: null,
-          },
-        });
-
-        console.log(
-          `[Queue] Document ${knowledgeBaseId} processed (${inserted}/${chunks.length} embedded)`
-        );
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        console.error(`[Queue] Document ${knowledgeBaseId} failed:`, message);
-
-        // Increment retryCount and record failure metadata.
-        try {
-          const existing = await strapi.db
-            .query('api::knowledge-base.knowledge-base')
-            .findOne({ where: { id: knowledgeBaseId }, select: ['retryCount'] });
-
-          await strapi.db.query('api::knowledge-base.knowledge-base').update({
-            where: { id: knowledgeBaseId },
-            data: {
-              status: 'failed',
-              statusMessage: message.slice(0, 500),
-              failedAt: new Date().toISOString(),
-              retryCount: (existing?.retryCount || 0) + 1,
-            },
-          });
-        } catch (updateErr) {
-          console.error(
-            `[Queue] Failed to mark document ${knowledgeBaseId} as failed:`,
-            updateErr instanceof Error ? updateErr.message : updateErr
-          );
-        }
-
-        throw error;
-      }
-    },
+    async (job) => processDocumentJob(strapi, job),
     {
       connection: redisConfig,
       concurrency: 2,

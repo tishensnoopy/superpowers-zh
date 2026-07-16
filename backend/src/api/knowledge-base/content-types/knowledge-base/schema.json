@@ -36,6 +36,12 @@
       "default": "pending",
       "description": "Processing status"
     },
+    "vectorizationStatus": {
+      "type": "enumeration",
+      "enum": ["pending", "processing", "completed", "failed"],
+      "default": "pending",
+      "description": "向量化状态"
+    },
     "statusMessage": {
       "type": "string",
       "maxLength": 500,
