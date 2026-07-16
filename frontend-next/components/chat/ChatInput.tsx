@@ -21,8 +21,10 @@ export default function ChatInput({ onSend, isLoading, disabled = false, locale 
 
   const isDisabled = isLoading || disabled;
 
-  const handleSend = () => {
-    const trimmed = value.trim();
+  const handleSend = (overrideValue?: string) => {
+    // overrideValue 用于 keydown 事件直接从 DOM 读取值，
+    // 避免 React 18 批量更新导致 state 尚未同步的问题
+    const trimmed = (overrideValue ?? value).trim();
     if (!trimmed || isDisabled) return;
     if (trimmed.length > MAX_LENGTH) {
       setError(t('messageTooLong', { max: MAX_LENGTH }));
@@ -39,7 +41,8 @@ export default function ChatInput({ onSend, isLoading, disabled = false, locale 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      // 直接从 DOM 元素读取当前值，不依赖 React state 的同步性
+      handleSend(e.currentTarget.value);
     }
   };
 
@@ -77,7 +80,7 @@ export default function ChatInput({ onSend, isLoading, disabled = false, locale 
         />
         <button
           type="button"
-          onClick={handleSend}
+          onClick={() => handleSend()}
           disabled={isDisabled}
           aria-busy={isLoading}
           aria-label={t('sendButton')}

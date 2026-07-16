@@ -29,6 +29,8 @@ export default function FloatingChat({ locale = 'zh-CN' }: { locale?: 'zh-CN' | 
   const [sessionId, setSessionId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageIdRef = useRef(0);
+  // 当 session 尚未就绪时，暂存用户消息；session 就绪后自动发送
+  const pendingMessageRef = useRef<string | null>(null);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -84,21 +86,31 @@ export default function FloatingChat({ locale = 'zh-CN' }: { locale?: 'zh-CN' | 
   }, []);
 
   const handleSend = useCallback(
-    async (message: string) => {
-      if (!sessionId || isLoading) return;
+    async (message: string, isPending = false) => {
+      if (isLoading) return;
 
-      // Add user message
-      const userMessage: ChatMessageData = {
-        id: `msg-${++messageIdRef.current}`,
-        role: 'user',
-        content: message,
-        timestamp: new Date().toISOString(),
-      };
-      setMessages((prev) => [...prev, userMessage]);
+      // 乐观渲染：用户消息立即显示在 UI 中，不等待 sessionId 就绪
+      // isPending=true 表示消息已在 UI 中，仅执行 API 调用（由 useEffect 触发）
+      if (!isPending) {
+        const userMessage: ChatMessageData = {
+          id: `msg-${++messageIdRef.current}`,
+          role: 'user',
+          content: message,
+          timestamp: new Date().toISOString(),
+        };
+        setMessages((prev) => [...prev, userMessage]);
+      }
+
+      // session 尚未就绪：暂存消息，等 sessionId 设置后由 useEffect 自动发送
+      if (!sessionId) {
+        pendingMessageRef.current = message;
+        return;
+      }
+
       setIsLoading(true);
 
       // Add "thinking" AI message
-      const aiMessageIndex = messages.length + 1;
+      const aiMessageIndex = messages.length + (isPending ? 0 : 1);
       setMessages((prev) => [
         ...prev,
         { id: `msg-${++messageIdRef.current}`, role: 'assistant', content: '', timestamp: new Date().toISOString(), streaming: true },
@@ -160,6 +172,15 @@ export default function FloatingChat({ locale = 'zh-CN' }: { locale?: 'zh-CN' | 
     },
     [sessionId, isLoading, messages.length, locale, t]
   );
+
+  // session 就绪后，自动发送暂存的待发消息
+  useEffect(() => {
+    if (sessionId && pendingMessageRef.current && !isLoading) {
+      const msg = pendingMessageRef.current;
+      pendingMessageRef.current = null;
+      void handleSend(msg, true);
+    }
+  }, [sessionId, isLoading, handleSend]);
 
   if (!isOpen) {
     return (

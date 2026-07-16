@@ -3,7 +3,11 @@ import { getSiteSettings, getProducts, getTeachers, getCampuses, getNews, getFaq
 import { buildLlmsTxtContent } from '@/lib/geo';
 import type { Locale } from '@/lib/api';
 
-export const revalidate = 3600;
+// force-dynamic 确保查询参数 (?locale=en-US) 每次都被正确处理。
+// ISR 的 revalidate 会以 URL 路径为缓存键（不含查询参数），
+// 导致 ?locale=en-US 返回缓存的 zh-CN 版本。
+// 改用 CDN 层面的 Cache-Control 实现缓存。
+export const dynamic = 'force-dynamic';
 
 const SUPPORTED_LOCALES: Locale[] = ['zh-CN', 'en-US'];
 
@@ -16,7 +20,11 @@ function parseLocale(searchParams: URLSearchParams): Locale {
 }
 
 export async function GET(request: NextRequest) {
-  const locale = parseLocale(request.nextUrl.searchParams);
+  // 用 new URL(request.url) 而非 request.nextUrl.searchParams，
+  // dev 模式下 nextUrl.searchParams 可能不包含查询参数
+  const url = new URL(request.url);
+  const locale = parseLocale(url.searchParams);
+  console.log('[llms.txt] url:', request.url, 'locale:', locale);
 
   const [settingsRes, productsRes, teachersRes, campusesRes, newsRes, faqRes] = await Promise.all([
     getSiteSettings(locale).catch(() => ({ data: [] as never[] })),
