@@ -42,6 +42,8 @@ CREATE TABLE IF NOT EXISTS admin_users (
   email         TEXT UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
   role          TEXT NOT NULL DEFAULT 'admin',
+  locked        BOOLEAN NOT NULL DEFAULT false,
+  locked_at     TIMESTAMPTZ,
   created_at    TIMESTAMPTZ DEFAULT now()
 );
 

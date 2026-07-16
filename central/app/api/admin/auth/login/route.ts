@@ -7,13 +7,16 @@ export async function POST(req: NextRequest) {
   const { email, password } = await req.json();
   if (!email || !password) return errorResponse('Missing email or password', 400);
 
-  const result = await query<{ id: string; password_hash: string; role: string }>(
-    'SELECT id, password_hash, role FROM admin_users WHERE email = $1',
+  const result = await query<{ id: string; password_hash: string; role: string; locked: boolean }>(
+    'SELECT id, password_hash, role, locked FROM admin_users WHERE email = $1',
     [email]
   );
   if (result.rows.length === 0) return errorResponse('Invalid credentials', 401);
 
   const user = result.rows[0];
+  if (user.locked) {
+    return errorResponse('账号已锁定，请联系超级管理员解锁', 403);
+  }
   if (!(await verifyPassword(password, user.password_hash))) {
     return errorResponse('Invalid credentials', 401);
   }
