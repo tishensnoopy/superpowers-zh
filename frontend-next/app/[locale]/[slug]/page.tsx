@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { useTranslations } from 'next-intl';
 import { getPages, getPageBySlug, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd, buildBreadcrumbSchema } from '@/lib/seo';
 import SectionRenderer from '@/components/SectionRenderer';
@@ -51,7 +50,7 @@ export default async function DynamicPage({ params }: PageProps) {
 
   const sections = page.sections || [];
 
-  const tSeo = useTranslations('seo');
+  const tSeo = await getTranslations('seo');
   const breadcrumbSchema = buildBreadcrumbSchema(
     [
       { name: tSeo('home'), url: '/' },

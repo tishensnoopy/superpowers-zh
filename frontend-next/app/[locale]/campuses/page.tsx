@@ -1,7 +1,6 @@
 import { getCampuses, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd, buildBreadcrumbSchema } from '@/lib/seo';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { useTranslations } from 'next-intl';
 import CampusHeader from '@/components/campus/CampusHeader';
 import CampusGrid from '@/components/campus/CampusGrid';
 import type { Metadata } from 'next';
@@ -21,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function CampusOverviewPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const tSeo = useTranslations('seo');
+  const tSeo = await getTranslations('seo');
   const { data: campuses } = await getCampuses(locale as Locale).catch(() => ({ data: [] as never[] }));
 
   const breadcrumbSchema = buildBreadcrumbSchema(

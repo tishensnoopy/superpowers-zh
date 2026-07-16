@@ -1,7 +1,6 @@
 import { Phone, Mail, MessageCircle, Clock, MapPin } from 'lucide-react';
 import { buildMetadata, buildJsonLd, buildBreadcrumbSchema } from '@/lib/seo';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { useTranslations } from 'next-intl';
 import { getCampuses, getSiteSettings, type Locale } from '@/lib/api';
 import ContactForm from '@/components/sections/ContactForm';
 import type { Metadata } from 'next';
@@ -21,9 +20,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function ContactPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = useTranslations('contact');
-  const tSeo = useTranslations('seo');
-  const tContactForm = useTranslations('sections.contactForm');
+  const t = await getTranslations('contact');
+  const tSeo = await getTranslations('seo');
+  const tContactForm = await getTranslations('sections.contactForm');
   const [campusesRes, settingsRes] = await Promise.all([
     getCampuses(locale as Locale).catch(() => ({ data: [] as never[] })),
     getSiteSettings(locale as Locale).catch(() => ({ data: null as any })),

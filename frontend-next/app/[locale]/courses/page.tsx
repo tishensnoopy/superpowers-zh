@@ -1,6 +1,5 @@
 import CourseSearchPanel from '@/components/course/CourseSearchPanel';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { useTranslations } from 'next-intl';
 import { buildMetadata, buildJsonLd, buildBreadcrumbSchema } from '@/lib/seo';
 import type { Metadata } from 'next';
 
@@ -15,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function CoursesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const tNav = useTranslations('navigation');
+  const tNav = await getTranslations('navigation');
   const breadcrumbSchema = buildBreadcrumbSchema(
     [
       { name: tNav('home'), url: '/' },

@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { useTranslations } from 'next-intl';
 import { getTeachers, getTeacherBySlug, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd, buildPersonSchema, buildBreadcrumbSchema } from '@/lib/seo';
 import StrapiImage from '@/components/ui/StrapiImage';
@@ -61,8 +60,8 @@ export default async function TeacherDetailPage({ params }: PageProps) {
     ? teacher.achievements
     : [];
 
-  const tSeo = useTranslations('seo');
-  const tTeachers = useTranslations('teachers');
+  const tSeo = await getTranslations('seo');
+  const tTeachers = await getTranslations('teachers');
 
   const personSchema = buildPersonSchema(teacher, locale as Locale);
   const breadcrumbSchema = buildBreadcrumbSchema(

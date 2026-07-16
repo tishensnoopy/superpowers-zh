@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { useTranslations } from 'next-intl';
 import { getPageBySlug, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd, buildBreadcrumbSchema } from '@/lib/seo';
 import SectionRenderer from '@/components/SectionRenderer';
@@ -33,8 +32,8 @@ export default async function UserAgreementPage({ params }: { params: Promise<{ 
 
   const sections = page.sections || [];
 
-  const tSeo = useTranslations('seo');
-  const tPolicies = useTranslations('policies');
+  const tSeo = await getTranslations('seo');
+  const tPolicies = await getTranslations('policies');
   const breadcrumbSchema = buildBreadcrumbSchema(
     [
       { name: tSeo('home'), url: '/' },

@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { useTranslations } from 'next-intl';
 import { getCampuses, getCampusBySlug, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd, buildLocalBusinessSchema, buildBreadcrumbSchema } from '@/lib/seo';
 import CampusDetailHeader from '@/components/campus/CampusDetailHeader';
@@ -53,7 +52,7 @@ export default async function CampusDetailPage({ params }: PageProps) {
   }
 
   const localBusinessSchema = buildLocalBusinessSchema(campus, locale as Locale);
-  const tSeo = useTranslations('seo');
+  const tSeo = await getTranslations('seo');
   const breadcrumbSchema = buildBreadcrumbSchema(
     [
       { name: tSeo('home'), url: '/' },

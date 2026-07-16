@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { getNews, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd, buildBreadcrumbSchema } from '@/lib/seo';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { useTranslations } from 'next-intl';
 import NewsCard from '@/components/news/NewsCard';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -36,8 +35,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function NewsListPage({ params, searchParams }: PageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = useTranslations('news');
-  const tNav = useTranslations('navigation');
+  const t = await getTranslations('news');
+  const tNav = await getTranslations('navigation');
   const { category, page } = await searchParams;
   const activeCategory = category || '';
   const currentPage = Math.max(1, parseInt(page || '1', 10) || 1);

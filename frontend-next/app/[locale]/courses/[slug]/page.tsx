@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { useTranslations } from 'next-intl';
 import { getProducts, getProductBySlug, getSiteSettings, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd, buildCourseSchema, buildBreadcrumbSchema } from '@/lib/seo';
 import CourseHeader from '@/components/course/CourseHeader';
@@ -55,9 +54,9 @@ export default async function CourseDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const tSeo = useTranslations('seo');
-  const tNav = useTranslations('navigation');
-  const tCourses = useTranslations('courses');
+  const tSeo = await getTranslations('seo');
+  const tNav = await getTranslations('navigation');
+  const tCourses = await getTranslations('courses');
 
   const { data: settingsData } = await getSiteSettings(locale as Locale).catch(() => ({ data: [] as never[] }));
   const settings = Array.isArray(settingsData) ? settingsData[0] : settingsData;

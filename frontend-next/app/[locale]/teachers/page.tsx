@@ -1,6 +1,5 @@
 import TeamPage from '@/components/team/TeamPage';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { useTranslations } from 'next-intl';
 import type { Locale } from '@/lib/api';
 import { buildJsonLd, buildBreadcrumbSchema } from '@/lib/seo';
 import type { Metadata } from 'next';
@@ -19,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function TeachersPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const tSeo = useTranslations('seo');
+  const tSeo = await getTranslations('seo');
   const breadcrumbSchema = buildBreadcrumbSchema(
     [
       { name: tSeo('home'), url: '/' },

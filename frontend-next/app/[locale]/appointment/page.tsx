@@ -1,6 +1,5 @@
 import { buildMetadata, buildJsonLd, buildBreadcrumbSchema } from '@/lib/seo';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { useTranslations } from 'next-intl';
 import ContactForm from '@/components/sections/ContactForm';
 import type { Metadata } from 'next';
 
@@ -19,9 +18,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function AppointmentPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = useTranslations('appointment');
-  const tSeo = useTranslations('seo');
-  const tContactForm = useTranslations('sections.contactForm');
+  const t = await getTranslations('appointment');
+  const tSeo = await getTranslations('seo');
+  const tContactForm = await getTranslations('sections.contactForm');
   const breadcrumbSchema = buildBreadcrumbSchema(
     [
       { name: tSeo('home'), url: '/' },

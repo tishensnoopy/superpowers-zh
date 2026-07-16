@@ -1,7 +1,6 @@
 import { getFaqItems, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd, buildFaqPageSchema, buildBreadcrumbSchema } from '@/lib/seo';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { useTranslations } from 'next-intl';
 import Faq from '@/components/sections/Faq';
 import type { Metadata } from 'next';
 
@@ -20,8 +19,8 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default async function FaqPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const t = useTranslations('faq');
-  const tSeo = useTranslations('seo');
+  const t = await getTranslations('faq');
+  const tSeo = await getTranslations('seo');
   const { data: faqItems } = await getFaqItems(locale as Locale).catch(() => ({ data: [] as never[] }));
 
   // 构造 section 对象以复用 Faq 组件

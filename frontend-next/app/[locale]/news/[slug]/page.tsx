@@ -1,6 +1,5 @@
 import { notFound } from 'next/navigation';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { Calendar, Eye, ArrowLeft, Home } from 'lucide-react';
 import { getNews, getNewsBySlug, getNewsCategoryLabel, getImageUrl, getSiteSettings, type Locale } from '@/lib/api';
@@ -83,9 +82,9 @@ export default async function NewsDetailPage({ params }: PageProps) {
 
   const { data: settingsData } = await getSiteSettings(locale as Locale).catch(() => ({ data: [] as never[] }));
   const settings = Array.isArray(settingsData) ? settingsData[0] : settingsData;
-  const tSeo = useTranslations('seo');
-  const tNav = useTranslations('navigation');
-  const tNews = useTranslations('news');
+  const tSeo = await getTranslations('seo');
+  const tNav = await getTranslations('navigation');
+  const tNews = await getTranslations('news');
   const newsSettings = settings || { name: tSeo('siteNameZh') };
 
   const newsSchema = buildNewsArticleSchema(news, newsSettings, locale as Locale);
