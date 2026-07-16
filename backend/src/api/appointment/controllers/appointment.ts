@@ -241,8 +241,8 @@ export default {
 
       const csv = csvRows.join('\n');
 
-      ctx.header('Content-Type', 'text/csv; charset=utf-8');
-      ctx.header(
+      ctx.set('Content-Type', 'text/csv; charset=utf-8');
+      ctx.set(
         'Content-Disposition',
         `attachment; filename="appointments_${Date.now()}.csv"`
       );
