@@ -1,5 +1,5 @@
 {
-  "kind": "contentType",
+  "kind": "collectionType",
   "collectionName": "chat_sessions",
   "info": {
     "singularName": "chat-session",
@@ -32,7 +32,11 @@
     },
     "status": {
       "type": "enumeration",
-      "enum": ["active", "transferred", "closed"],
+      "enum": [
+        "active",
+        "transferred",
+        "closed"
+      ],
       "default": "active"
     },
     "sourcePage": {

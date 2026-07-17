@@ -1,5 +1,5 @@
 {
-  "kind": "contentType",
+  "kind": "collectionType",
   "collectionName": "footers",
   "info": {
     "singularName": "footer",

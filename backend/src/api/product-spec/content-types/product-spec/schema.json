@@ -1,5 +1,5 @@
 {
-  "kind": "contentType",
+  "kind": "collectionType",
   "collectionName": "product_specs",
   "info": {
     "singularName": "product-spec",
@@ -34,7 +34,12 @@
     },
     "type": {
       "type": "enumeration",
-      "enum": ["text", "number", "select", "boolean"],
+      "enum": [
+        "text",
+        "number",
+        "select",
+        "boolean"
+      ],
       "default": "text",
       "description": "Value type"
     },

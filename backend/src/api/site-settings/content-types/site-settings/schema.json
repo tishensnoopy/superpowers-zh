@@ -1,5 +1,5 @@
 {
-  "kind": "contentType",
+  "kind": "collectionType",
   "collectionName": "site_settings",
   "info": {
     "singularName": "site-settings",

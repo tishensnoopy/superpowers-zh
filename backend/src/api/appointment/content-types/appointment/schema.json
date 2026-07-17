@@ -1,5 +1,5 @@
 {
-  "kind": "contentType",
+  "kind": "collectionType",
   "collectionName": "appointments",
   "info": {
     "singularName": "appointment",
@@ -56,7 +56,11 @@
     },
     "preferredTimeSlot": {
       "type": "enumeration",
-      "enum": ["morning", "afternoon", "evening"],
+      "enum": [
+        "morning",
+        "afternoon",
+        "evening"
+      ],
       "description": "期望时段（选填）"
     },
     "message": {
@@ -65,7 +69,12 @@
     },
     "status": {
       "type": "enumeration",
-      "enum": ["pending", "confirmed", "completed", "cancelled"],
+      "enum": [
+        "pending",
+        "confirmed",
+        "completed",
+        "cancelled"
+      ],
       "default": "pending",
       "description": "预约状态"
     },

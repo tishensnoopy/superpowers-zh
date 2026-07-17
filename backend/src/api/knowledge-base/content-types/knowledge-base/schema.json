@@ -1,5 +1,5 @@
 {
-  "kind": "contentType",
+  "kind": "collectionType",
   "collectionName": "knowledge_bases",
   "info": {
     "singularName": "knowledge-base",
@@ -26,19 +26,36 @@
     },
     "sourceType": {
       "type": "enumeration",
-      "enum": ["manual", "faq", "pdf", "webpage", "chat-history", "content-sync"],
+      "enum": [
+        "manual",
+        "faq",
+        "pdf",
+        "webpage",
+        "chat-history",
+        "content-sync"
+      ],
       "default": "manual",
       "description": "Source type"
     },
     "status": {
       "type": "enumeration",
-      "enum": ["pending", "processing", "ready", "failed"],
+      "enum": [
+        "pending",
+        "processing",
+        "ready",
+        "failed"
+      ],
       "default": "pending",
       "description": "Processing status"
     },
     "vectorizationStatus": {
       "type": "enumeration",
-      "enum": ["pending", "processing", "completed", "failed"],
+      "enum": [
+        "pending",
+        "processing",
+        "completed",
+        "failed"
+      ],
       "default": "pending",
       "description": "向量化状态"
     },
@@ -71,7 +88,11 @@
     },
     "priority": {
       "type": "enumeration",
-      "enum": ["low", "medium", "high"],
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
       "default": "medium",
       "description": "Processing priority"
     },
@@ -95,7 +116,10 @@
     "file": {
       "type": "media",
       "multiple": false,
-      "allowedTypes": ["files", "images"],
+      "allowedTypes": [
+        "files",
+        "images"
+      ],
       "description": "Uploaded document file"
     },
     "sourceUrl": {

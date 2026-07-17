@@ -441,6 +441,68 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiAiConfigAiConfig extends Struct.ContentTypeSchema {
+  collectionName: 'ai_configs';
+  info: {
+    description: 'AI model configuration';
+    displayName: 'AI Config';
+    icon: 'Settings';
+    pluralName: 'ai-configs';
+    singularName: 'ai-config';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    apiEndpoint: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 500;
+      }>;
+    apiKey: Schema.Attribute.String &
+      Schema.Attribute.Private &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 500;
+      }>;
+    chunkOverlap: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<50>;
+    chunkSize: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<500>;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    embeddingModel: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }> &
+      Schema.Attribute.DefaultTo<'text-embedding-v2'>;
+    isActive: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::ai-config.ai-config'
+    > &
+      Schema.Attribute.Private;
+    maxTokens: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<2000>;
+    model: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }> &
+      Schema.Attribute.DefaultTo<'qwen-plus'>;
+    name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    provider: Schema.Attribute.Enumeration<['qwen', 'openai', 'custom']> &
+      Schema.Attribute.DefaultTo<'qwen'>;
+    publishedAt: Schema.Attribute.DateTime;
+    systemPrompt: Schema.Attribute.Text;
+    temperature: Schema.Attribute.Float & Schema.Attribute.DefaultTo<0.7>;
+    topK: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<5>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
 export interface ApiAppointmentAppointment extends Struct.ContentTypeSchema {
   collectionName: 'appointments';
   info: {
@@ -456,6 +518,11 @@ export interface ApiAppointmentAppointment extends Struct.ContentTypeSchema {
   attributes: {
     age: Schema.Attribute.Integer;
     campus: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    childName: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
@@ -479,6 +546,10 @@ export interface ApiAppointmentAppointment extends Struct.ContentTypeSchema {
       Schema.Attribute.Private;
     message: Schema.Attribute.Text;
     name: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    parentName: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
@@ -488,10 +559,15 @@ export interface ApiAppointmentAppointment extends Struct.ContentTypeSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 20;
       }>;
+    preferredDate: Schema.Attribute.Date;
     preferredTimeSlot: Schema.Attribute.Enumeration<
       ['morning', 'afternoon', 'evening']
     >;
     publishedAt: Schema.Attribute.DateTime;
+    sourcePage: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
     status: Schema.Attribute.Enumeration<
       ['pending', 'confirmed', 'completed', 'cancelled']
     > &
@@ -567,6 +643,111 @@ export interface ApiCampusCampus extends Struct.CollectionTypeSchema {
   };
 }
 
+export interface ApiChatMessageChatMessage extends Struct.ContentTypeSchema {
+  collectionName: 'chat_messages';
+  info: {
+    description: 'Individual chat message in a session';
+    displayName: 'Chat Message';
+    icon: 'MessageSquare';
+    pluralName: 'chat-messages';
+    singularName: 'chat-message';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    content: Schema.Attribute.Text & Schema.Attribute.Required;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    latencyMs: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::chat-message.chat-message'
+    > &
+      Schema.Attribute.Private;
+    metadata: Schema.Attribute.JSON;
+    publishedAt: Schema.Attribute.DateTime;
+    retrievedDocs: Schema.Attribute.JSON;
+    role: Schema.Attribute.Enumeration<['user', 'assistant', 'system']> &
+      Schema.Attribute.Required;
+    session: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::chat-session.chat-session'
+    >;
+    tokenCount: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiChatSessionChatSession extends Struct.ContentTypeSchema {
+  collectionName: 'chat_sessions';
+  info: {
+    description: 'AI customer service chat session';
+    displayName: 'Chat Session';
+    icon: 'MessageCircle';
+    pluralName: 'chat-sessions';
+    singularName: 'chat-session';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    closedAt: Schema.Attribute.DateTime;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::chat-session.chat-session'
+    > &
+      Schema.Attribute.Private;
+    messageCount: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    messages: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::chat-message.chat-message'
+    >;
+    metadata: Schema.Attribute.JSON;
+    publishedAt: Schema.Attribute.DateTime;
+    sessionId: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.Unique &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    sourcePage: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 200;
+      }>;
+    status: Schema.Attribute.Enumeration<['active', 'transferred', 'closed']> &
+      Schema.Attribute.DefaultTo<'active'>;
+    transferredAt: Schema.Attribute.DateTime;
+    transferredTo: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    visitorId: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    visitorName: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    visitorPhone: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 20;
+      }>;
+  };
+}
+
 export interface ApiFaqItemFaqItem extends Struct.ContentTypeSchema {
   collectionName: 'faq_items';
   info: {
@@ -605,11 +786,23 @@ export interface ApiFaqItemFaqItem extends Struct.ContentTypeSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 500;
       }>;
+    reviewStatus: Schema.Attribute.Enumeration<
+      ['pending', 'approved', 'rejected']
+    > &
+      Schema.Attribute.DefaultTo<'approved'>;
     sortOrder: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     sourceDocument: Schema.Attribute.Relation<
       'oneToOne',
       'api::knowledge-base.knowledge-base'
     >;
+    sourceSession: Schema.Attribute.Relation<
+      'oneToOne',
+      'api::chat-session.chat-session'
+    >;
+    sourceType: Schema.Attribute.Enumeration<
+      ['manual', 'ai-generated', 'chat-feedback']
+    > &
+      Schema.Attribute.DefaultTo<'manual'>;
     tags: Schema.Attribute.String &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 500;
@@ -617,6 +810,66 @@ export interface ApiFaqItemFaqItem extends Struct.ContentTypeSchema {
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    vectorSynced: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+  };
+}
+
+export interface ApiFeedbackFeedback extends Struct.ContentTypeSchema {
+  collectionName: 'feedbacks';
+  info: {
+    description: '\u8BBF\u5BA2\u901A\u8FC7\u8054\u7CFB\u8868\u5355\u63D0\u4EA4\u7684\u53CD\u9988';
+    displayName: '\u53CD\u9988/\u8054\u7CFB\u8868\u5355';
+    icon: 'Envelope';
+    pluralName: 'feedbacks';
+    singularName: 'feedback';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    email: Schema.Attribute.Email & Schema.Attribute.Required;
+    ipAddress: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 45;
+      }>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::feedback.feedback'
+    > &
+      Schema.Attribute.Private;
+    message: Schema.Attribute.Text & Schema.Attribute.Required;
+    name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    phone: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 20;
+      }>;
+    publishedAt: Schema.Attribute.DateTime;
+    reply: Schema.Attribute.Text;
+    sourcePage: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    status: Schema.Attribute.Enumeration<['pending', 'replied', 'closed']> &
+      Schema.Attribute.DefaultTo<'pending'>;
+    subject: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 200;
+      }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    userAgent: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 500;
+      }>;
   };
 }
 
@@ -675,6 +928,10 @@ export interface ApiKnowledgeBaseKnowledgeBase
     singleton: false;
   };
   attributes: {
+    category: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
     chunkCount: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     content: Schema.Attribute.Text;
     createdAt: Schema.Attribute.DateTime;
@@ -682,6 +939,7 @@ export interface ApiKnowledgeBaseKnowledgeBase
       Schema.Attribute.Private;
     failedAt: Schema.Attribute.DateTime;
     faqs: Schema.Attribute.Relation<'oneToMany', 'api::faq-item.faq-item'>;
+    file: Schema.Attribute.Media<'files' | 'images'>;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
@@ -695,9 +953,13 @@ export interface ApiKnowledgeBaseKnowledgeBase
     retryCount: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     seo: Schema.Attribute.Component<'common.seo', false>;
     sourceType: Schema.Attribute.Enumeration<
-      ['manual', 'faq', 'pdf', 'webpage', 'chat-history']
+      ['manual', 'faq', 'pdf', 'webpage', 'chat-history', 'content-sync']
     > &
       Schema.Attribute.DefaultTo<'manual'>;
+    sourceUrl: Schema.Attribute.String &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 500;
+      }>;
     status: Schema.Attribute.Enumeration<
       ['pending', 'processing', 'ready', 'failed']
     > &
@@ -719,6 +981,10 @@ export interface ApiKnowledgeBaseKnowledgeBase
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     vectorDbIds: Schema.Attribute.JSON;
+    vectorizationStatus: Schema.Attribute.Enumeration<
+      ['pending', 'processing', 'completed', 'failed']
+    > &
+      Schema.Attribute.DefaultTo<'pending'>;
   };
 }
 
@@ -812,6 +1078,7 @@ export interface ApiNewsArticleNewsArticle extends Struct.CollectionTypeSchema {
     seo: Schema.Attribute.Component<'common.seo', false>;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     sortOrder: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
+    tags: Schema.Attribute.String;
     title: Schema.Attribute.String &
       Schema.Attribute.Required &
       Schema.Attribute.SetMinMaxLength<{
@@ -1183,6 +1450,48 @@ export interface ApiTeacherTeacher extends Struct.CollectionTypeSchema {
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 200;
       }>;
+    updatedAt: Schema.Attribute.DateTime;
+    updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+  };
+}
+
+export interface ApiVectorConfigVectorConfig extends Struct.ContentTypeSchema {
+  collectionName: 'vector_configs';
+  info: {
+    description: 'Vector database configuration';
+    displayName: 'Vector Config';
+    icon: 'Database';
+    pluralName: 'vector-configs';
+    singularName: 'vector-config';
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    connectionConfig: Schema.Attribute.JSON & Schema.Attribute.Private;
+    createdAt: Schema.Attribute.DateTime;
+    createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
+      Schema.Attribute.Private;
+    dimension: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<1536>;
+    indexParams: Schema.Attribute.JSON;
+    indexType: Schema.Attribute.Enumeration<['ivfflat', 'hnsw']> &
+      Schema.Attribute.DefaultTo<'ivfflat'>;
+    isActive: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
+    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    localizations: Schema.Attribute.Relation<
+      'oneToMany',
+      'api::vector-config.vector-config'
+    > &
+      Schema.Attribute.Private;
+    name: Schema.Attribute.String &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    provider: Schema.Attribute.Enumeration<['pgvector', 'qdrant', 'milvus']> &
+      Schema.Attribute.DefaultTo<'pgvector'>;
+    publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -1700,9 +2009,13 @@ declare module '@strapi/strapi' {
       'admin::transfer-token': AdminTransferToken;
       'admin::transfer-token-permission': AdminTransferTokenPermission;
       'admin::user': AdminUser;
+      'api::ai-config.ai-config': ApiAiConfigAiConfig;
       'api::appointment.appointment': ApiAppointmentAppointment;
       'api::campus.campus': ApiCampusCampus;
+      'api::chat-message.chat-message': ApiChatMessageChatMessage;
+      'api::chat-session.chat-session': ApiChatSessionChatSession;
       'api::faq-item.faq-item': ApiFaqItemFaqItem;
+      'api::feedback.feedback': ApiFeedbackFeedback;
       'api::footer.footer': ApiFooterFooter;
       'api::knowledge-base.knowledge-base': ApiKnowledgeBaseKnowledgeBase;
       'api::navigation.navigation': ApiNavigationNavigation;
@@ -1713,6 +2026,7 @@ declare module '@strapi/strapi' {
       'api::product.product': ApiProductProduct;
       'api::site-settings.site-settings': ApiSiteSettingsSiteSettings;
       'api::teacher.teacher': ApiTeacherTeacher;
+      'api::vector-config.vector-config': ApiVectorConfigVectorConfig;
       'plugin::content-releases.release': PluginContentReleasesRelease;
       'plugin::content-releases.release-action': PluginContentReleasesReleaseAction;
       'plugin::i18n.locale': PluginI18NLocale;

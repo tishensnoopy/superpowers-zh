@@ -1,5 +1,5 @@
 {
-  "kind": "contentType",
+  "kind": "collectionType",
   "collectionName": "chat_messages",
   "info": {
     "singularName": "chat-message",
@@ -20,7 +20,11 @@
     },
     "role": {
       "type": "enumeration",
-      "enum": ["user", "assistant", "system"],
+      "enum": [
+        "user",
+        "assistant",
+        "system"
+      ],
       "required": true
     },
     "content": {

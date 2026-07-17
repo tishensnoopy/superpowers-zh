@@ -1,5 +1,5 @@
 {
-  "kind": "contentType",
+  "kind": "collectionType",
   "collectionName": "pages",
   "info": {
     "singularName": "page",
@@ -71,7 +71,12 @@
     },
     "layout": {
       "type": "enumeration",
-      "enum": ["full-width", "boxed", "sidebar-left", "sidebar-right"],
+      "enum": [
+        "full-width",
+        "boxed",
+        "sidebar-left",
+        "sidebar-right"
+      ],
       "default": "full-width",
       "description": "页面布局"
     },

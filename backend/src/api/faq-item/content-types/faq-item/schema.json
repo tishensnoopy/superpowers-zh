@@ -1,5 +1,5 @@
 {
-  "kind": "contentType",
+  "kind": "collectionType",
   "collectionName": "faq_items",
   "info": {
     "singularName": "faq-item",
@@ -64,7 +64,11 @@
     },
     "sourceType": {
       "type": "enumeration",
-      "enum": ["manual", "ai-generated", "chat-feedback"],
+      "enum": [
+        "manual",
+        "ai-generated",
+        "chat-feedback"
+      ],
       "default": "manual",
       "description": "How this FAQ was created"
     },
@@ -76,7 +80,11 @@
     },
     "reviewStatus": {
       "type": "enumeration",
-      "enum": ["pending", "approved", "rejected"],
+      "enum": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
       "default": "approved",
       "description": "Review status for AI-generated FAQs"
     },

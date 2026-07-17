@@ -1,5 +1,5 @@
 {
-  "kind": "contentType",
+  "kind": "collectionType",
   "collectionName": "vector_configs",
   "info": {
     "singularName": "vector-config",
@@ -19,7 +19,11 @@
     },
     "provider": {
       "type": "enumeration",
-      "enum": ["pgvector", "qdrant", "milvus"],
+      "enum": [
+        "pgvector",
+        "qdrant",
+        "milvus"
+      ],
       "default": "pgvector"
     },
     "dimension": {
@@ -28,7 +32,10 @@
     },
     "indexType": {
       "type": "enumeration",
-      "enum": ["ivfflat", "hnsw"],
+      "enum": [
+        "ivfflat",
+        "hnsw"
+      ],
       "default": "ivfflat"
     },
     "indexParams": {

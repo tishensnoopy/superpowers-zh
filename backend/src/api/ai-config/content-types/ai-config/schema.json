@@ -1,5 +1,5 @@
 {
-  "kind": "contentType",
+  "kind": "collectionType",
   "collectionName": "ai_configs",
   "info": {
     "singularName": "ai-config",
@@ -19,7 +19,11 @@
     },
     "provider": {
       "type": "enumeration",
-      "enum": ["qwen", "openai", "custom"],
+      "enum": [
+        "qwen",
+        "openai",
+        "custom"
+      ],
       "default": "qwen"
     },
     "model": {

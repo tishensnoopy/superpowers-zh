@@ -209,4 +209,49 @@ export default factories.createCoreService('api::product.product', ({ strapi }) 
       console.error('[Product Sync Service] Error deleting product:', error);
     }
   },
+
+  /**
+   * Bootstrap 时确保 products 表有默认占位数据。仅在表为空时创建，
+   * 避免首次启动时 Content Manager 显示空列表。已存在数据时跳过。
+   * 关联到 product-category.initializeDefaults() 创建的默认分类。
+   */
+  async initializeDefaults() {
+    console.log('[ProductService] initializeDefaults() called');
+    try {
+      const existing = await strapi.db.query('api::product.product').findMany();
+      console.log('[ProductService] initializeDefaults() found existing records:', existing.length);
+
+      if (existing.length > 0) {
+        console.log('[ProductService] initializeDefaults() skipping - already exists');
+        return existing;
+      }
+
+      console.log('[ProductService] initializeDefaults() creating default products');
+      const categoryA = await strapi.db.query('api::product-category.product-category').findOne({
+        where: { slug: 'category-a' },
+      });
+
+      const defaults = [
+        {
+          name: 'Product Sample A',
+          slug: 'product-sample-a',
+          description: 'Default sample product A. Replace with real data via Strapi Admin.',
+          shortDescription: 'Sample product A',
+          price: 0,
+          isFeatured: false,
+          isInStock: true,
+          categories: categoryA ? [categoryA.id] : [],
+        },
+      ];
+
+      const created = await Promise.all(
+        defaults.map((item) => this.create({ data: item }))
+      );
+      console.log('[ProductService] initializeDefaults() created successfully, count:', created.length);
+      return created;
+    } catch (err) {
+      console.error('[ProductService] initializeDefaults() failed:', err instanceof Error ? err.message : err);
+      throw err;
+    }
+  },
 }));
