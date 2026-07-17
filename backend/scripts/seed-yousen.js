@@ -733,6 +733,8 @@ async function seedPages(strapi, force, remove) {
     await removeEntity(strapi, uid, homepageSlug);
     await removeEntity(strapi, uid, 'about');
     await removeEntity(strapi, uid, 'refund-policy');
+    await removeEntity(strapi, uid, 'privacy-policy');
+    await removeEntity(strapi, uid, 'user-agreement');
     return;
   }
 
@@ -909,6 +911,46 @@ async function seedPages(strapi, force, remove) {
     status: 'published',
   };
   await seedEntity(strapi, uid, 'refund-policy', refundData, force);
+
+  // === 隐私政策页 ===
+  const privacyData = {
+    title: '隐私政策',
+    slug: 'privacy-policy',
+    isHomepage: false,
+    sections: [
+      {
+        __component: 'section.rich-text',
+        title: '隐私政策',
+        alignment: 'left',
+        content: '<p>武汉佑森小课堂艺术培训学校有限公司（以下简称"我们"）深知个人信息对您的重要性，我们将按照法律法规的规定，保护您的个人信息及隐私安全。</p><p>本隐私政策适用于您通过我们的官方网站、小程序等渠道使用我们的产品或服务。</p><p><strong>一、信息收集</strong></p><p>1. 您主动提供的信息：姓名、手机号码、孩子年龄、意向课程、留言等预约试听信息。</p><p>2. 自动收集的信息：访问时间、IP地址、浏览器类型、设备信息等。</p><p>3. Cookie信息：为提升用户体验，我们使用Cookie记住您的偏好设置。</p><p><strong>二、信息使用</strong></p><p>1. 提供试听预约服务，与您联系安排试听时间。</p><p>2. 改善我们的产品和服务，优化用户体验。</p><p>3. 发送教育资讯、课程通知等服务信息（您可随时退订）。</p><p>4. 遵守法律法规要求，配合监管需要。</p><p><strong>三、信息保护</strong></p><p>1. 我们采用严格的安全措施保护您的个人信息，防止未经授权的访问、使用或泄露。</p><p>2. 仅授权人员可在必要范围内访问您的个人信息，并签署保密协议。</p><p>3. 我们将在实现目的所必要的最短时间内保留您的信息。</p><p><strong>四、用户权利</strong></p><p>1. 您有权访问、更正、删除您的个人信息。</p><p>2. 您有权撤回信息处理授权。</p><p>3. 如需行使上述权利，请通过页面底部的联系方式与我们沟通。</p><p><strong>五、Cookie政策</strong></p><p>我们使用Cookie来记住您的偏好设置、分析网站流量。您可以通过浏览器设置管理或删除Cookie。</p><p><strong>六、政策更新</strong></p><p>本隐私政策可能不时更新，更新后我们将在网站公布。继续使用服务即视为您同意更新后的政策。</p><p>如有疑问，请咨询各校区前台或致电客服。</p>',
+      },
+    ],
+    layout: 'boxed',
+    showNavigation: true,
+    showFooter: true,
+    status: 'published',
+  };
+  await seedEntity(strapi, uid, 'privacy-policy', privacyData, force);
+
+  // === 用户协议页 ===
+  const agreementData = {
+    title: '用户协议',
+    slug: 'user-agreement',
+    isHomepage: false,
+    sections: [
+      {
+        __component: 'section.rich-text',
+        title: '用户协议',
+        alignment: 'left',
+        content: '<p>欢迎使用武汉佑森小课堂艺术培训学校有限公司（以下简称"佑森小课堂"）提供的在线服务。请您在使用本服务前，仔细阅读并同意以下用户协议。</p><p><strong>一、服务说明</strong></p><p>1. 本服务由佑森小课堂提供，包括但不限于课程预约、在线咨询、资讯浏览等功能。</p><p>2. 我们保留随时修改、暂停或终止部分或全部服务的权利。</p><p><strong>二、用户注册</strong></p><p>1. 您应保证提供的信息真实、准确、完整。</p><p>2. 您应对您的账户和密码安全负责，因您保管不善造成的损失由您自行承担。</p><p>3. 不得将账户转让、出借给他人使用。</p><p><strong>三、用户行为规范</strong></p><p>1. 您不得利用本服务从事违法违规活动。</p><p>2. 您不得发布侵犯他人合法权益的内容。</p><p>3. 您不得干扰本服务的正常运行，包括但不限于攻击服务器、传播病毒等。</p><p>4. 您不得以任何方式获取、泄露他人个人信息。</p><p><strong>四、知识产权</strong></p><p>1. 本服务中的所有内容（包括但不限于文字、图片、音频、视频、软件等）的知识产权归佑森小课堂或相关权利人所有。</p><p>2. 未经授权，您不得复制、转载、传播或用于商业用途。</p><p>3. 您发布的内容，您授予佑森小课堂在全球范围内免费的、非独占的使用许可。</p><p><strong>五、免责声明</strong></p><p>1. 本服务按"现状"提供，我们不保证服务不中断或没有错误。</p><p>2. 因不可抗力、系统维护等原因导致服务中断，我们不承担赔偿责任。</p><p>3. 您因使用本服务产生的风险由您自行承担。</p><p><strong>六、协议修改</strong></p><p>我们有权随时修改本协议，修改后的协议一经公布即生效。继续使用服务即视为您同意修改后的协议。</p><p><strong>七、法律适用</strong></p><p>本协议的签订、履行、解释及争议解决均适用中华人民共和国法律。如发生争议，双方应友好协商解决；协商不成的，任何一方均可向佑森小课堂所在地有管辖权的人民法院提起诉讼。</p><p>如有疑问，请咨询各校区前台或致电客服。</p>',
+      },
+    ],
+    layout: 'boxed',
+    showNavigation: true,
+    showFooter: true,
+    status: 'published',
+  };
+  await seedEntity(strapi, uid, 'user-agreement', agreementData, force);
 }
 
 // === Main ===
