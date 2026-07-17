@@ -57,5 +57,10 @@
       "default": 0,
       "description": "Sort order in comparison table"
     }
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
   }
 }

@@ -30,17 +30,49 @@ export default factories.createCoreController('api::navigation.navigation', ({ s
   },
 
   async getNavigationTree(ctx) {
-    console.log('[Navigation] getNavigationTree() called');
+    // locale 感知导航树：
+    // v5 i18n 中关系字段恒为 localized，en-US 行的 parent 链接可能缺失，
+    // 因此结构（父子层级、排序）始终取自 zh-CN 主版本，
+    // 显示字段（name/url/icon）按 documentId 从目标 locale 覆盖，缺失则回退 zh-CN。
+    const locale = typeof ctx.query.locale === 'string' && ctx.query.locale !== '' ? ctx.query.locale : 'zh-CN';
+    console.log('[Navigation] getNavigationTree() called, locale:', locale);
     try {
-      const items = await strapi.db.query('api::navigation.navigation').findMany({
-        where: { parent: null },
+      const zhItems = await strapi.db.query('api::navigation.navigation').findMany({
+        where: { locale: 'zh-CN' },
         orderBy: { position: 'asc' },
-        populate: {
-          children: {
-            orderBy: { position: 'asc' },
-          },
-        },
+        populate: { parent: true, children: true },
       });
+
+      const localizedByDocId = new Map<string, Record<string, unknown>>();
+      if (locale !== 'zh-CN') {
+        const localizedItems = await strapi.db.query('api::navigation.navigation').findMany({
+          where: { locale },
+        });
+        for (const item of localizedItems) {
+          localizedByDocId.set(item.documentId, item);
+        }
+      }
+
+      const mergeLocale = (item) => {
+        const loc = localizedByDocId.get(item.documentId);
+        if (!loc) return item;
+        return {
+          ...item,
+          name: loc.name ?? item.name,
+          url: loc.url ?? item.url,
+          icon: loc.icon ?? item.icon,
+        };
+      };
+
+      const items = zhItems
+        .filter((it) => !it.parent)
+        .map((root) => ({
+          ...mergeLocale(root),
+          children: (root.children ?? [])
+            .slice()
+            .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
+            .map((child) => mergeLocale(child)),
+        }));
 
       console.log('[Navigation] getNavigationTree() completed, root items:', items.length);
       return { data: items, meta: {} };

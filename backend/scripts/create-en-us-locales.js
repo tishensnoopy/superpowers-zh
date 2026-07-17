@@ -23,19 +23,34 @@
 const path = require('path');
 const { createStrapi } = require('@strapi/strapi');
 
+// 按依赖顺序排列：被引用的类型在前（Phase B 关系复制依赖目标已存在 en-US 版本）
 const CONTENT_TYPES = [
-  { uid: 'api::page.page', lookupField: 'slug' },
-  { uid: 'api::product.product', lookupField: 'slug' },
+  { uid: 'api::product-spec.product-spec', lookupField: 'code' },
   { uid: 'api::product-category.product-category', lookupField: 'slug' },
   { uid: 'api::campus.campus', lookupField: 'slug' },
-  { uid: 'api::teacher.teacher', lookupField: 'slug' },
-  { uid: 'api::news-article.news-article', lookupField: 'slug' },
-  { uid: 'api::faq-item.faq-item', lookupField: 'question' },
+  { uid: 'api::knowledge-base.knowledge-base', lookupField: 'title' },
   { uid: 'api::navigation.navigation', lookupField: 'name' },
+  { uid: 'api::page.page', lookupField: 'slug' },
+  { uid: 'api::teacher.teacher', lookupField: 'slug' },
+  { uid: 'api::faq-item.faq-item', lookupField: 'question' },
+  { uid: 'api::product.product', lookupField: 'slug' },
+  { uid: 'api::news-article.news-article', lookupField: 'slug' },
   { uid: 'api::footer.footer', lookupField: 'id' },
   { uid: 'api::site-settings.site-settings', lookupField: 'id' },
-  { uid: 'api::knowledge-base.knowledge-base', lookupField: 'title' },
 ];
+
+// Phase B：v5 i18n 中关系字段恒为 localized（不随 locale 版本创建自动继承），
+// 需在全部 en-US 版本就绪后，按 owning side 显式复制关系链接（值传 documentId，
+// document service 会按源 locale=en-US 解析到对应语言的行）。
+// 仅列 owning side（manyToOne / m2m inversedBy 侧），inverse side 由 v5 自动维护。
+const RELATION_COPY = {
+  'api::navigation.navigation': ['parent'],
+  'api::page.page': ['parent'],
+  'api::product-category.product-category': ['parent'],
+  'api::teacher.teacher': ['campus'],
+  'api::faq-item.faq-item': ['sourceDocument'],
+  'api::product.product': ['categories', 'specs'],
+};
 
 // 不翻译的字段 key（小写精确匹配）：机器可读值/枚举/联系方式/URL 等，前端逻辑依赖原值
 const SKIP_KEYS = new Set([
@@ -277,6 +292,70 @@ async function main() {
       await sleep(DOC_INTERVAL_MS);
     }
     log(`  ${uid} 完成\n`);
+  }
+
+  // ===== Phase B：复制 owning side 关系到 en-US 版本 =====
+  if (!DRY_RUN) {
+    log('=== Phase B: 复制关系到 en-US 版本 ===');
+    let relUpdated = 0;
+    let relSkipped = 0;
+    let relError = 0;
+
+    const relTypes = ONLY ? Object.keys(RELATION_COPY).filter((u) => ONLY.includes(u)) : Object.keys(RELATION_COPY);
+
+    for (const uid of relTypes) {
+      const relFields = RELATION_COPY[uid];
+      let zhDocs;
+      try {
+        const result = await strapi.documents(uid).findMany({
+          locale: 'zh-CN',
+          limit: 1000,
+          status: 'published',
+          populate: relFields,
+        });
+        zhDocs = Array.isArray(result) ? result : (result ? [result] : []);
+      } catch (e) {
+        info(`Phase B 查询 ${uid} 失败: ${e.message}`);
+        relError++;
+        continue;
+      }
+
+      for (const doc of zhDocs) {
+        // 提取关系 documentId（manyToOne → 对象/null；m2m → 数组）
+        const relData = {};
+        for (const field of relFields) {
+          const val = doc[field];
+          if (!val) continue;
+          if (Array.isArray(val)) {
+            const ids = val.map((v) => v && v.documentId).filter(Boolean);
+            if (ids.length > 0) relData[field] = ids;
+          } else if (val.documentId) {
+            relData[field] = val.documentId;
+          }
+        }
+        if (Object.keys(relData).length === 0) {
+          relSkipped++;
+          continue;
+        }
+
+        try {
+          await strapi.documents(uid).update({
+            documentId: doc.documentId,
+            locale: 'en-US',
+            status: 'published',
+            data: relData,
+          });
+          ok(`Phase B ${uid} ${doc.documentId}: ${Object.keys(relData).join(', ')}`);
+          relUpdated++;
+        } catch (e) {
+          info(`Phase B ${uid} ${doc.documentId} 失败: ${e.message}`);
+          relError++;
+        }
+        await sleep(100);
+      }
+    }
+
+    log(`Phase B 完成: 更新 ${relUpdated}, 跳过(无关系) ${relSkipped}, 错误 ${relError}\n`);
   }
 
   log('=== 总结 ===');
