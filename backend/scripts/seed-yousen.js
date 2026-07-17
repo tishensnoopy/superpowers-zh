@@ -382,6 +382,14 @@ async function uploadImage(strapi, filePath) {
   return Array.isArray(result) ? result[0].id : result.id;
 }
 
+// 检测 content type 是否启用 i18n
+// 注意：即使 schema.json 没有 pluginOptions.i18n.localized，数据库表可能有 locale 字段
+// 对有 locale 字段的表，无条件传 locale 参数避免 locale=NULL
+function isLocalizedContentType(strapi, uid) {
+  const ct = strapi.contentTypes[uid];
+  return ct?.pluginOptions?.i18n?.localized === true;
+}
+
 async function findBySlug(strapi, uid, slug) {
   const found = await strapi.documents(uid).findFirst({
     filters: { slug: { $eq: slug } },
@@ -394,25 +402,48 @@ async function seedEntity(strapi, uid, slug, data, force) {
   // Strapi v5: status 是 create/update 的顶层参数，不能放在 data 里
   const { status, ...fields } = data;
   const publishStatus = status || 'published';
+  // 无条件传 locale: 'zh-CN'
+  // 即使 schema.json 没声明 i18n pluginOptions，数据库表有 locale 字段时此参数会写入
+  // 如果 Strapi 因 content type 不支持 locale 而报错，catch 后不传 locale 重试
+  const doCreate = async (localeOpts) => strapi.documents(uid).create({
+    data: fields,
+    status: publishStatus,
+    ...localeOpts,
+  });
+  const doUpdate = async (localeOpts) => strapi.documents(uid).update({
+    documentId: existing.documentId,
+    data: fields,
+    status: publishStatus,
+    ...localeOpts,
+  });
   if (existing && !force) {
     info(`已存在，跳过 (slug=${slug})`);
     return existing;
   }
-  if (existing && force) {
-    const updated = await strapi.documents(uid).update({
-      documentId: existing.documentId,
-      data: fields,
-      status: publishStatus,
-    });
-    ok(`更新成功 (slug=${slug})`);
-    return updated;
+  try {
+    if (existing && force) {
+      const updated = await doUpdate({ locale: 'zh-CN' });
+      ok(`更新成功 (slug=${slug})`);
+      return updated;
+    }
+    const created = await doCreate({ locale: 'zh-CN' });
+    ok(`创建成功 (slug=${slug})`);
+    return created;
+  } catch (e) {
+    // 如果 locale 参数不被支持，回退到不传 locale
+    if (e.message && /locale/i.test(e.message)) {
+      warn(`locale 不支持，回退 (slug=${slug}): ${e.message}`);
+      if (existing && force) {
+        const updated = await doUpdate({});
+        ok(`更新成功 (slug=${slug})`);
+        return updated;
+      }
+      const created = await doCreate({});
+      ok(`创建成功 (slug=${slug})`);
+      return created;
+    }
+    throw e;
   }
-  const created = await strapi.documents(uid).create({ 
-    data: fields, 
-    status: publishStatus,
-  });
-  ok(`创建成功 (slug=${slug})`);
-  return created;
 }
 
 async function removeEntity(strapi, uid, slug) {
@@ -960,7 +991,11 @@ async function main() {
   log(`模式: ${remove ? '删除' : force ? '强制更新' : '创建（跳过已存在）'}`);
   log(`实体: ${entities.join(', ')}`);
 
-  const strapi = await createStrapi().load();
+  // 显式指定 distDir：让 Strapi 从 dist/ 加载编译后的 .js 配置和 schemas
+  // 否则配置加载器尝试加载 config/*.ts 会报 "extension must be one of .js,.json"
+  // 这样在本地宿主机和 Docker 容器内都能执行
+  const distDir = path.resolve(__dirname, '..', 'dist');
+  const strapi = await createStrapi({ distDir }).load();
   log('Strapi 已启动\n');
 
   try {
