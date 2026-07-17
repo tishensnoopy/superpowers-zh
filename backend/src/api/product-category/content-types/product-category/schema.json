@@ -67,5 +67,10 @@
       "mappedBy": "categories",
       "description": "Products in this category"
     }
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
   }
 }

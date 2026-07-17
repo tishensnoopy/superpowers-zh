@@ -60,5 +60,10 @@
       "default": false,
       "description": "Whether this is an external link"
     }
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
   }
 }

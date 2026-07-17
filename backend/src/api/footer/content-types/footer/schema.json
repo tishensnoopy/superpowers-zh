@@ -40,5 +40,10 @@
       "component": "common.seo",
       "description": "SEO configuration"
     }
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
   }
 }

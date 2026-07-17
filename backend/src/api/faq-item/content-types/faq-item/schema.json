@@ -93,5 +93,10 @@
       "default": false,
       "description": "Whether this FAQ is synced to vector DB"
     }
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
   }
 }

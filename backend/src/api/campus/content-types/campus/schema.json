@@ -28,13 +28,17 @@
     "coverImage": {
       "type": "media",
       "multiple": false,
-      "allowedTypes": ["images"],
+      "allowedTypes": [
+        "images"
+      ],
       "description": "校区封面图"
     },
     "gallery": {
       "type": "media",
       "multiple": true,
-      "allowedTypes": ["images"],
+      "allowedTypes": [
+        "images"
+      ],
       "description": "校区环境图集"
     },
     "address": {
@@ -86,6 +90,11 @@
       "type": "component",
       "component": "common.seo",
       "description": "SEO 配置"
+    }
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
     }
   }
 }

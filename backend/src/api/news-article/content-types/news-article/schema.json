@@ -36,12 +36,18 @@
     "coverImage": {
       "type": "media",
       "multiple": false,
-      "allowedTypes": ["images"],
+      "allowedTypes": [
+        "images"
+      ],
       "description": "封面图"
     },
     "category": {
       "type": "enumeration",
-      "enum": ["company_news", "industry_news", "event_notice"],
+      "enum": [
+        "company_news",
+        "industry_news",
+        "event_notice"
+      ],
       "default": "company_news",
       "description": "文章分类"
     },
@@ -68,6 +74,11 @@
       "type": "component",
       "component": "common.seo",
       "description": "SEO 配置"
+    }
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
     }
   }
 }

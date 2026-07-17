@@ -132,5 +132,10 @@
       "maxLength": 100,
       "description": "Document category"
     }
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
   }
 }

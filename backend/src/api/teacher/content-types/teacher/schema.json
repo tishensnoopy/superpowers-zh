@@ -33,7 +33,9 @@
     "avatar": {
       "type": "media",
       "multiple": false,
-      "allowedTypes": ["images"],
+      "allowedTypes": [
+        "images"
+      ],
       "description": "教师头像"
     },
     "campus": {
@@ -45,7 +47,12 @@
     },
     "subject": {
       "type": "enumeration",
-      "enum": ["pinyin", "math", "english", "comprehensive"],
+      "enum": [
+        "pinyin",
+        "math",
+        "english",
+        "comprehensive"
+      ],
       "description": "教授科目"
     },
     "teachingYears": {
@@ -79,6 +86,11 @@
       "type": "component",
       "component": "common.seo",
       "description": "SEO 配置"
+    }
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
     }
   }
 }
