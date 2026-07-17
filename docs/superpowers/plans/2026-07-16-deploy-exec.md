@@ -1,12 +1,25 @@
 # 客户业务系统部署执行实现计划
 
-> **面向 AI 代理的工作者：** 必需子技能：使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans 逐任务实现此计划。步骤使用复选框（`- [ ]`）语法来跟踪进度。
+> **面向 AI 代理的工作者：** 必需子技能：使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans 逐任务实现此计划。步骤使用复选框（`- [x]`）语法来跟踪进度。
 
 **目标：** 在 P1+P2+P2.5 完成、本地代码通过审查之后，执行严格测试套件（P3）拿到"绿牌"，将客户业务系统部署到 124.223.1.67（与 Central 同机），并完成本地/GitHub/服务器三端同步与文档"小白化"。
 
 **架构：** 基于 `docs/superpowers/specs/2026-07-16-deploy-and-sync-design.md` 规格第 6-8 节，分三阶段串行执行：P3 单元测试 + 构建验证 + Lint + E2E + 测试报告（5 任务）→ P4 在 Central 后台创建客户 + rsync 同步 + .env 配置 + 分步启动 + Strapi 初始化 + Agent 注册 + 验证（8 任务）→ P5 commit + push + 服务器版本记录 + project_memory 更新 + FULL-DEPLOY-GUIDE 重写 + 审查报告 + DEPLOY-RUNBOOK 更新（7 任务）。SSH 操作使用 `sshpass`，rsync 排除项按规格完整列出。
 
 **技术栈：** Strapi v5（backend）、Next.js 14（frontend-next）、Next.js（central）、Node.js Agent、PostgreSQL 16、Redis 7、MeiliSearch v1.12、Docker Compose、Vitest、Playwright、sshpass、rsync、DashScope LLM
+
+---
+## 进度汇总（2026-07-17 更新）
+
+> 所有任务已通过 commit 提交。以下为 commit SHA 映射，复选框已全部勾选。
+
+| 任务 | 状态 | Commit | 备注 |
+|------|------|--------|------|
+| T1-T5 (P3 测试) | ✅ | 0be0f4e | 单元测试/构建/lint/E2E/报告 |
+| T6-T13 (P4 部署) | ✅ | 4cc6f16 | 客户创建/rsync/env/启动/Agent/验证 |
+| T14-T20 (P5 三端同步) | ✅ | 3f6898d, 6f95a82 | commit/push/SHA记录/文档更新 |
+| 额外修复 | ✅ | 3c1abc6 | schema.json kind 修复 + i18n locale 修复 |
+
 
 ---
 
@@ -119,7 +132,7 @@ docs/, skills/, hooks/, .trae/, .codex/, .cursor-plugin/, .claude-plugin/,
 
 **目标：** 所有子项目单元测试 0 失败。
 
-- [ ] **步骤 1：执行 backend 单元测试**
+- [x] **步骤 1：执行 backend 单元测试**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh/backend && npm test 2>&1 | tee /tmp/unit-backend.txt
@@ -135,7 +148,7 @@ cd /home/tishensnoopy/project/superpowers-zh/backend && npm test 2>&1 | tee /tmp
 
 完成标志：`/tmp/unit-backend.txt` 末尾显示 `Y passed` 且 0 failed。
 
-- [ ] **步骤 2：执行 frontend-next 单元测试**
+- [x] **步骤 2：执行 frontend-next 单元测试**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh/frontend-next && npm test 2>&1 | tee /tmp/unit-frontend.txt
@@ -147,7 +160,7 @@ cd /home/tishensnoopy/project/superpowers-zh/frontend-next && npm test 2>&1 | te
 
 完成标志：`/tmp/unit-frontend.txt` 末尾显示 0 failed。
 
-- [ ] **步骤 3：执行 central 单元测试**
+- [x] **步骤 3：执行 central 单元测试**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh/central && npm test 2>&1 | tee /tmp/unit-central.txt
@@ -162,7 +175,7 @@ PGPASSWORD=postgres psql -h localhost -U postgres -d central_db -c "SELECT 1"
 
 完成标志：`/tmp/unit-central.txt` 末尾显示 0 failed。
 
-- [ ] **步骤 4：执行 agent 单元测试**
+- [x] **步骤 4：执行 agent 单元测试**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh/agent && npm test 2>&1 | tee /tmp/unit-agent.txt
@@ -179,7 +192,7 @@ cd /home/tishensnoopy/project/superpowers-zh/agent && npm test 2>&1 | tee /tmp/u
 
 完成标志：`/tmp/unit-agent.txt` 末尾显示 0 failed，或已记录"无测试"。
 
-- [ ] **步骤 5：修复失败测试**
+- [x] **步骤 5：修复失败测试**
 
 对步骤 1-4 中每个失败的测试：
 1. 分析失败原因（测试代码错 / 业务代码 bug / 历史环境依赖）
@@ -187,7 +200,7 @@ cd /home/tishensnoopy/project/superpowers-zh/agent && npm test 2>&1 | tee /tmp/u
 3. 标记 skip 的测试记录到 `docs/known-issues.md`（格式见任务 4 步骤 4）
 4. 重新运行对应测试验证通过
 
-- [ ] **步骤 6：Commit 单元测试修复**
+- [x] **步骤 6：Commit 单元测试修复**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh
@@ -210,7 +223,7 @@ git commit -m "test: 单元测试全绿
 
 **目标：** 所有子项目 `npm run build` 成功，为 Docker 镜像构建做准备。
 
-- [ ] **步骤 1：执行 backend 构建**
+- [x] **步骤 1：执行 backend 构建**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh/backend && npm run build 2>&1 | tee /tmp/build-backend.txt
@@ -225,7 +238,7 @@ cd /home/tishensnoopy/project/superpowers-zh/backend && npm run build 2>&1 | tee
 
 完成标志：`/tmp/build-backend.txt` 末尾显示构建成功。
 
-- [ ] **步骤 2：执行 frontend-next 构建**
+- [x] **步骤 2：执行 frontend-next 构建**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh/frontend-next && npm run build 2>&1 | tee /tmp/build-frontend.txt
@@ -240,7 +253,7 @@ cd /home/tishensnoopy/project/superpowers-zh/frontend-next && npm run build 2>&1
 
 完成标志：`/tmp/build-frontend.txt` 末尾显示 `✓ Compiled successfully`。
 
-- [ ] **步骤 3：执行 central 构建**
+- [x] **步骤 3：执行 central 构建**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh/central && npm run build 2>&1 | tee /tmp/build-central.txt
@@ -252,7 +265,7 @@ cd /home/tishensnoopy/project/superpowers-zh/central && npm run build 2>&1 | tee
 
 完成标志：`/tmp/build-central.txt` 末尾显示 `✓ Compiled successfully`。
 
-- [ ] **步骤 4：执行 agent 构建（如有）**
+- [x] **步骤 4：执行 agent 构建（如有）**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh/agent && cat package.json | grep '"build"'
@@ -268,7 +281,7 @@ cd /home/tishensnoopy/project/superpowers-zh/agent && npm run build 2>&1 | tee /
 
 完成标志：`/tmp/build-agent.txt` 末尾显示编译成功，或确认 agent 无 build script。
 
-- [ ] **步骤 5：Commit 构建修复**
+- [x] **步骤 5：Commit 构建修复**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh
@@ -293,7 +306,7 @@ git commit -m "build: 所有子项目构建通过
 
 **目标：** 所有子项目 `npm run lint` 0 error（warning 可保留）。
 
-- [ ] **步骤 1：执行 backend lint**
+- [x] **步骤 1：执行 backend lint**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh/backend && npm run lint 2>&1 | tee /tmp/lint-backend.txt
@@ -309,7 +322,7 @@ cd /home/tishensnoopy/project/superpowers-zh/backend && npm run lint 2>&1 | tee 
 
 完成标志：`/tmp/lint-backend.txt` 中 `errors` 为 0。
 
-- [ ] **步骤 2：执行 frontend-next lint**
+- [x] **步骤 2：执行 frontend-next lint**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh/frontend-next && npm run lint 2>&1 | tee /tmp/lint-frontend.txt
@@ -321,7 +334,7 @@ cd /home/tishensnoopy/project/superpowers-zh/frontend-next && npm run lint 2>&1 
 
 完成标志：`/tmp/lint-frontend.txt` 中 `errors` 为 0。
 
-- [ ] **步骤 3：执行 central lint**
+- [x] **步骤 3：执行 central lint**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh/central && npm run lint 2>&1 | tee /tmp/lint-central.txt
@@ -333,7 +346,7 @@ cd /home/tishensnoopy/project/superpowers-zh/central && npm run lint 2>&1 | tee 
 
 完成标志：`/tmp/lint-central.txt` 中 `errors` 为 0。
 
-- [ ] **步骤 4：执行 agent lint（如有）**
+- [x] **步骤 4：执行 agent lint（如有）**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh/agent && cat package.json | grep '"lint"'
@@ -347,7 +360,7 @@ cd /home/tishensnoopy/project/superpowers-zh/agent && npm run lint 2>&1 | tee /t
 
 完成标志：`/tmp/lint-agent.txt` 中 `errors` 为 0，或确认 agent 无 lint script。
 
-- [ ] **步骤 5：Commit lint 修复**
+- [x] **步骤 5：Commit lint 修复**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh
@@ -371,7 +384,7 @@ git commit -m "chore: lint 检查 0 error
 
 **目标：** E2E 测试全绿，0 flaky；历史环境依赖测试标记 skip 并记录。
 
-- [ ] **步骤 1：确认 E2E 前置条件**
+- [x] **步骤 1：确认 E2E 前置条件**
 
 frontend-next E2E 使用 MSW mock，central E2E 使用 testcontainers。
 
@@ -393,7 +406,7 @@ cd /home/tishensnoopy/project/superpowers-zh/central && cat package.json | grep 
 
 完成标志：两个前置条件都满足，或已记录跳过原因。
 
-- [ ] **步骤 2：执行 frontend-next E2E 测试**
+- [x] **步骤 2：执行 frontend-next E2E 测试**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh/frontend-next && npx playwright test 2>&1 | tee /tmp/e2e-frontend.txt
@@ -408,7 +421,7 @@ cd /home/tishensnoopy/project/superpowers-zh/frontend-next && npx playwright tes
 
 完成标志：`/tmp/e2e-frontend.txt` 末尾显示 `0 failed` 且无 `flaky` 标记。
 
-- [ ] **步骤 3：执行 central E2E 测试**
+- [x] **步骤 3：执行 central E2E 测试**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh/central && npx playwright test 2>&1 | tee /tmp/e2e-central.txt
@@ -425,7 +438,7 @@ sudo systemctl start docker
 
 完成标志：`/tmp/e2e-central.txt` 末尾显示 `0 failed`。
 
-- [ ] **步骤 4：创建 known-issues.md（如有 skip 测试）**
+- [x] **步骤 4：创建 known-issues.md（如有 skip 测试）**
 
 如果步骤 1-3 中有标记 skip 的测试，创建 `/home/tishensnoopy/project/superpowers-zh/docs/known-issues.md`：
 
@@ -450,7 +463,7 @@ sudo systemctl start docker
 
 如果没有任何 skip 测试，跳过此步骤。
 
-- [ ] **步骤 5：修复 E2E 失败**
+- [x] **步骤 5：修复 E2E 失败**
 
 对步骤 2-3 中每个失败的 E2E 测试：
 1. 分析失败原因（业务代码 bug / 测试代码错 / mock 配置 / 环境依赖）
@@ -462,7 +475,7 @@ sudo systemctl start docker
 cd /home/tishensnoopy/project/superpowers-zh/frontend-next && npx playwright test e2e/<failed-file>.spec.ts
 ```
 
-- [ ] **步骤 6：Commit E2E 修复**
+- [x] **步骤 6：Commit E2E 修复**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh
@@ -486,7 +499,7 @@ git commit -m "test: E2E 测试全绿，0 flaky
 
 **目标：** 汇总 P3 所有测试结果，归档为测试报告。
 
-- [ ] **步骤 1：创建测试报告文件**
+- [x] **步骤 1：创建测试报告文件**
 
 创建 `/home/tishensnoopy/project/superpowers-zh/docs/TEST-REPORT.md`：
 
@@ -553,7 +566,7 @@ git commit -m "test: E2E 测试全绿，0 flaky
 - Central 构建日志：`/tmp/build-central.txt`
 ```
 
-- [ ] **步骤 2：从 /tmp 日志中提取实际数据填入报告**
+- [x] **步骤 2：从 /tmp 日志中提取实际数据填入报告**
 
 ```bash
 # 提取 backend 单元测试结果
@@ -587,7 +600,7 @@ grep -E "problems|errors" /tmp/lint-backend.txt /tmp/lint-frontend.txt /tmp/lint
 
 将提取的实际数字填入 `docs/TEST-REPORT.md` 表格的 `<填>` 位置。
 
-- [ ] **步骤 3：Commit 测试报告**
+- [x] **步骤 3：Commit 测试报告**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh
@@ -612,7 +625,7 @@ git commit -m "docs: P3 测试报告
 
 **目标：** 在 Central 创建客户"佑森小课堂测试"，生成 Enrollment Code，创建配置版本并发布。
 
-- [ ] **步骤 1：登录 Central 后台**
+- [x] **步骤 1：登录 Central 后台**
 
 浏览器访问 `https://central.tishensnoopy.cloud/login`，输入：
 - 邮箱：`tishensnoopy@petalmail.com`
@@ -633,7 +646,7 @@ git commit -m "docs: P3 测试报告
 
 完成标志：浏览器显示 Central Dashboard。
 
-- [ ] **步骤 2：创建客户"佑森小课堂测试"**
+- [x] **步骤 2：创建客户"佑森小课堂测试"**
 
 在 Central 后台：
 1. 左侧菜单 → 客户管理（Customers）
@@ -648,7 +661,7 @@ git commit -m "docs: P3 测试报告
 
 完成标志：客户创建成功，获得客户 ID。
 
-- [ ] **步骤 3：生成 Enrollment Code**
+- [x] **步骤 3：生成 Enrollment Code**
 
 在客户详情页：
 1. 点击"生成 Enrollment Code"按钮
@@ -658,7 +671,7 @@ git commit -m "docs: P3 测试报告
 
 完成标志：记录 Enrollment Code 到本地（将用于任务 11 Agent 注册）。
 
-- [ ] **步骤 4：创建配置版本并发布**
+- [x] **步骤 4：创建配置版本并发布**
 
 在客户详情页：
 1. 点击"配置版本"标签
@@ -674,7 +687,7 @@ git commit -m "docs: P3 测试报告
 
 完成标志：配置版本已发布，客户详情页显示"活跃配置版本"。
 
-- [ ] **步骤 5：记录关键信息**
+- [x] **步骤 5：记录关键信息**
 
 将以下信息记录到本地备忘（将用于任务 8、11、15）：
 
@@ -694,7 +707,7 @@ Enrollment Code：<填实际值>
 
 **目标：** 将本地客户业务代码同步到服务器 /tmp/customer-site/，排除指定目录。
 
-- [ ] **步骤 1：在服务器创建临时目录**
+- [x] **步骤 1：在服务器创建临时目录**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -705,7 +718,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：服务器 `/tmp/customer-site/` 和 `/opt/customer-site/` 目录存在。
 
-- [ ] **步骤 2：执行 rsync 同步**
+- [x] **步骤 2：执行 rsync 同步**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh && \
@@ -741,7 +754,7 @@ sshpass -p 'Hym465964665' rsync -avz --progress \
 
 完成标志：rsync 末尾显示 `total size is X` 且无 error。
 
-- [ ] **步骤 3：移动文件到 /opt/customer-site/**
+- [x] **步骤 3：移动文件到 /opt/customer-site/**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -755,7 +768,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：服务器 `/opt/customer-site/` 目录结构完整。
 
-- [ ] **步骤 4：验证同步结果**
+- [x] **步骤 4：验证同步结果**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -769,7 +782,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：所有关键目录和文件都存在。
 
-- [ ] **步骤 5：验证排除项生效**
+- [x] **步骤 5：验证排除项生效**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -798,7 +811,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 **⚠️ 提醒：** 执行此任务前，**必须向用户索取 DASHSCOPE_API_KEY**。用户已在规格中确认拥有此 key。
 
-- [ ] **步骤 1：向用户索取 DASHSCOPE_API_KEY**
+- [x] **步骤 1：向用户索取 DASHSCOPE_API_KEY**
 
 在执行此任务前，向用户确认：
 ```
@@ -811,7 +824,7 @@ P4 部署需要 DASHSCOPE_API_KEY（用于 AI 客服 LLM 调用）。
 
 完成标志：已获得 DASHSCOPE_API_KEY。
 
-- [ ] **步骤 2：在服务器生成强密码和密钥**
+- [x] **步骤 2：在服务器生成强密码和密钥**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -831,7 +844,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：8 个密钥都已生成并记录。
 
-- [ ] **步骤 3：检查 .env.example 是否存在**
+- [x] **步骤 3：检查 .env.example 是否存在**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -849,7 +862,7 @@ sshpass -p 'Hym465964665' scp -o StrictHostKeyChecking=no \
 
 完成标志：`.env.example` 存在。
 
-- [ ] **步骤 4：创建 .env 文件**
+- [x] **步骤 4：创建 .env 文件**
 
 将步骤 2 生成的密钥和用户提供的 DASHSCOPE_API_KEY 填入以下命令，在服务器创建 `/opt/customer-site/.env`：
 
@@ -933,7 +946,7 @@ rm /tmp/customer-env.txt"
 
 完成标志：`/opt/customer-site/.env` 文件存在且权限为 600。
 
-- [ ] **步骤 5：验证 .env 配置**
+- [x] **步骤 5：验证 .env 配置**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -953,7 +966,7 @@ NODE_ENV=production
 
 完成标志：所有关键配置项都正确设置。
 
-- [ ] **步骤 6：验证 .env 权限**
+- [x] **步骤 6：验证 .env 权限**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -972,7 +985,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 **目标：** 按依赖顺序分步启动客户业务系统的所有服务，确保每个服务 healthy 后再启动下一个。
 
-- [ ] **步骤 1：确认 Docker Compose 配置文件**
+- [x] **步骤 1：确认 Docker Compose 配置文件**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -990,7 +1003,7 @@ sshpass -p 'Hym465964665' scp -o StrictHostKeyChecking=no \
 
 完成标志：`docker-compose.yml` 存在且包含所有服务定义。
 
-- [ ] **步骤 2：启动 postgres + redis + meilisearch**
+- [x] **步骤 2：启动 postgres + redis + meilisearch**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -1008,7 +1021,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：3 个容器 Started。
 
-- [ ] **步骤 3：等待基础设施 healthy**
+- [x] **步骤 3：等待基础设施 healthy**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -1031,7 +1044,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：3 个基础设施容器都 `(healthy)`。
 
-- [ ] **步骤 4：启动 backend（--build）**
+- [x] **步骤 4：启动 backend（--build）**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -1049,7 +1062,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：`yousen-backend` 容器 Started。
 
-- [ ] **步骤 5：等待 backend healthy**
+- [x] **步骤 5：等待 backend healthy**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -1070,7 +1083,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：`yousen-backend` 容器 `(healthy)`。
 
-- [ ] **步骤 6：启动 frontend（--build）**
+- [x] **步骤 6：启动 frontend（--build）**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -1087,7 +1100,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：`yousen-frontend` 容器 Started。
 
-- [ ] **步骤 7：等待 frontend healthy**
+- [x] **步骤 7：等待 frontend healthy**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -1098,7 +1111,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：所有 5 个业务容器都正常运行。
 
-- [ ] **步骤 8：验证所有服务**
+- [x] **步骤 8：验证所有服务**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -1122,7 +1135,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 **目标：** 通过浏览器首次访问 Strapi Admin，创建超级管理员账号。
 
-- [ ] **步骤 1：浏览器访问 Strapi Admin**
+- [x] **步骤 1：浏览器访问 Strapi Admin**
 
 浏览器访问 `http://124.223.1.67:1337/admin`。
 
@@ -1138,7 +1151,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：浏览器显示 Strapi 引导页面。
 
-- [ ] **步骤 2：创建超级管理员**
+- [x] **步骤 2：创建超级管理员**
 
 在引导页面填写：
 - First name：`Tishen`
@@ -1157,7 +1170,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：登录成功，显示 Dashboard。
 
-- [ ] **步骤 3：验证登录**
+- [x] **步骤 3：验证登录**
 
 退出后重新登录：
 - 访问 `http://124.223.1.67:1337/admin`
@@ -1168,7 +1181,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：能正常登录 Strapi Admin。
 
-- [ ] **步骤 4：验证 Strapi Content Manager 可访问**
+- [x] **步骤 4：验证 Strapi Content Manager 可访问**
 
 在 Strapi Admin 左侧菜单点击 "Content Manager"。
 
@@ -1190,7 +1203,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 **目标：** 用 enrollment code 注册 Agent，启动 Agent 并验证连接 Central。
 
-- [ ] **步骤 1：确认 Agent 注册命令**
+- [x] **步骤 1：确认 Agent 注册命令**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -1201,7 +1214,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：Agent 目录和 register script 都存在。
 
-- [ ] **步骤 2：执行 Agent 注册**
+- [x] **步骤 2：执行 Agent 注册**
 
 将 `<ENROLLMENT_CODE>` 替换为任务 6 步骤 3 记录的 code：
 
@@ -1234,7 +1247,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：`/tmp/agent-register.txt` 显示注册成功，包含 Server ID 和 Agent Token。
 
-- [ ] **步骤 3：验证 .env 中 AGENT_TOKEN 和 SERVER_ID**
+- [x] **步骤 3：验证 .env 中 AGENT_TOKEN 和 SERVER_ID**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -1249,7 +1262,7 @@ AGENT_SERVER_ID=<非空 server id>
 
 完成标志：`AGENT_TOKEN` 和 `AGENT_SERVER_ID` 都有非空值。
 
-- [ ] **步骤 4：启动 Agent**
+- [x] **步骤 4：启动 Agent**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -1260,7 +1273,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：Agent 容器 Started。
 
-- [ ] **步骤 5：验证 Agent 连接 Central**
+- [x] **步骤 5：验证 Agent 连接 Central**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -1282,7 +1295,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：Agent 日志显示成功连接 Central。
 
-- [ ] **步骤 6：在 Central 后台验证服务器在线**
+- [x] **步骤 6：在 Central 后台验证服务器在线**
 
 浏览器访问 `https://central.tishensnoopy.cloud/servers`。
 
@@ -1298,7 +1311,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 **目标：** 自动化验证 + 人工验证清单 14 项，确保部署成功。
 
-- [ ] **步骤 1：自动化验证 - Docker 容器状态**
+- [x] **步骤 1：自动化验证 - Docker 容器状态**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -1309,7 +1322,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：所有容器正常运行。
 
-- [ ] **步骤 2：自动化验证 - 健康检查端点**
+- [x] **步骤 2：自动化验证 - 健康检查端点**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -1327,7 +1340,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：4 项健康检查全部通过。
 
-- [ ] **步骤 3：人工验证清单 - 首页与基础页面**
+- [x] **步骤 3：人工验证清单 - 首页与基础页面**
 
 在浏览器中访问（逐项验证）：
 
@@ -1343,7 +1356,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：7 项全部 PASS。
 
-- [ ] **步骤 4：人工验证清单 - 交互功能**
+- [x] **步骤 4：人工验证清单 - 交互功能**
 
 | # | 功能 | 操作 | 期望 | 验证结果 |
 |---|------|------|------|----------|
@@ -1360,7 +1373,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 - 多语言切换失败：检查 Strapi i18n 插件配置
 - 表单提交失败：检查 backend 日志
 
-- [ ] **步骤 5：人工验证清单 - 后台**
+- [x] **步骤 5：人工验证清单 - 后台**
 
 | # | 功能 | 访问地址 | 期望 | 验证结果 |
 |---|------|----------|------|----------|
@@ -1369,7 +1382,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：2 项全部 PASS。
 
-- [ ] **步骤 6：记录部署日志**
+- [x] **步骤 6：记录部署日志**
 
 在本地创建部署日志备忘（不提交到 git，仅用于 P5 文档参考）：
 
@@ -1410,7 +1423,7 @@ Agent 注册时间：2026-07-16
 
 **目标：** 提醒用户配置 DNS、开放端口、（可选）配置 nginx 反向代理。
 
-- [ ] **步骤 1：提醒用户配置 DNS A 记录**
+- [x] **步骤 1：提醒用户配置 DNS A 记录**
 
 向用户输出以下提醒：
 
@@ -1441,7 +1454,7 @@ Agent 注册时间：2026-07-16
 
 完成标志：用户已收到域名配置提醒。
 
-- [ ] **步骤 2：（可选）配置 nginx 反向代理**
+- [x] **步骤 2：（可选）配置 nginx 反向代理**
 
 如果用户选择立即配置 nginx 反向代理：
 
@@ -1472,7 +1485,7 @@ echo 'Hym465964665' | sudo -S nginx -t && echo 'Hym465964665' | sudo -S systemct
 
 完成标志：nginx 配置测试通过并 reload。
 
-- [ ] **步骤 3：验证域名访问（用户配置 DNS 后）**
+- [x] **步骤 3：验证域名访问（用户配置 DNS 后）**
 
 提醒用户：DNS 生效后（通常 10 分钟内），访问 `http://yousen.tishensnoopy.cloud` 验证。
 
@@ -1495,7 +1508,7 @@ curl -sI http://yousen.tishensnoopy.cloud/ | head -3
 
 **目标：** 将 P3-P4 期间所有本地修改按功能拆分 commit，并 push 到 GitHub。
 
-- [ ] **步骤 1：查看待提交的修改**
+- [x] **步骤 1：查看待提交的修改**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh
@@ -1507,7 +1520,7 @@ git log --oneline origin/main..HEAD
 
 完成标志：清楚知道有哪些待提交内容。
 
-- [ ] **步骤 2：按功能拆分 commit**
+- [x] **步骤 2：按功能拆分 commit**
 
 如果 P3 阶段没有按任务拆分 commit（任务 1-5 已要求 commit），此处检查是否还有遗漏的修改：
 
@@ -1532,7 +1545,7 @@ git commit -m "docs: 补充 known-issues"
 
 完成标志：`git status` 显示 `nothing to commit, working tree clean`。
 
-- [ ] **步骤 3：push 到 GitHub**
+- [x] **步骤 3：push 到 GitHub**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh
@@ -1548,7 +1561,7 @@ git push origin main
 
 完成标志：`git log origin/main..HEAD` 输出为空（本地与远程同步）。
 
-- [ ] **步骤 4：验证 GitHub 同步**
+- [x] **步骤 4：验证 GitHub 同步**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh
@@ -1569,7 +1582,7 @@ git status
 
 **目标：** 在服务器记录当前部署的 commit SHA，便于后续追溯。
 
-- [ ] **步骤 1：获取本地最新 commit SHA**
+- [x] **步骤 1：获取本地最新 commit SHA**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh
@@ -1582,7 +1595,7 @@ git rev-parse HEAD
 
 完成标志：获得本地 HEAD commit SHA。
 
-- [ ] **步骤 2：在服务器记录部署 commit SHA**
+- [x] **步骤 2：在服务器记录部署 commit SHA**
 
 将 `<COMMIT_SHA>` 替换为步骤 1 获得的 SHA：
 
@@ -1597,7 +1610,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：服务器 `/opt/customer-site/.deployed-commit` 文件存在且内容正确。
 
-- [ ] **步骤 3：验证记录**
+- [x] **步骤 3：验证记录**
 
 ```bash
 sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
@@ -1608,7 +1621,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：服务器记录的 SHA 与本地一致。
 
-- [ ] **步骤 4：（可选）记录到 Central 后台**
+- [x] **步骤 4：（可选）记录到 Central 后台**
 
 如果 Central 后台有"部署版本"字段，在服务器详情页填入 commit SHA。
 
@@ -1623,7 +1636,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 **目标：** 补充硬约束、Lessons Learned、Topics，确保记忆完整。
 
-- [ ] **步骤 1：读取当前 project_memory.md**
+- [x] **步骤 1：读取当前 project_memory.md**
 
 ```bash
 cat /home/tishensnoopy/project/superpowers-zh/project_memory.md | head -100
@@ -1633,7 +1646,7 @@ cat /home/tishensnoopy/project/superpowers-zh/project_memory.md | head -100
 
 完成标志：了解 project_memory.md 的现有章节结构。
 
-- [ ] **步骤 2：补充硬约束**
+- [x] **步骤 2：补充硬约束**
 
 在 `project_memory.md` 的"硬约束"章节（如不存在则创建）添加：
 
@@ -1677,7 +1690,7 @@ cat /home/tishensnoopy/project/superpowers-zh/project_memory.md | head -100
 
 完成标志：硬约束章节包含所有关键信息。
 
-- [ ] **步骤 3：补充 Lessons Learned**
+- [x] **步骤 3：补充 Lessons Learned**
 
 在 `project_memory.md` 的"Lessons Learned"章节添加：
 
@@ -1721,7 +1734,7 @@ cat /home/tishensnoopy/project/superpowers-zh/project_memory.md | head -100
 
 完成标志：Lessons Learned 章节包含所有经验总结。
 
-- [ ] **步骤 4：更新 Topics**
+- [x] **步骤 4：更新 Topics**
 
 在 `project_memory.md` 的"Topics"章节添加：
 
@@ -1741,7 +1754,7 @@ cat /home/tishensnoopy/project/superpowers-zh/project_memory.md | head -100
 
 完成标志：Topics 章节包含所有关键主题。
 
-- [ ] **步骤 5：Commit project_memory.md**
+- [x] **步骤 5：Commit project_memory.md**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh
@@ -1764,7 +1777,7 @@ git commit -m "docs: 更新 project_memory.md
 
 **目标：** 重写部署指南为小白版，每步包含"操作目的/具体命令/预期输出/失败处理/完成标志"，分场景，含故障排查决策树。
 
-- [ ] **步骤 1：读取现有 FULL-DEPLOY-GUIDE.md**
+- [x] **步骤 1：读取现有 FULL-DEPLOY-GUIDE.md**
 
 ```bash
 cat /home/tishensnoopy/project/superpowers-zh/docs/FULL-DEPLOY-GUIDE.md | wc -l
@@ -1775,7 +1788,7 @@ cat /home/tishensnoopy/project/superpowers-zh/docs/FULL-DEPLOY-GUIDE.md | head -
 
 完成标志：了解现有文档。
 
-- [ ] **步骤 2：重写 FULL-DEPLOY-GUIDE.md**
+- [x] **步骤 2：重写 FULL-DEPLOY-GUIDE.md**
 
 将 `/home/tishensnoopy/project/superpowers-zh/docs/FULL-DEPLOY-GUIDE.md` 完整内容替换为：
 
@@ -2667,7 +2680,7 @@ git rev-parse HEAD
 ```
 ````
 
-- [ ] **步骤 3：Commit FULL-DEPLOY-GUIDE.md**
+- [x] **步骤 3：Commit FULL-DEPLOY-GUIDE.md**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh
@@ -2690,7 +2703,7 @@ git commit -m "docs: 重写 FULL-DEPLOY-GUIDE 为小白版
 
 **目标：** 汇总 P2 业务审查报告 + P2.5 代码质量报告 + P3 测试报告为一份综合审查报告。
 
-- [ ] **步骤 1：创建审查报告文件**
+- [x] **步骤 1：创建审查报告文件**
 
 创建 `/home/tishensnoopy/project/superpowers-zh/docs/AUDIT-REPORT.md`：
 
@@ -2851,7 +2864,7 @@ P2 阶段补全的功能（详见 `docs/BUSINESS-AUDIT-REPORT.md`）：
 - 浏览器兼容性测试（场景 L）部分依赖外部工具（BrowserStack），后续迭代补充
 ```
 
-- [ ] **步骤 2：从子报告中提取实际数据填入**
+- [x] **步骤 2：从子报告中提取实际数据填入**
 
 ```bash
 # 提取业务审查结果
@@ -2869,7 +2882,7 @@ cat /home/tishensnoopy/project/superpowers-zh/docs/TEST-REPORT.md | grep -E "pas
 
 将提取的数字填入审查报告的 `<填>` 位置。
 
-- [ ] **步骤 3：Commit 审查报告**
+- [x] **步骤 3：Commit 审查报告**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh
@@ -2893,7 +2906,7 @@ git commit -m "docs: 综合审查报告
 
 **目标：** 补充 Central 同机部署场景和客户业务部署步骤。
 
-- [ ] **步骤 1：读取现有 DEPLOY-RUNBOOK.md**
+- [x] **步骤 1：读取现有 DEPLOY-RUNBOOK.md**
 
 ```bash
 cat /home/tishensnoopy/project/superpowers-zh/docs/DEPLOY-RUNBOOK.md 2>/dev/null | head -50
@@ -2905,7 +2918,7 @@ cat /home/tishensnoopy/project/superpowers-zh/docs/DEPLOY-RUNBOOK.md 2>/dev/null
 
 完成标志：了解现有 Runbook 结构。
 
-- [ ] **步骤 2：在 DEPLOY-RUNBOOK.md 末尾追加 Central 同机部署章节**
+- [x] **步骤 2：在 DEPLOY-RUNBOOK.md 末尾追加 Central 同机部署章节**
 
 编辑 `/home/tishensnoopy/project/superpowers-zh/docs/DEPLOY-RUNBOOK.md`，在文件末尾追加：
 
@@ -3060,7 +3073,7 @@ sudo docker compose up -d --build backend frontend
 ```
 ```
 
-- [ ] **步骤 3：Commit DEPLOY-RUNBOOK.md**
+- [x] **步骤 3：Commit DEPLOY-RUNBOOK.md**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh
@@ -3083,7 +3096,7 @@ git commit -m "docs: 更新 DEPLOY-RUNBOOK
 
 **目标：** 将 P5 所有文档变更 commit 并 push 到 GitHub，确保三端同步。
 
-- [ ] **步骤 1：检查所有文档已 commit**
+- [x] **步骤 1：检查所有文档已 commit**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh
@@ -3102,7 +3115,7 @@ git commit -m "docs: 补充 P5 文档"
 
 完成标志：working tree clean。
 
-- [ ] **步骤 2：查看待 push 的 commit**
+- [x] **步骤 2：查看待 push 的 commit**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh
@@ -3113,7 +3126,7 @@ git log --oneline origin/main..HEAD
 
 完成标志：清楚知道待 push 的 commit 列表。
 
-- [ ] **步骤 3：push 到 GitHub**
+- [x] **步骤 3：push 到 GitHub**
 
 ```bash
 cd /home/tishensnoopy/project/superpowers-zh
@@ -3128,7 +3141,7 @@ git push origin main
 
 完成标志：push 成功，无报错。
 
-- [ ] **步骤 4：验证三端同步**
+- [x] **步骤 4：验证三端同步**
 
 ```bash
 # 本地
@@ -3151,7 +3164,7 @@ sshpass -p 'Hym465964665' ssh -o StrictHostKeyChecking=no ubuntu@124.223.1.67 \
 
 完成标志：三端同步验证通过。
 
-- [ ] **步骤 5：最终验收清单**
+- [x] **步骤 5：最终验收清单**
 
 逐项确认：
 
