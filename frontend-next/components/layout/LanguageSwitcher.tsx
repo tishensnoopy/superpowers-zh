@@ -1,14 +1,17 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { Globe, ChevronDown } from 'lucide-react';
+import { usePathname, useRouter } from '@/i18n/navigation';
 
 export default function LanguageSwitcher() {
   const locale = useLocale() as 'zh-CN' | 'en-US';
   const t = useTranslations('languageSwitcher');
+  // next-intl usePathname returns the pathname WITHOUT the locale prefix,
+  // so it can be handed straight to router.replace with a target locale.
   const pathname = usePathname();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -23,19 +26,13 @@ export default function LanguageSwitcher() {
   }, []);
 
   function switchTo(targetLocale: 'zh-CN' | 'en-US') {
-    if (targetLocale === locale) {
-      setIsOpen(false);
-      return;
-    }
-    // Locale switch relies on NEXT_LOCALE cookie + next-intl middleware redirect.
-    // Must use window.location (full page load) instead of router.replace
-    // (client-side navigation) because the middleware only runs on server-side
-    // requests — client-side router.replace bypasses it entirely.
-    document.cookie = `NEXT_LOCALE=${targetLocale}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
-    // Strip current locale prefix from pathname for next-intl middleware redirect
-    const cleanPath = pathname.replace(/^\/en-US/, '') || '/';
-    window.location.href = cleanPath;
     setIsOpen(false);
+    if (targetLocale === locale) return;
+    // Locale is carried by the URL prefix (localeCookie is disabled — see
+    // i18n/routing.ts). router.replace with a locale option navigates to the
+    // prefixed/unprefixed URL client-side; no middleware round-trip needed.
+    // Full reload is unnecessary and would only slow the switch down.
+    router.replace(pathname, { locale: targetLocale });
   }
 
   return (

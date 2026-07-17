@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { CheckCircle, Phone, Calendar, ArrowLeft, AlertCircle } from 'lucide-react';
 import type { AppointmentData } from '@/lib/api';

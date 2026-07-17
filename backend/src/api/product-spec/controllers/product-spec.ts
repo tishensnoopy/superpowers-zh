@@ -27,7 +27,6 @@ export default factories.createCoreController('api::product-spec.product-spec', 
 
   async create(ctx) {
     console.log('[ProductSpec] create() called');
-    console.log('[ProductSpec] create() data:', JSON.stringify(ctx.request.body));
     try {
       const result = await super.create(ctx);
       console.log('[ProductSpec] create() completed successfully, id:', result.data?.id);
@@ -40,7 +39,6 @@ export default factories.createCoreController('api::product-spec.product-spec', 
 
   async update(ctx) {
     console.log('[ProductSpec] update() called, id:', ctx.params.id);
-    console.log('[ProductSpec] update() data:', JSON.stringify(ctx.request.body));
     try {
       const result = await super.update(ctx);
       console.log('[ProductSpec] update() completed successfully');

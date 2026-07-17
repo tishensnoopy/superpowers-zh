@@ -19,7 +19,6 @@ export default factories.createCoreController('api::footer.footer', ({ strapi })
 
   async create(ctx) {
     console.log('[Footer] create() called - creating new footer');
-    console.log('[Footer] create() data:', JSON.stringify(ctx.request.body));
     try {
       const result = await super.create(ctx);
       console.log('[Footer] create() completed successfully, id:', result.data?.id);
@@ -32,7 +31,6 @@ export default factories.createCoreController('api::footer.footer', ({ strapi })
 
   async update(ctx) {
     console.log('[Footer] update() called - updating footer, id:', ctx.params.id);
-    console.log('[Footer] update() data:', JSON.stringify(ctx.request.body));
     try {
       const result = await super.update(ctx);
       console.log('[Footer] update() completed successfully');

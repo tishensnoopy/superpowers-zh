@@ -48,7 +48,7 @@
     },
     "parent": {
       "type": "relation",
-      "relation": "oneToOne",
+      "relation": "manyToOne",
       "target": "api::product-category.product-category",
       "inversedBy": "children",
       "description": "Parent category"

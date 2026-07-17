@@ -46,6 +46,25 @@ vi.mock('next/link', () => ({
     createElement('a', { href, ...props }, children),
 }));
 
+// Mock the localized navigation module globally. It wraps next-intl's
+// createNavigation, whose prebuilt ESM imports 'next/navigation' — a bare
+// specifier vitest cannot resolve inside node_modules. Providing a factory
+// avoids loading the real module entirely.
+vi.mock('@/i18n/navigation', () => ({
+  Link: ({ children, href, ...props }: any) =>
+    createElement('a', { href: typeof href === 'string' ? href : (href?.pathname ?? '#'), ...props }, children),
+  usePathname: () => '/',
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    back: vi.fn(),
+    refresh: vi.fn(),
+    prefetch: vi.fn(),
+  }),
+  redirect: vi.fn(),
+  getPathname: () => '/',
+}));
+
 vi.mock('next/image', () => ({
   default: ({ src, alt, fill, width, height, priority, className, sizes, ...props }: any) =>
     createElement('img', { src, alt, width, height, className, ...props }),

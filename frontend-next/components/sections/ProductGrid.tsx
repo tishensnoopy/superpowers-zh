@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { BookOpen, CheckCircle, Clock } from 'lucide-react';
 import type { Section } from '@/lib/api';
 import { getProducts } from '@/lib/api';

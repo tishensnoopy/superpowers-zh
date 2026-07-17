@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { AlertCircle, CheckCircle, Clock, RefreshCw } from 'lucide-react';
 import type { Product } from '@/lib/api';
 import { useTranslations } from 'next-intl';

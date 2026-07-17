@@ -56,7 +56,6 @@ export default factories.createCoreController('api::product-category.product-cat
 
   async create(ctx) {
     console.log('[ProductCategory] create() called');
-    console.log('[ProductCategory] create() data:', JSON.stringify(ctx.request.body));
     try {
       const result = await super.create(ctx);
       console.log('[ProductCategory] create() completed successfully, id:', result.data?.id);
@@ -69,7 +68,6 @@ export default factories.createCoreController('api::product-category.product-cat
 
   async update(ctx) {
     console.log('[ProductCategory] update() called, id:', ctx.params.id);
-    console.log('[ProductCategory] update() data:', JSON.stringify(ctx.request.body));
     try {
       const result = await super.update(ctx);
       console.log('[ProductCategory] update() completed successfully');

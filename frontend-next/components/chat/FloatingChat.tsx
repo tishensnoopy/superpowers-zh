@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { MessageCircle, X, Bot } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import ChatMessage, { type ChatRole } from './ChatMessage';

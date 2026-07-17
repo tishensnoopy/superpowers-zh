@@ -337,6 +337,30 @@ if [ "$MODE" = "nginx" ]; then
   else
     warn "nginx 启动中，状态: $NGINX_HEALTHY"
   fi
+
+  # ============== 配置漂移防护（R14/R7）==============
+  # 防止服务器 nginx.conf 与仓库版本不一致（如手工编辑后未同步）
+  # 检查运行时配置中是否包含关键的 /uploads/ location（媒体库依赖）
+  log "[+] 校验 nginx 运行时配置..."
+  NGINX_CONF_RUNTIME=$($COMPOSE_CMD "${COMPOSE_FILES[@]}" exec -T nginx nginx -T 2>/dev/null || echo "")
+  if [ -z "$NGINX_CONF_RUNTIME" ]; then
+    warn "无法读取 nginx 运行时配置（容器可能未完全启动），跳过漂移校验"
+  else
+    NGINX_DRIFT=0
+    # 关键 location 列表（缺失将导致功能故障）
+    for LOC in "/api/" "/admin" "/uploads/" "/_health"; do
+      if ! echo "$NGINX_CONF_RUNTIME" | grep -q "location $LOC"; then
+        err "nginx 运行时配置缺少关键 location: $LOC"
+        NGINX_DRIFT=1
+      fi
+    done
+    if [ "$NGINX_DRIFT" -eq 1 ]; then
+      err "nginx 配置漂移检测到！服务器配置与 nginx/nginx.conf 不一致"
+      err "修复方式: rsync 同步 nginx/nginx.conf 后执行: $COMPOSE_CMD ${COMPOSE_FILES[*]} restart nginx"
+      exit 1
+    fi
+    ok "nginx 配置漂移校验通过"
+  fi
 fi
 
 # ============== 启动 Agent（可选，C 块新增）==============

@@ -19,7 +19,6 @@ export default factories.createCoreController('api::site-settings.site-settings'
 
   async create(ctx) {
     console.log('[SiteSettings] create() called - creating new site settings');
-    console.log('[SiteSettings] create() data:', JSON.stringify(ctx.request.body));
     try {
       const result = await super.create(ctx);
       console.log('[SiteSettings] create() completed successfully, id:', result.data?.id);
@@ -32,7 +31,6 @@ export default factories.createCoreController('api::site-settings.site-settings'
 
   async update(ctx) {
     console.log('[SiteSettings] update() called - updating site settings, id:', ctx.params.id);
-    console.log('[SiteSettings] update() data:', JSON.stringify(ctx.request.body));
     try {
       const result = await super.update(ctx);
       console.log('[SiteSettings] update() completed successfully');

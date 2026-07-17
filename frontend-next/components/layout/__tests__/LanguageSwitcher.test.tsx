@@ -1,10 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { createElement } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { usePathname } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import LanguageSwitcher from '../LanguageSwitcher';
 
-vi.mock('next/navigation');
+// vi.mock factories prevent vitest from loading the real @/i18n/navigation
+// module (its next-intl ESM chain imports 'next/navigation', which vitest
+// cannot resolve). vi.hoisted gives us stable references for assertions.
+const { replaceMock, pathnameMock } = vi.hoisted(() => ({
+  replaceMock: vi.fn(),
+  pathnameMock: vi.fn(),
+}));
+
+vi.mock('@/i18n/navigation', () => ({
+  usePathname: pathnameMock,
+  useRouter: () => ({ replace: replaceMock }),
+  Link: ({ children, href, ...props }: any) => createElement('a', { href, ...props }, children),
+}));
+
 vi.mock('next-intl');
 
 const translations: Record<string, string> = {
@@ -18,51 +31,42 @@ describe('LanguageSwitcher', () => {
     vi.clearAllMocks();
     (useLocale as any).mockReturnValue('zh-CN');
     (useTranslations as any).mockReturnValue((key: string) => translations[key] || key);
+    pathnameMock.mockReturnValue('/courses');
   });
 
   it('renders with aria-label', () => {
-    (usePathname as any).mockReturnValue('/courses');
-
     render(<LanguageSwitcher />);
     expect(screen.getByLabelText('切换语言')).toBeInTheDocument();
   });
 
   it('highlights current locale zh-CN', () => {
-    (useLocale as any).mockReturnValue('zh-CN');
-    (usePathname as any).mockReturnValue('/courses');
-
     render(<LanguageSwitcher />);
     const zhButton = screen.getByText('中文');
     expect(zhButton).toHaveAttribute('aria-current', 'true');
   });
 
-  it('sets window.location.href when clicking English', () => {
-    (useLocale as any).mockReturnValue('zh-CN');
-    (usePathname as any).mockReturnValue('/courses');
-
-    // Mock window.location.href setter
-    const hrefSetter = vi.fn();
-    Object.defineProperty(window, 'location', {
-      value: { href: '' },
-      writable: true,
-    });
-    Object.defineProperty(window.location, 'href', {
-      set: hrefSetter,
-      get: () => '',
-      configurable: true,
-    });
-
+  it('router.replace with en-US locale when clicking English', () => {
     render(<LanguageSwitcher />);
     fireEvent.click(screen.getByText('English'));
-    expect(hrefSetter).toHaveBeenCalledWith('/courses');
+    expect(replaceMock).toHaveBeenCalledWith('/courses', { locale: 'en-US' });
   });
 
-  it('writes NEXT_LOCALE cookie on switch', () => {
-    (useLocale as any).mockReturnValue('zh-CN');
-    (usePathname as any).mockReturnValue('/courses');
+  it('router.replace with zh-CN locale when clicking 中文 from en-US', () => {
+    (useLocale as any).mockReturnValue('en-US');
+    render(<LanguageSwitcher />);
+    fireEvent.click(screen.getByText('中文'));
+    expect(replaceMock).toHaveBeenCalledWith('/courses', { locale: 'zh-CN' });
+  });
 
+  it('does not navigate when clicking current locale', () => {
+    render(<LanguageSwitcher />);
+    fireEvent.click(screen.getByText('中文'));
+    expect(replaceMock).not.toHaveBeenCalled();
+  });
+
+  it('does not write NEXT_LOCALE cookie (locale carried by URL prefix)', () => {
     render(<LanguageSwitcher />);
     fireEvent.click(screen.getByText('English'));
-    expect(document.cookie).toContain('NEXT_LOCALE=en-US');
+    expect(document.cookie).not.toContain('NEXT_LOCALE');
   });
 });

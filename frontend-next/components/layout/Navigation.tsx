@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { Link } from '@/i18n/navigation';
+import { usePathname, useRouter } from '@/i18n/navigation';
 import { Phone, Menu, X, ChevronDown } from 'lucide-react';
 import type { NavigationItem, SiteSettings } from '@/lib/api';
 import { getImageUrl } from '@/lib/api';

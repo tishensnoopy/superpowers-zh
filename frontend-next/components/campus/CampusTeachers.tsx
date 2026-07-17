@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Users } from 'lucide-react';
 import StrapiImage from '@/components/ui/StrapiImage';
 import type { Teacher } from '@/lib/api';

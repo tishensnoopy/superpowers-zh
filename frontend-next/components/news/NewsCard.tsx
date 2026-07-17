@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Calendar } from 'lucide-react';
 import StrapiImage from '@/components/ui/StrapiImage';
 import { getNewsCategoryLabel, type NewsArticle } from '@/lib/api';

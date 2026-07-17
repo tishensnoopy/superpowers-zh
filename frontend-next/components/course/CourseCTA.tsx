@@ -1,5 +1,5 @@
 import { Calendar } from 'lucide-react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 
 export default function CourseCTA({ courseName }: { courseName: string }) {

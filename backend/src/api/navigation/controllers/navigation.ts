@@ -52,7 +52,6 @@ export default factories.createCoreController('api::navigation.navigation', ({ s
 
   async create(ctx) {
     console.log('[Navigation] create() called');
-    console.log('[Navigation] create() data:', JSON.stringify(ctx.request.body));
     try {
       const result = await super.create(ctx);
       console.log('[Navigation] create() completed successfully, id:', result.data?.id);
@@ -65,7 +64,6 @@ export default factories.createCoreController('api::navigation.navigation', ({ s
 
   async update(ctx) {
     console.log('[Navigation] update() called, id:', ctx.params.id);
-    console.log('[Navigation] update() data:', JSON.stringify(ctx.request.body));
     try {
       const result = await super.update(ctx);
       console.log('[Navigation] update() completed successfully');

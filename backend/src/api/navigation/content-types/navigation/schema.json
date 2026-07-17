@@ -50,7 +50,7 @@
     },
     "parent": {
       "type": "relation",
-      "relation": "oneToOne",
+      "relation": "manyToOne",
       "target": "api::navigation.navigation",
       "inversedBy": "children",
       "description": "Parent navigation item"

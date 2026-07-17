@@ -34,7 +34,9 @@ const MAX_MESSAGES = 10;
 const MAX_MESSAGE_LENGTH = 500;
 
 function randomId(prefix: string): string {
-  return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  // crypto.randomUUID: cryptographically secure, unguessable — prevents IDOR
+  // via session-id enumeration (Math.random is predictable, R31).
+  return `${prefix}_${crypto.randomUUID()}`;
 }
 
 export default {

@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Phone, MapPin, Mail } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { Footer as FooterData, SiteSettings, SocialLink } from '@/lib/api';

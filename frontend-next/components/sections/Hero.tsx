@@ -1,5 +1,5 @@
 import { CalendarDays, ChevronRight, Sparkles, Star } from 'lucide-react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import type { Section } from '@/lib/api';
 import { getImageUrl } from '@/lib/api';
 import { useTranslations } from 'next-intl';

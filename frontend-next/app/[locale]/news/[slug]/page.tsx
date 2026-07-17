@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Calendar, Eye, ArrowLeft, Home } from 'lucide-react';
 import { getNews, getNewsBySlug, getNewsCategoryLabel, getImageUrl, getSiteSettings, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd, buildNewsArticleSchema, buildBreadcrumbSchema } from '@/lib/seo';

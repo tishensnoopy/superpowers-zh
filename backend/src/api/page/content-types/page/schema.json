@@ -57,7 +57,7 @@
     },
     "parent": {
       "type": "relation",
-      "relation": "oneToOne",
+      "relation": "manyToOne",
       "target": "api::page.page",
       "inversedBy": "children",
       "description": "父页面"

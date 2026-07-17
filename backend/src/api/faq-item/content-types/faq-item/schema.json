@@ -47,7 +47,7 @@
     },
     "sourceDocument": {
       "type": "relation",
-      "relation": "oneToOne",
+      "relation": "manyToOne",
       "target": "api::knowledge-base.knowledge-base",
       "inversedBy": "faqs",
       "description": "Source knowledge base document"

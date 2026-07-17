@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import * as Sentry from '@sentry/nextjs';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 export default function Error({

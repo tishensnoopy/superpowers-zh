@@ -87,7 +87,6 @@ export default factories.createCoreController('api::faq-item.faq-item', ({ strap
 
   async submitFeedback(ctx) {
     console.log('[FaqItem] submitFeedback() called, faqId:', ctx.params.id);
-    console.log('[FaqItem] submitFeedback() data:', JSON.stringify(ctx.request.body));
     try {
       const { helpful, comment } = ctx.request.body.data || {};
       const faq = await strapi.db.query('api::faq-item.faq-item').findOne({
@@ -129,7 +128,6 @@ export default factories.createCoreController('api::faq-item.faq-item', ({ strap
 
   async create(ctx) {
     console.log('[FaqItem] create() called');
-    console.log('[FaqItem] create() data:', JSON.stringify(ctx.request.body));
     try {
       const result = await super.create(ctx);
       console.log('[FaqItem] create() completed successfully, id:', result.data?.id);
@@ -142,7 +140,6 @@ export default factories.createCoreController('api::faq-item.faq-item', ({ strap
 
   async update(ctx) {
     console.log('[FaqItem] update() called, id:', ctx.params.id);
-    console.log('[FaqItem] update() data:', JSON.stringify(ctx.request.body));
     try {
       const result = await super.update(ctx);
       console.log('[FaqItem] update() completed successfully');
