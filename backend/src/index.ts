@@ -4,41 +4,27 @@ export default {
   async register({ strapi }: { strapi: Core.Strapi }) {
     console.log('[Register] Registering lifecycle hooks...');
 
-    const { syncSingleContent, deleteSyncedContent } = await import('./services/knowledge-sync-service');
+    const { reconcileContent, SYNCED_UIDS } = await import('./services/knowledge-sync-service');
 
-    const SYNCED_CONTENT_TYPES = [
-      'api::course.course',
-      'api::news-article.news-article',
-      'api::teacher.teacher',
-      'api::campus.campus',
-      'api::faq-item.faq-item',
-    ];
-
-    for (const uid of SYNCED_CONTENT_TYPES) {
+    for (const uid of SYNCED_UIDS) {
       try {
+        // afterCreate/afterUpdate/afterDelete 统一走 reconcile：
+        // Strapi v5 无 afterPublish/afterUnpublish 事件，发布/取消发布/删除都经这三个钩子，
+        // reconcileContent 以"当前是否存在 published 版本"为唯一事实来源，事件载荷不可信。
+        const handler = async (event: any) => {
+          const record = event?.result;
+          if (!record?.documentId) return;
+          await reconcileContent(strapi, uid, {
+            documentId: record.documentId,
+            locale: record.locale,
+          });
+          console.log(`[Lifecycle] Reconciled ${uid} (${record.documentId}, ${record.locale ?? 'zh-CN'})`);
+        };
         strapi.db.lifecycles.subscribe({
           models: [uid],
-          afterCreate: async (event) => {
-            const record = event.result;
-            if (record) {
-              await syncSingleContent(strapi, uid, record);
-              console.log(`[Lifecycle] Synced new ${uid}`);
-            }
-          },
-          afterUpdate: async (event) => {
-            const record = event.result;
-            if (record) {
-              await syncSingleContent(strapi, uid, record);
-              console.log(`[Lifecycle] Synced updated ${uid}`);
-            }
-          },
-          afterDelete: async (event) => {
-            const record = event.result;
-            if (record) {
-              await deleteSyncedContent(strapi, uid, record);
-              console.log(`[Lifecycle] Deleted synced ${uid}`);
-            }
-          },
+          afterCreate: handler,
+          afterUpdate: handler,
+          afterDelete: handler,
         });
       } catch (err) {
         console.warn(`[Register] Failed to subscribe lifecycle for ${uid}:`, err);

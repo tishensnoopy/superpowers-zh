@@ -13,13 +13,16 @@ function buildSourceUrl(uid: string, record: any): string {
   return `strapi://${uid}/${docId}?locale=${locale}`;
 }
 
-const CONTENT_TYPES = [
+export const CONTENT_TYPES = [
   { uid: 'api::product.product', serialize: serializeProduct, name: '课程' },
   { uid: 'api::news-article.news-article', serialize: serializeNews, name: '新闻' },
   { uid: 'api::teacher.teacher', serialize: serializeTeacher, name: '教师' },
   { uid: 'api::campus.campus', serialize: serializeCampus, name: '校区' },
   { uid: 'api::faq-item.faq-item', serialize: serializeFaq, name: 'FAQ' },
 ];
+
+/** 生命周期订阅列表的单一事实来源——index.ts register 必须使用它，禁止另写 UID 列表 */
+export const SYNCED_UIDS = CONTENT_TYPES.map((c) => c.uid);
 
 export function serializeProduct(p: any): string {
   const lines: string[] = [];
@@ -218,4 +221,16 @@ export async function deleteSyncedContent(strapi: any, uid: string, record: any)
       documentId: existing.documentId,
     });
   }
+}
+
+/**
+ * 占位实现：暂复用 syncSingleContent 逻辑，保证 register 可运行。
+ * 后续任务将替换为以"当前是否存在 published 版本"为唯一事实来源的 reconcile 薄封装。
+ */
+export async function reconcileContent(
+  strapi: any,
+  uid: string,
+  ref: { documentId: string; locale?: string },
+): Promise<void> {
+  await syncSingleContent(strapi, uid, { documentId: ref.documentId, locale: ref.locale });
 }
