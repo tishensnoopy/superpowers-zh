@@ -1018,7 +1018,12 @@ async function main() {
     console.error(err.stack);
     process.exitCode = 1;
   } finally {
-    await strapi.destroy();
+    console.log('\n正在关闭 Strapi (超时 8s 强制退出)...');
+    await Promise.race([
+      strapi.destroy(),
+      new Promise((resolve) => setTimeout(resolve, 8000)),
+    ]);
+    process.exit(process.exitCode || 0);
   }
 }
 

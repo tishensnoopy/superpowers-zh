@@ -122,6 +122,24 @@ function setByPath(obj, pathArr, value) {
   cur[pathArr[pathArr.length - 1]] = value;
 }
 
+/**
+ * 递归剥离组件实例 id（跨 locale 写入时组件必须新建，否则报
+ * "components not related to the entity"）。媒体对象（url+provider/mime）
+ * 的 id 是 upload_files 外键，必须保留以维持图片关联。
+ */
+function stripComponentIds(obj) {
+  if (Array.isArray(obj)) {
+    obj.forEach(stripComponentIds);
+    return obj;
+  }
+  if (obj && typeof obj === 'object') {
+    const isMedia = obj.url && (obj.provider !== undefined || obj.mime !== undefined);
+    if (!isMedia) delete obj.id;
+    for (const v of Object.values(obj)) stripComponentIds(v);
+  }
+  return obj;
+}
+
 /** 把待翻译条目按字符数分批 */
 function batchItems(items) {
   const batches = [];
@@ -244,6 +262,9 @@ async function main() {
       // 收集可翻译文本
       const items = collectTranslatable(fields);
 
+      // 跨 locale 写入前剥离组件实例 id（媒体 id 保留）
+      stripComponentIds(fields);
+
       if (DRY_RUN) {
         ok(`[dry-run] ${lookupValue}: ${items.length} 个可翻译字段`);
         items.slice(0, 5).forEach((it) => console.log(`      ${it.path.join('.')} = ${it.value.slice(0, 40)}`));
@@ -258,7 +279,12 @@ async function main() {
           const payload = {};
           batch.forEach((it, i) => { payload[`f${i}`] = it.value; });
           try {
-            const result = await translateDocument({ apiKey, fields: payload });
+            const result = await Promise.race([
+              translateDocument({ apiKey, fields: payload }),
+              new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('翻译API超时(90s)')), 90000)
+              ),
+            ]);
             batch.forEach((it, i) => {
               const tv = result[`f${i}`];
               if (typeof tv === 'string' && tv.trim() !== '') {
@@ -364,7 +390,12 @@ async function main() {
   log(`跳过(已有): ${totalSkipped}`);
   log(`错误: ${totalError}`);
 
-  await strapi.destroy();
+  log('正在关闭 Strapi (超时 8s 强制退出)...');
+  await Promise.race([
+    strapi.destroy(),
+    new Promise((resolve) => setTimeout(resolve, 8000)),
+  ]);
+  process.exit(0);
 }
 
 main().catch((e) => {

@@ -174,7 +174,11 @@ export default factories.createCoreService('api::product.product', ({ strapi }) 
       categorySlugs: categories?.map((c: any) => c.slug) || [],
       isFeatured: product.isFeatured || false,
       isInStock: product.isInStock || false,
-      createdAt: product.createdAt?.toISOString() || '',
+      createdAt: product.createdAt
+        ? product.createdAt instanceof Date
+          ? product.createdAt.toISOString()
+          : String(product.createdAt)
+        : '',
     };
   },
 
