@@ -1,4 +1,4 @@
-import { MapPin, Phone, Clock, Train, Ruler } from 'lucide-react';
+import { MapPin, Phone, Clock, Train, Ruler, User } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { Campus } from '@/lib/api';
 import { useTranslations } from 'next-intl';
@@ -11,11 +11,12 @@ interface InfoRow {
 
 export default function CampusInfoCard({ campus }: { campus: Campus }) {
   const t = useTranslations('campuses');
-  const { address, phone, businessHours, transportation, area } = campus;
+  const { address, phone, contactPerson, businessHours, transportation, area } = campus;
 
   const rows: InfoRow[] = [
     { icon: MapPin, label: t('addressLabel'), value: address },
-    { icon: Phone, label: t('phoneLabel'), value: phone },
+    { icon: Phone, label: t('phoneLabel'), value: phone || '—' },
+    { icon: User, label: t('contactPersonLabel'), value: contactPerson || '—' },
     { icon: Clock, label: t('businessHoursLabel'), value: businessHours },
     { icon: Train, label: t('transportationLabel'), value: transportation },
     { icon: Ruler, label: t('areaLabel'), value: area },

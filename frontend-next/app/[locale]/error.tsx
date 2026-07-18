@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
-import * as Sentry from '@sentry/nextjs';
 import { Link } from '@/i18n/navigation';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
@@ -19,9 +18,13 @@ export default function Error({
 
   useEffect(() => {
     if (error.message.includes('API request failed')) return;
-    Sentry.captureException(error, {
-      tags: { section: 'route-error', digest: error.digest },
-    });
+    if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
+      import('@sentry/nextjs').then((Sentry) => {
+        Sentry.captureException(error, {
+          tags: { section: 'route-error', digest: error.digest },
+        });
+      });
+    }
   }, [error]);
 
   const handleReset = () => {

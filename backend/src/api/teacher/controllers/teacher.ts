@@ -1,8 +1,8 @@
-import type { Core } from '@strapi/strapi';
+import { factories } from '@strapi/strapi';
 
 const UID = 'api::teacher.teacher';
 
-export default {
+export default factories.createCoreController(UID, ({ strapi }) => ({
   async find(ctx) {
     const { filters, sort, page, pageSize, locale } = ctx.query as any;
 
@@ -73,4 +73,4 @@ export default {
 
     ctx.body = { data: teacher, meta: {} };
   },
-} satisfies Core.Controller;
+}));

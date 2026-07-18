@@ -6,7 +6,7 @@
  * on provider/parse errors.
  */
 
-const DASHSCOPE_ENDPOINT = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions';
+const DEFAULT_ENDPOINT = 'https://dashscope.aliyuncs.com/compatible-mode/v1';
 const TRANSLATE_MODEL = 'qwen-plus';
 const TIMEOUT_MS = 30000;
 
@@ -22,7 +22,10 @@ export async function translateDocument(opts: TranslateOptions): Promise<Record<
   const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
-    const response = await fetch(DASHSCOPE_ENDPOINT, {
+    // 工作空间 key（sk-ws-...）需使用 ws-<id>.cn-beijing.maas.aliyuncs.com endpoint，
+    // 通过 DASHSCOPE_API_ENDPOINT 覆盖（与 llm-service 同一语义：前缀不含 /chat/completions）
+    const endpoint = (process.env.DASHSCOPE_API_ENDPOINT || DEFAULT_ENDPOINT) + '/chat/completions';
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

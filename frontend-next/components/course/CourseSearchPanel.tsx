@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { BookOpen } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useProductSearch } from '@/hooks/useProductSearch';
 import { getProductCategories } from '@/lib/api';
-import type { ProductCategory } from '@/lib/api';
+import type { Locale, ProductCategory } from '@/lib/api';
 import SearchBar from './SearchBar';
 import CategoryFilter from './CategoryFilter';
 import SortControl from './SortControl';
@@ -22,7 +22,8 @@ export default function CourseSearchPanel({
   description,
 }: CourseSearchPanelProps) {
   const t = useTranslations('courses');
-  const search = useProductSearch(12);
+  const locale = useLocale() as Locale;
+  const search = useProductSearch(12, locale);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
 
   useEffect(() => {

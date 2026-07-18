@@ -22,6 +22,9 @@ backend/data.db
 backend/.strapi-updater.json
 backend/.tmp/
 
+# 上传媒体文件（部署走 rsync + restore-uploads.js，不进 git）
+backend/public/uploads/
+
 # Brainstorming 工作目录
 .superpowers/
 

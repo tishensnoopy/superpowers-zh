@@ -43,6 +43,25 @@ describe('useProductSearch', () => {
       sort: undefined,
       page: 1,
       limit: 12,
+      locale: 'zh-CN',
+    });
+  });
+
+  it('传入 en-US locale 时透传到 searchProducts', async () => {
+    renderHook(() => useProductSearch(12, 'en-US'));
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+
+    expect(searchProducts).toHaveBeenCalledTimes(1);
+    expect(searchProducts).toHaveBeenCalledWith({
+      query: undefined,
+      categorySlugs: undefined,
+      sort: undefined,
+      page: 1,
+      limit: 12,
+      locale: 'en-US',
     });
   });
 

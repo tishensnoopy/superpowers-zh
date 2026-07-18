@@ -86,10 +86,13 @@ jobs:
             --exclude='.npmrc' \
             --exclude='central/' \
             --exclude='agent/' \
+            --exclude='backend/public/uploads/' \
             -e "ssh -p ${{ secrets.DEPLOY_SSH_PORT || 22 }}" \
             ./ ${{ secrets.DEPLOY_USER || 'root' }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_PATH }}/
         # 关键：--exclude='.env' 确保服务器端 .env 不被覆盖
         # 排除 central/ 和 agent/：这两个目录是 A 块产物，不属于客户业务部署范围
+        # 排除 backend/public/uploads/：媒体库图片只存在于服务器（Strapi 上传），
+        # 本地为空目录，--delete 不同步排除会清空服务器图片（阻断性 bug）
 
       - name: Deploy via SSH (without agent)
         if: ${{ github.event.inputs.restart_agent != 'true' }}

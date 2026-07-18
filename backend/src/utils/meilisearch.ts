@@ -88,7 +88,14 @@ async function configureProductsIndex(index: any) {
   try {
     const settings = await index.getSettings();
 
-    if (settings.searchableAttributes?.length === 0 || !settings.searchableAttributes) {
+    // 已有索引也需要补应用新设置（如后来新增的 locale 过滤字段），
+    // 因此除了空设置外，检测到 filterableAttributes 缺少 locale 时也重新配置。
+    const needsConfigure =
+      settings.searchableAttributes?.length === 0 ||
+      !settings.searchableAttributes ||
+      !settings.filterableAttributes?.includes('locale');
+
+    if (needsConfigure) {
       console.log('[MeiliSearch] Configuring products index settings...');
 
       await index.updateSettings({
@@ -105,6 +112,7 @@ async function configureProductsIndex(index: any) {
           'price',
           'isFeatured',
           'isInStock',
+          'locale',
         ],
         sortableAttributes: [
           'name',
@@ -145,6 +153,7 @@ export interface ProductDocument {
   isFeatured: boolean;
   isInStock: boolean;
   createdAt: string;
+  locale?: string;
 }
 
 export async function addProductToIndex(product: ProductDocument): Promise<void> {
@@ -201,6 +210,7 @@ export async function searchProducts(
     priceMax?: number;
     isFeatured?: boolean;
     isInStock?: boolean;
+    locale?: string;
   },
   sort?: string[],
   limit: number = 20,
@@ -238,6 +248,9 @@ export async function searchProducts(
       }
       if (filters.isInStock !== undefined) {
         filterStrings.push(`isInStock = ${filters.isInStock}`);
+      }
+      if (filters.locale) {
+        filterStrings.push(`locale = "${filters.locale}"`);
       }
     }
 

@@ -67,6 +67,16 @@
         }
       }
     },
+    "contactPerson": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "联系人",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
     "businessHours": {
       "type": "string",
       "maxLength": 200,
@@ -105,9 +115,17 @@
         }
       }
     },
+    "latitude": {
+      "type": "float",
+      "description": "纬度（GCJ-02 火星坐标系）"
+    },
+    "longitude": {
+      "type": "float",
+      "description": "经度（GCJ-02 火星坐标系）"
+    },
     "mapEmbed": {
       "type": "text",
-      "description": "地图嵌入代码",
+      "description": "地图嵌入代码（已废弃，保留兼容）",
       "pluginOptions": {
         "i18n": {
           "localized": true

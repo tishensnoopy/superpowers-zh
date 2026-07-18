@@ -42,7 +42,7 @@ export default function Testimonials({ section }: { section: Section }) {
         <div className="grid grid-cols-12 gap-6">
           {testimonialList.map((testimonial: Testimonial) => (
             <div key={testimonial.id} className="col-span-12 md:col-span-4">
-              <div className="bg-card rounded-2xl p-8 border border-border shadow-sm hover:shadow-xl transition-all duration-300">
+              <div className="h-full bg-card rounded-2xl p-8 border border-border shadow-sm hover:shadow-xl transition-all duration-300">
                 <div className="flex items-center gap-1 mb-4">
                   {Array.from({ length: testimonial.rating || 5 }).map((_, i) => (
                     <Star key={i} size={14} fill="#F5851F" className="text-[#F5851F]" />

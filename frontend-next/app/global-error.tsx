@@ -1,8 +1,6 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useTranslations } from 'next-intl';
-import * as Sentry from '@sentry/nextjs';
 
 export default function GlobalError({
   error,
@@ -11,32 +9,32 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  const t = useTranslations('errors');
-
   useEffect(() => {
-    Sentry.captureException(error, {
-      tags: { section: 'global-error', digest: error.digest },
-      level: 'fatal',
-    });
+    if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
+      import('@sentry/nextjs').then((Sentry) => {
+        Sentry.captureException(error, {
+          tags: { section: 'global-error', digest: error.digest },
+          level: 'fatal',
+        });
+      });
+    }
   }, [error]);
 
   return (
-    <html lang="zh-CN">
-      <body>
-        <div style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontFamily: 'sans-serif',
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <h2>{t('systemErrorTitle')}</h2>
-            <p>{t('systemErrorMessage')}</p>
-            <button onClick={reset}>{t('retry')}</button>
-          </div>
-        </div>
-      </body>
-    </html>
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontFamily: 'sans-serif',
+      }}
+    >
+      <div style={{ textAlign: 'center' }}>
+        <h2>System Error</h2>
+        <p>Something went wrong. Please try again.</p>
+        <button onClick={reset}>Retry</button>
+      </div>
+    </div>
   );
 }

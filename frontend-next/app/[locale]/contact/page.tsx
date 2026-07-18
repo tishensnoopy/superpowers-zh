@@ -1,4 +1,4 @@
-import { Phone, Mail, MessageCircle, Clock, MapPin } from 'lucide-react';
+import { Phone, Mail, MessageCircle, Clock, MapPin, User } from 'lucide-react';
 import { buildMetadata, buildJsonLd, buildBreadcrumbSchema } from '@/lib/seo';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { getCampuses, getSiteSettings, type Locale } from '@/lib/api';
@@ -106,7 +106,11 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
               {campuses.map((campus: any) => (
                 <div key={campus.id} className="p-4 rounded-xl border border-border bg-background">
                   <div className="font-semibold text-[#1C2B3A] mb-2">{campus.name}</div>
-                  {campus.phone && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                    <User size={14} />
+                    {campus.contactPerson || '—'}
+                  </div>
+                  {campus.phone ? (
                     <a
                       href={`tel:${campus.phone}`}
                       className="flex items-center gap-2 text-sm text-muted-foreground hover:text-[#F5851F] transition-colors mb-1"
@@ -114,6 +118,11 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
                       <Phone size={14} />
                       {campus.phone}
                     </a>
+                  ) : (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                      <Phone size={14} />
+                      —
+                    </div>
                   )}
                   {campus.address && (
                     <div className="flex items-start gap-2 text-sm text-muted-foreground">

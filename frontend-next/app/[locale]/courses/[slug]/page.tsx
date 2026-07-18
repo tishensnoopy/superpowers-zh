@@ -120,9 +120,10 @@ export default async function CourseDetailPage({ params }: PageProps) {
             >
               {tCourses('teachingMethod')}
             </h2>
-            <div className="prose prose-lg max-w-none text-muted-foreground leading-relaxed">
-              {product.teachingMethod}
-            </div>
+            <div
+              className="prose prose-lg max-w-none text-muted-foreground leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: product.teachingMethod }}
+            />
           </div>
         </section>
       )}

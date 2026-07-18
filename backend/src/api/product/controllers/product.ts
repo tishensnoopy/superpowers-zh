@@ -13,9 +13,14 @@ async function searchProductsViaDb(
     sort?: string[];
     limit: number;
     offset: number;
+    locale?: string;
   }
 ) {
   const where: any = { publishedAt: { $notNull: true } };
+
+  if (params.locale) {
+    where.locale = params.locale;
+  }
 
   if (params.query) {
     where.$or = [
@@ -143,7 +148,7 @@ export default factories.createCoreController('api::product.product', ({ strapi 
   },
 
   async search(ctx) {
-    const { query, categories, categorySlugs, priceMin, priceMax, isFeatured, isInStock, sort, limit, page } = ctx.query;
+    const { query, categories, categorySlugs, priceMin, priceMax, isFeatured, isInStock, sort, limit, page, locale } = ctx.query;
 
     console.log('[Product Search] Request received:', {
       query,
@@ -156,6 +161,7 @@ export default factories.createCoreController('api::product.product', ({ strapi 
       sort,
       limit,
       page,
+      locale,
       meiliAvailable: isMeiliAvailable(),
     });
 
@@ -178,6 +184,9 @@ export default factories.createCoreController('api::product.product', ({ strapi 
     }
     if (isInStock !== undefined && isInStock !== '') {
       filters.isInStock = isInStock === 'true';
+    }
+    if (locale) {
+      filters.locale = locale as string;
     }
 
     const sortArray = sort ? (Array.isArray(sort) ? sort : [sort]) : undefined;
@@ -208,6 +217,7 @@ export default factories.createCoreController('api::product.product', ({ strapi 
           sort: sortArray,
           limit: limitNum,
           offset,
+          locale: filters.locale,
         });
       }
 
@@ -261,6 +271,7 @@ export default factories.createCoreController('api::product.product', ({ strapi 
         isFeatured: product.isFeatured || false,
         isInStock: product.isInStock || false,
         createdAt: product.createdAt?.toISOString() || '',
+        locale: product.locale,
       }));
       
       await syncAllProducts(documents);
@@ -358,46 +369,48 @@ export default factories.createCoreController('api::product.product', ({ strapi 
   },
   
   async withCategory(ctx) {
-    const { categorySlug, limit, page } = ctx.query;
-    
-    console.log('[Products by Category] Request:', { categorySlug, limit, page });
-    
+    const { categorySlug, limit, page, locale } = ctx.query as any;
+
+    console.log('[Products by Category] Request:', { categorySlug, limit, page, locale });
+
     if (!categorySlug) {
       ctx.status = 400;
       ctx.body = { error: '请提供分类路径' };
       return;
     }
-    
+
     try {
       const category = await strapi.db.query('api::product-category.product-category').findOne({
-        where: { slug: categorySlug },
+        where: { slug: categorySlug, ...(locale ? { locale } : {}) },
       });
-      
+
       if (!category) {
         ctx.status = 404;
         ctx.body = { error: '分类不存在' };
         return;
       }
-      
+
       const pageNum = parseInt(page as string) || 1;
       const limitNum = parseInt(limit as string) || 20;
       const offset = (pageNum - 1) * limitNum;
-      
+
       const products = await strapi.db.query('api::product.product').findMany({
         where: {
           categories: { slug: categorySlug },
           publishedAt: { $notNull: true },
+          ...(locale ? { locale } : {}),
         },
         populate: ['thumbnail', 'categories'],
         limit: limitNum,
         offset,
         orderBy: { createdAt: 'desc' },
       });
-      
+
       const total = await strapi.db.query('api::product.product').count({
         where: {
           categories: { slug: categorySlug },
           publishedAt: { $notNull: true },
+          ...(locale ? { locale } : {}),
         },
       });
       
@@ -429,18 +442,20 @@ export default factories.createCoreController('api::product.product', ({ strapi 
 
   async findBySlug(ctx) {
     const { slug } = ctx.params;
-    
-    console.log('[Product findBySlug] Request:', { slug });
-    
+    const { locale } = ctx.query as any;
+
+    console.log('[Product findBySlug] Request:', { slug, locale });
+
     if (!slug) {
       ctx.status = 400;
       ctx.body = { error: '请提供课程 slug' };
       return;
     }
-    
+
     try {
+      // db.query 不过滤 locale 时双语同 slug 会恒返回默认语言，必须显式按 locale 过滤
       const product = await strapi.db.query('api::product.product').findOne({
-        where: { slug, publishedAt: { $notNull: true } },
+        where: { slug, publishedAt: { $notNull: true }, ...(locale ? { locale } : {}) },
         populate: ['thumbnail', 'images', 'categories', 'objectives', 'outline', 'testimonials', 'seo'],
       });
       

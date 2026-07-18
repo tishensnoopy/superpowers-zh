@@ -2,10 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { searchProducts } from '@/lib/api';
-import type { Product } from '@/lib/api';
-import * as Sentry from '@sentry/nextjs';
+import type { Locale, Product } from '@/lib/api';
 
-export function useProductSearch(initialLimit = 12) {
+const captureException = (error: unknown, context?: Record<string, unknown>) => {
+  if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
+    import('@sentry/nextjs').then((Sentry) => Sentry.captureException(error, context));
+  }
+};
+
+export function useProductSearch(initialLimit = 12, locale: Locale = 'zh-CN') {
   const [query, setQueryState] = useState('');
   const [category, setCategoryState] = useState<string | null>(null);
   const [sort, setSortState] = useState<string | null>(null);
@@ -42,6 +47,7 @@ export function useProductSearch(initialLimit = 12) {
         sort: sort ? [sort] : undefined,
         page,
         limit: limitRef.current,
+        locale,
       });
 
       if (currentRequestId !== requestIdRef.current || controller.signal.aborted) {
@@ -59,7 +65,7 @@ export function useProductSearch(initialLimit = 12) {
         return;
       }
       if (!(err instanceof Error && err.name.includes('Abort'))) {
-        Sentry.captureException(err, {
+        captureException(err, {
           tags: { section: 'product-search', category },
           extra: { query },
         });
@@ -70,7 +76,7 @@ export function useProductSearch(initialLimit = 12) {
         setLoading(false);
       }
     }
-  }, [query, category, sort, page]);
+  }, [query, category, sort, page, locale]);
 
   useEffect(() => {
     const skipDebounce = skipDebounceRef.current;

@@ -131,7 +131,9 @@ export default async function LocaleLayout({
 
   const cmsUrl =
     process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
-  const cmsParsedUrl = new URL(cmsUrl);
+  // 相对路径（如 /api/strapi）走 Next.js rewrites 同源代理，无需 dns-prefetch / preconnect
+  const isRelativeCmsUrl = cmsUrl.startsWith('/');
+  const cmsParsedUrl = isRelativeCmsUrl ? null : new URL(cmsUrl);
 
   const websiteSchema = settings
     ? buildWebSiteSchema(settings, locale as Locale)
@@ -154,8 +156,12 @@ export default async function LocaleLayout({
         {fontFaceCSS && (
           <style dangerouslySetInnerHTML={{ __html: fontFaceCSS }} />
         )}
-        <link rel="dns-prefetch" href={`//${cmsParsedUrl.host}`} />
-        <link rel="preconnect" href={cmsUrl} crossOrigin="anonymous" />
+        {cmsParsedUrl && (
+          <>
+            <link rel="dns-prefetch" href={`//${cmsParsedUrl.host}`} />
+            <link rel="preconnect" href={cmsUrl} crossOrigin="anonymous" />
+          </>
+        )}
       </head>
       <body>
         {websiteSchema && (

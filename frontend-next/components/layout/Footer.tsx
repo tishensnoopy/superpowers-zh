@@ -164,7 +164,7 @@ export default function Footer({
           )}
         </div>
 
-        <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 md:pr-44">
           <p className="text-white/35 text-sm">
             {footer.copyright || t('copyrightFallback')}
             {settings.icp && <span className="mx-2">·</span>}

@@ -179,6 +179,7 @@ export default factories.createCoreService('api::product.product', ({ strapi }) 
           ? product.createdAt.toISOString()
           : String(product.createdAt)
         : '',
+      locale: product.locale,
     };
   },
 

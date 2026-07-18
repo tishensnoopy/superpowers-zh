@@ -2,6 +2,7 @@ import { Award, BookOpen, ChevronRight, GraduationCap, Shield, Users } from 'luc
 import type { LucideIcon } from 'lucide-react';
 import type { Section } from '@/lib/api';
 import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 
 const iconMap: Record<string, LucideIcon> = {
   GraduationCap,
@@ -59,12 +60,13 @@ export default function Advantages({ section }: { section: Section }) {
                     {adv.title}
                   </h3>
                   <p className="text-muted-foreground text-sm leading-relaxed flex-1">{adv.description}</p>
-                  <div
-                    className="mt-6 flex items-center gap-1 text-sm font-medium transition-colors duration-200"
+                  <Link
+                    href="/about"
+                    className="mt-6 inline-flex items-center gap-1 text-sm font-medium transition-colors duration-200 hover:underline"
                     style={{ color: adv.color || '#F5851F' }}
                   >
                     {t('learnMore')} <ChevronRight size={15} />
-                  </div>
+                  </Link>
                 </div>
               </div>
             );

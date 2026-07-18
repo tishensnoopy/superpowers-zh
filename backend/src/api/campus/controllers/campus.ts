@@ -1,8 +1,8 @@
-import type { Core } from '@strapi/strapi';
+import { factories } from '@strapi/strapi';
 
 const UID = 'api::campus.campus';
 
-export default {
+export default factories.createCoreController(UID, ({ strapi }) => ({
   async find(ctx) {
     const { filters, sort, locale } = ctx.query as any;
 
@@ -69,4 +69,4 @@ export default {
 
     ctx.body = { data: campus, meta: {} };
   },
-} satisfies Core.Controller;
+}));

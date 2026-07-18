@@ -105,6 +105,9 @@ function collectTranslatable(obj, pathArr = [], out = []) {
   if (typeof obj === 'object') {
     // media 对象（含 url+provider/mime）不递归——图片不翻译，原样 round-trip
     if (obj.url && (obj.provider !== undefined || obj.mime !== undefined)) return out;
+    // 关系对象（含 documentId）不递归——关联实体作为独立文档单独翻译，
+    // 写入时由 sanitizeNested 转为 documentId 引用
+    if (obj.documentId !== undefined) return out;
     for (const [k, v] of Object.entries(obj)) {
       collectTranslatable(v, [...pathArr, k], out);
     }
@@ -138,6 +141,67 @@ function stripComponentIds(obj) {
     for (const v of Object.values(obj)) stripComponentIds(v);
   }
   return obj;
+}
+
+/**
+ * 按 content type schema 构建深populate：component/dynamiczone 需 { populate: '*' }
+ * 才能带出嵌套组件（populate:'*' 只覆盖第一层，dynamic zone 内的嵌套组件会丢失，
+ * 导致 en-US 版本 section 标题已翻译但列表为空）。
+ * 关系字段不 populate（v5 建 locale 版本自动继承 + Phase B 显式复制）。
+ */
+function buildDeepPopulate(strapi, uid) {
+  const ct = strapi.contentType(uid);
+  const populate = {};
+  for (const [key, attr] of Object.entries(ct.attributes)) {
+    if (attr.type === 'dynamiczone' || attr.type === 'component') {
+      populate[key] = { populate: '*' };
+    } else if (attr.type === 'media') {
+      populate[key] = true;
+    }
+  }
+  return populate;
+}
+
+/**
+ * 深 populate 后的数据清洗（写回前）：
+ * - 关系对象/数组 → documentId 引用（写入 en-US 时 document service 按同 locale 解析）
+ * - media 对象/数组 → id（保持图片关联）
+ * 递归处理 dynamic zone / 嵌套组件。
+ */
+function sanitizeComponent(strapi, compUid, compData) {
+  const schema = strapi.components[compUid];
+  if (!schema || !compData || typeof compData !== 'object') return;
+  for (const [key, attr] of Object.entries(schema.attributes)) {
+    const v = compData[key];
+    if (v === null || v === undefined) continue;
+    if (attr.type === 'relation') {
+      if (Array.isArray(v)) compData[key] = v.map((x) => x && x.documentId).filter(Boolean);
+      else compData[key] = (v && v.documentId) || null;
+    } else if (attr.type === 'media') {
+      if (Array.isArray(v)) compData[key] = v.map((x) => x && x.id).filter(Boolean);
+      else compData[key] = (v && v.id) || null;
+    } else if (attr.type === 'component') {
+      if (Array.isArray(v)) v.forEach((item) => sanitizeComponent(strapi, attr.component, item));
+      else sanitizeComponent(strapi, attr.component, v);
+    }
+  }
+}
+
+function sanitizeNested(strapi, uid, fields) {
+  const ct = strapi.contentType(uid);
+  for (const [key, attr] of Object.entries(ct.attributes)) {
+    const v = fields[key];
+    if (v === null || v === undefined) continue;
+    if (attr.type === 'dynamiczone' && Array.isArray(v)) {
+      v.forEach((item) => item && item.__component && sanitizeComponent(strapi, item.__component, item));
+    } else if (attr.type === 'component') {
+      if (Array.isArray(v)) v.forEach((item) => sanitizeComponent(strapi, attr.component, item));
+      else sanitizeComponent(strapi, attr.component, v);
+    } else if (attr.type === 'media') {
+      if (Array.isArray(v)) fields[key] = v.map((x) => x && x.id).filter(Boolean);
+      else fields[key] = (v && v.id) || null;
+    }
+  }
 }
 
 /** 把待翻译条目按字符数分批 */
@@ -228,14 +292,14 @@ async function main() {
         continue;
       }
 
-      // 读取 zh-CN 完整文档（populate 全部字段，含 components）
+      // 读取 zh-CN 完整文档（深 populate：component/dynamiczone 带嵌套组件）
       let zhFull;
       try {
         zhFull = await strapi.documents(uid).findOne({
           documentId: doc.documentId,
           locale: 'zh-CN',
           status: 'published',
-          populate: '*',
+          populate: buildDeepPopulate(strapi, uid),
         });
       } catch (e) {
         info(`读取 zh-CN 完整数据失败 (${lookupValue}): ${e.message}`);
@@ -259,10 +323,14 @@ async function main() {
         fields[k] = v;
       }
 
-      // 收集可翻译文本
+      // 收集可翻译文本（须在 sanitize 之前：关系对象整体跳过，不翻译其文本）
       const items = collectTranslatable(fields);
 
-      // 跨 locale 写入前剥离组件实例 id（媒体 id 保留）
+      // 关系对象→documentId、media→id（须在 stripComponentIds 之前：
+      // 避免关系对象被剥 id 后失去引用，media 转为数字后不受影响）
+      sanitizeNested(strapi, uid, fields);
+
+      // 跨 locale 写入前剥离组件实例 id（媒体已转为数字 id，不受影响）
       stripComponentIds(fields);
 
       if (DRY_RUN) {

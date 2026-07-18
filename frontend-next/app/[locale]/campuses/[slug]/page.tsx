@@ -88,7 +88,12 @@ export default async function CampusDetailPage({ params }: PageProps) {
         <CampusTeachers teachers={campus.teachers} />
 
         <div className="mt-12">
-          <CampusMap mapEmbed={campus.mapEmbed} />
+          <CampusMap
+            latitude={campus.latitude}
+            longitude={campus.longitude}
+            address={campus.address}
+            name={campus.name}
+          />
         </div>
       </div>
     </div>

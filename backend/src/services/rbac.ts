@@ -83,6 +83,11 @@ const CLIENT_ADMIN_ACTIONS: string[] = [
 ];
 
 export default ({ strapi }: { strapi: any }) => {
+  // client-admin 权限首启种子标记（存 strapi core store，跨重启持久）
+  // 首启种子后，超管在「设置 → Users & Permissions → Roles」的勾选调整
+  // 是唯一事实来源；bootstrap 不再补齐，避免覆盖超管的删减。
+  const SEED_FLAG_KEY = 'clientAdminPermissionsSeeded';
+
   async function ensurePermission(roleId: number, action: string): Promise<boolean> {
     const existing = await strapi.db.query('plugin::users-permissions.permission').findOne({
       where: { action, role: roleId },
@@ -134,8 +139,16 @@ export default ({ strapi }: { strapi: any }) => {
         console.log('[RBAC] created client-admin role, id:', clientAdmin.id);
       }
 
-      // 3. client-admin 权限（幂等补齐）
-      await ensurePermissions(clientAdmin.id, CLIENT_ADMIN_ACTIONS, 'client-admin');
+      // 3. client-admin 权限：仅首启种子一次，之后以 Admin UI 调整为准
+      const store = strapi.store({ type: 'core', name: 'custom-rbac' });
+      const seeded = await store.get({ key: SEED_FLAG_KEY });
+      if (!seeded) {
+        await ensurePermissions(clientAdmin.id, CLIENT_ADMIN_ACTIONS, 'client-admin');
+        await store.set({ key: SEED_FLAG_KEY, value: true });
+        console.log('[RBAC] client-admin permissions seeded (first boot only)');
+      } else {
+        console.log('[RBAC] client-admin permissions already seeded, skip (admin UI is source of truth)');
+      }
 
       console.log('[RBAC] initializeRoles() completed');
     } catch (err) {
