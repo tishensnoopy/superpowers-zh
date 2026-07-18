@@ -6,7 +6,7 @@ export default factories.createCoreController('api::faq-item.faq-item', ({ strap
   async find(ctx) {
     console.log('[FaqItem] find() called');
     try {
-      const { category } = ctx.query as any;
+      const { category, locale } = ctx.query as any;
       const entityFilters: any = { isActive: true };
       if (category) {
         entityFilters.category = { $eq: category };
@@ -15,6 +15,7 @@ export default factories.createCoreController('api::faq-item.faq-item', ({ strap
       const faqs = await strapi.documents(UID).findMany({
         filters: entityFilters,
         sort: { sortOrder: 'asc' },
+        ...(locale ? { locale } : {}),
       });
 
       const data = faqs || [];
@@ -29,8 +30,10 @@ export default factories.createCoreController('api::faq-item.faq-item', ({ strap
   async findOne(ctx) {
     console.log('[FaqItem] findOne() called, id:', ctx.params.id);
     try {
+      const { locale } = ctx.query as any;
       const faq = await strapi.documents(UID).findOne({
         documentId: ctx.params.id,
+        ...(locale ? { locale } : {}),
       });
 
       if (!faq) {
@@ -48,9 +51,11 @@ export default factories.createCoreController('api::faq-item.faq-item', ({ strap
   async findByCategory(ctx) {
     console.log('[FaqItem] findByCategory() called, category:', ctx.params.category);
     try {
+      const { locale } = ctx.query as any;
       const faqs = await strapi.documents(UID).findMany({
         filters: { category: { $eq: ctx.params.category }, isActive: true },
         sort: { sortOrder: 'asc' },
+        ...(locale ? { locale } : {}),
       });
       const data = faqs || [];
       console.log('[FaqItem] findByCategory() completed, count:', data.length);
@@ -65,6 +70,7 @@ export default factories.createCoreController('api::faq-item.faq-item', ({ strap
     console.log('[FaqItem] search() called, query:', ctx.query.q);
     try {
       const query = (ctx.query as any).q || '';
+      const { locale } = ctx.query as any;
       const faqs = await strapi.documents(UID).findMany({
         filters: {
           $or: [
@@ -75,6 +81,7 @@ export default factories.createCoreController('api::faq-item.faq-item', ({ strap
           isActive: true,
         },
         sort: { sortOrder: 'asc' },
+        ...(locale ? { locale } : {}),
       });
       const data = faqs || [];
       console.log('[FaqItem] search() completed, count:', data.length);

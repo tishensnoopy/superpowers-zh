@@ -11,12 +11,14 @@ const PAGE_POPULATE = {
 
 export default {
   async find(ctx) {
-    const { filters } = ctx.query as any;
+    const { filters, locale, ...rest } = ctx.query as any;
 
     const pages = await strapi.documents(UID).findMany({
       filters: filters || {},
       populate: PAGE_POPULATE,
       status: 'published',
+      ...(locale ? { locale } : {}),
+      ...rest,
     });
 
     const data = pages || [];
@@ -35,10 +37,12 @@ export default {
 
   async findOne(ctx) {
     const { id } = ctx.params;
+    const { locale } = ctx.query as any;
     const page = await strapi.documents(UID).findOne({
       documentId: id,
       populate: PAGE_POPULATE,
       status: 'published',
+      ...(locale ? { locale } : {}),
     });
 
     if (!page) {
@@ -50,11 +54,13 @@ export default {
 
   async findBySlug(ctx) {
     const { slug } = ctx.params;
+    const { locale } = ctx.query as any;
     const pages = await strapi.documents(UID).findMany({
       filters: { slug: { $eq: slug } },
       populate: PAGE_POPULATE,
       status: 'published',
       limit: 1,
+      ...(locale ? { locale } : {}),
     });
 
     const page = pages?.[0];
@@ -66,11 +72,13 @@ export default {
   },
 
   async getHomepage(ctx) {
+    const { locale } = ctx.query as any;
     const pages = await strapi.documents(UID).findMany({
       filters: { isHomepage: { $eq: true } },
       populate: PAGE_POPULATE,
       status: 'published',
       limit: 1,
+      ...(locale ? { locale } : {}),
     });
 
     const page = pages?.[0];

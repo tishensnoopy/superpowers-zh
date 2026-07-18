@@ -104,9 +104,11 @@ const PRODUCT_POPULATE_DETAIL = {
 
 export default factories.createCoreController('api::product.product', ({ strapi }) => ({
   async find(ctx) {
+    const { locale } = ctx.query as any;
     const products = await strapi.documents('api::product.product').findMany({
       populate: PRODUCT_POPULATE,
       status: 'published',
+      ...(locale ? { locale } : {}),
     });
 
     const data = products || [];
@@ -125,10 +127,12 @@ export default factories.createCoreController('api::product.product', ({ strapi 
 
   async findOne(ctx) {
     const { id } = ctx.params;
+    const { locale } = ctx.query as any;
     const product = await strapi.documents('api::product.product').findOne({
       documentId: id,
       populate: PRODUCT_POPULATE_DETAIL,
       status: 'published',
+      ...(locale ? { locale } : {}),
     });
 
     if (!product) {

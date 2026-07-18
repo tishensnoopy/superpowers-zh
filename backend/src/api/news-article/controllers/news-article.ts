@@ -4,7 +4,7 @@ const UID = 'api::news-article.news-article';
 
 export default {
   async find(ctx) {
-    const { category, sort, page, pageSize } = ctx.query as any;
+    const { category, sort, page, pageSize, locale } = ctx.query as any;
 
     const entityFilters: any = {};
     if (category) {
@@ -26,10 +26,12 @@ export default {
         start,
         populate: { coverImage: true, seo: true },
         status: 'published',
+        ...(locale ? { locale } : {}),
       }),
       strapi.documents(UID).count({
         filters: entityFilters,
         status: 'published',
+        ...(locale ? { locale } : {}),
       }),
     ]);
 
@@ -50,10 +52,12 @@ export default {
 
   async findOne(ctx) {
     const { id } = ctx.params;
+    const { locale } = ctx.query as any;
     const article = await strapi.documents(UID).findOne({
       documentId: id,
       populate: { coverImage: true, seo: true },
       status: 'published',
+      ...(locale ? { locale } : {}),
     });
 
     if (!article) {
@@ -66,12 +70,14 @@ export default {
 
   async findBySlug(ctx) {
     const { slug } = ctx.params;
+    const { locale } = ctx.query as any;
 
     const articles = await strapi.documents(UID).findMany({
       filters: { slug: { $eq: slug } },
       populate: { coverImage: true, seo: true },
       status: 'published',
       limit: 1,
+      ...(locale ? { locale } : {}),
     });
 
     const article = articles?.[0];

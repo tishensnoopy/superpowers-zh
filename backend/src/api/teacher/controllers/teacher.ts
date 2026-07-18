@@ -4,7 +4,7 @@ const UID = 'api::teacher.teacher';
 
 export default {
   async find(ctx) {
-    const { filters, sort, page, pageSize } = ctx.query as any;
+    const { filters, sort, page, pageSize, locale } = ctx.query as any;
 
     const entityFilters: any = {};
     if (filters?.subject) {
@@ -32,10 +32,12 @@ export default {
         start,
         populate: { campus: true, avatar: true, seo: true },
         status: 'published',
+        ...(locale ? { locale } : {}),
       }),
       strapi.documents(UID).count({
         filters: entityFilters,
         status: 'published',
+        ...(locale ? { locale } : {}),
       }),
     ]);
 
@@ -56,10 +58,12 @@ export default {
 
   async findOne(ctx) {
     const { id } = ctx.params;
+    const { locale } = ctx.query as any;
     const teacher = await strapi.documents(UID).findOne({
       documentId: id,
       populate: { campus: true, avatar: true, seo: true },
       status: 'published',
+      ...(locale ? { locale } : {}),
     });
 
     if (!teacher) {

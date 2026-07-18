@@ -4,7 +4,7 @@ const UID = 'api::campus.campus';
 
 export default {
   async find(ctx) {
-    const { filters, sort } = ctx.query as any;
+    const { filters, sort, locale } = ctx.query as any;
 
     const entityFilters: any = {};
     if (filters?.slug?.$eq) {
@@ -27,6 +27,7 @@ export default {
         seo: true,
       },
       status: 'published',
+      ...(locale ? { locale } : {}),
     });
 
     const data = campuses || [];
@@ -46,6 +47,7 @@ export default {
 
   async findOne(ctx) {
     const { id } = ctx.params;
+    const { locale } = ctx.query as any;
     const campus = await strapi.documents(UID).findOne({
       documentId: id,
       populate: {
@@ -57,6 +59,7 @@ export default {
         seo: true,
       },
       status: 'published',
+      ...(locale ? { locale } : {}),
     });
 
     if (!campus) {
