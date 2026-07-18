@@ -18,22 +18,42 @@
       "type": "string",
       "required": true,
       "maxLength": 500,
-      "description": "FAQ question"
+      "description": "FAQ question",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "answer": {
       "type": "text",
       "required": true,
-      "description": "FAQ answer"
+      "description": "FAQ answer",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "category": {
       "type": "string",
       "maxLength": 100,
-      "description": "FAQ category"
+      "description": "FAQ category",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "tags": {
       "type": "string",
       "maxLength": 500,
-      "description": "Tags (comma separated)"
+      "description": "Tags (comma separated)",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "isActive": {
       "type": "boolean",

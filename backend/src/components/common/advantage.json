@@ -13,29 +13,54 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Advantage title"
+      "description": "Advantage title",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "description": {
       "type": "string",
       "maxLength": 500,
-      "description": "Advantage description"
+      "description": "Advantage description",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "icon": {
       "type": "string",
       "maxLength": 100,
-      "description": "Icon name"
+      "description": "Icon name",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "color": {
       "type": "string",
       "maxLength": 20,
       "description": "Icon color (hex)",
-      "default": "#F5851F"
+      "default": "#F5851F",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "bgColor": {
       "type": "string",
       "maxLength": 20,
       "description": "Icon background color (hex)",
-      "default": "#FFF3E5"
+      "default": "#FFF3E5",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   }
 }

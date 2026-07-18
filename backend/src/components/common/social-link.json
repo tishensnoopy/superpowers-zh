@@ -11,7 +11,17 @@
   "attributes": {
     "platform": {
       "type": "enumeration",
-      "enum": ["wechat", "weibo", "qq", "douyin", "linkedin", "twitter", "facebook", "instagram", "youtube"],
+      "enum": [
+        "wechat",
+        "weibo",
+        "qq",
+        "douyin",
+        "linkedin",
+        "twitter",
+        "facebook",
+        "instagram",
+        "youtube"
+      ],
       "required": true,
       "description": "Social media platform"
     },
@@ -19,12 +29,22 @@
       "type": "string",
       "required": true,
       "maxLength": 500,
-      "description": "Social media profile URL"
+      "description": "Social media profile URL",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "label": {
       "type": "string",
       "maxLength": 100,
-      "description": "Display label for the link"
+      "description": "Display label for the link",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   }
 }

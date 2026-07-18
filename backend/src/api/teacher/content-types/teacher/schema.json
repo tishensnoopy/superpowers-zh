@@ -16,7 +16,12 @@
       "type": "string",
       "required": true,
       "maxLength": 100,
-      "description": "教师姓名"
+      "description": "教师姓名",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "slug": {
       "type": "uid",
@@ -28,7 +33,12 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "职称"
+      "description": "职称",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "avatar": {
       "type": "media",
@@ -62,15 +72,30 @@
     },
     "education": {
       "type": "text",
-      "description": "教育背景"
+      "description": "教育背景",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "teachingFeatures": {
       "type": "text",
-      "description": "教学特色"
+      "description": "教学特色",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "achievements": {
       "type": "json",
-      "description": "荣誉成就（字符串数组）"
+      "description": "荣誉成就（字符串数组）",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "isFeatured": {
       "type": "boolean",
@@ -85,7 +110,12 @@
     "seo": {
       "type": "component",
       "component": "common.seo",
-      "description": "SEO 配置"
+      "description": "SEO 配置",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   },
   "pluginOptions": {

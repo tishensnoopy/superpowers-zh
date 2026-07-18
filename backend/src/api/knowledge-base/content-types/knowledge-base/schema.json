@@ -18,11 +18,21 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Document title"
+      "description": "Document title",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "content": {
       "type": "text",
-      "description": "Document content"
+      "description": "Document content",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "sourceType": {
       "type": "enumeration",
@@ -62,11 +72,21 @@
     "statusMessage": {
       "type": "string",
       "maxLength": 500,
-      "description": "Status message (error reason, etc.)"
+      "description": "Status message (error reason, etc.)",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "vectorDbIds": {
       "type": "json",
-      "description": "Vector database IDs (array)"
+      "description": "Vector database IDs (array)",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "chunkCount": {
       "type": "integer",
@@ -99,12 +119,22 @@
     "tags": {
       "type": "string",
       "maxLength": 500,
-      "description": "Tags (comma separated)"
+      "description": "Tags (comma separated)",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "seo": {
       "type": "component",
       "component": "common.seo",
-      "description": "SEO configuration"
+      "description": "SEO configuration",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "faqs": {
       "type": "relation",
@@ -125,12 +155,22 @@
     "sourceUrl": {
       "type": "string",
       "maxLength": 500,
-      "description": "Source URL for webpage type"
+      "description": "Source URL for webpage type",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "category": {
       "type": "string",
       "maxLength": 100,
-      "description": "Document category"
+      "description": "Document category",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   },
   "pluginOptions": {

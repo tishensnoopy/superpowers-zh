@@ -13,16 +13,31 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Main title"
+      "description": "Main title",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "subtitle": {
       "type": "string",
       "maxLength": 300,
-      "description": "Subtitle"
+      "description": "Subtitle",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "description": {
       "type": "text",
-      "description": "Description text"
+      "description": "Description text",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "backgroundImage": {
       "type": "media",
@@ -32,12 +47,22 @@
     "buttonText": {
       "type": "string",
       "maxLength": 50,
-      "description": "Button text"
+      "description": "Button text",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "buttonUrl": {
       "type": "string",
       "maxLength": 500,
-      "description": "Button link"
+      "description": "Button link",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "isFullWidth": {
       "type": "boolean",
@@ -47,7 +72,12 @@
     "overlayColor": {
       "type": "string",
       "maxLength": 20,
-      "description": "Overlay color (hex)"
+      "description": "Overlay color (hex)",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   }
 }

@@ -23,7 +23,12 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "产品名称"
+      "description": "产品名称",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "slug": {
       "type": "string",
@@ -34,12 +39,22 @@
     },
     "description": {
       "type": "text",
-      "description": "产品描述"
+      "description": "产品描述",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "shortDescription": {
       "type": "string",
       "maxLength": 500,
-      "description": "列表显示的简短描述"
+      "description": "列表显示的简短描述",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "price": {
       "type": "float",
@@ -97,33 +112,63 @@
     "seo": {
       "type": "component",
       "component": "common.seo",
-      "description": "SEO 配置"
+      "description": "SEO 配置",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "specValues": {
       "type": "json",
-      "description": "规格值（键值对）"
+      "description": "规格值（键值对）",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "teachingMethod": {
       "type": "richtext",
-      "description": "教学方法描述"
+      "description": "教学方法描述",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "objectives": {
       "type": "component",
       "component": "course.objective",
       "repeatable": true,
-      "description": "学习目标列表"
+      "description": "学习目标列表",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "outline": {
       "type": "component",
       "component": "course.module",
       "repeatable": true,
-      "description": "课程大纲分阶段"
+      "description": "课程大纲分阶段",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "testimonials": {
       "type": "component",
       "component": "course.testimonial",
       "repeatable": true,
-      "description": "家长评价"
+      "description": "家长评价",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   },
   "admin": {

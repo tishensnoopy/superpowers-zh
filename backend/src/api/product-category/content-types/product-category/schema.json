@@ -18,7 +18,12 @@
       "type": "string",
       "required": true,
       "maxLength": 100,
-      "description": "Category name"
+      "description": "Category name",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "slug": {
       "type": "string",
@@ -29,7 +34,12 @@
     },
     "description": {
       "type": "text",
-      "description": "Category description"
+      "description": "Category description",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "image": {
       "type": "media",

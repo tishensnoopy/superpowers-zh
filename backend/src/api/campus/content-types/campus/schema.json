@@ -17,7 +17,12 @@
       "type": "string",
       "required": true,
       "maxLength": 100,
-      "description": "校区名称"
+      "description": "校区名称",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "slug": {
       "type": "uid",
@@ -45,34 +50,69 @@
       "type": "string",
       "required": true,
       "maxLength": 500,
-      "description": "校区地址"
+      "description": "校区地址",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "phone": {
       "type": "string",
       "maxLength": 50,
-      "description": "联系电话"
+      "description": "联系电话",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "businessHours": {
       "type": "string",
       "maxLength": 200,
-      "description": "营业时间"
+      "description": "营业时间",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "transportation": {
       "type": "text",
-      "description": "交通信息"
+      "description": "交通信息",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "area": {
       "type": "string",
       "maxLength": 100,
-      "description": "教学面积"
+      "description": "教学面积",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "description": {
       "type": "text",
-      "description": "校区简介"
+      "description": "校区简介",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "mapEmbed": {
       "type": "text",
-      "description": "地图嵌入代码"
+      "description": "地图嵌入代码",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "sortOrder": {
       "type": "integer",
@@ -89,7 +129,12 @@
     "seo": {
       "type": "component",
       "component": "common.seo",
-      "description": "SEO 配置"
+      "description": "SEO 配置",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   },
   "pluginOptions": {

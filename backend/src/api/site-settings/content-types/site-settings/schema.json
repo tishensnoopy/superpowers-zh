@@ -19,12 +19,22 @@
       "required": true,
       "maxLength": 255,
       "minLength": 1,
-      "description": "站点名称 / 品牌名称"
+      "description": "站点名称 / 品牌名称",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "slogan": {
       "type": "string",
       "maxLength": 500,
-      "description": "站点标语"
+      "description": "站点标语",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "logo": {
       "type": "media",
@@ -39,36 +49,71 @@
     "phone": {
       "type": "string",
       "maxLength": 50,
-      "description": "联系电话"
+      "description": "联系电话",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "email": {
       "type": "string",
       "maxLength": 255,
-      "description": "联系邮箱"
+      "description": "联系邮箱",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "address": {
       "type": "text",
-      "description": "公司地址"
+      "description": "公司地址",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "wechat": {
       "type": "string",
       "maxLength": 100,
-      "description": "微信号"
+      "description": "微信号",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "icp": {
       "type": "string",
       "maxLength": 100,
-      "description": "ICP 备案号"
+      "description": "ICP 备案号",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "publicSecurityRecord": {
       "type": "string",
       "maxLength": 100,
-      "description": "公安备案号"
+      "description": "公安备案号",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "seo": {
       "type": "component",
       "component": "common.seo",
-      "description": "SEO 配置"
+      "description": "SEO 配置",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   },
   "admin": {

@@ -13,12 +13,22 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Member name"
+      "description": "Member name",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "position": {
       "type": "string",
       "maxLength": 200,
-      "description": "Job position"
+      "description": "Job position",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "avatar": {
       "type": "media",
@@ -28,7 +38,12 @@
     "bio": {
       "type": "string",
       "maxLength": 500,
-      "description": "Biography"
+      "description": "Biography",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   }
 }

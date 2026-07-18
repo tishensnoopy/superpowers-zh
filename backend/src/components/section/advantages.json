@@ -13,17 +13,32 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Section title"
+      "description": "Section title",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "description": {
       "type": "text",
-      "description": "Section description"
+      "description": "Section description",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "advantages": {
       "type": "component",
       "component": "common.advantage",
       "repeatable": true,
-      "description": "List of advantages"
+      "description": "List of advantages",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   }
 }

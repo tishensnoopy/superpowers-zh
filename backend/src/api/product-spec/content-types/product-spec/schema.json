@@ -18,7 +18,12 @@
       "type": "string",
       "required": true,
       "maxLength": 100,
-      "description": "Specification name (e.g., 'Dimensions')"
+      "description": "Specification name (e.g., 'Dimensions')",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "code": {
       "type": "string",
@@ -30,7 +35,12 @@
     "unit": {
       "type": "string",
       "maxLength": 20,
-      "description": "Unit (e.g., 'mm', 'kg')"
+      "description": "Unit (e.g., 'mm', 'kg')",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "type": {
       "type": "enumeration",
@@ -45,7 +55,12 @@
     },
     "options": {
       "type": "string",
-      "description": "Select options (comma separated, for type=select)"
+      "description": "Select options (comma separated, for type=select)",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "isVisible": {
       "type": "boolean",

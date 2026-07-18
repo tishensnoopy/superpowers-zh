@@ -12,32 +12,60 @@
     "icon": {
       "type": "string",
       "maxLength": 100,
-      "description": "Button icon"
+      "description": "Button icon",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "label": {
       "type": "string",
       "maxLength": 50,
-      "description": "Button text"
+      "description": "Button text",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "action": {
       "type": "enumeration",
-      "enum": ["contact", "chat", "phone", "callback"],
+      "enum": [
+        "contact",
+        "chat",
+        "phone",
+        "callback"
+      ],
       "default": "contact",
       "description": "Action type"
     },
     "phone": {
       "type": "string",
       "maxLength": 50,
-      "description": "Phone number"
+      "description": "Phone number",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "wechat": {
       "type": "string",
       "maxLength": 100,
-      "description": "WeChat ID"
+      "description": "WeChat ID",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "position": {
       "type": "enumeration",
-      "enum": ["bottom-right", "bottom-left"],
+      "enum": [
+        "bottom-right",
+        "bottom-left"
+      ],
       "default": "bottom-right",
       "description": "Button position"
     }

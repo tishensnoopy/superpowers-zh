@@ -13,13 +13,23 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Link title"
+      "description": "Link title",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "url": {
       "type": "string",
       "required": true,
       "maxLength": 500,
-      "description": "Link URL"
+      "description": "Link URL",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   }
 }

@@ -13,17 +13,32 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Section title"
+      "description": "Section title",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "description": {
       "type": "text",
-      "description": "Section description"
+      "description": "Section description",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "members": {
       "type": "component",
       "component": "common.team-member",
       "repeatable": true,
-      "description": "Team members"
+      "description": "Team members",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   }
 }

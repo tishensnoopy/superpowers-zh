@@ -13,17 +13,33 @@
       "type": "string",
       "required": true,
       "maxLength": 100,
-      "description": "Field label"
+      "description": "Field label",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "name": {
       "type": "string",
       "required": true,
       "maxLength": 100,
-      "description": "Field name"
+      "description": "Field name",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "type": {
       "type": "enumeration",
-      "enum": ["text", "email", "phone", "textarea", "select"],
+      "enum": [
+        "text",
+        "email",
+        "phone",
+        "textarea",
+        "select"
+      ],
       "required": true,
       "description": "Field type"
     },
@@ -35,11 +51,21 @@
     "placeholder": {
       "type": "string",
       "maxLength": 200,
-      "description": "Placeholder text"
+      "description": "Placeholder text",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "options": {
       "type": "json",
-      "description": "Select options"
+      "description": "Select options",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   }
 }

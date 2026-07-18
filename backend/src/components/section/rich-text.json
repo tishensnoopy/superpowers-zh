@@ -12,16 +12,30 @@
     "content": {
       "type": "text",
       "required": true,
-      "description": "Rich text content"
+      "description": "Rich text content",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "title": {
       "type": "string",
       "maxLength": 200,
-      "description": "Section title"
+      "description": "Section title",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "alignment": {
       "type": "enumeration",
-      "enum": ["left", "center", "right"],
+      "enum": [
+        "left",
+        "center",
+        "right"
+      ],
       "default": "left",
       "description": "Content alignment"
     }

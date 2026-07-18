@@ -13,28 +13,53 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Form title"
+      "description": "Form title",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "description": {
       "type": "text",
-      "description": "Form description"
+      "description": "Form description",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "fields": {
       "type": "component",
       "component": "common.form-field",
       "repeatable": true,
-      "description": "Form fields"
+      "description": "Form fields",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "submitText": {
       "type": "string",
       "default": "提交",
       "maxLength": 50,
-      "description": "Submit button text"
+      "description": "Submit button text",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "successMessage": {
       "type": "string",
       "maxLength": 200,
-      "description": "Success message"
+      "description": "Success message",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   }
 }

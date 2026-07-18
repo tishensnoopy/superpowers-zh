@@ -12,32 +12,62 @@
     "metaTitle": {
       "type": "string",
       "maxLength": 60,
-      "description": "Meta title"
+      "description": "Meta title",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "metaDescription": {
       "type": "string",
       "maxLength": 160,
-      "description": "Meta description"
+      "description": "Meta description",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "metaKeywords": {
       "type": "string",
       "maxLength": 200,
-      "description": "Meta keywords"
+      "description": "Meta keywords",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "canonicalUrl": {
       "type": "string",
       "maxLength": 500,
-      "description": "Canonical URL"
+      "description": "Canonical URL",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "ogTitle": {
       "type": "string",
       "maxLength": 60,
-      "description": "Open Graph title"
+      "description": "Open Graph title",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "ogDescription": {
       "type": "string",
       "maxLength": 160,
-      "description": "Open Graph description"
+      "description": "Open Graph description",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "ogImage": {
       "type": "media",
@@ -47,7 +77,11 @@
     },
     "ogType": {
       "type": "enumeration",
-      "enum": ["website", "article", "product"],
+      "enum": [
+        "website",
+        "article",
+        "product"
+      ],
       "default": "website",
       "description": "Open Graph type"
     }

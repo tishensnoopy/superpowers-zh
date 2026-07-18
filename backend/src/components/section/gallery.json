@@ -13,21 +13,40 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Section title"
+      "description": "Section title",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "description": {
       "type": "text",
-      "description": "Section description"
+      "description": "Section description",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "images": {
       "type": "component",
       "component": "common.gallery-item",
       "repeatable": true,
-      "description": "Gallery images"
+      "description": "Gallery images",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "columns": {
       "type": "enumeration",
-      "enum": ["2", "3", "4"],
+      "enum": [
+        "2",
+        "3",
+        "4"
+      ],
       "default": "3",
       "description": "Number of columns"
     }

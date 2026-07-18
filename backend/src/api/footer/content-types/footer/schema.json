@@ -17,28 +17,53 @@
     "copyright": {
       "type": "string",
       "maxLength": 500,
-      "description": "Copyright text"
+      "description": "Copyright text",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "socialLinks": {
       "type": "component",
       "component": "common.social-link",
       "repeatable": true,
-      "description": "Social media links"
+      "description": "Social media links",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "quickLinks": {
       "type": "component",
       "component": "common.quick-link",
       "repeatable": true,
-      "description": "Quick navigation links"
+      "description": "Quick navigation links",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "aboutText": {
       "type": "text",
-      "description": "About company text in footer"
+      "description": "About company text in footer",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "seo": {
       "type": "component",
       "component": "common.seo",
-      "description": "SEO configuration"
+      "description": "SEO configuration",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   },
   "pluginOptions": {

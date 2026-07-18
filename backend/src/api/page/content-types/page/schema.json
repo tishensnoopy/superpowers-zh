@@ -18,7 +18,12 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "页面标题"
+      "description": "页面标题",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "slug": {
       "type": "string",
@@ -48,12 +53,22 @@
         "section.gallery",
         "section.floating-button"
       ],
-      "description": "页面区块（拖拽排序）"
+      "description": "页面区块（拖拽排序）",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "seo": {
       "type": "component",
       "component": "common.seo",
-      "description": "SEO 配置"
+      "description": "SEO 配置",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "parent": {
       "type": "relation",

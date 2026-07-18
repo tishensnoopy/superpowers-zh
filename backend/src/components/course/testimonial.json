@@ -13,12 +13,22 @@
       "type": "string",
       "required": true,
       "maxLength": 50,
-      "description": "家长称呼"
+      "description": "家长称呼",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "content": {
       "type": "text",
       "required": true,
-      "description": "评价内容"
+      "description": "评价内容",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "rating": {
       "type": "integer",

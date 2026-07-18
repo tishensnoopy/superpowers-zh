@@ -12,23 +12,43 @@
     "content": {
       "type": "text",
       "required": true,
-      "description": "Testimonial content"
+      "description": "Testimonial content",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "author": {
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Author name"
+      "description": "Author name",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "position": {
       "type": "string",
       "maxLength": 200,
-      "description": "Author position"
+      "description": "Author position",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "company": {
       "type": "string",
       "maxLength": 200,
-      "description": "Author company"
+      "description": "Author company",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "avatar": {
       "type": "media",

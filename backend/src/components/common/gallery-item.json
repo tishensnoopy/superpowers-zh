@@ -18,12 +18,22 @@
     "title": {
       "type": "string",
       "maxLength": 200,
-      "description": "Image title"
+      "description": "Image title",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "description": {
       "type": "string",
       "maxLength": 500,
-      "description": "Image description"
+      "description": "Image description",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   }
 }
