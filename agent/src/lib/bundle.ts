@@ -14,7 +14,7 @@ export interface BundleDeps {
 
 const defaultExec = (cmd: string, args: string[]) =>
   new Promise<void>((resolve, reject) => {
-    execFile(cmd, args, (err, _stdout, stderr) =>
+    execFile(cmd, args, { maxBuffer: 64 * 1024 * 1024 }, (err, _stdout, stderr) =>
       err ? reject(new Error(`${cmd} failed: ${stderr || err.message}`)) : resolve()
     );
   });
@@ -27,38 +27,42 @@ export async function downloadBundle(
   const fetchImpl = deps.fetchImpl ?? fetch;
   const res = await fetchImpl(opts.url, {
     headers: { Authorization: `Bearer ${opts.token}` },
+    redirect: 'manual',
   });
   if (!res.ok || !res.body) {
-    throw new Error(`bundle download failed: HTTP ${res.status}`);
+    throw new Error(`bundle download failed: HTTP ${res.status} from ${opts.url}`);
   }
 
   let size = 0;
-  if (deps.writeImpl) {
-    const reader = res.body.getReader();
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      size += value.byteLength;
-      await deps.writeImpl(opts.destFile, value);
+  const reader = res.body.getReader();
+  try {
+    if (deps.writeImpl) {
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        size += value.byteLength;
+        await deps.writeImpl(opts.destFile, value);
+      }
+      return size;
+    }
+
+    // 生产路径：流式写盘
+    mkdirSync(path.dirname(opts.destFile), { recursive: true });
+    const fh = await open(opts.destFile, 'w');
+    try {
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        size += value.byteLength;
+        await fh.write(value);
+      }
+    } finally {
+      await fh.close();
     }
     return size;
-  }
-
-  // 生产路径：流式写盘
-  mkdirSync(path.dirname(opts.destFile), { recursive: true });
-  const fh = await open(opts.destFile, 'w');
-  try {
-    const reader = res.body.getReader();
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      size += value.byteLength;
-      await fh.write(value);
-    }
   } finally {
-    await fh.close();
+    reader.releaseLock();
   }
-  return size;
 }
 
 /**
@@ -78,16 +82,19 @@ export async function syncBundleToDir(
     downloadBundle(o, { fetchImpl: deps.fetchImpl }));
 
   mkdirSync(extractDir, { recursive: true });
-  await downloadImpl({ url: opts.url, token: opts.token, destFile: tarFile });
-  await execImpl('tar', ['-xzf', tarFile, '-C', extractDir]);
-  // git archive 根目录无包裹层，直接同步内容
-  await execImpl('rsync', [
-    '-a', '--delete',
-    '--exclude', '.env',
-    '--exclude', 'backend/public/uploads/',
-    '--exclude', 'node_modules/',
-    `${extractDir}/`,
-    `${opts.dataDir}/`,
-  ]);
-  await execImpl('rm', ['-rf', tmp]);
+  try {
+    await downloadImpl({ url: opts.url, token: opts.token, destFile: tarFile });
+    await execImpl('tar', ['-xzf', tarFile, '-C', extractDir, '--no-same-owner']);
+    // git archive 根目录无包裹层，直接同步内容
+    await execImpl('rsync', [
+      '-a', '--delete',
+      '--exclude', '.env',
+      '--exclude', 'backend/public/uploads/',
+      '--exclude', 'node_modules/',
+      `${extractDir}/`,
+      `${opts.dataDir}/`,
+    ]);
+  } finally {
+    await execImpl('rm', ['-rf', tmp]).catch(() => {});
+  }
 }

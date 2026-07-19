@@ -59,4 +59,20 @@ describe('bundle.syncBundleToDir', () => {
     expect(rsyncCall!.join(' ')).toContain('node_modules/');
     expect(rsyncCall![rsyncCall!.length - 1]).toBe('/opt/site/');
   });
+
+  it('rsync 失败 → 仍执行 rm -rf 清理临时目录，原始错误透出', async () => {
+    const calls: string[][] = [];
+    const execImpl = vi.fn(async (cmd: string, args: string[]) => {
+      calls.push([cmd, ...args]);
+      if (cmd === 'rsync') throw new Error('rsync boom');
+    });
+    const downloadImpl = vi.fn(async () => 100);
+
+    await expect(
+      syncBundleToDir({ url: 'http://x/b', token: 'tok', dataDir: '/opt/site' }, { downloadImpl, execImpl, tmpDir: '/tmp/bundle-test-cleanup' })
+    ).rejects.toThrow('rsync boom');
+
+    const rmCall = calls.find((c) => c[0] === 'rm');
+    expect(rmCall).toEqual(['rm', '-rf', '/tmp/bundle-test-cleanup']);
+  });
 });
