@@ -56,9 +56,12 @@ export async function handleDeploy(
   const intervalMs = opts.healthcheckIntervalMs ?? 5000;
   const maxAttempts = opts.healthcheckMaxAttempts ?? 24;  // 默认 2 分钟（与 deploy.sh 一致）
 
-  // 步骤 0：检查取消
+  // 步骤 0：检查取消 + fail-fast 校验（在改写任何文件之前）
   if (signal.aborted) {
     return { success: false, stderr: 'aborted before start', durationMs: Date.now() - start };
+  }
+  if (!cmd.bundleUrl) {
+    return { success: false, stderr: 'bundleUrl is required (deploy pipeline is bundle-based)', durationMs: Date.now() - start };
   }
 
   // 步骤 1：写 .env（可选）
@@ -73,9 +76,6 @@ export async function handleDeploy(
   }
 
   // 步骤 2：发布包同步（替代 git pull，去 GitHub 依赖）
-  if (!cmd.bundleUrl) {
-    return { success: false, stderr: 'bundleUrl is required (deploy pipeline is bundle-based)', durationMs: Date.now() - start };
-  }
   hooks.onProgress('bundle-sync', 'downloading and syncing release bundle');
   try {
     const { syncBundleToDir } = await import('../lib/bundle');

@@ -64,7 +64,7 @@ docker compose -f agent-compose.yml logs -f agent
 
 - 中央管理后台的服务器列表页应显示此服务器为 `online`
 - 中央点"查看状态" → Agent 执行 `docker compose ps` 并回传
-- 中央点"部署" → Agent 执行 `git pull` + `docker compose up --build` + 健康检查
+- 中央点"部署" → Agent 下载并同步发布包（bundle，替代 git pull）+ `docker compose up --build` + 健康检查
 
 ## 5. 故障排查
 

@@ -13,8 +13,8 @@ RUN npm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-# 安装 docker CLI，让 Agent 可通过挂载的 docker.sock 管理客户业务容器
-RUN apk add --no-cache docker-cli
+# 安装 docker CLI（管理客户业务容器）+ rsync/tar（bundle 发布包解压同步）
+RUN apk add --no-cache docker-cli rsync tar
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/package*.json ./
 RUN npm ci --omit=dev
