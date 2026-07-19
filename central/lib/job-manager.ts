@@ -1,6 +1,6 @@
 import { query } from './db';
 
-export type JobType = 'deploy' | 'config-sync' | 'restart' | 'status' | 'logs';
+export type JobType = 'deploy' | 'provision' | 'config-sync' | 'restart' | 'status' | 'logs';
 export type JobStatus = 'queued' | 'running' | 'success' | 'failed' | 'cancelled';
 
 const VALID_TRANSITIONS: Record<JobStatus, JobStatus[]> = {

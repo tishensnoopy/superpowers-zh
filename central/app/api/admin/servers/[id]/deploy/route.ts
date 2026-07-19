@@ -10,7 +10,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   if (admin instanceof Response) return admin;
 
   const body = await req.json().catch(() => ({}));
-  const { configId, mode = 'nginx', envVars } = body;
+  const { configId, bundleId: bodyBundleId, mode = 'nginx', envVars } = body;
 
   // 验证 server
   const srv = await query(`SELECT id, customer_id FROM customer_servers WHERE id=$1`, [params.id]);
@@ -30,6 +30,21 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   } else {
     const cfg = await query(`SELECT id FROM customer_configs WHERE id=$1 AND customer_id=$2`, [resolvedConfigId, srv.rows[0].customer_id]);
     if (cfg.rows.length === 0) return errorResponse('Config not found or does not belong to this customer', 404);
+  }
+
+  // 解析发布包（部署管道统一走 bundle；无 ready bundle 拒绝部署）
+  let bundleId: string = bodyBundleId;
+  if (!bundleId) {
+    const latest = await query(
+      `SELECT id FROM bundles WHERE status='ready' ORDER BY created_at DESC LIMIT 1`
+    );
+    if (latest.rows.length === 0) {
+      return errorResponse('No ready bundle. Build a bundle first (POST /api/admin/bundles).', 400);
+    }
+    bundleId = (latest.rows[0] as { id: string }).id;
+  } else {
+    const b = await query(`SELECT id FROM bundles WHERE id=$1 AND status='ready'`, [bundleId]);
+    if (b.rows.length === 0) return errorResponse('Bundle not found or not ready', 404);
   }
 
   // 检查 agent 在线
@@ -58,6 +73,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     type: 'command:deploy',
     jobId: job.id,
     imageTag: 'unused',  // 保留字段，本期忽略
+    bundleId,
+    bundleUrl: `/api/agent/bundles/${bundleId}/download`,
     envVars: deployEnvVars,
     mode,
   };
@@ -94,7 +111,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     targetId: params.id,
     ip: req.headers.get('x-forwarded-for')?.split(',')[0]?.trim(),
     userAgent: req.headers.get('user-agent') ?? undefined,
-    detail: { jobId: job.id, configId: resolvedConfigId, mode },
+    detail: { jobId: job.id, configId: resolvedConfigId, bundleId, mode },
   });
 
   return json({ jobId: job.id, status: 'queued', streamUrl: `/api/admin/jobs/${job.id}/stream` }, 202);
