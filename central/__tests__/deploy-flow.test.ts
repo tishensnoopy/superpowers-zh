@@ -115,7 +115,13 @@ describe('deploy flow integration', () => {
         },
       } as any,
       new AbortController().signal,
-      { healthcheckIntervalMs: 5, healthcheckMaxAttempts: 2 }
+      {
+        // bundle 模式：注入 syncBundle mock 替代真实下载，agentToken 避免加载 agent config
+        syncBundle: async () => {},
+        agentToken: 'test-token',
+        healthcheckIntervalMs: 5,
+        healthcheckMaxAttempts: 2,
+      }
     );
 
     expect(result.success).toBe(true);
@@ -137,7 +143,7 @@ describe('deploy flow integration', () => {
     const stages = receivedEvents
       .filter((e) => e.event === 'job:progress')
       .map((e) => e.data.stage);
-    expect(stages).toEqual(['config-written', 'git-pull', 'build', 'healthcheck']);
+    expect(stages).toEqual(['config-written', 'bundle-sync', 'bundle-synced', 'build', 'healthcheck']);
 
     const finalUpdate = receivedEvents.find(
       (e) => e.event === 'job:update' && e.data.status === 'success'
@@ -161,7 +167,12 @@ describe('deploy flow integration', () => {
         runCompose: async () => ({ exitCode: 0 }),
       } as any,
       new AbortController().signal,
-      { healthcheckIntervalMs: 5, healthcheckMaxAttempts: 2 }
+      {
+        syncBundle: async () => {},
+        agentToken: 'test-token',
+        healthcheckIntervalMs: 5,
+        healthcheckMaxAttempts: 2,
+      }
     );
 
     expect(result.success).toBe(false);

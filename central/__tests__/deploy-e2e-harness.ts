@@ -68,7 +68,7 @@ export function installDeployMocks(opts: HarnessOptions = {}, execaMock: ExecaMo
   };
 }
 
-/** 构造一个标准 deploy 命令 */
+/** 构造一个标准 deploy 命令（bundle 模式：bundleUrl 必填，否则 agent fail-fast） */
 export function makeDeployCommand(overrides: Partial<any> = {}) {
   return {
     commandId: 'test-cmd-' + Math.random().toString(36).slice(2),
@@ -76,6 +76,8 @@ export function makeDeployCommand(overrides: Partial<any> = {}) {
     jobId: 'test-job-' + Math.random().toString(36).slice(2),
     imageTag: 'unused',
     mode: 'nginx' as const,
+    bundleUrl: '/api/agent/bundles/test-b-1/download',
+    centralApiUrl: 'http://test-central',
     envVars: { NEXT_PUBLIC_SITE_URL: 'https://test.example.com' },
     ...overrides,
   };
