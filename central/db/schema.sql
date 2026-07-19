@@ -109,3 +109,16 @@ CREATE TABLE IF NOT EXISTS audit_logs (
 CREATE INDEX IF NOT EXISTS idx_audit_logs_admin_id ON audit_logs (admin_id, ts DESC);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_target ON audit_logs (target_type, target_id, ts DESC);
 CREATE INDEX IF NOT EXISTS idx_audit_logs_ts ON audit_logs (ts DESC);
+
+-- 发布包（bundle）：唯一代码分发载体，central 本机仓库 git archive 产出
+CREATE TABLE IF NOT EXISTS bundles (
+  id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  ref         TEXT NOT NULL,
+  filename    TEXT NOT NULL,
+  size_bytes  BIGINT,
+  status      TEXT NOT NULL DEFAULT 'building',  -- building|ready|failed
+  error       TEXT,
+  created_by  UUID REFERENCES admin_users(id),
+  created_at  TIMESTAMPTZ DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_bundles_created ON bundles(created_at DESC);
