@@ -25,6 +25,8 @@ echo "== dry-run 不执行副作用 =="
 OUT=$(bash provision-new-customer.sh --customer-id acme --domain acme.example.com --admin-email a@b.com --server-host 1.2.3.4 --dry-run 2>&1 || true)
 echo "$OUT" | grep -q "DRY-RUN" && echo "PASS: dry-run 输出标记" && PASS=$((PASS+1)) || { echo "FAIL: dry-run 输出标记"; FAIL=$((FAIL+1)); }
 echo "$OUT" | grep -q "pg_dump" && echo "PASS: dry-run 仍打印将执行的命令" && PASS=$((PASS+1)) || { echo "FAIL: dry-run 打印命令"; FAIL=$((FAIL+1)); }
+echo "$OUT" | grep -q 'bash -s -- /opt/acme' && echo "PASS: 步骤6 REMOTE_DIR 以位置参数传入" && PASS=$((PASS+1)) || { echo "FAIL: 步骤6 REMOTE_DIR 以位置参数传入"; FAIL=$((FAIL+1)); }
+grep -q "cd \"\$1\"" provision-new-customer.sh && echo "PASS: 步骤6 远端 cd 用位置参数" && PASS=$((PASS+1)) || { echo "FAIL: 步骤6 远端 cd 用位置参数"; FAIL=$((FAIL+1)); }
 
 echo ""
 echo "结果: $PASS 通过, $FAIL 失败"

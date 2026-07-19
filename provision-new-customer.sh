@@ -166,10 +166,8 @@ run ssh "${SERVER_USER}@${SERVER_HOST}" "sudo mkdir -p ${REMOTE_DIR} && sudo cho
 run rsync -az --delete \
   --exclude .env --exclude node_modules --exclude 'backend/public/uploads/' --exclude .git \
   "${SCRIPT_DIR}/" "${SERVER_USER}@${SERVER_HOST}:${REMOTE_DIR}/"
-if ! $DRY_RUN; then
-  scp "$ENV_FILE" "${SERVER_USER}@${SERVER_HOST}:${REMOTE_DIR}/.env"
-  scp "$DUMP_FILE" "${SERVER_USER}@${SERVER_HOST}:/tmp/"
-fi
+run scp "$ENV_FILE" "${SERVER_USER}@${SERVER_HOST}:${REMOTE_DIR}/.env"
+run scp "$DUMP_FILE" "${SERVER_USER}@${SERVER_HOST}:/tmp/"
 
 # ---------- 步骤 4：新实例 DB 恢复 ----------
 echo ""
@@ -198,9 +196,9 @@ REMOTE
 # ---------- 步骤 6：bootstrap 自检确认（D4/D5：开通即用） ----------
 echo ""
 echo "[6/6] 等待 backend 启动并确认自检报告..."
-run ssh "${SERVER_USER}@${SERVER_HOST}" bash -s <<'REMOTE'
+run ssh "${SERVER_USER}@${SERVER_HOST}" bash -s -- "$REMOTE_DIR" <<'REMOTE'
 set -euo pipefail
-cd '"${REMOTE_DIR}"'
+cd "$1"
 for i in $(seq 1 36); do
   sleep 5
   if sudo docker compose logs backend 2>&1 | grep -q '\[bootstrap-health\]'; then
