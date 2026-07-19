@@ -122,11 +122,20 @@ export function serializeFaq(f: any): string {
   return lines.join('\n');
 }
 
-export async function syncWebsiteContent(strapi: any): Promise<{ synced: number; updated: number; errors: string[] }> {
+/**
+ * 全量镜像同步：KB 的 content-sync 文档 = 后台 published 内容的精确镜像。
+ * 1) 只拉 published（草稿不进 KB），populate:* 保证组件字段（如 objectives）完整
+ * 2) upsert 全部 published 记录
+ * 3) 孤儿回收：KB 中 sourceType='content-sync' 但不在 published 集合内的文档 → 删文档+清向量
+ *    （只碰 content-sync，manual/faq/pdf 等手工文档绝不回收）
+ */
+export async function syncWebsiteContent(strapi: any): Promise<{ synced: number; updated: number; removed: number; errors: string[] }> {
   let synced = 0;
   let updated = 0;
+  let removed = 0;
   const errors: string[] = [];
   const LOCALES: Locale[] = ['zh-CN', 'en-US'];
+  const validSourceUrls = new Set<string>();
 
   for (const { uid, serialize, name } of CONTENT_TYPES) {
     for (const locale of LOCALES) {
@@ -134,11 +143,15 @@ export async function syncWebsiteContent(strapi: any): Promise<{ synced: number;
         const records = await strapi.documents(uid).findMany({
           limit: 1000,
           locale,
+          status: 'published',
+          populate: '*',
         });
         for (const record of records) {
           const recordWithLocale = { ...record, locale };
           const sourceUrl = buildSourceUrl(uid, recordWithLocale);
+          validSourceUrls.add(sourceUrl);
           const content = serialize(record);
+          const title = record.title || record.name || `${name}文档`;
 
           const existing = await strapi.db.query('api::knowledge-base.knowledge-base').findOne({
             where: { sourceUrl },
@@ -147,13 +160,13 @@ export async function syncWebsiteContent(strapi: any): Promise<{ synced: number;
           if (existing) {
             await strapi.documents('api::knowledge-base.knowledge-base').update({
               documentId: existing.documentId,
-              data: { title: record.title || record.name || `${name}文档`, content, locale, status: 'pending' },
+              data: { title, content, locale, status: 'pending' },
             });
             updated++;
           } else {
             await strapi.documents('api::knowledge-base.knowledge-base').create({
               data: {
-                title: record.title || record.name || `${name}文档`,
+                title,
                 content,
                 sourceType: 'content-sync',
                 sourceUrl,
@@ -172,8 +185,28 @@ export async function syncWebsiteContent(strapi: any): Promise<{ synced: number;
     }
   }
 
-  console.log(`[knowledge-sync-service] Sync complete: ${synced} new, ${updated} updated, ${errors.length} errors`);
-  return { synced, updated, errors };
+  // 孤儿回收
+  const syncedDocs = await strapi.db.query('api::knowledge-base.knowledge-base').findMany({
+    where: { sourceType: 'content-sync' },
+    limit: 10000,
+  });
+  for (const doc of syncedDocs) {
+    if (doc.sourceUrl && !validSourceUrls.has(doc.sourceUrl)) {
+      try {
+        const kbService = strapi.service('api::knowledge-base.knowledge-base');
+        await kbService.deleteVectors(doc.id);
+        await strapi.documents('api::knowledge-base.knowledge-base').delete({
+          documentId: doc.documentId,
+        });
+        removed++;
+      } catch (err) {
+        errors.push(`orphan-remove[${doc.sourceUrl}]: ${err instanceof Error ? err.message : err}`);
+      }
+    }
+  }
+
+  console.log(`[knowledge-sync-service] Mirror sync complete: ${synced} new, ${updated} updated, ${removed} removed, ${errors.length} errors`);
+  return { synced, updated, removed, errors };
 }
 
 /**

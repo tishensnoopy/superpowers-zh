@@ -154,6 +154,7 @@ describe('syncWebsiteContent', () => {
   const mockStrapi: any = {
     documents: vi.fn(),
     db: { query: vi.fn() },
+    service: vi.fn(() => ({ deleteVectors: vi.fn() })),
   };
 
   beforeEach(() => {
@@ -170,10 +171,74 @@ describe('syncWebsiteContent', () => {
       }
       return { findMany: vi.fn().mockResolvedValue([]) };
     });
-    mockStrapi.db.query.mockReturnValue({ findOne: vi.fn().mockResolvedValue(null) });
+    mockStrapi.db.query.mockReturnValue({
+      findOne: vi.fn().mockResolvedValue(null),
+      findMany: vi.fn().mockResolvedValue([]),
+    });
 
     const result = await syncWebsiteContent(mockStrapi);
     expect(result.synced).toBeGreaterThan(0);
+  });
+
+  it('findMany 带 status:published + populate:*（草稿不进 KB，组件字段不丢）', async () => {
+    const findManyProduct = vi.fn().mockResolvedValue([]);
+    const strapi: any = {
+      documents: vi.fn((uid: string) => {
+        if (uid === 'api::product.product') return { findMany: findManyProduct };
+        if (uid === 'api::knowledge-base.knowledge-base') return { create: vi.fn(), update: vi.fn(), delete: vi.fn() };
+        return { findMany: vi.fn().mockResolvedValue([]) };
+      }),
+      db: {
+        query: vi.fn(() => ({
+          findOne: vi.fn().mockResolvedValue(null),
+          findMany: vi.fn().mockResolvedValue([]),
+        })),
+      },
+      service: vi.fn(() => ({ deleteVectors: vi.fn() })),
+    };
+
+    await syncWebsiteContent(strapi);
+
+    expect(findManyProduct).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'published', populate: '*', locale: 'zh-CN' })
+    );
+    expect(findManyProduct).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'published', populate: '*', locale: 'en-US' })
+    );
+  });
+
+  it('孤儿回收：KB content-sync 文档不在 published 集合内 → 删文档+清向量', async () => {
+    const deleteKb = vi.fn();
+    const deleteVectors = vi.fn();
+    // 后台只剩 1 门已发布课程；KB 里却有 2 条 content-sync（其中 orphan1 是孤儿）
+    const strapi: any = {
+      documents: vi.fn((uid: string) => {
+        if (uid === 'api::product.product') {
+          return { findMany: vi.fn().mockResolvedValue([{ documentId: 'alive1', name: '在售课程' }]) };
+        }
+        if (uid === 'api::knowledge-base.knowledge-base') {
+          return { create: vi.fn().mockResolvedValue({ id: 100 }), update: vi.fn(), delete: deleteKb };
+        }
+        return { findMany: vi.fn().mockResolvedValue([]) };
+      }),
+      db: {
+        query: vi.fn(() => ({
+          findOne: vi.fn().mockResolvedValue(null),
+          findMany: vi.fn().mockResolvedValue([
+            { id: 1, documentId: 'kb-orphan', sourceType: 'content-sync', sourceUrl: 'strapi://api::campus.campus/gone1?locale=zh-CN' },
+            { id: 2, documentId: 'kb-manual', sourceType: 'manual', sourceUrl: null }, // 手工文档绝不回收
+          ]),
+        })),
+      },
+      service: vi.fn(() => ({ deleteVectors })),
+    };
+
+    const result = await syncWebsiteContent(strapi);
+
+    expect(deleteVectors).toHaveBeenCalledWith(1);
+    expect(deleteKb).toHaveBeenCalledTimes(1);
+    expect(deleteKb).toHaveBeenCalledWith({ documentId: 'kb-orphan' });
+    expect(result.removed).toBe(1);
   });
 });
 
