@@ -57,3 +57,8 @@ export async function buildBundle(
 export function bundlePath(id: string, deps: BundleDeps = {}): string {
   return path.join(deps.bundleDir ?? BUNDLE_DIR, `${id}.tar.gz`);
 }
+
+/** 错误消息透传给 admin 前 scrub 可能内嵌在 git remote URL 中的凭证 */
+export function scrubCredentials(message: string): string {
+  return message.replace(/(https?|git|ssh):\/\/[^/@\s]+@/g, '$1://***@');
+}

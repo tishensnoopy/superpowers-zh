@@ -27,6 +27,7 @@ import path from 'node:path';
 import { pool } from '@/lib/db';
 import { hashPassword, signJwt } from '@/lib/auth';
 import { generateAgentToken } from '@/lib/agent-auth';
+import { scrubCredentials } from '@/lib/bundles';
 
 const BASE = 'http://localhost:3000';
 const REPO_DIR = process.env.CENTRAL_CODE_REPO ?? '/tmp/central-code-repo-test';
@@ -119,6 +120,17 @@ describe('POST /api/admin/bundles', () => {
     );
     expect(dbRow.rows[0].status).toBe('failed');
     expect(dbRow.rows[0].error).toContain('no-such-ref');
+  });
+
+  it('scrubCredentials：scrub URL 内嵌凭证，无凭证消息原样保留', () => {
+    const scrubbed = scrubCredentials(
+      "fatal: unable to access 'https://ci:secret123@git.example.com/repo.git/': Could not resolve host"
+    );
+    expect(scrubbed).not.toContain('secret123');
+    expect(scrubbed).toContain('https://***@git.example.com');
+
+    const plain = 'fatal: Not a valid object name: no-such-ref';
+    expect(scrubCredentials(plain)).toBe(plain);
   });
 });
 

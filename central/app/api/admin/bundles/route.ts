@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { json, errorResponse, requireAdmin } from '@/lib/api-helpers';
 import { query } from '@/lib/db';
-import { buildBundle } from '@/lib/bundles';
+import { buildBundle, scrubCredentials } from '@/lib/bundles';
 import { writeAuditLog } from '@/lib/audit';
 
 export async function GET() {
@@ -30,7 +30,8 @@ export async function POST(req: NextRequest) {
   try {
     await buildBundle({ id, ref });
   } catch (err) {
-    return errorResponse(`bundle build failed: ${err instanceof Error ? err.message : err}`, 500);
+    const raw = err instanceof Error ? err.message : String(err);
+    return errorResponse(`bundle build failed: ${scrubCredentials(raw)}`, 500);
   }
 
   await writeAuditLog({
