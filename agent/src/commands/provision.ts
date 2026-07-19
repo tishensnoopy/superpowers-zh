@@ -44,7 +44,12 @@ export async function handleProvision(
 
   // 1. 写 .env（central 下发的完整配置，含随机生成的密钥）
   hooks.onProgress('env', 'writing .env from central config');
-  deps.writeEnv(`${dataDir}/.env`, cmd.envVars);
+  try {
+    deps.writeEnv(`${dataDir}/.env`, cmd.envVars);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { success: false, stderr: `failed to write .env: ${msg}`, durationMs: Date.now() - start };
+  }
 
   // 2. 发布包同步
   hooks.onProgress('bundle', 'downloading and syncing release bundle');

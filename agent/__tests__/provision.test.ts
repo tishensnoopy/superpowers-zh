@@ -43,6 +43,19 @@ describe('provision 从零开通编排', () => {
     expect(result.success).toBe(true);
   });
 
+  it('写 env 失败 → success:false，stderr 含原因，不执行后续步骤', async () => {
+    const deps = makeDeps();
+    deps.writeEnv.mockImplementation(() => { throw new Error('ENOENT: no such file or directory'); });
+    const hooks = { onLog: vi.fn(), onProgress: vi.fn() };
+
+    const result = await handleProvision(baseCmd, '/data', hooks, new AbortController().signal, deps);
+
+    expect(result.success).toBe(false);
+    expect(result.stderr).toContain('ENOENT');
+    expect(deps.syncBundle).not.toHaveBeenCalled();
+    expect(deps.runCompose).not.toHaveBeenCalled();
+  });
+
   it('健康检查失败 → success:false，不跑 KB resync', async () => {
     const deps = makeDeps();
     deps.waitHealthy.mockResolvedValue({ ok: false, failedService: 'backend' });
