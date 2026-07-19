@@ -5,10 +5,15 @@ vi.mock('../kb-schema', () => ({
   ensureKbSchema: vi.fn().mockResolvedValue(undefined),
 }));
 
+vi.mock('../admin-locale-perms', () => ({
+  ensureAdminLocalePermissions: vi.fn().mockResolvedValue({ patched: 0 }),
+  ensureEditorContentPermissions: vi.fn().mockResolvedValue({ created: 0 }),
+}));
+
 const ENV_KEYS = [
   'DATABASE_CLIENT', 'DATABASE_HOST', 'DATABASE_PORT', 'DATABASE_NAME', 'DATABASE_USERNAME', 'DATABASE_PASSWORD',
   'APP_KEYS', 'API_TOKEN_SALT', 'ADMIN_JWT_SECRET', 'TRANSFER_TOKEN_SALT', 'ENCRYPTION_KEY', 'JWT_SECRET',
-  'MEILISEARCH_HOST', 'MEILISEARCH_API_KEY',
+  'MEILI_HOST', 'MEILI_MASTER_KEY',
 ];
 
 describe('bootstrap-health 启动自检自愈', () => {
@@ -40,6 +45,8 @@ describe('bootstrap-health 启动自检自愈', () => {
     expect(byName['postgres'].level).toBe('ok');
     expect(byName['kb-schema'].level).toBe('ok');
     expect(byName['kb-schema'].healed).toBe(true);
+    expect(byName['admin-locale-perms'].level).toBe('ok');
+    expect(byName['admin-locale-perms'].healed).toBe(false);
     expect(byName['required-env'].level).toBe('ok');
     expect(report.ok).toBe(true);
     expect(report.failed).toEqual([]);
@@ -56,14 +63,14 @@ describe('bootstrap-health 启动自检自愈', () => {
   });
 
   it('必填 env 缺失：列出缺失项，level=fail', async () => {
-    delete process.env.MEILISEARCH_HOST;
+    delete process.env.MEILI_HOST;
     delete process.env.APP_KEYS;
     const { strapi } = makeStrapi();
     const report = await runBootstrapHealthcheck(strapi);
 
     const envCheck = report.checks.find((c: any) => c.name === 'required-env');
     expect(envCheck.level).toBe('fail');
-    expect(envCheck.message).toContain('MEILISEARCH_HOST');
+    expect(envCheck.message).toContain('MEILI_HOST');
     expect(envCheck.message).toContain('APP_KEYS');
   });
 
@@ -86,6 +93,23 @@ describe('bootstrap-health 启动自检自愈', () => {
     expect(byName['kb-schema'].level).toBe('fail');
     expect(byName['required-env']).toBeDefined();
     expect(report.failed).toEqual(['kb-schema']);
+  });
+
+  it('admin-locale-perms 有修复动作：healed=true；自愈失败：level=fail 不中断', async () => {
+    const { ensureAdminLocalePermissions } = await import('../admin-locale-perms');
+    (ensureAdminLocalePermissions as any).mockResolvedValueOnce({ patched: 72 });
+    const { strapi } = makeStrapi();
+    const report1 = await runBootstrapHealthcheck(strapi);
+    const check1 = report1.checks.find((c: any) => c.name === 'admin-locale-perms');
+    expect(check1.level).toBe('ok');
+    expect(check1.healed).toBe(true);
+    expect(check1.message).toContain('72');
+
+    (ensureAdminLocalePermissions as any).mockRejectedValueOnce(new Error('i18n not ready'));
+    const report2 = await runBootstrapHealthcheck(strapi);
+    const check2 = report2.checks.find((c: any) => c.name === 'admin-locale-perms');
+    expect(check2.level).toBe('fail');
+    expect(report2.checks.find((c: any) => c.name === 'required-env')).toBeDefined();
   });
 
   it('配置了 REDIS_HOST 但连接失败：warn 不算 fail，report.ok 仍为 true', async () => {

@@ -22,7 +22,8 @@ export interface HealthReport {
 const REQUIRED_ENV = [
   'DATABASE_CLIENT', 'DATABASE_HOST', 'DATABASE_PORT', 'DATABASE_NAME', 'DATABASE_USERNAME', 'DATABASE_PASSWORD',
   'APP_KEYS', 'API_TOKEN_SALT', 'ADMIN_JWT_SECRET', 'TRANSFER_TOKEN_SALT', 'ENCRYPTION_KEY', 'JWT_SECRET',
-  'MEILISEARCH_HOST', 'MEILISEARCH_API_KEY',
+  // 与 src/utils/meilisearch.ts 实际读取的变量名保持一致
+  'MEILI_HOST', 'MEILI_MASTER_KEY',
 ];
 
 export async function runBootstrapHealthcheck(strapi: any): Promise<HealthReport> {
@@ -58,7 +59,36 @@ export async function runBootstrapHealthcheck(strapi: any): Promise<HealthReport
     });
   }
 
-  // 3. 必填 env
+  // 3. admin 本地化权限自愈（Editor/Author 缺 locales 属性 → 文档级 403，幂等修复）
+  try {
+    const { ensureAdminLocalePermissions, ensureEditorContentPermissions } = await import('./admin-locale-perms');
+    const { patched } = await ensureAdminLocalePermissions(strapi);
+    checks.push({
+      name: 'admin-locale-perms',
+      level: 'ok',
+      healed: patched > 0,
+      message: patched > 0 ? `修复 ${patched} 条 Editor/Author 权限的 locales 属性` : 'Editor/Author 本地化权限完整',
+    });
+    // 3b. Editor 权限行自愈（Strapi 只在角色创建时种默认权限，后加的内容类型缺整行 CRUD/publish）
+    const { created, revoked } = await ensureEditorContentPermissions(strapi);
+    if (created > 0 || revoked > 0) {
+      checks.push({
+        name: 'admin-content-perms',
+        level: 'ok',
+        healed: true,
+        message: `Editor 权限行自愈：补建 ${created} 条，回收超管专属类型 ${revoked} 条`,
+      });
+    }
+  } catch (err) {
+    checks.push({
+      name: 'admin-locale-perms',
+      level: 'fail',
+      healed: false,
+      message: `admin 本地化权限自愈失败: ${err instanceof Error ? err.message : err}`,
+    });
+  }
+
+  // 4. 必填 env
   const missing = REQUIRED_ENV.filter((k) => !process.env[k]);
   checks.push(
     missing.length === 0
@@ -66,7 +96,7 @@ export async function runBootstrapHealthcheck(strapi: any): Promise<HealthReport
       : { name: 'required-env', level: 'fail', healed: false, message: `缺少必填环境变量: ${missing.join(', ')}` }
   );
 
-  // 4. Redis（可选但配置了就必须通）
+  // 5. Redis（可选但配置了就必须通）
   if (process.env.REDIS_HOST) {
     let redis: any;
     try {

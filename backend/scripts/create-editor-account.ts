@@ -79,10 +79,34 @@ function parseArgs(argv: string[]): EditorAccountParams {
   return params;
 }
 
+/**
+ * 加载 Strapi 工厂。tsx/esbuild 下原生 import('@strapi/strapi') 会把
+ * @strapi/core 的 ESM dist 拉进来，其内部 `import 'lodash/fp'` 在 node ESM
+ * 解析下要求 lodash/fp/index.js（不存在）而失败；CJS require 走 fp.js 正常。
+ * 因此优先原生 import，失败回退 createRequire（与 strapi develop 的 CJS 链路一致）。
+ */
+async function loadCreateStrapi(): Promise<(opts?: any) => { load: () => Promise<any> }> {
+  try {
+    const m = await import('@strapi/strapi');
+    return (m as any).createStrapi ?? (m as any).default?.createStrapi;
+  } catch {
+    const { createRequire } = await import('module');
+    const req = createRequire(process.cwd() + '/index.js');
+    const m = req('@strapi/strapi');
+    return m.createStrapi ?? m.default?.createStrapi;
+  }
+}
+
 async function main() {
   const params = parseArgs(process.argv);
-  const { createStrapi } = await import('@strapi/strapi');
-  const strapi = await createStrapi().load();
+  const createStrapi = await loadCreateStrapi();
+  // 显式指定 distDir：脚本在 tsx 下运行时 Strapi 的 TS 探测会误判，
+  // 导致去 ./config 加载 .ts 配置报 "extension must be one of .js,.json"
+  const path = await import('path');
+  const strapi = await createStrapi({
+    appDir: process.cwd(),
+    distDir: path.join(process.cwd(), 'dist'),
+  }).load();
   try {
     const result = await manageEditorAccount(strapi, params);
     console.log(`[create-editor-account] ${result.action}: ${result.email}`);

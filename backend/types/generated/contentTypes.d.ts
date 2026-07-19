@@ -441,7 +441,7 @@ export interface AdminUser extends Struct.CollectionTypeSchema {
   };
 }
 
-export interface ApiAiConfigAiConfig extends Struct.ContentTypeSchema {
+export interface ApiAiConfigAiConfig extends Struct.CollectionTypeSchema {
   collectionName: 'ai_configs';
   info: {
     description: 'AI model configuration';
@@ -503,7 +503,7 @@ export interface ApiAiConfigAiConfig extends Struct.ContentTypeSchema {
   };
 }
 
-export interface ApiAppointmentAppointment extends Struct.ContentTypeSchema {
+export interface ApiAppointmentAppointment extends Struct.CollectionTypeSchema {
   collectionName: 'appointments';
   info: {
     description: '\u9884\u7EA6\u8BD5\u542C\u8868\u5355\u63D0\u4EA4';
@@ -595,55 +595,112 @@ export interface ApiCampusCampus extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
     singleton: false;
   };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
   attributes: {
     address: Schema.Attribute.String &
       Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 500;
       }>;
     area: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
       }>;
     businessHours: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 200;
+      }>;
+    contactPerson: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
+      Schema.Attribute.SetMinMaxLength<{
+        maxLength: 100;
       }>;
     coverImage: Schema.Attribute.Media<'images'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    description: Schema.Attribute.Text;
+    description: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     gallery: Schema.Attribute.Media<'images', true>;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<
-      'oneToMany',
-      'api::campus.campus'
-    > &
-      Schema.Attribute.Private;
-    mapEmbed: Schema.Attribute.Text;
+    latitude: Schema.Attribute.Float;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::campus.campus'>;
+    longitude: Schema.Attribute.Float;
+    mapEmbed: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     name: Schema.Attribute.String &
       Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
       }>;
     phone: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 50;
       }>;
     publishedAt: Schema.Attribute.DateTime;
-    seo: Schema.Attribute.Component<'common.seo', false>;
+    seo: Schema.Attribute.Component<'common.seo', false> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
     sortOrder: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     teachers: Schema.Attribute.Relation<'oneToMany', 'api::teacher.teacher'>;
-    transportation: Schema.Attribute.Text;
+    transportation: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
   };
 }
 
-export interface ApiChatMessageChatMessage extends Struct.ContentTypeSchema {
+export interface ApiChatMessageChatMessage extends Struct.CollectionTypeSchema {
   collectionName: 'chat_messages';
   info: {
     description: 'Individual chat message in a session';
@@ -683,7 +740,7 @@ export interface ApiChatMessageChatMessage extends Struct.ContentTypeSchema {
   };
 }
 
-export interface ApiChatSessionChatSession extends Struct.ContentTypeSchema {
+export interface ApiChatSessionChatSession extends Struct.CollectionTypeSchema {
   collectionName: 'chat_sessions';
   info: {
     description: 'AI customer service chat session';
@@ -748,7 +805,7 @@ export interface ApiChatSessionChatSession extends Struct.ContentTypeSchema {
   };
 }
 
-export interface ApiFaqItemFaqItem extends Struct.ContentTypeSchema {
+export interface ApiFaqItemFaqItem extends Struct.CollectionTypeSchema {
   collectionName: 'faq_items';
   info: {
     description: 'Frequently asked question';
@@ -762,9 +819,25 @@ export interface ApiFaqItemFaqItem extends Struct.ContentTypeSchema {
     draftAndPublish: false;
     singleton: false;
   };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
   attributes: {
-    answer: Schema.Attribute.Text & Schema.Attribute.Required;
+    answer: Schema.Attribute.Text &
+      Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     category: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
       }>;
@@ -774,15 +847,19 @@ export interface ApiFaqItemFaqItem extends Struct.ContentTypeSchema {
     feedbackCount: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     helpfulCount: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     isActive: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::faq-item.faq-item'
-    > &
-      Schema.Attribute.Private;
+    >;
     publishedAt: Schema.Attribute.DateTime;
     question: Schema.Attribute.String &
       Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 500;
       }>;
@@ -792,7 +869,7 @@ export interface ApiFaqItemFaqItem extends Struct.ContentTypeSchema {
       Schema.Attribute.DefaultTo<'approved'>;
     sortOrder: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     sourceDocument: Schema.Attribute.Relation<
-      'oneToOne',
+      'manyToOne',
       'api::knowledge-base.knowledge-base'
     >;
     sourceSession: Schema.Attribute.Relation<
@@ -804,6 +881,11 @@ export interface ApiFaqItemFaqItem extends Struct.ContentTypeSchema {
     > &
       Schema.Attribute.DefaultTo<'manual'>;
     tags: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 500;
       }>;
@@ -814,7 +896,7 @@ export interface ApiFaqItemFaqItem extends Struct.ContentTypeSchema {
   };
 }
 
-export interface ApiFeedbackFeedback extends Struct.ContentTypeSchema {
+export interface ApiFeedbackFeedback extends Struct.CollectionTypeSchema {
   collectionName: 'feedbacks';
   info: {
     description: '\u8BBF\u5BA2\u901A\u8FC7\u8054\u7CFB\u8868\u5355\u63D0\u4EA4\u7684\u53CD\u9988';
@@ -873,7 +955,7 @@ export interface ApiFeedbackFeedback extends Struct.ContentTypeSchema {
   };
 }
 
-export interface ApiFooterFooter extends Struct.ContentTypeSchema {
+export interface ApiFooterFooter extends Struct.CollectionTypeSchema {
   collectionName: 'footers';
   info: {
     description: 'Site footer configuration';
@@ -887,25 +969,51 @@ export interface ApiFooterFooter extends Struct.ContentTypeSchema {
     draftAndPublish: false;
     singleton: true;
   };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
   attributes: {
-    aboutText: Schema.Attribute.Text;
+    aboutText: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     copyright: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 500;
       }>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<
-      'oneToMany',
-      'api::footer.footer'
-    > &
-      Schema.Attribute.Private;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::footer.footer'>;
     publishedAt: Schema.Attribute.DateTime;
-    quickLinks: Schema.Attribute.Component<'common.quick-link', true>;
-    seo: Schema.Attribute.Component<'common.seo', false>;
-    socialLinks: Schema.Attribute.Component<'common.social-link', true>;
+    quickLinks: Schema.Attribute.Component<'common.quick-link', true> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    seo: Schema.Attribute.Component<'common.seo', false> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    socialLinks: Schema.Attribute.Component<'common.social-link', true> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
@@ -913,7 +1021,7 @@ export interface ApiFooterFooter extends Struct.ContentTypeSchema {
 }
 
 export interface ApiKnowledgeBaseKnowledgeBase
-  extends Struct.ContentTypeSchema {
+  extends Struct.CollectionTypeSchema {
   collectionName: 'knowledge_bases';
   info: {
     description: 'Knowledge base document with vectorization support';
@@ -927,36 +1035,60 @@ export interface ApiKnowledgeBaseKnowledgeBase
     draftAndPublish: false;
     singleton: false;
   };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
   attributes: {
     category: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
       }>;
     chunkCount: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
-    content: Schema.Attribute.Text;
+    content: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     failedAt: Schema.Attribute.DateTime;
     faqs: Schema.Attribute.Relation<'oneToMany', 'api::faq-item.faq-item'>;
     file: Schema.Attribute.Media<'files' | 'images'>;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::knowledge-base.knowledge-base'
-    > &
-      Schema.Attribute.Private;
+    >;
     priority: Schema.Attribute.Enumeration<['low', 'medium', 'high']> &
       Schema.Attribute.DefaultTo<'medium'>;
     processedAt: Schema.Attribute.DateTime;
     publishedAt: Schema.Attribute.DateTime;
     retryCount: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
-    seo: Schema.Attribute.Component<'common.seo', false>;
+    seo: Schema.Attribute.Component<'common.seo', false> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     sourceType: Schema.Attribute.Enumeration<
       ['manual', 'faq', 'pdf', 'webpage', 'chat-history', 'content-sync']
     > &
       Schema.Attribute.DefaultTo<'manual'>;
     sourceUrl: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 500;
       }>;
@@ -965,22 +1097,42 @@ export interface ApiKnowledgeBaseKnowledgeBase
     > &
       Schema.Attribute.DefaultTo<'pending'>;
     statusMessage: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 500;
       }>;
     tags: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 500;
       }>;
     title: Schema.Attribute.String &
       Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 200;
       }>;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    vectorDbIds: Schema.Attribute.JSON;
+    vectorDbIds: Schema.Attribute.JSON &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     vectorizationStatus: Schema.Attribute.Enumeration<
       ['pending', 'processing', 'completed', 'failed']
     > &
@@ -988,7 +1140,7 @@ export interface ApiKnowledgeBaseKnowledgeBase
   };
 }
 
-export interface ApiNavigationNavigation extends Struct.ContentTypeSchema {
+export interface ApiNavigationNavigation extends Struct.CollectionTypeSchema {
   collectionName: 'navigations';
   info: {
     description: 'Site navigation menu items';
@@ -1002,6 +1154,11 @@ export interface ApiNavigationNavigation extends Struct.ContentTypeSchema {
     draftAndPublish: false;
     singleton: false;
   };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
   attributes: {
     children: Schema.Attribute.Relation<
       'oneToMany',
@@ -1011,23 +1168,35 @@ export interface ApiNavigationNavigation extends Struct.ContentTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     icon: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
       }>;
     isActive: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     isExternal: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::navigation.navigation'
-    > &
-      Schema.Attribute.Private;
+    >;
     name: Schema.Attribute.String &
       Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
       }>;
-    parent: Schema.Attribute.Relation<'oneToOne', 'api::navigation.navigation'>;
+    parent: Schema.Attribute.Relation<
+      'manyToOne',
+      'api::navigation.navigation'
+    >;
     position: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     publishedAt: Schema.Attribute.DateTime;
     updatedAt: Schema.Attribute.DateTime;
@@ -1035,6 +1204,11 @@ export interface ApiNavigationNavigation extends Struct.ContentTypeSchema {
       Schema.Attribute.Private;
     url: Schema.Attribute.String &
       Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 500;
       }>;
@@ -1053,34 +1227,63 @@ export interface ApiNewsArticleNewsArticle extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
     singleton: false;
   };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
   attributes: {
     category: Schema.Attribute.Enumeration<
       ['company_news', 'industry_news', 'event_notice']
     > &
       Schema.Attribute.DefaultTo<'company_news'>;
-    content: Schema.Attribute.RichText;
+    content: Schema.Attribute.RichText &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     coverImage: Schema.Attribute.Media<'images'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     excerpt: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 500;
       }>;
     isFeatured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::news-article.news-article'
-    > &
-      Schema.Attribute.Private;
+    >;
     publishedAt: Schema.Attribute.DateTime;
-    seo: Schema.Attribute.Component<'common.seo', false>;
+    seo: Schema.Attribute.Component<'common.seo', false> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
     sortOrder: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
-    tags: Schema.Attribute.String;
+    tags: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     title: Schema.Attribute.String &
       Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 200;
       }>;
@@ -1091,7 +1294,7 @@ export interface ApiNewsArticleNewsArticle extends Struct.CollectionTypeSchema {
   };
 }
 
-export interface ApiPagePage extends Struct.ContentTypeSchema {
+export interface ApiPagePage extends Struct.CollectionTypeSchema {
   collectionName: 'pages';
   info: {
     description: '\u52A8\u6001\u9875\u9762\uFF0C\u652F\u6301\u62D6\u62FD\u533A\u5757\u7EC4\u88C5';
@@ -1105,6 +1308,11 @@ export interface ApiPagePage extends Struct.ContentTypeSchema {
     draftAndPublish: true;
     singleton: false;
   };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
   attributes: {
     children: Schema.Attribute.Relation<'oneToMany', 'api::page.page'>;
     createdAt: Schema.Attribute.DateTime;
@@ -1115,10 +1323,9 @@ export interface ApiPagePage extends Struct.ContentTypeSchema {
       ['full-width', 'boxed', 'sidebar-left', 'sidebar-right']
     > &
       Schema.Attribute.DefaultTo<'full-width'>;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
-    localizations: Schema.Attribute.Relation<'oneToMany', 'api::page.page'> &
-      Schema.Attribute.Private;
-    parent: Schema.Attribute.Relation<'oneToOne', 'api::page.page'>;
+    locale: Schema.Attribute.String;
+    localizations: Schema.Attribute.Relation<'oneToMany', 'api::page.page'>;
+    parent: Schema.Attribute.Relation<'manyToOne', 'api::page.page'>;
     publishedAt: Schema.Attribute.DateTime;
     sections: Schema.Attribute.DynamicZone<
       [
@@ -1135,8 +1342,18 @@ export interface ApiPagePage extends Struct.ContentTypeSchema {
         'section.gallery',
         'section.floating-button',
       ]
-    >;
-    seo: Schema.Attribute.Component<'common.seo', false>;
+    > &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    seo: Schema.Attribute.Component<'common.seo', false> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     showFooter: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     showNavigation: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
     slug: Schema.Attribute.String &
@@ -1147,6 +1364,11 @@ export interface ApiPagePage extends Struct.ContentTypeSchema {
       }>;
     title: Schema.Attribute.String &
       Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 200;
       }>;
@@ -1157,7 +1379,7 @@ export interface ApiPagePage extends Struct.ContentTypeSchema {
 }
 
 export interface ApiProductCategoryProductCategory
-  extends Struct.ContentTypeSchema {
+  extends Struct.CollectionTypeSchema {
   collectionName: 'product_categories';
   info: {
     description: 'Product category for organizing products';
@@ -1171,6 +1393,11 @@ export interface ApiProductCategoryProductCategory
     draftAndPublish: false;
     singleton: false;
   };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
   attributes: {
     children: Schema.Attribute.Relation<
       'oneToMany',
@@ -1179,22 +1406,31 @@ export interface ApiProductCategoryProductCategory
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    description: Schema.Attribute.Text;
+    description: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     image: Schema.Attribute.Media;
     isActive: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::product-category.product-category'
-    > &
-      Schema.Attribute.Private;
+    >;
     name: Schema.Attribute.String &
       Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
       }>;
     parent: Schema.Attribute.Relation<
-      'oneToOne',
+      'manyToOne',
       'api::product-category.product-category'
     >;
     position: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
@@ -1212,7 +1448,7 @@ export interface ApiProductCategoryProductCategory
   };
 }
 
-export interface ApiProductSpecProductSpec extends Struct.ContentTypeSchema {
+export interface ApiProductSpecProductSpec extends Struct.CollectionTypeSchema {
   collectionName: 'product_specs';
   info: {
     description: 'Product specification/attribute for comparison';
@@ -1226,6 +1462,11 @@ export interface ApiProductSpecProductSpec extends Struct.ContentTypeSchema {
     draftAndPublish: false;
     singleton: false;
   };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
   attributes: {
     code: Schema.Attribute.String &
       Schema.Attribute.Required &
@@ -1237,18 +1478,27 @@ export interface ApiProductSpecProductSpec extends Struct.ContentTypeSchema {
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     isVisible: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::product-spec.product-spec'
-    > &
-      Schema.Attribute.Private;
+    >;
     name: Schema.Attribute.String &
       Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
       }>;
-    options: Schema.Attribute.String;
+    options: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     position: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     publishedAt: Schema.Attribute.DateTime;
     type: Schema.Attribute.Enumeration<
@@ -1256,6 +1506,11 @@ export interface ApiProductSpecProductSpec extends Struct.ContentTypeSchema {
     > &
       Schema.Attribute.DefaultTo<'text'>;
     unit: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 20;
       }>;
@@ -1265,7 +1520,7 @@ export interface ApiProductSpecProductSpec extends Struct.ContentTypeSchema {
   };
 }
 
-export interface ApiProductProduct extends Struct.ContentTypeSchema {
+export interface ApiProductProduct extends Struct.CollectionTypeSchema {
   collectionName: 'products';
   info: {
     description: '\u4EA7\u54C1\u76EE\u5F55\u9879';
@@ -1279,6 +1534,11 @@ export interface ApiProductProduct extends Struct.ContentTypeSchema {
     draftAndPublish: true;
     singleton: false;
   };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
   attributes: {
     categories: Schema.Attribute.Relation<
       'manyToMany',
@@ -1287,28 +1547,57 @@ export interface ApiProductProduct extends Struct.ContentTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    description: Schema.Attribute.Text;
+    description: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     images: Schema.Attribute.Media<undefined, true>;
     isFeatured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
     isInStock: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<true>;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::product.product'
-    > &
-      Schema.Attribute.Private;
+    >;
     name: Schema.Attribute.String &
       Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 200;
       }>;
-    objectives: Schema.Attribute.Component<'course.objective', true>;
+    objectives: Schema.Attribute.Component<'course.objective', true> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     originalPrice: Schema.Attribute.Float;
-    outline: Schema.Attribute.Component<'course.module', true>;
+    outline: Schema.Attribute.Component<'course.module', true> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     price: Schema.Attribute.Float;
     publishedAt: Schema.Attribute.DateTime;
-    seo: Schema.Attribute.Component<'common.seo', false>;
+    seo: Schema.Attribute.Component<'common.seo', false> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     shortDescription: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 500;
       }>;
@@ -1328,10 +1617,25 @@ export interface ApiProductProduct extends Struct.ContentTypeSchema {
       'manyToMany',
       'api::product-spec.product-spec'
     >;
-    specValues: Schema.Attribute.JSON;
+    specValues: Schema.Attribute.JSON &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     stock: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
-    teachingMethod: Schema.Attribute.RichText;
-    testimonials: Schema.Attribute.Component<'course.testimonial', true>;
+    teachingMethod: Schema.Attribute.RichText &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
+    testimonials: Schema.Attribute.Component<'course.testimonial', true> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     thumbnail: Schema.Attribute.Media;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
@@ -1339,7 +1643,8 @@ export interface ApiProductProduct extends Struct.ContentTypeSchema {
   };
 }
 
-export interface ApiSiteSettingsSiteSettings extends Struct.ContentTypeSchema {
+export interface ApiSiteSettingsSiteSettings
+  extends Struct.CollectionTypeSchema {
   collectionName: 'site_settings';
   info: {
     description: '\u5168\u5C40\u7AD9\u70B9\u8BBE\u7F6E\u548C\u914D\u7F6E';
@@ -1353,44 +1658,88 @@ export interface ApiSiteSettingsSiteSettings extends Struct.ContentTypeSchema {
     draftAndPublish: false;
     singleton: true;
   };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
   attributes: {
-    address: Schema.Attribute.Text;
+    address: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     email: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 255;
       }>;
     favicon: Schema.Attribute.Media;
     icp: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
       }>;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::site-settings.site-settings'
-    > &
-      Schema.Attribute.Private;
+    >;
     logo: Schema.Attribute.Media;
     name: Schema.Attribute.String &
       Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 255;
         minLength: 1;
       }>;
     phone: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 50;
       }>;
     publicSecurityRecord: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
       }>;
     publishedAt: Schema.Attribute.DateTime;
-    seo: Schema.Attribute.Component<'common.seo', false>;
+    seo: Schema.Attribute.Component<'common.seo', false> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     slogan: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 500;
       }>;
@@ -1398,6 +1747,11 @@ export interface ApiSiteSettingsSiteSettings extends Struct.ContentTypeSchema {
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
     wechat: Schema.Attribute.String &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
       }>;
@@ -1416,37 +1770,71 @@ export interface ApiTeacherTeacher extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
     singleton: false;
   };
+  pluginOptions: {
+    i18n: {
+      localized: true;
+    };
+  };
   attributes: {
-    achievements: Schema.Attribute.JSON;
+    achievements: Schema.Attribute.JSON &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     avatar: Schema.Attribute.Media<'images'>;
     campus: Schema.Attribute.Relation<'manyToOne', 'api::campus.campus'>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
-    education: Schema.Attribute.Text;
+    education: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     isFeatured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    locale: Schema.Attribute.String & Schema.Attribute.Private;
+    locale: Schema.Attribute.String;
     localizations: Schema.Attribute.Relation<
       'oneToMany',
       'api::teacher.teacher'
-    > &
-      Schema.Attribute.Private;
+    >;
     name: Schema.Attribute.String &
       Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 100;
       }>;
     publishedAt: Schema.Attribute.DateTime;
-    seo: Schema.Attribute.Component<'common.seo', false>;
+    seo: Schema.Attribute.Component<'common.seo', false> &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     slug: Schema.Attribute.UID<'name'> & Schema.Attribute.Required;
     sortOrder: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     subject: Schema.Attribute.Enumeration<
       ['pinyin', 'math', 'english', 'comprehensive']
     >;
-    teachingFeatures: Schema.Attribute.Text;
+    teachingFeatures: Schema.Attribute.Text &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }>;
     teachingYears: Schema.Attribute.Integer & Schema.Attribute.DefaultTo<0>;
     title: Schema.Attribute.String &
       Schema.Attribute.Required &
+      Schema.Attribute.SetPluginOptions<{
+        i18n: {
+          localized: true;
+        };
+      }> &
       Schema.Attribute.SetMinMaxLength<{
         maxLength: 200;
       }>;
@@ -1456,7 +1844,8 @@ export interface ApiTeacherTeacher extends Struct.CollectionTypeSchema {
   };
 }
 
-export interface ApiVectorConfigVectorConfig extends Struct.ContentTypeSchema {
+export interface ApiVectorConfigVectorConfig
+  extends Struct.CollectionTypeSchema {
   collectionName: 'vector_configs';
   info: {
     description: 'Vector database configuration';
