@@ -62,4 +62,21 @@ describe('register() 生命周期订阅', () => {
     );
     expect(createKb).not.toHaveBeenCalled();
   });
+
+  it('reconcile 抛错时 handler 不 reject（错误隔离，不阻断后台保存）', async () => {
+    let captured: any = null;
+    const subscribe = vi.fn((s: any) => {
+      if (s.models[0] === 'api::product.product') captured = s;
+    });
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const strapi: any = {
+      db: { lifecycles: { subscribe }, query: vi.fn(() => ({ findOne: vi.fn() })) },
+      documents: vi.fn(() => { throw new Error('DB down'); }),
+      service: vi.fn(() => ({ deleteVectors: vi.fn() })),
+    };
+    await index.register({ strapi });
+    await expect(captured.afterCreate({ result: { documentId: 'p1', locale: 'zh-CN' } })).resolves.toBeUndefined();
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+  });
 });

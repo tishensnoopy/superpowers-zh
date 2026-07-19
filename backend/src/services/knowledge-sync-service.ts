@@ -176,27 +176,53 @@ export async function syncWebsiteContent(strapi: any): Promise<{ synced: number;
   return { synced, updated, errors };
 }
 
-export async function syncSingleContent(strapi: any, uid: string, record: any): Promise<void> {
-  const config = CONTENT_TYPES.find(c => c.uid === uid);
-  if (!config) return;
+/**
+ * 以"该 documentId+locale 当前是否存在 published 版本"为唯一事实来源，对单条内容做 KB 对账。
+ * - 有 published 版本 → upsert KB 文档（置回 pending 触发重向量化）
+ * - 无 published 版本（草稿/取消发布/已删除）→ 删除 KB 文档并清向量
+ * 生命周期三个钩子（afterCreate/afterUpdate/afterDelete）都调它，事件载荷不可信。
+ */
+export async function reconcileContent(strapi: any, uid: string, ref: { documentId?: string; locale?: string }): Promise<void> {
+  const config = CONTENT_TYPES.find((c) => c.uid === uid);
+  if (!config || !ref?.documentId) return;
 
-  const locale = normalizeLocale(record?.locale);
-  const sourceUrl = buildSourceUrl(uid, record);
-  const content = config.serialize(record);
+  const locale = normalizeLocale(ref.locale);
+  const sourceUrl = buildSourceUrl(uid, { documentId: ref.documentId, locale });
+
+  const published = await strapi.documents(uid).findOne({
+    documentId: ref.documentId,
+    locale,
+    status: 'published',
+    populate: '*',
+  });
 
   const existing = await strapi.db.query('api::knowledge-base.knowledge-base').findOne({
     where: { sourceUrl },
   });
 
+  if (!published) {
+    if (existing) {
+      const kbService = strapi.service('api::knowledge-base.knowledge-base');
+      await kbService.deleteVectors(existing.id);
+      await strapi.documents('api::knowledge-base.knowledge-base').delete({
+        documentId: existing.documentId,
+      });
+    }
+    return;
+  }
+
+  const content = config.serialize(published);
+  const title = published.title || published.name || `${config.name}文档`;
+
   if (existing) {
     await strapi.documents('api::knowledge-base.knowledge-base').update({
       documentId: existing.documentId,
-      data: { title: record.title || record.name || '文档', content, locale, status: 'pending' },
+      data: { title, content, locale, status: 'pending' },
     });
   } else {
     await strapi.documents('api::knowledge-base.knowledge-base').create({
       data: {
-        title: record.title || record.name || '文档',
+        title,
         content,
         sourceType: 'content-sync',
         sourceUrl,
@@ -209,28 +235,12 @@ export async function syncSingleContent(strapi: any, uid: string, record: any): 
   }
 }
 
-export async function deleteSyncedContent(strapi: any, uid: string, record: any): Promise<void> {
-  const sourceUrl = buildSourceUrl(uid, record);
-  const existing = await strapi.db.query('api::knowledge-base.knowledge-base').findOne({
-    where: { sourceUrl },
-  });
-  if (existing) {
-    const kbService = strapi.service('api::knowledge-base.knowledge-base');
-    await kbService.deleteVectors(existing.id);
-    await strapi.documents('api::knowledge-base.knowledge-base').delete({
-      documentId: existing.documentId,
-    });
-  }
+/** 生命周期 create/update 入口：薄封装 reconcileContent（忽略事件载荷内容，只取 documentId+locale） */
+export async function syncSingleContent(strapi: any, uid: string, record: any): Promise<void> {
+  return reconcileContent(strapi, uid, { documentId: record?.documentId, locale: record?.locale });
 }
 
-/**
- * 占位实现：暂复用 syncSingleContent 逻辑，保证 register 可运行。
- * 后续任务将替换为以"当前是否存在 published 版本"为唯一事实来源的 reconcile 薄封装。
- */
-export async function reconcileContent(
-  strapi: any,
-  uid: string,
-  ref: { documentId: string; locale?: string },
-): Promise<void> {
-  await syncSingleContent(strapi, uid, { documentId: ref.documentId, locale: ref.locale });
+/** 生命周期 delete 入口：薄封装 reconcileContent（无 published 版本即删除） */
+export async function deleteSyncedContent(strapi: any, uid: string, record: any): Promise<void> {
+  return reconcileContent(strapi, uid, { documentId: record?.documentId, locale: record?.locale });
 }

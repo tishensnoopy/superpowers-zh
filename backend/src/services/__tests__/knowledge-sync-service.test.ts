@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { serializeProduct, serializeNews, serializeTeacher, serializeCampus, serializeFaq, syncWebsiteContent, syncSingleContent, deleteSyncedContent } from '../knowledge-sync-service';
+import { serializeProduct, serializeNews, serializeTeacher, serializeCampus, serializeFaq, syncWebsiteContent, syncSingleContent, deleteSyncedContent, reconcileContent } from '../knowledge-sync-service';
 
 describe('knowledge-sync-service 序列化规则', () => {
   it('课程序列化应包含名称/简介/教学目标/教学方式/价格', () => {
@@ -177,100 +177,136 @@ describe('syncWebsiteContent', () => {
   });
 });
 
-describe('syncSingleContent with locale', () => {
-  it('writes locale=en-US to knowledge_base when record has locale=en-US', async () => {
-    const mockFindOne = vi.fn().mockResolvedValue(null);
-    const mockCreate = vi.fn().mockResolvedValue({});
-    const mockStrapi = {
-      db: { query: vi.fn().mockReturnValue({ findOne: mockFindOne }) },
-      documents: vi.fn().mockReturnValue({ create: mockCreate }),
-    } as any;
+describe('reconcileContent（published 为唯一事实来源）', () => {
+  function makeStrapi(opts: { published?: any; existingKb?: any }) {
+    const findOnePublished = vi.fn().mockResolvedValue(opts.published ?? null);
+    const findOneKb = vi.fn().mockResolvedValue(opts.existingKb ?? null);
+    const createKb = vi.fn().mockResolvedValue({ id: 10 });
+    const updateKb = vi.fn().mockResolvedValue({});
+    const deleteKb = vi.fn().mockResolvedValue({});
+    const deleteVectors = vi.fn().mockResolvedValue(true);
+    const strapi: any = {
+      documents: vi.fn((uid: string) => {
+        if (uid === 'api::knowledge-base.knowledge-base') {
+          return { create: createKb, update: updateKb, delete: deleteKb };
+        }
+        return { findOne: findOnePublished };
+      }),
+      db: { query: vi.fn(() => ({ findOne: findOneKb })) },
+      service: vi.fn(() => ({ deleteVectors })),
+    };
+    return { strapi, findOnePublished, findOneKb, createKb, updateKb, deleteKb, deleteVectors };
+  }
 
-    await syncSingleContent(mockStrapi, 'api::product.product', {
-      documentId: 'doc1',
-      name: 'English Course',
-      description: 'desc',
-      locale: 'en-US',
+  it('已发布内容 → 创建 KB 文档（sourceUrl 含 locale）', async () => {
+    const { strapi, createKb } = makeStrapi({
+      published: { documentId: 'p1', name: '幼小衔接全能班', price: 3800, locale: 'zh-CN' },
     });
-
-    expect(mockCreate).toHaveBeenCalledWith(
+    await reconcileContent(strapi, 'api::product.product', { documentId: 'p1', locale: 'zh-CN' });
+    expect(createKb).toHaveBeenCalledWith(
       expect.objectContaining({
-        data: expect.objectContaining({ locale: 'en-US' }),
-      })
-    );
-  });
-
-  it('writes locale=zh-CN when record has no locale field', async () => {
-    const mockFindOne = vi.fn().mockResolvedValue(null);
-    const mockCreate = vi.fn().mockResolvedValue({});
-    const mockStrapi = {
-      db: { query: vi.fn().mockReturnValue({ findOne: mockFindOne }) },
-      documents: vi.fn().mockReturnValue({ create: mockCreate }),
-    } as any;
-
-    await syncSingleContent(mockStrapi, 'api::product.product', {
-      documentId: 'doc2',
-      name: '中文课程',
-    });
-
-    expect(mockCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ locale: 'zh-CN' }),
-      })
-    );
-  });
-
-  it('creates two independent records for same documentId different locales', async () => {
-    const mockFindOne = vi.fn().mockResolvedValue(null);
-    const mockCreate = vi.fn().mockResolvedValue({});
-    const mockStrapi = {
-      db: { query: vi.fn().mockReturnValue({ findOne: mockFindOne }) },
-      documents: vi.fn().mockReturnValue({ create: mockCreate }),
-    } as any;
-
-    await syncSingleContent(mockStrapi, 'api::product.product', {
-      documentId: 'doc1',
-      name: '中文课程',
-      locale: 'zh-CN',
-    });
-    await syncSingleContent(mockStrapi, 'api::product.product', {
-      documentId: 'doc1',
-      name: 'English Course',
-      locale: 'en-US',
-    });
-
-    expect(mockCreate).toHaveBeenCalledTimes(2);
-    const firstCall = mockCreate.mock.calls[0][0].data;
-    const secondCall = mockCreate.mock.calls[1][0].data;
-    expect(firstCall.locale).toBe('zh-CN');
-    expect(secondCall.locale).toBe('en-US');
-    // sourceUrl should differ by locale
-    expect(firstCall.sourceUrl).not.toBe(secondCall.sourceUrl);
-  });
-
-  it('deleteSyncedContent only deletes matching documentId + locale', async () => {
-    const mockFindOne = vi.fn().mockResolvedValue({ id: 5, documentId: 'kb1' });
-    const mockDeleteVectors = vi.fn();
-    const mockDelete = vi.fn();
-    const mockStrapi = {
-      db: { query: vi.fn().mockReturnValue({ findOne: mockFindOne }) },
-      documents: vi.fn().mockReturnValue({ delete: mockDelete }),
-      service: vi.fn().mockReturnValue({ deleteVectors: mockDeleteVectors }),
-    } as any;
-
-    await deleteSyncedContent(mockStrapi, 'api::product.product', {
-      documentId: 'doc1',
-      locale: 'en-US',
-    });
-
-    expect(mockFindOne).toHaveBeenCalledWith(
-      expect.objectContaining({
-        where: expect.objectContaining({
-          sourceUrl: 'strapi://api::product.product/doc1?locale=en-US',
+        data: expect.objectContaining({
+          title: '幼小衔接全能班',
+          sourceType: 'content-sync',
+          sourceUrl: 'strapi://api::product.product/p1?locale=zh-CN',
+          locale: 'zh-CN',
+          status: 'pending',
         }),
       })
     );
-    expect(mockDeleteVectors).toHaveBeenCalledWith(5);
-    expect(mockDelete).toHaveBeenCalled();
+  });
+
+  it('已发布内容 + 已有 KB → 更新并置回 pending（触发重向量化）', async () => {
+    const { strapi, updateKb, createKb } = makeStrapi({
+      published: { documentId: 'p1', name: '改名后的课程', locale: 'zh-CN' },
+      existingKb: { id: 5, documentId: 'kb1' },
+    });
+    await reconcileContent(strapi, 'api::product.product', { documentId: 'p1', locale: 'zh-CN' });
+    expect(updateKb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        documentId: 'kb1',
+        data: expect.objectContaining({ title: '改名后的课程', status: 'pending' }),
+      })
+    );
+    expect(createKb).not.toHaveBeenCalled();
+  });
+
+  it('草稿保存（无 published 版本）且 KB 无记录 → 不创建任何文档', async () => {
+    const { strapi, createKb, deleteKb } = makeStrapi({ published: null });
+    await reconcileContent(strapi, 'api::product.product', { documentId: 'p1', locale: 'zh-CN' });
+    expect(createKb).not.toHaveBeenCalled();
+    expect(deleteKb).not.toHaveBeenCalled();
+  });
+
+  it('取消发布/删除（无 published 版本）且 KB 有记录 → 删 KB 文档并清向量', async () => {
+    const { strapi, deleteKb, deleteVectors } = makeStrapi({
+      published: null,
+      existingKb: { id: 5, documentId: 'kb1' },
+    });
+    await reconcileContent(strapi, 'api::product.product', { documentId: 'p1', locale: 'zh-CN' });
+    expect(deleteVectors).toHaveBeenCalledWith(5);
+    expect(deleteKb).toHaveBeenCalledWith({ documentId: 'kb1' });
+  });
+
+  it('查询 published 版本带 status+populate（objectives 等组件字段不丢失）', async () => {
+    const { strapi, findOnePublished } = makeStrapi({
+      published: { documentId: 'p1', name: 'x', locale: 'zh-CN' },
+    });
+    await reconcileContent(strapi, 'api::product.product', { documentId: 'p1', locale: 'zh-CN' });
+    expect(findOnePublished).toHaveBeenCalledWith(
+      expect.objectContaining({
+        documentId: 'p1',
+        locale: 'zh-CN',
+        status: 'published',
+        populate: '*',
+      })
+    );
+  });
+
+  it('en-US locale → sourceUrl 带 locale=en-US', async () => {
+    const { strapi, createKb } = makeStrapi({
+      published: { documentId: 'p1', name: 'English Course', locale: 'en-US' },
+    });
+    await reconcileContent(strapi, 'api::product.product', { documentId: 'p1', locale: 'en-US' });
+    expect(createKb).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          sourceUrl: 'strapi://api::product.product/p1?locale=en-US',
+          locale: 'en-US',
+        }),
+      })
+    );
+  });
+
+  it('未知 UID → 静默返回不报错', async () => {
+    const { strapi, createKb } = makeStrapi({ published: { documentId: 'x' } });
+    await expect(
+      reconcileContent(strapi, 'api::unknown.unknown', { documentId: 'x', locale: 'zh-CN' })
+    ).resolves.toBeUndefined();
+    expect(createKb).not.toHaveBeenCalled();
+  });
+
+  it('序列化用 published 版本数据，不用事件载荷（syncSingleContent 薄封装验证）', async () => {
+    const { strapi, createKb } = makeStrapi({
+      published: { documentId: 'p1', name: '正式名称', locale: 'zh-CN' },
+    });
+    await syncSingleContent(strapi, 'api::product.product', {
+      documentId: 'p1',
+      name: 'DRAFT草稿名',
+      locale: 'zh-CN',
+    });
+    expect(createKb).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ title: '正式名称' }) })
+    );
+  });
+
+  it('deleteSyncedContent 同样走 reconcile（条目删除 → KB 删除）', async () => {
+    const { strapi, deleteKb, deleteVectors } = makeStrapi({
+      published: null,
+      existingKb: { id: 7, documentId: 'kb9' },
+    });
+    await deleteSyncedContent(strapi, 'api::product.product', { documentId: 'p1', locale: 'en-US' });
+    expect(deleteVectors).toHaveBeenCalledWith(7);
+    expect(deleteKb).toHaveBeenCalledWith({ documentId: 'kb9' });
   });
 });

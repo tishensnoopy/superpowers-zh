@@ -14,11 +14,16 @@ export default {
         const handler = async (event: any) => {
           const record = event?.result;
           if (!record?.documentId) return;
-          await reconcileContent(strapi, uid, {
-            documentId: record.documentId,
-            locale: record.locale,
-          });
-          console.log(`[Lifecycle] Reconciled ${uid} (${record.documentId}, ${record.locale ?? 'zh-CN'})`);
+          try {
+            await reconcileContent(strapi, uid, {
+              documentId: record.documentId,
+              locale: record.locale,
+            });
+            console.log(`[Lifecycle] Reconciled ${uid} (${record.documentId}, ${record.locale ?? 'zh-CN'})`);
+          } catch (err) {
+            // 错误隔离：reconcile 失败不阻断后台保存，仅告警
+            console.warn(`[Lifecycle] Reconcile failed for ${uid} (${record.documentId}):`, err);
+          }
         };
         strapi.db.lifecycles.subscribe({
           models: [uid],
