@@ -157,6 +157,8 @@ describe('POST /api/admin/servers/[id]/provision', () => {
       expect(cmd.type).toBe('command:provision');
       expect(cmd.bundleId).toBe(bundleId);
       expect(cmd.bundleUrl).toBe(`/api/agent/bundles/${bundleId}/download`);
+      // agent executor 强依赖 centralApiUrl 拼接下载地址（env 优先，origin 兜底）
+      expect(cmd.centralApiUrl).toBeTruthy();
       // APP_KEYS：4 段逗号拼接（3 个逗号），每段为足够长的随机密钥
       const appKeys = cmd.envVars.APP_KEYS.split(',');
       expect(appKeys).toHaveLength(4);
@@ -179,6 +181,34 @@ describe('POST /api/admin/servers/[id]/provision', () => {
       body: JSON.stringify({}),
     });
     expect(res.status).toBe(409);
+  });
+
+  it('显式传非 ready bundleId → 404', async () => {
+    const buildingBundleId = await insertBundle('building');
+    const res = await fetch(`${BASE}/api/admin/servers/${serverId}/provision`, {
+      method: 'POST',
+      headers: adminHeaders(),
+      body: JSON.stringify({ bundleId: buildingBundleId }),
+    });
+    expect(res.status).toBe(404);
+    const body = await res.json();
+    expect(body.error).toMatch(/not found or not ready/i);
+  });
+
+  it('显式传其他 customer 的 configId → 404', async () => {
+    const other = await pool.query(`INSERT INTO customers (name) VALUES ('其他客户') RETURNING id`);
+    const otherCfg = await pool.query(
+      `INSERT INTO customer_configs (customer_id, version, env_overrides, published_at) VALUES ($1,1,'{}',NOW()) RETURNING id`,
+      [other.rows[0].id]
+    );
+    const res = await fetch(`${BASE}/api/admin/servers/${serverId}/provision`, {
+      method: 'POST',
+      headers: adminHeaders(),
+      body: JSON.stringify({ configId: otherCfg.rows[0].id }),
+    });
+    expect(res.status).toBe(404);
+    const body = await res.json();
+    expect(body.error).toMatch(/config not found/i);
   });
 });
 

@@ -33,6 +33,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     );
     if (latest.rows.length === 0) return errorResponse('No published config for this customer.', 400);
     resolvedConfigId = (latest.rows[0] as { id: string }).id;
+  } else {
+    const owned = await query(`SELECT id FROM customer_configs WHERE id=$1 AND customer_id=$2`, [resolvedConfigId, customerId]);
+    if (owned.rows.length === 0) return errorResponse('Config not found for this customer', 404);
   }
   const cfg = await query(`SELECT env_overrides FROM customer_configs WHERE id=$1`, [resolvedConfigId]);
   const envOverrides = (cfg.rows[0] as { env_overrides: Record<string, string> } | undefined)?.env_overrides ?? {};
@@ -43,6 +46,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     const latest = await query(`SELECT id FROM bundles WHERE status='ready' ORDER BY created_at DESC LIMIT 1`);
     if (latest.rows.length === 0) return errorResponse('No ready bundle. Build a bundle first.', 400);
     bundleId = (latest.rows[0] as { id: string }).id;
+  } else {
+    const b = await query(`SELECT id FROM bundles WHERE id=$1 AND status='ready'`, [bundleId]);
+    if (b.rows.length === 0) return errorResponse('Bundle not found or not ready', 404);
   }
 
   if (!isOnline(params.id)) return errorResponse('Agent is offline.', 409);
@@ -62,6 +68,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     jobId: job.id,
     bundleId,
     bundleUrl: `/api/agent/bundles/${bundleId}/download`,
+    centralApiUrl: process.env.CENTRAL_PUBLIC_URL ?? req.nextUrl.origin,
     envVars,
     mode,
   };
@@ -75,7 +82,11 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       const msg = err instanceof Error ? err.message : String(err);
       if (/job not found/.test(msg)) throw err;
       if (/invalid transition/.test(msg)) {
-        await updateJobStatus(job.id, 'cancelled', { errorMessage: 'send failed' }).catch(() => {});
+        try {
+          await updateJobStatus(job.id, 'cancelled', { errorMessage: 'send failed' });
+        } catch (fallbackErr: unknown) {
+          console.warn('[provision] concurrent job update during send-failure cleanup:', fallbackErr);
+        }
       } else throw err;
     }
     return errorResponse('Failed to send provision command', 503);

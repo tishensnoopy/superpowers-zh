@@ -40,7 +40,7 @@ if ! command -v docker >/dev/null 2>&1; then
   curl -fsSL https://get.docker.com | sh
   systemctl enable --now docker
 fi
-docker compose version >/dev/null 2>&1 || apt-get update -qq && apt-get install -y -qq docker-compose-v2
+docker compose version >/dev/null 2>&1 || { apt-get update -qq && apt-get install -y -qq docker-compose-v2; }
 command -v rsync >/dev/null 2>&1 || apt-get install -y -qq rsync
 
 echo "[2/4] 向 central 注册（enroll）..."
@@ -85,6 +85,7 @@ echo "✅ agent 已上线。请回 central 对该服务器执行「一键开通�
     headers: {
       'content-type': 'text/plain; charset=utf-8',
       'content-disposition': 'attachment; filename="bootstrap-agent.sh"',
+      'x-content-type-options': 'nosniff',
     },
   });
 }
