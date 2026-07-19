@@ -2,6 +2,10 @@
 #
 # 佑森小课堂 —— 全栈 Docker 部署脚本
 #
+# ⚠️  主要部署入口已迁移至 central agent bundle 管道（central/app/(dashboard)/bundles）。
+#     此脚本保留用于：① 裸机首次引导（agent enroll 前）；② 应急手动部署。
+#     日常发布请使用 central 后台的"发布包"页面构建 bundle，然后向目标服务器下发部署命令。
+#
 # 用法:
 #   ./deploy.sh                  # 直接 IP:3000 + IP:1337 模式（默认）
 #   ./deploy.sh --nginx          # Nginx 统一入口模式（仅 80 端口）

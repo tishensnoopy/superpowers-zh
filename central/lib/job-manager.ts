@@ -90,20 +90,55 @@ export async function listJobs(filter: { serverId?: string; limit?: number; offs
   return result.rows;
 }
 
-export async function markStaleJobsFailed(timeoutMs: number): Promise<number> {
-  const result = await query(
-    `UPDATE deploy_jobs
-     SET status = 'failed', error_message = 'timeout: no result within ' || $1 || 'ms',
-         finished_at = now()
-     WHERE status = 'running'
-       AND started_at < now() - ($1 || ' milliseconds')::interval
-     RETURNING id`,
-    [String(timeoutMs)]
-  );
-  return result.rowCount ?? 0;
+/**
+ * 把超时 running job 标记为 failed。
+ * timeoutMs 可以是单一数字（所有类型），或按类型区分（deploy/provision 通常需要更久）。
+ * 默认：deploy/provision 30 分钟，其他类型 5 分钟。
+ */
+export async function markStaleJobsFailed(
+  timeoutMs: number | Partial<Record<JobType, number>>
+): Promise<number> {
+  const defaults: Required<Record<JobType, number>> = {
+    deploy: 30 * 60 * 1000,
+    provision: 30 * 60 * 1000,
+    'config-sync': 5 * 60 * 1000,
+    restart: 5 * 60 * 1000,
+    status: 5 * 60 * 1000,
+    logs: 5 * 60 * 1000,
+  };
+  const timeouts: Required<Record<JobType, number>> =
+    typeof timeoutMs === 'number'
+      ? {
+          deploy: timeoutMs,
+          provision: timeoutMs,
+          'config-sync': timeoutMs,
+          restart: timeoutMs,
+          status: timeoutMs,
+          logs: timeoutMs,
+        }
+      : { ...defaults, ...timeoutMs };
+
+  // 每类分别 UPDATE，SQL 简单且类型安全
+  let total = 0;
+  for (const [type, ms] of Object.entries(timeouts)) {
+    const result = await query(
+      `UPDATE deploy_jobs
+       SET status = 'failed', error_message = 'timeout: no result within ' || $1 || 'ms',
+           finished_at = now()
+       WHERE status = 'running' AND type = $2
+         AND started_at < now() - ($1 || ' milliseconds')::interval
+       RETURNING id`,
+      [String(ms), type]
+    );
+    total += result.rowCount ?? 0;
+  }
+  return total;
 }
 
-export function startJobTimeoutMonitor(timeoutMs = 5 * 60 * 1000, intervalMs = 60000): NodeJS.Timeout {
+export function startJobTimeoutMonitor(
+  timeoutMs: number | Partial<Record<JobType, number>> = {},
+  intervalMs = 60000
+): NodeJS.Timeout {
   return setInterval(async () => {
     try {
       const count = await markStaleJobsFailed(timeoutMs);

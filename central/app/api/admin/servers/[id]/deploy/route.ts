@@ -11,6 +11,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   const body = await req.json().catch(() => ({}));
   const { configId, bundleId: bodyBundleId, mode = 'nginx', envVars } = body;
+  if (mode !== 'nginx' && mode !== 'direct') {
+    return errorResponse('mode must be nginx or direct', 400);
+  }
 
   // 验证 server
   const srv = await query(`SELECT id, customer_id FROM customer_servers WHERE id=$1`, [params.id]);
@@ -52,6 +55,15 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return errorResponse('Agent is offline. Cannot deploy.', 409);
   }
 
+  // per-server 并发防护：同 server 已有 queued/running 的 deploy job 则拒绝（防双击/重复下发）
+  const inflight = await query(
+    `SELECT id FROM deploy_jobs WHERE server_id=$1 AND type='deploy' AND status IN ('queued','running') LIMIT 1`,
+    [params.id]
+  );
+  if (inflight.rows.length > 0) {
+    return errorResponse('A deploy job is already in flight for this server.', 409);
+  }
+
   // 创建 job
   const job = await createJob({
     serverId: params.id,
@@ -75,6 +87,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     imageTag: 'unused',  // 保留字段，本期忽略
     bundleId,
     bundleUrl: `/api/agent/bundles/${bundleId}/download`,
+    centralApiUrl: process.env.CENTRAL_PUBLIC_URL ?? req.nextUrl.origin,
     envVars: deployEnvVars,
     mode,
   };

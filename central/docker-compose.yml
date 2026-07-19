@@ -29,7 +29,16 @@ services:
       ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
       INITIAL_ADMIN_PASSWORD: ${INITIAL_ADMIN_PASSWORD}
       CENTRAL_DOMAIN: ${CENTRAL_DOMAIN}
+      # bundle 发布包管道：代码仓库路径（git archive 来源）+ bundle 存储目录 + agent 下载 base URL
+      CENTRAL_CODE_REPO: /opt/central-code-repo
+      CENTRAL_BUNDLE_DIR: /data/bundles
+      CENTRAL_PUBLIC_URL: ${CENTRAL_PUBLIC_URL:-}
       NODE_ENV: production
+    volumes:
+      # 代码仓库只读挂载（git archive 来源，需先在宿主机 clone）
+      - ${CENTRAL_CODE_REPO_HOST:-/opt/central-code-repo}:/opt/central-code-repo:ro
+      # bundle 持久化（容器重建不丢，否则 agent 下载 410）
+      - central_bundles:/data/bundles
     ports:
       - "${CENTRAL_PORT:-3000}:3000"
     healthcheck:
@@ -43,3 +52,4 @@ services:
 
 volumes:
   central_pgdata:
+  central_bundles:

@@ -19,6 +19,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   const body = await req.json().catch(() => ({}));
   const { configId, bundleId: bodyBundleId, mode = 'nginx' } = body;
+  if (mode !== 'nginx' && mode !== 'direct') {
+    return errorResponse('mode must be nginx or direct', 400);
+  }
 
   const srv = await query(`SELECT id, customer_id FROM customer_servers WHERE id=$1`, [params.id]);
   if (srv.rows.length === 0) return errorResponse('Server not found', 404);
@@ -52,6 +55,15 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
 
   if (!isOnline(params.id)) return errorResponse('Agent is offline.', 409);
+
+  // per-server 并发防护：同 server 已有 queued/running 的 provision job 则拒绝（防双击/重复下发）
+  const inflight = await query(
+    `SELECT id FROM deploy_jobs WHERE server_id=$1 AND type='provision' AND status IN ('queued','running') LIMIT 1`,
+    [params.id]
+  );
+  if (inflight.rows.length > 0) {
+    return errorResponse('A provision job is already in flight for this server.', 409);
+  }
 
   // 组装完整 envVars：config 差异 + 自动密钥（APP_KEYS 特殊：4 段逗号拼接）
   const envVars: Record<string, string> = { ...envOverrides };

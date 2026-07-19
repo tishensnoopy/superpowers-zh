@@ -22,7 +22,7 @@ app.prepare().then(() => {
       if (client.readyState === client.OPEN) client.ping();
     }
   }, 30000);
-  const jobMonitor = startJobTimeoutMonitor(5 * 60 * 1000, 60000);
+  const jobMonitor = startJobTimeoutMonitor({}, 60000);
   wss.on('close', () => {
     clearInterval(pingInterval);
     clearInterval(jobMonitor);
@@ -79,9 +79,13 @@ app.prepare().then(() => {
   const originalEmit = server.emit.bind(server);
   server.emit = function (event: string, ...args: any[]) {
     if (event === 'upgrade') {
-      // Route upgrade events only to our handler, bypassing Next.js's crashing handler.
-      upgradeHandler(args[0], args[1], args[2]);
-      return true;
+      const { pathname } = parse(args[0].url!, true);
+      if (pathname === '/api/agent/ws') {
+        // Route agent WS upgrades only to our handler, bypassing Next.js's crashing handler.
+        upgradeHandler(args[0], args[1], args[2]);
+        return true;
+      }
+      // Non-agent upgrades (e.g. Next.js HMR in dev) fall through to the original listeners.
     }
     return originalEmit(event, ...args);
   } as typeof server.emit;

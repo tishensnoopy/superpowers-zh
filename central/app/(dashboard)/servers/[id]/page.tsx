@@ -119,7 +119,7 @@ export default function ServerDetailPage() {
           <button
             disabled={busy || server?.status !== 'online'}
             onClick={async () => {
-              if (!confirm('确认触发部署？这将执行 git pull + docker compose up --build，预计需要 3-5 分钟。')) return;
+              if (!confirm('确认触发部署？这将下载并同步发布包（bundle）+ docker compose up --build，预计需要 3-5 分钟。')) return;
               const mode = confirm('使用 Nginx 模式？取消则用直连模式。') ? 'nginx' : 'direct';
               setBusy(true);
               try {

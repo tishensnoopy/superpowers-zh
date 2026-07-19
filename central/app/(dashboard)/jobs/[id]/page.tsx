@@ -109,7 +109,8 @@ export default function JobDetailPage() {
     cancelled: 'bg-gray-100 text-gray-500',
   };
 
-  const stageOrder = ['config-written', 'git-pull', 'build', 'healthcheck'];
+  // deploy 与 provision 的阶段合集（未知阶段 indexOf=-1 仅不点亮进度条，不影响日志流）
+  const stageOrder = ['env', 'config-written', 'bundle-sync', 'bundle-synced', 'bundle', 'build', 'healthcheck', 'kb-sync'];
   const currentStageIdx = progress ? stageOrder.indexOf(progress.stage) : -1;
 
   return (
