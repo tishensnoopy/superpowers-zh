@@ -49,7 +49,7 @@ export async function buildBundle(
     return { id: bundle.id, path: filePath, sizeBytes: size };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    await queryImpl(`UPDATE bundles SET status='failed', error=$1 WHERE id=$2`, [message, bundle.id]).catch(() => {});
+    await queryImpl(`UPDATE bundles SET status='failed', error=$1 WHERE id=$2`, [scrubCredentials(message), bundle.id]).catch(() => {});
     throw err;
   }
 }
