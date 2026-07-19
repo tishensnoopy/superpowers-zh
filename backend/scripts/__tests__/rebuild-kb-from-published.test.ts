@@ -48,6 +48,9 @@ describe('rebuild-kb-from-published 服务器清理重建', () => {
     // 3 条 pending 全部入队
     expect(queueAdd).toHaveBeenCalledTimes(3);
     expect(queueAdd).toHaveBeenCalledWith('document-processing', { knowledgeBaseId: 101, type: 'revectorize' });
+    // embeddings 清空后全部文档被置回 pending（含 ready 的手工文档）
+    const updateSql = raw.mock.calls.map((c) => String(c[0])).find((s) => /UPDATE knowledge_bases SET status/i.test(s));
+    expect(updateSql).toBeTruthy();
     expect(result).toEqual({ deleted: 3, synced: 60, updated: 0, removed: 0, errors: [], queued: 3 });
   });
 
@@ -64,5 +67,36 @@ describe('rebuild-kb-from-published 服务器清理重建', () => {
 
     expect(result.errors).toEqual(['课程[zh-CN]: boom']);
     expect(queueAdd).toHaveBeenCalledTimes(3);
+  });
+
+  it('embeddings 清空后全部文档（含 ready 手工文档）置回 pending 并入队', async () => {
+    const { strapi, raw } = makeStrapi();
+    const syncWebsiteContent = vi.fn().mockResolvedValue({ synced: 2, updated: 0, removed: 0, errors: [] });
+    const queueAdd = vi.fn().mockResolvedValue({ id: 'job-1' });
+
+    await rebuildKbFromPublished(strapi, {
+      syncWebsiteContent,
+      queueAdd,
+      sleep: vi.fn().mockResolvedValue(undefined),
+    });
+
+    const updateSql = raw.mock.calls.map((c) => String(c[0])).find((s) => /UPDATE knowledge_bases SET status/i.test(s));
+    expect(updateSql).toBeTruthy();
+    expect(queueAdd).toHaveBeenCalledTimes(3);
+  });
+
+  it('source_url 有重复值时预检抛错，不执行任何删除', async () => {
+    const { strapi, raw, deleteKb } = makeStrapi();
+    raw.mockReset();
+    raw.mockResolvedValueOnce({ rows: [{ source_url: 'strapi://x', cnt: 2 }] });
+
+    await expect(
+      rebuildKbFromPublished(strapi, {
+        syncWebsiteContent: vi.fn(),
+        queueAdd: vi.fn(),
+        sleep: vi.fn(),
+      })
+    ).rejects.toThrow(/重复值/);
+    expect(deleteKb).not.toHaveBeenCalled();
   });
 });

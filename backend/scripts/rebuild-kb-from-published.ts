@@ -3,11 +3,14 @@
  *
  * 背景：KB 中混入 ① 硬编码英文模板种子 ② 无来源孤儿文档 ③ 异常重试产生的重复文档，
  * 且历史同步未过滤草稿。本脚本把 KB 恢复为"后台 published 内容的精确镜像"：
+ *   0. 预检：source_url 有重复值时直接抛错退出（唯一索引必败，避免死在破坏之后）
  *   1. 删除全部 content-sync 文档（稍后由镜像同步重建）
  *   2. 删除硬编码英文模板种子（3 个固定标题）
  *   3. 给 knowledge_bases.source_url 建唯一部分索引（防重复，NULL 放行手工文档）
  *   4. 跑 syncWebsiteContent 镜像同步（published-only）
- *   5. 清空 knowledge_embeddings（向量全量重建，避免新旧混杂）
+ *   5. 清空 knowledge_embeddings（向量全量重建，避免新旧混杂），
+ *      并把全部 KB 文档置回 pending（含 ready 状态的 manual/pdf 手工文档——
+ *      它们的向量也被清了，必须重新向量化，否则 RAG 静默失效）
  *   6. 全部 pending 文档入队重向量化（100ms 限速）
  *
  * 用法（backend 容器内）：npx tsx scripts/rebuild-kb-from-published.ts
@@ -28,6 +31,17 @@ export async function rebuildKbFromPublished(
 ): Promise<{ deleted: number; synced: number; updated: number; removed: number; errors: string[]; queued: number }> {
   const sleep = options.sleep ?? ((ms: number) => new Promise((r) => setTimeout(r, ms)));
   const db = strapi.db.connection;
+
+  // 步骤 0：预检——source_url 有重复值时唯一索引必败，先打印清单并非零退出，避免死在破坏之后
+  const dupes = await db.raw(
+    "SELECT source_url, COUNT(*) AS cnt FROM knowledge_bases WHERE source_url IS NOT NULL GROUP BY source_url HAVING COUNT(*) > 1"
+  );
+  const dupeRows = dupes.rows ?? dupes;
+  if (Array.isArray(dupeRows) && dupeRows.length > 0) {
+    throw new Error(
+      `[rebuild-kb] source_url 存在重复值，唯一索引将失败。请先人工去重：${JSON.stringify(dupeRows)}`
+    );
+  }
 
   // 步骤 1：删除全部 content-sync 文档（镜像同步会重建它们）
   console.log('[rebuild-kb] Step 1: deleting all content-sync documents...');
@@ -64,6 +78,9 @@ export async function rebuildKbFromPublished(
   // 步骤 5：清空 embeddings（向量全量重建）
   console.log('[rebuild-kb] Step 5: wiping knowledge_embeddings...');
   await db.raw('DELETE FROM knowledge_embeddings');
+
+  // 全部文档置回 pending——embeddings 已清空，所有文档都待重新向量化（含 manual/pdf 等手工文档）
+  await db.raw("UPDATE knowledge_bases SET status = 'pending'");
 
   // 步骤 6：全部 pending 文档入队重向量化（限速 100ms）
   console.log('[rebuild-kb] Step 6: queueing pending documents for vectorization...');
