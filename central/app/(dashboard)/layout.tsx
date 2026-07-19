@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 const NAV = [
   { href: '/customers', label: '客户' },
   { href: '/servers', label: '服务器' },
+  { href: '/bundles', label: '发布包' },
   { href: '/configs', label: '配置' },
   { href: '/jobs', label: '任务管理' },
   { href: '/admins', label: '用户管理' },

@@ -21,6 +21,10 @@ export default function CustomerDetailPage() {
     });
   }, [id]);
 
+  function downloadBootstrap() {
+    window.location.href = `/api/admin/customers/${id}/bootstrap-script`;
+  }
+
   async function issueCode() {
     await fetch('/api/admin/enrollment-codes', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -35,6 +39,15 @@ export default function CustomerDetailPage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">{customer.name}</h1>
+      <section>
+        <h2 className="text-lg font-bold mb-2">操作</h2>
+        <div className="space-x-2">
+          <button onClick={downloadBootstrap} className="bg-blue-600 text-white px-3 py-1 rounded text-sm">
+            下载开通脚本
+          </button>
+        </div>
+        <p className="mt-1 text-sm text-gray-500">裸机第一步：把脚本拷到目标服务器执行 <code className="bg-gray-100 px-1">sudo bash bootstrap-agent.sh</code>（含一次性 enrollment code，24h 有效；需先构建出 ready 发布包）。</p>
+      </section>
       <section>
         <h2 className="text-lg font-bold mb-2">服务器</h2>
         <Link href={`/servers?customerId=${id}`} className="text-blue-600">添加服务器 →</Link>

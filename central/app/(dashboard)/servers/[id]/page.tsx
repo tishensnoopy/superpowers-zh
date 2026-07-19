@@ -96,6 +96,29 @@ export default function ServerDetailPage() {
           <button
             disabled={busy || server?.status !== 'online'}
             onClick={async () => {
+              if (!confirm('确认一键开通？将全自动完成 env 生成 + 部署 + 初始化（自动取最新已发布配置与最新 ready 发布包）。')) return;
+              setBusy(true);
+              try {
+                const res = await fetch(`/api/admin/servers/${id}/provision`, { method: 'POST' });
+                const body = await res.json();
+                if (res.ok) {
+                  window.open(`/jobs/${body.jobId}`, '_blank');
+                } else {
+                  alert(`开通失败: ${body.error}`);
+                }
+              } catch (e) {
+                alert(`网络错误: ${e instanceof Error ? e.message : String(e)}`);
+              } finally {
+                setBusy(false);
+              }
+            }}
+            className="bg-blue-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50"
+          >
+            一键开通
+          </button>
+          <button
+            disabled={busy || server?.status !== 'online'}
+            onClick={async () => {
               if (!confirm('确认触发部署？这将执行 git pull + docker compose up --build，预计需要 3-5 分钟。')) return;
               const mode = confirm('使用 Nginx 模式？取消则用直连模式。') ? 'nginx' : 'direct';
               setBusy(true);
