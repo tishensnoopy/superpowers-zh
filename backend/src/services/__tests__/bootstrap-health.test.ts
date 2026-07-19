@@ -87,4 +87,25 @@ describe('bootstrap-health 启动自检自愈', () => {
     expect(byName['required-env']).toBeDefined();
     expect(report.failed).toEqual(['kb-schema']);
   });
+
+  it('配置了 REDIS_HOST 但连接失败：warn 不算 fail，report.ok 仍为 true', async () => {
+    process.env.REDIS_HOST = 'broken-redis';
+    vi.doMock('ioredis', () => ({
+      default: class {
+        constructor(_opts: any) {}
+        async connect() { throw new Error('connect ETIMEDOUT'); }
+        async ping() { throw new Error('unreachable'); }
+        disconnect() {}
+      },
+    }));
+    const { strapi } = makeStrapi();
+    const report = await runBootstrapHealthcheck(strapi);
+
+    const redisCheck = report.checks.find((c: any) => c.name === 'redis');
+    expect(redisCheck.level).toBe('warn');
+    expect(redisCheck.message).toContain('ETIMEDOUT');
+    expect(report.ok).toBe(true);
+
+    vi.doUnmock('ioredis');
+  });
 });

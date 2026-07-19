@@ -173,8 +173,13 @@ export default {
 
     // 启动自检自愈：DB/KB schema/必填 env/Redis。失败不阻断启动（打 error 日志），
     // 让客户站问题在部署后第一时间暴露，而不是用着用着悄悄坏。
-    const { runBootstrapHealthcheck } = await import('./services/bootstrap-health');
-    await runBootstrapHealthcheck(strapi);
+    try {
+      const { runBootstrapHealthcheck } = await import('./services/bootstrap-health');
+      await runBootstrapHealthcheck(strapi);
+    } catch (err) {
+      // 自检自身崩溃也绝不阻断启动
+      console.error('[bootstrap-health] 自检执行异常（不阻断启动）:', err instanceof Error ? err.message : err);
+    }
 
     console.log('[Bootstrap] Startup complete');
   },

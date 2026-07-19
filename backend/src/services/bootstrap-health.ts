@@ -28,10 +28,10 @@ const REQUIRED_ENV = [
 export async function runBootstrapHealthcheck(strapi: any): Promise<HealthReport> {
   const startedAt = Date.now();
   const checks: HealthCheck[] = [];
-  const db = strapi.db.connection;
 
   // 1. postgres 连通（短路项：库不通则其余检查无意义）
   try {
+    const db = strapi.db.connection;
     await db.raw('SELECT 1');
     checks.push({ name: 'postgres', level: 'ok', healed: false, message: 'connected' });
   } catch (err) {
@@ -68,9 +68,10 @@ export async function runBootstrapHealthcheck(strapi: any): Promise<HealthReport
 
   // 4. Redis（可选但配置了就必须通）
   if (process.env.REDIS_HOST) {
+    let redis: any;
     try {
       const { default: Redis } = await import('ioredis');
-      const redis = new Redis({
+      redis = new Redis({
         host: process.env.REDIS_HOST,
         port: Number(process.env.REDIS_PORT ?? 6379),
         password: process.env.REDIS_PASSWORD || undefined,
@@ -80,7 +81,6 @@ export async function runBootstrapHealthcheck(strapi: any): Promise<HealthReport
       });
       await redis.connect();
       await redis.ping();
-      redis.disconnect();
       checks.push({ name: 'redis', level: 'ok', healed: false, message: 'connected' });
     } catch (err) {
       checks.push({
@@ -89,6 +89,8 @@ export async function runBootstrapHealthcheck(strapi: any): Promise<HealthReport
         healed: false,
         message: `Redis 连接失败（向量化队列不可用）: ${err instanceof Error ? err.message : err}`,
       });
+    } finally {
+      redis?.disconnect();
     }
   } else {
     checks.push({ name: 'redis', level: 'warn', healed: false, message: 'REDIS_HOST 未配置，向量化队列禁用' });
