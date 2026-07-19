@@ -21,8 +21,20 @@ export default function CustomerDetailPage() {
     });
   }, [id]);
 
-  function downloadBootstrap() {
-    window.location.href = `/api/admin/customers/${id}/bootstrap-script`;
+  async function downloadBootstrap() {
+    const res = await fetch(`/api/admin/customers/${id}/bootstrap-script`);
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      alert(body.error ?? '下载失败');
+      return;
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'bootstrap-agent.sh';
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   async function issueCode() {

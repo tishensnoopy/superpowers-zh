@@ -30,14 +30,19 @@ export default function BundlesPage() {
   async function build() {
     setBuilding(true);
     setError('');
-    const res = await fetch('/api/admin/bundles', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ref }),
-    });
-    if (!res.ok) setError((await res.json()).error ?? 'build failed');
-    await load();
-    setBuilding(false);
+    try {
+      const res = await fetch('/api/admin/bundles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ref }),
+      });
+      if (!res.ok) setError((await res.json().catch(() => ({}))).error ?? 'build failed');
+      await load();
+    } catch (e) {
+      setError(`网络错误: ${e instanceof Error ? e.message : String(e)}`);
+    } finally {
+      setBuilding(false);
+    }
   }
 
   return (
