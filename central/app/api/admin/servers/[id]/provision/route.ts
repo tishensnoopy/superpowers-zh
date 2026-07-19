@@ -85,6 +85,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         try {
           await updateJobStatus(job.id, 'cancelled', { errorMessage: 'send failed' });
         } catch (fallbackErr: unknown) {
+          const m2 = fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr);
+          if (!/invalid transition|job not found/.test(m2)) throw fallbackErr;
           console.warn('[provision] concurrent job update during send-failure cleanup:', fallbackErr);
         }
       } else throw err;
