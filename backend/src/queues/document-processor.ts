@@ -60,40 +60,11 @@ export const documentQueue = new Queue(QUEUE_NAME, {
 /**
  * Ensures the `knowledge_embeddings` pgvector table exists. The table is a raw
  * SQL table (not a Strapi content type) so it must be created out-of-band.
- * Running this lazily on the first job makes the worker self-sufficient.
+ * DDL 统一由 services/kb-schema.ts 提供（与 bootstrap 自检同源）。
  */
 async function ensureSchema(strapi: any): Promise<void> {
-  const db = strapi.db.connection;
-
-  try {
-    await db.raw('CREATE EXTENSION IF NOT EXISTS vector');
-  } catch (err) {
-    // Extension may already exist or require superuser privileges; the INSERT
-    // below will surface a clearer error if the extension is truly missing.
-    console.warn(
-      '[Queue] CREATE EXTENSION vector skipped:',
-      err instanceof Error ? err.message : err
-    );
-  }
-
-  await db.raw(`
-    CREATE TABLE IF NOT EXISTS knowledge_embeddings (
-      id BIGSERIAL PRIMARY KEY,
-      knowledge_base_id BIGINT NOT NULL,
-      chunk_index INTEGER NOT NULL,
-      chunk_text TEXT NOT NULL,
-      embedding vector,
-      source_type VARCHAR(50) DEFAULT 'document',
-      created_at TIMESTAMPTZ DEFAULT NOW(),
-      updated_at TIMESTAMPTZ DEFAULT NOW()
-    )
-  `);
-
-  await db.raw(
-    'CREATE INDEX IF NOT EXISTS idx_knowledge_embeddings_kb_id ON knowledge_embeddings (knowledge_base_id)'
-  );
-
-  console.log('[Queue] knowledge_embeddings schema ensured');
+  const { ensureKbSchema } = await import('../services/kb-schema');
+  await ensureKbSchema(strapi);
 }
 
 let schemaPromise: Promise<void> | null = null;
