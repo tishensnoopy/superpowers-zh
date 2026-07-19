@@ -33,4 +33,33 @@ describe('kb-schema.ensureKbSchema', () => {
     expect(KB_SOURCE_URL_UNIQUE_INDEX_SQL).toContain('source_url');
     expect(KB_SOURCE_URL_UNIQUE_INDEX_SQL).toContain('WHERE source_url IS NOT NULL');
   });
+
+  it('CREATE TABLE 失败必须抛错中断（fail-fast，不得静默吞掉 schema 错误）', async () => {
+    const raw = vi.fn()
+      .mockResolvedValueOnce({}) // EXTENSION 成功
+      .mockRejectedValueOnce(new Error('syntax error')); // TABLE 失败
+    const strapi: any = { db: { connection: { raw } } };
+
+    await expect(ensureKbSchema(strapi)).rejects.toThrow('syntax error');
+  });
+
+  it('source_url 有历史重复值时抛出带去重指引的诊断错误', async () => {
+    const raw = vi.fn()
+      .mockResolvedValueOnce({}) // EXTENSION
+      .mockResolvedValueOnce({}) // TABLE
+      .mockResolvedValueOnce({}) // kb_id index
+      .mockRejectedValueOnce(
+        new Error('could not create unique index "knowledge_bases_source_url_unique"')
+      ); // unique index 失败
+    const strapi: any = { db: { connection: { raw } } };
+
+    try {
+      await ensureKbSchema(strapi);
+      expect.unreachable('should have thrown');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      expect(msg).toMatch(/历史重复值/);
+      expect(msg).toMatch(/GROUP BY source_url/);
+    }
+  });
 });

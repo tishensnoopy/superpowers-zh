@@ -38,7 +38,20 @@ export async function ensureKbSchema(strapi: any): Promise<void> {
   );
 
   // content-sync 防重复（NULL 放行：manual/pdf 等手工文档无 sourceUrl）
-  await db.raw(KB_SOURCE_URL_UNIQUE_INDEX_SQL);
+  try {
+    await db.raw(KB_SOURCE_URL_UNIQUE_INDEX_SQL);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes('could not create unique index') || msg.includes('duplicate key')) {
+      // 历史脏数据挡住了唯一索引：给出可操作的诊断，而不是让 worker 裸 PG 报错瘫痪
+      throw new Error(
+        `[kb-schema] knowledge_bases.source_url 存在历史重复值，唯一索引创建失败。` +
+          `请先执行去重预检：SELECT source_url, COUNT(*) FROM knowledge_bases WHERE source_url IS NOT NULL GROUP BY source_url HAVING COUNT(*) > 1; ` +
+          `去重后重启即可自动重试。原始错误: ${msg}`
+      );
+    }
+    throw err;
+  }
 
   console.log('[kb-schema] knowledge_embeddings + source_url index ensured');
 }
