@@ -10,10 +10,11 @@ describe('bundles.buildBundle', () => {
     });
     const statImpl = vi.fn(async () => ({ size: 123456 }));
     const queryImpl = vi.fn(async () => ({ rows: [], rowCount: 1 }));
+    const mkdirImpl = vi.fn(async () => undefined);
 
     const result = await buildBundle(
       { id: 'b-1', ref: 'main' },
-      { repoPath: '/srv/repo', bundleDir: '/srv/bundles', execImpl, statImpl, queryImpl }
+      { repoPath: '/srv/repo', bundleDir: '/srv/bundles', execImpl, statImpl, queryImpl, mkdirImpl }
     );
 
     expect(execCalls[0]).toEqual(['git', '-C', '/srv/repo', 'fetch', '--all', '--tags', '--prune']);
@@ -33,11 +34,12 @@ describe('bundles.buildBundle', () => {
       .mockResolvedValueOnce({ stdout: '', stderr: '' }) // fetch ok
       .mockRejectedValueOnce(new Error('fatal: Not a valid object name'));
     const queryImpl = vi.fn(async () => ({ rows: [], rowCount: 1 }));
+    const mkdirImpl = vi.fn(async () => undefined);
 
     await expect(
       buildBundle(
         { id: 'b-2', ref: 'no-such-ref' },
-        { repoPath: '/srv/repo', bundleDir: '/srv/bundles', execImpl, statImpl: vi.fn(), queryImpl }
+        { repoPath: '/srv/repo', bundleDir: '/srv/bundles', execImpl, statImpl: vi.fn(), queryImpl, mkdirImpl }
       )
     ).rejects.toThrow('Not a valid object name');
 

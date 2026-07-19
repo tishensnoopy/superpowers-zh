@@ -13,6 +13,7 @@ export interface BundleDeps {
   execImpl?: (cmd: string, args: string[]) => Promise<{ stdout: string; stderr: string }>;
   statImpl?: (p: string) => Promise<{ size: number }>;
   queryImpl?: (text: string, params?: unknown[]) => Promise<{ rows: unknown[]; rowCount: number | null }>;
+  mkdirImpl?: (p: string) => Promise<unknown>;
 }
 
 const defaultExec = (cmd: string, args: string[]) =>
@@ -31,8 +32,9 @@ export async function buildBundle(
   const execImpl = deps.execImpl ?? defaultExec;
   const statImpl = deps.statImpl ?? stat;
   const queryImpl = deps.queryImpl ?? query;
+  const mkdirImpl = deps.mkdirImpl ?? ((p: string) => mkdir(p, { recursive: true }));
 
-  await mkdir(bundleDir, { recursive: true });
+  await mkdirImpl(bundleDir);
   const filePath = path.join(bundleDir, `${bundle.id}.tar.gz`);
 
   try {
