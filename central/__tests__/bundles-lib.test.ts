@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { buildBundle } from '@/lib/bundles';
+import { buildBundle, bundlePath } from '@/lib/bundles';
 
 describe('bundles.buildBundle', () => {
   it('git fetch + git archive 产出 tar.gz，记录 ready 与大小', async () => {
@@ -47,5 +47,22 @@ describe('bundles.buildBundle', () => {
       expect.stringContaining("status='failed'"),
       expect.arrayContaining(['fatal: Not a valid object name', 'b-2'])
     );
+  });
+
+  it('ref 以 - 开头（git 选项注入）→ 拒绝且不触 git', async () => {
+    const execImpl = vi.fn();
+    await expect(
+      buildBundle(
+        { id: 'b-3', ref: '--output=/tmp/pwned' },
+        { repoPath: '/srv/repo', bundleDir: '/srv/bundles', execImpl, statImpl: vi.fn(), queryImpl: vi.fn(), mkdirImpl: vi.fn(async () => undefined) }
+      )
+    ).rejects.toThrow('invalid git ref');
+    expect(execImpl).not.toHaveBeenCalled();
+  });
+});
+
+describe('bundles.bundlePath', () => {
+  it('bundlePath 返回 <bundleDir>/<id>.tar.gz', () => {
+    expect(bundlePath('b-9', { bundleDir: '/srv/bundles' })).toBe('/srv/bundles/b-9.tar.gz');
   });
 });

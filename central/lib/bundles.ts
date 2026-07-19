@@ -34,21 +34,24 @@ export async function buildBundle(
   const queryImpl = deps.queryImpl ?? query;
   const mkdirImpl = deps.mkdirImpl ?? ((p: string) => mkdir(p, { recursive: true }));
 
-  await mkdirImpl(bundleDir);
+  if (!/^[A-Za-z0-9][A-Za-z0-9._/-]{0,127}$/.test(bundle.ref)) {
+    throw new Error(`invalid git ref: ${bundle.ref}`);
+  }
+
   const filePath = path.join(bundleDir, `${bundle.id}.tar.gz`);
 
   try {
+    await mkdirImpl(bundleDir);
     await execImpl('git', ['-C', repoPath, 'fetch', '--all', '--tags', '--prune']);
     await execImpl('git', ['-C', repoPath, 'archive', '--format=tar.gz', '-o', filePath, bundle.ref]);
+    const { size } = await statImpl(filePath);
+    await queryImpl(`UPDATE bundles SET status='ready', size_bytes=$1 WHERE id=$2`, [size, bundle.id]);
+    return { id: bundle.id, path: filePath, sizeBytes: size };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
-    await queryImpl(`UPDATE bundles SET status='failed', error=$1 WHERE id=$2`, [message, bundle.id]);
+    await queryImpl(`UPDATE bundles SET status='failed', error=$1 WHERE id=$2`, [message, bundle.id]).catch(() => {});
     throw err;
   }
-
-  const { size } = await statImpl(filePath);
-  await queryImpl(`UPDATE bundles SET status='ready', size_bytes=$1 WHERE id=$2`, [size, bundle.id]);
-  return { id: bundle.id, path: filePath, sizeBytes: size };
 }
 
 export function bundlePath(id: string, deps: BundleDeps = {}): string {
