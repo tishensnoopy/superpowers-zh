@@ -4,10 +4,14 @@ import { executeCommand } from '../src/executor';
 import type { Command } from '../src/executor';
 import * as composeMod from '../src/lib/compose';
 import * as envMod from '../src/lib/env-file';
+import * as bundleMod from '../src/lib/bundle';
+import * as configMod from '../src/config';
 import { createAbortController, cleanupAbortController } from '../src/lib/abort-registry';
 
 vi.mock('../src/lib/compose');
 vi.mock('../src/lib/env-file');
+vi.mock('../src/lib/bundle');
+vi.mock('../src/config');
 vi.mock('execa');
 
 describe('executeCommand dispatch', () => {
@@ -60,11 +64,18 @@ describe('executeCommand dispatch', () => {
 });
 
 describe('executor deploy command', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(configMod.loadConfig).mockReturnValue({
+      centralWsUrl: 'ws://central:3100/ws',
+      centralApiUrl: 'http://central:3100',
+      serverId: 'srv-1',
+      agentToken: 'tok',
+    });
+  });
 
-  it('dispatches command:deploy to handleDeploy', async () => {
+  it('dispatches command:deploy to handleDeploy（bundle 模式）', async () => {
     vi.mocked(execa).mockImplementation(async (cmd, args) => {
-      if (cmd === 'git') return { stdout: 'Fast-forward', stderr: '', exitCode: 0 } as any;
       if (cmd === 'docker' && args?.[1] === 'ps') return { stdout: '{"Health":"healthy"}', stderr: '', exitCode: 0 } as any;
       return { stdout: '', stderr: '', exitCode: 0 } as any;
     });
@@ -76,6 +87,7 @@ describe('executor deploy command', () => {
       type: 'command:deploy',
       jobId: 'job-exec-1',
       imageTag: 'unused',
+      bundleUrl: '/api/agent/bundles/b-1/download',
       mode: 'direct',
     };
     const result = await executeCommand(cmd, {
@@ -85,6 +97,44 @@ describe('executor deploy command', () => {
 
     expect(result).toBeDefined();
     expect(result).toMatch(/deploy completed/);
+    expect(bundleMod.syncBundleToDir).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: 'http://central:3100/api/agent/bundles/b-1/download',
+        token: 'tok',
+      })
+    );
+  });
+
+  it('dispatches command:provision to handleProvision', async () => {
+    vi.mocked(execa).mockImplementation(async (cmd, args) => {
+      if (cmd === 'docker' && args?.[1] === 'ps') return { stdout: '{"Health":"healthy"}', stderr: '', exitCode: 0 } as any;
+      return { stdout: '', stderr: '', exitCode: 0 } as any;
+    });
+    vi.mocked(composeMod.runCompose).mockResolvedValue({ stdout: '', stderr: '', exitCode: 0 });
+
+    const cmd: Command = {
+      commandId: 'exec-prov-1',
+      type: 'command:provision',
+      jobId: 'job-prov-1',
+      bundleUrl: '/api/agent/bundles/b-1/download',
+      centralApiUrl: 'http://central:3100',
+      envVars: { APP_KEYS: 'k', JWT_SECRET: 'j' },
+      mode: 'direct',
+    };
+    const result = await executeCommand(cmd, {
+      onLog: () => {},
+      onProgress: () => {},
+    });
+
+    expect(result).toBeDefined();
+    expect(result).toMatch(/provision completed/);
+    expect(envMod.syncEnvFile).toHaveBeenCalledWith(expect.any(String), { APP_KEYS: 'k', JWT_SECRET: 'j' });
+    expect(bundleMod.syncBundleToDir).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: 'http://central:3100/api/agent/bundles/b-1/download',
+        token: 'tok',
+      })
+    );
   });
 
   it('returns "no running task" for command:cancel with no running task', async () => {

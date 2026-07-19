@@ -1,4 +1,3 @@
-import { pullLatest } from '../lib/git-pull';
 import { waitForServicesHealthy } from '../lib/healthcheck';
 import { syncEnvFile } from '../lib/env-file';
 import type { ComposeHooks } from '../lib/compose';
@@ -8,6 +7,8 @@ export interface DeployCommand {
   type: 'command:deploy';
   jobId: string;
   imageTag: string;              // 保留字段，本期忽略（仍用 build context 模式）
+  bundleUrl?: string;            // 相对路径（/api/agent/bundles/<id>/download）
+  centralApiUrl?: string;        // bundle 下载 base；缺省从 agent config 取
   envVars?: Record<string, string>;
   mode: 'nginx' | 'direct';
 }
@@ -24,6 +25,9 @@ export interface ComposeRunner {
 export interface DeployOptions {
   healthcheckIntervalMs?: number;
   healthcheckMaxAttempts?: number;
+  syncBundle?: (opts: { url: string; token: string; dataDir: string }) => Promise<void>;
+  agentToken?: string;
+  centralApiUrl?: string;
 }
 
 export interface DeployResult {
@@ -35,7 +39,7 @@ export interface DeployResult {
 }
 
 /**
- * 执行部署：写 .env（可选）→ git pull → docker compose up --build → 健康检查。
+ * 执行部署：写 .env（可选）→ 发布包同步 → docker compose up --build → 健康检查。
  *
  * imageTag 字段保留为未来切换到镜像仓库 pull 模式时使用，本期忽略。
  * 当前实现沿用现有 docker-compose.yml 的 build context 模式。
@@ -68,13 +72,21 @@ export async function handleDeploy(
     }
   }
 
-  // 步骤 2：git pull
-  hooks.onProgress('git-pull', 'pulling latest code');
-  const pullResult = await pullLatest(dataDir);
-  if (!pullResult.ok) {
-    return { success: false, stderr: pullResult.error, durationMs: Date.now() - start };
+  // 步骤 2：发布包同步（替代 git pull，去 GitHub 依赖）
+  if (!cmd.bundleUrl) {
+    return { success: false, stderr: 'bundleUrl is required (deploy pipeline is bundle-based)', durationMs: Date.now() - start };
   }
-  if (pullResult.output) hooks.onLog('stdout', pullResult.output);
+  hooks.onProgress('bundle-sync', 'downloading and syncing release bundle');
+  try {
+    const { syncBundleToDir } = await import('../lib/bundle');
+    const sync = opts.syncBundle ?? syncBundleToDir;
+    const token = opts.agentToken ?? (await import('../config')).loadConfig().agentToken;
+    const apiBase = cmd.centralApiUrl ?? opts.centralApiUrl ?? (await import('../config')).loadConfig().centralApiUrl;
+    await sync({ url: `${apiBase}${cmd.bundleUrl}`, token, dataDir });
+    hooks.onProgress('bundle-synced', 'release bundle synced');
+  } catch (err: any) {
+    return { success: false, stderr: `bundle sync failed: ${err.message}`, durationMs: Date.now() - start };
+  }
 
   // 步骤 3：docker compose up --build
   hooks.onProgress('build', 'building and starting containers');

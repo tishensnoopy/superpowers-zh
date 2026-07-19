@@ -17,7 +17,8 @@ export type Command =
   | { type: 'command:restart'; commandId: string; services: string[] }
   | { type: 'command:status'; commandId: string }
   | { type: 'command:logs'; commandId: string; service: string; tail: number }
-  | { type: 'command:deploy'; commandId: string; jobId?: string; imageTag?: string; envVars?: Record<string, string>; mode?: 'nginx' | 'direct' }
+  | { type: 'command:deploy'; commandId: string; jobId?: string; imageTag?: string; bundleUrl?: string; centralApiUrl?: string; envVars?: Record<string, string>; mode?: 'nginx' | 'direct' }
+  | { type: 'command:provision'; commandId: string; jobId?: string; bundleUrl: string; centralApiUrl: string; envVars: Record<string, string>; mode?: 'nginx' | 'direct'; postSyncKb?: boolean }
   | { type: 'command:cancel'; commandId: string };
 
 export async function executeCommand(cmd: Command, hooks: CommandHandler): Promise<string | undefined> {
@@ -48,6 +49,8 @@ export async function executeCommand(cmd: Command, hooks: CommandHandler): Promi
 
       case 'command:deploy': {
         const { handleDeploy } = await import('./commands/deploy');
+        const { loadConfig } = await import('./config');
+        const cfg = loadConfig();
         const deployResult = await handleDeploy(
           cmd as any,
           DATA_DIR,
@@ -58,7 +61,8 @@ export async function executeCommand(cmd: Command, hooks: CommandHandler): Promi
               return { exitCode: r.exitCode };
             },
           },
-          controller.signal
+          controller.signal,
+          { agentToken: cfg.agentToken, centralApiUrl: cfg.centralApiUrl }
         );
         if (!deployResult.success) {
           throw Object.assign(new Error(deployResult.stderr ?? 'deploy failed'), {
@@ -66,6 +70,36 @@ export async function executeCommand(cmd: Command, hooks: CommandHandler): Promi
           });
         }
         return `deploy completed in ${deployResult.durationMs}ms`;
+      }
+
+      case 'command:provision': {
+        const { handleProvision } = await import('./commands/provision');
+        const { syncEnvFile } = await import('./lib/env-file');
+        const { syncBundleToDir } = await import('./lib/bundle');
+        const { waitForServicesHealthy } = await import('./lib/healthcheck');
+        const { loadConfig } = await import('./config');
+        const cfg = loadConfig();
+        const result = await handleProvision(
+          { ...cmd, mode: cmd.mode ?? 'direct' } as any,
+          DATA_DIR,
+          hooks,
+          controller.signal,
+          {
+            syncBundle: syncBundleToDir,
+            writeEnv: syncEnvFile,
+            runCompose: async (args, opts, composeHooks) => {
+              const r = await runCompose(args, opts, composeHooks);
+              return { exitCode: r.exitCode };
+            },
+            waitHealthy: (services, o) =>
+              waitForServicesHealthy(services, { cwd: o.cwd, intervalMs: 5000, maxAttempts: 24, onProgress: o.onProgress as any }),
+            agentToken: cfg.agentToken,
+          }
+        );
+        if (!result.success) {
+          throw Object.assign(new Error(result.stderr ?? 'provision failed'), { exitCode: 1 });
+        }
+        return `provision completed in ${result.durationMs}ms`;
       }
 
       default:
