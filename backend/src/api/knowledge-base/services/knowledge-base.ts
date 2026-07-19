@@ -68,51 +68,13 @@ export default factories.createCoreService('api::knowledge-base.knowledge-base',
     }
   },
 
+  /**
+   * 母站隔离（决策 D7）：KB 不预置任何硬编码种子。
+   * KB 内容 100% 由本实例自身内容经 knowledge-sync-service 派生，
+   * 克隆母站时 KB 不会携带母站内容。
+   */
   async initializeDefaults() {
-    try {
-      const existing = await strapi.db.query('api::knowledge-base.knowledge-base').findMany();
-
-      if (existing.length === 0) {
-        const defaults = [
-          {
-            title: 'Introduction to Our Company',
-            content: 'Welcome to our company. We provide high-quality products and services.',
-            sourceType: 'manual',
-            status: 'ready',
-            priority: 'high',
-            tags: 'company, introduction, about',
-          },
-          {
-            title: 'Product FAQ',
-            content: 'Frequently asked questions about our products.',
-            sourceType: 'faq',
-            status: 'ready',
-            priority: 'medium',
-            tags: 'product, FAQ, questions',
-          },
-          {
-            title: 'Technical Documentation',
-            content: 'Technical specifications and documentation.',
-            sourceType: 'manual',
-            status: 'pending',
-            priority: 'low',
-            tags: 'technical, documentation, specs',
-          },
-        ];
-
-        const created = await Promise.all(
-          defaults.map((item, index) => {
-            return this.create({ data: item });
-          })
-        );
-        return created;
-      } else {
-        return existing;
-      }
-    } catch (err) {
-      console.error('[KnowledgeBaseService] initializeDefaults() failed:', err instanceof Error ? err.message : err);
-      throw err;
-    }
+    return [];
   },
 
   async getPendingDocuments() {
