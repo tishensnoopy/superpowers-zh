@@ -61,6 +61,10 @@ describe('API populate 契约（嵌套媒体字段必须深取）', () => {
       (Array.isArray(POPULATE) &&
         POPULATE.some((p: any) => p && typeof p === 'object' && p.fontSettings?.populate));
     expect(fontDeep).toBe(true);
+    // defaultOgImage 是媒体字段，必须在 populate 列表中
+    expect(flat).toContain('defaultOgImage');
+    // analytics 组件必须在 populate 列表中（否则前端拿不到统计代码配置）
+    expect(flat).toContain('analytics');
   });
 
   test('footer 控制器导出 FOOTER_POPULATE，socialLinks 深取 qrImage', async () => {

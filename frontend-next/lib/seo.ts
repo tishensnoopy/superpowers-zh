@@ -40,11 +40,12 @@ function resolveOgType(ogType: string | undefined): (typeof VALID_OG_TYPES)[numb
 export function buildMetadata(
   seo: SeoData | undefined,
   fallback: { title: string; description?: string; canonicalUrl?: string },
-  i18n?: { locale: 'zh-CN' | 'en-US'; path: string }
+  i18n?: { locale: 'zh-CN' | 'en-US'; path: string },
+  defaultOgImage?: { url: string; alternativeText?: string } | null
 ): Metadata {
   const title = seo?.metaTitle ?? fallback.title;
   const description = seo?.metaDescription ?? fallback.description;
-  const ogImage = getImageUrl(seo?.ogImage);
+  const ogImage = getImageUrl(seo?.ogImage) || getImageUrl(defaultOgImage) || undefined;
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
   const languages = i18n
@@ -53,6 +54,12 @@ export function buildMetadata(
         'en-US': `${baseUrl}/en-US${i18n.path}`,
       }
     : undefined;
+
+  // noindex 控制：后台 SEO 组件勾选 noindex 时标记页面不被索引
+  const noindex = seo?.noindex === true;
+  const robots = noindex
+    ? { index: false, follow: false }
+    : { index: true, follow: true };
 
   return {
     title,
@@ -72,6 +79,7 @@ export function buildMetadata(
       card: 'summary_large_image',
       images: ogImage ? [ogImage] : undefined,
     },
+    robots,
   };
 }
 

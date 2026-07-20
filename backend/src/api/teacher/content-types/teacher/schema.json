@@ -116,6 +116,15 @@
           "localized": true
         }
       }
+    },
+    "aiSummary": {
+      "type": "text",
+      "description": "GEO：给 AI 搜索引擎看的教师摘要（留空则自动从 title/achievements 生成）",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   },
   "pluginOptions": {

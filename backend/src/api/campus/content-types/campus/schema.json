@@ -153,6 +153,15 @@
           "localized": true
         }
       }
+    },
+    "aiSummary": {
+      "type": "text",
+      "description": "GEO：给 AI 搜索引擎看的校区摘要（留空则自动从 address/transportation 生成）",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   },
   "pluginOptions": {

@@ -138,6 +138,31 @@
           "localized": true
         }
       }
+    },
+    "googleVerification": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Google Search Console 验证码（如 google-site-verification=xxx）"
+    },
+    "bingVerification": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Bing Webmaster 验证码（如 msvalidate.01=xxx）"
+    },
+    "baiduVerification": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "百度站长平台验证码（如 baidu-site-verification=xxx）"
+    },
+    "analytics": {
+      "type": "component",
+      "component": "common.analytics",
+      "description": "第三方统计代码配置（GA4 / 百度统计 / Facebook Pixel）"
+    },
+    "defaultOgImage": {
+      "type": "media",
+      "multiple": false,
+      "description": "站点级默认分享图（页面未配置 OG 图时回退到此图）"
     }
   },
   "admin": {
@@ -233,6 +258,29 @@
           "field": "aiSummary",
           "label": "AI 摘要（GEO）",
           "placeholder": "写给 AI 搜索引擎看的机构简介，将写入 llms.txt"
+        },
+        {
+          "field": "googleVerification",
+          "label": "Google 验证码",
+          "placeholder": "google-site-verification=xxx"
+        },
+        {
+          "field": "bingVerification",
+          "label": "Bing 验证码",
+          "placeholder": "msvalidate.01=xxx"
+        },
+        {
+          "field": "baiduVerification",
+          "label": "百度验证码",
+          "placeholder": "baidu-site-verification=xxx"
+        },
+        {
+          "field": "analytics",
+          "label": "统计代码"
+        },
+        {
+          "field": "defaultOgImage",
+          "label": "默认分享图"
         }
       ]
     }

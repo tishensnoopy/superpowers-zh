@@ -441,3 +441,41 @@ describe('buildNewsArticleSchema', () => {
     expect(schema['image']).toBeUndefined();
   });
 });
+
+describe('buildMetadata noindex + default OG image', () => {
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_SITE_URL = 'https://example.com';
+  });
+  afterEach(() => {
+    delete process.env.NEXT_PUBLIC_SITE_URL;
+  });
+
+  it('seo.noindex=true 时 metadata.robots 含 noindex,nofollow', () => {
+    const seo = { noindex: true } as any;
+    const metadata = buildMetadata(seo, { title: 'Privacy Policy' });
+    expect(metadata.robots).toMatchObject({ index: false, follow: false });
+  });
+
+  it('seo.noindex=false 时 metadata.robots 含 index,follow', () => {
+    const seo = { noindex: false } as any;
+    const metadata = buildMetadata(seo, { title: 'Home' });
+    expect(metadata.robots).toMatchObject({ index: true, follow: true });
+  });
+
+  it('未配置 seo.ogImage 时回退到 defaultOgImage', () => {
+    const seo = {} as any;
+    const defaultOgImage = { url: '/uploads/default-og.png' } as any;
+    const metadata = buildMetadata(seo, { title: 'Test' }, undefined, defaultOgImage);
+    const ogImages = metadata.openGraph?.images as { url: string }[];
+    expect(ogImages[0].url).toContain('default-og.png');
+  });
+
+  it('配置了 seo.ogImage 时优先使用页面级 OG 图', () => {
+    const seo = { ogImage: { url: '/uploads/page-og.png' } } as any;
+    const defaultOgImage = { url: '/uploads/default-og.png' } as any;
+    const metadata = buildMetadata(seo, { title: 'Test' }, undefined, defaultOgImage);
+    const ogImages = metadata.openGraph?.images as { url: string }[];
+    expect(ogImages[0].url).toContain('page-og.png');
+    expect(ogImages[0].url).not.toContain('default-og.png');
+  });
+});

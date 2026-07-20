@@ -4,6 +4,7 @@ import { setRequestLocale, getMessages, getTranslations } from 'next-intl/server
 import { NextIntlClientProvider } from 'next-intl';
 import { getSiteSettings, getNavigationTree, getFooter, getImageUrl, type Locale } from '@/lib/api';
 import { buildWebSiteSchema, buildOrganizationSchema, buildJsonLd } from '@/lib/seo';
+import { buildSiteNavigationSchema } from '@/lib/geo';
 import { buildThemeCss } from '@/lib/theme';
 import { routing } from '@/i18n/routing';
 import LayoutShell from '@/components/layout/LayoutShell';
@@ -41,6 +42,19 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations('seo');
+  const settingsRes = await getSiteSettings(locale as Locale);
+  const settings = Array.isArray(settingsRes.data)
+    ? settingsRes.data[0]
+    : settingsRes.data;
+
+  // 站长平台验证码
+  const verification: Record<string, string> = {};
+  if (settings?.googleVerification) verification.google = settings.googleVerification;
+  if (settings?.bingVerification) verification.other = settings.bingVerification;
+
+  // 默认 OG 分享图
+  const defaultOgImageUrl = getImageUrl(settings?.defaultOgImage);
+
   return {
     title: {
       default:
@@ -61,8 +75,14 @@ export async function generateMetadata({
       type: 'website',
       locale: locale === 'en-US' ? 'en_US' : 'zh_CN',
       siteName: locale === 'en-US' ? t('siteNameEn') : t('siteNameZh'),
+      images: defaultOgImageUrl ? [{ url: defaultOgImageUrl }] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      images: defaultOgImageUrl ? [defaultOgImageUrl] : undefined,
     },
     robots: { index: true, follow: true },
+    verification: Object.keys(verification).length > 0 ? verification : undefined,
   };
 }
 
@@ -137,6 +157,16 @@ export default async function LocaleLayout({
   });
   const faviconUrl = getImageUrl(settings?.favicon);
 
+  // 站长平台验证码（Google/Bing/百度）：后台配置后自动注入 meta 标签
+  const googleVerify = settings?.googleVerification;
+  const bingVerify = settings?.bingVerification;
+  const baiduVerify = settings?.baiduVerification;
+
+  // 统计代码配置
+  const ga4Id = settings?.analytics?.ga4Id;
+  const baiduTongjiId = settings?.analytics?.baiduTongjiId;
+  const fbPixelId = settings?.analytics?.facebookPixelId;
+
   const cmsUrl =
     process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
   // 相对路径（如 /api/strapi）走 Next.js rewrites 同源代理，无需 dns-prefetch / preconnect
@@ -154,6 +184,14 @@ export default async function LocaleLayout({
       )
     : null;
 
+  // SiteNavigationElement：从导航树构建站点导航结构化数据
+  const navItems: { name: string; url: string }[] = (navigation || [])
+    .filter((item: any) => item?.name && item?.url)
+    .map((item: any) => ({ name: item.name, url: item.url }));
+  const navSchema = navItems.length > 0
+    ? buildSiteNavigationSchema(navItems, locale as Locale)
+    : null;
+
   return (
     <html
       lang={locale}
@@ -163,6 +201,27 @@ export default async function LocaleLayout({
       <head>
         <style data-theme-vars="" dangerouslySetInnerHTML={{ __html: themeCss }} />
         {faviconUrl && <link rel="icon" href={faviconUrl} />}
+        {/* 站长平台验证码 */}
+        {googleVerify && <meta name="google-site-verification" content={googleVerify} />}
+        {bingVerify && <meta name="msvalidate.01" content={bingVerify} />}
+        {baiduVerify && <meta name="baidu-site-verification" content={baiduVerify} />}
+        {/* 统计代码：GA4 */}
+        {ga4Id && (
+          <>
+            <script src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`} async />
+            <script dangerouslySetInnerHTML={{ __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${ga4Id}');` }} />
+          </>
+        )}
+        {/* 统计代码：百度统计 */}
+        {baiduTongjiId && (
+          <script dangerouslySetInnerHTML={{ __html: `var _hmt=_hmt||[];(function(){var hm=document.createElement('script');hm.src='https://hm.baidu.com/hm.js?${baiduTongjiId}';var s=document.getElementsByTagName('script')[0];s.parentNode.insertBefore(hm,s);})();` }} />
+        )}
+        {/* 统计代码：Facebook Pixel */}
+        {fbPixelId && (
+          <>
+            <script dangerouslySetInnerHTML={{ __html: `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${fbPixelId}');fbq('track','PageView');` }} />
+          </>
+        )}
         {fontFaceCSS && (
           <style dangerouslySetInnerHTML={{ __html: fontFaceCSS }} />
         )}
@@ -184,6 +243,12 @@ export default async function LocaleLayout({
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: buildJsonLd(orgSchema) }}
+          />
+        )}
+        {navSchema && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: buildJsonLd(navSchema) }}
           />
         )}
         <NextIntlClientProvider locale={locale} messages={messages}>

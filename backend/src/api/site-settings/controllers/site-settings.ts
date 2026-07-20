@@ -1,7 +1,7 @@
 import { factories } from '@strapi/strapi';
 
-// 'seo.ogImage' / 'fontSettings.fontFile' 点路径深取组件内媒体字段；浅层 'seo' 不返回 ogImage。
-export const SITE_SETTINGS_POPULATE = ['logo', 'favicon', 'seo.ogImage', 'fontSettings.fontFile'];
+// 深取组件内媒体字段：seo.ogImage / fontSettings.fontFile / analytics（无媒体，浅取即可）/ defaultOgImage
+export const SITE_SETTINGS_POPULATE = ['logo', 'favicon', 'seo.ogImage', 'fontSettings.fontFile', 'analytics', 'defaultOgImage'];
 
 export default factories.createCoreController('api::site-settings.site-settings', ({ strapi }) => ({
   async find(ctx) {

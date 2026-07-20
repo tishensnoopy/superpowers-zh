@@ -114,4 +114,77 @@ describe('后台可调整入口 — schema 契约', () => {
       );
     });
   });
+
+  describe('seo 组件增强（common/seo.json）', () => {
+    const schema = readSchema('components/common/seo.json');
+
+    test('noindex 布尔字段存在（后台可控制页面不被索引）', () => {
+      expect(schema.attributes.noindex).toMatchObject({ type: 'boolean' });
+    });
+  });
+
+  describe('site-settings 站长验证 + 统计代码（SEO/GEO 增强）', () => {
+    const schema = readSchema('api/site-settings/content-types/site-settings/schema.json');
+
+    test('googleVerification 字段存在（Google Search Console 验证）', () => {
+      expect(schema.attributes.googleVerification).toMatchObject({ type: 'string' });
+    });
+
+    test('bingVerification 字段存在（Bing Webmaster 验证）', () => {
+      expect(schema.attributes.bingVerification).toMatchObject({ type: 'string' });
+    });
+
+    test('baiduVerification 字段存在（百度站长验证）', () => {
+      expect(schema.attributes.baiduVerification).toMatchObject({ type: 'string' });
+    });
+
+    test('analytics 组件存在（统计代码：GA4 / 百度统计 / Facebook Pixel）', () => {
+      expect(schema.attributes.analytics).toMatchObject({
+        type: 'component',
+        component: 'common.analytics',
+      });
+    });
+
+    test('defaultOgImage 媒体字段存在（站点级默认分享图）', () => {
+      expect(schema.attributes.defaultOgImage).toMatchObject({ type: 'media' });
+    });
+  });
+
+  describe('analytics 组件（common/analytics.json）', () => {
+    const schema = readSchema('components/common/analytics.json');
+
+    test('ga4Id 字段存在（Google Analytics 4 ID）', () => {
+      expect(schema.attributes.ga4Id).toMatchObject({ type: 'string' });
+    });
+
+    test('baiduTongjiId 字段存在（百度统计 ID）', () => {
+      expect(schema.attributes.baiduTongjiId).toMatchObject({ type: 'string' });
+    });
+
+    test('facebookPixelId 字段存在（Facebook Pixel ID）', () => {
+      expect(schema.attributes.facebookPixelId).toMatchObject({ type: 'string' });
+    });
+  });
+
+  describe('各内容类型 aiSummary 字段（GEO：每条内容独立 AI 摘要）', () => {
+    test('product 有 aiSummary（课程级 AI 摘要）', () => {
+      const schema = readSchema('api/product/content-types/product/schema.json');
+      expect(schema.attributes.aiSummary).toMatchObject({ type: 'text' });
+    });
+
+    test('campus 有 aiSummary（校区级 AI 摘要）', () => {
+      const schema = readSchema('api/campus/content-types/campus/schema.json');
+      expect(schema.attributes.aiSummary).toMatchObject({ type: 'text' });
+    });
+
+    test('teacher 有 aiSummary（教师级 AI 摘要）', () => {
+      const schema = readSchema('api/teacher/content-types/teacher/schema.json');
+      expect(schema.attributes.aiSummary).toMatchObject({ type: 'text' });
+    });
+
+    test('news-article 有 aiSummary（新闻级 AI 摘要）', () => {
+      const schema = readSchema('api/news-article/content-types/news-article/schema.json');
+      expect(schema.attributes.aiSummary).toMatchObject({ type: 'text' });
+    });
+  });
 });

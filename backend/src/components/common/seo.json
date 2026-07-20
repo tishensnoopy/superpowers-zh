@@ -84,6 +84,11 @@
       ],
       "default": "website",
       "description": "Open Graph type"
+    },
+    "noindex": {
+      "type": "boolean",
+      "default": false,
+      "description": "勾选后此页面不会被搜索引擎索引（适用于隐私政策/退费政策等页面）"
     }
   }
 }

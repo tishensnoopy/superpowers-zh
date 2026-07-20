@@ -310,6 +310,22 @@ export interface SiteSettings {
   darkColor?: string;
   /** GEO：给 AI 搜索引擎看的机构摘要（写入 llms.txt） */
   aiSummary?: string;
+  /** Google Search Console 验证码 */
+  googleVerification?: string;
+  /** Bing Webmaster 验证码 */
+  bingVerification?: string;
+  /** 百度站长平台验证码 */
+  baiduVerification?: string;
+  /** 统计代码配置（GA4 / 百度统计 / Facebook Pixel） */
+  analytics?: AnalyticsConfig;
+  /** 站点级默认分享图（页面未配置 OG 图时回退） */
+  defaultOgImage?: { url: string; alternativeText?: string } | null;
+}
+
+export interface AnalyticsConfig {
+  ga4Id?: string;
+  baiduTongjiId?: string;
+  facebookPixelId?: string;
 }
 
 export interface NavigationItem {
@@ -376,6 +392,8 @@ export interface Seo {
   ogDescription?: string;
   ogImage?: { url: string; alternativeText?: string } | null;
   ogType?: string;
+  /** 后台勾选后此页面不被搜索引擎索引 */
+  noindex?: boolean;
 }
 
 export interface CourseObjective {
@@ -420,6 +438,8 @@ export interface Product {
   outline?: CourseModule[];
   testimonials?: CourseTestimonial[];
   seo?: Seo;
+  /** GEO：课程级 AI 摘要 */
+  aiSummary?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -466,6 +486,8 @@ export interface NewsArticle {
   publishedAt?: string;
   viewCount?: number;
   seo?: Seo;
+  /** GEO：新闻级 AI 摘要 */
+  aiSummary?: string;
 }
 
 export interface KnowledgeBase {
@@ -552,6 +574,9 @@ export interface Teacher {
   achievements?: string[];
   isFeatured?: boolean;
   sortOrder?: number;
+  seo?: Seo;
+  /** GEO：教师级 AI 摘要 */
+  aiSummary?: string;
 }
 
 export async function getTeachers(
@@ -627,6 +652,8 @@ export interface Campus {
   sortOrder?: number;
   teachers?: Teacher[];
   seo?: Seo;
+  /** GEO：校区级 AI 摘要 */
+  aiSummary?: string;
 }
 
 export async function getCampuses(locale: Locale = 'zh-CN') {

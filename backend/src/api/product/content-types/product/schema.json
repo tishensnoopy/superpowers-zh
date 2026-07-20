@@ -119,6 +119,15 @@
         }
       }
     },
+    "aiSummary": {
+      "type": "text",
+      "description": "GEO：给 AI 搜索引擎看的课程摘要（留空则自动从 description 生成）",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
     "specValues": {
       "type": "json",
       "description": "规格值（键值对）",

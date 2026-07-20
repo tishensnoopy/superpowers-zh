@@ -42,9 +42,14 @@ export function buildOrgSummary(
  * 内容: 简述 + 教学目标(前3条) + 教学方式 + 价格
  */
 export function buildCourseSummary(
-  product: Pick<Product, 'name' | 'slug' | 'shortDescription' | 'description' | 'objectives' | 'teachingMethod' | 'price'>,
+  product: Pick<Product, 'name' | 'slug' | 'shortDescription' | 'description' | 'objectives' | 'teachingMethod' | 'price' | 'aiSummary'>,
   locale: Locale
 ): string {
+  // GEO：优先使用后台配置的课程级 AI 摘要
+  if (product.aiSummary?.trim()) {
+    return `${product.name}: ${product.aiSummary.trim()}`;
+  }
+
   const labels = locale === 'en-US'
     ? { desc: 'Description', objectives: 'Objectives', method: 'Teaching Method', price: 'Price' }
     : { desc: '简介', objectives: '教学目标', method: '教学方式', price: '价格' };
@@ -112,9 +117,14 @@ export function buildTeacherSummary(
  * 内容: 地址 + 电话 + 营业时间 + 交通指引
  */
 export function buildCampusSummary(
-  campus: Pick<Campus, 'name' | 'slug' | 'address' | 'phone' | 'businessHours' | 'transportation'>,
+  campus: Pick<Campus, 'name' | 'slug' | 'address' | 'phone' | 'businessHours' | 'transportation' | 'aiSummary'>,
   locale: Locale
 ): string {
+  // GEO：优先使用后台配置的校区级 AI 摘要
+  if (campus.aiSummary?.trim()) {
+    return `${campus.name}: ${campus.aiSummary.trim()}`;
+  }
+
   const labels = locale === 'en-US'
     ? { address: 'Address', phone: 'Phone', hours: 'Business Hours', transport: 'Transportation' }
     : { address: '地址', phone: '电话', hours: '营业时间', transport: '交通' };
@@ -273,4 +283,38 @@ export function buildLlmsTxtContent(
   }
 
   return sections.join('\n').trim() + '\n';
+}
+
+/**
+ * 构建 Speakable schema（语音搜索标记）
+ * 标记页面中适合语音助手朗读的 CSS 选择器区域
+ */
+export function buildSpeakableSchema(
+  url: string,
+  cssSelectors: string[]
+): Record<string, unknown> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'SpeakableSpecification',
+    url,
+    cssSelector: cssSelectors,
+  };
+}
+
+/**
+ * 构建 SiteNavigationElement schema（站点导航结构化数据）
+ * 帮助 AI 搜索引擎理解站点导航结构
+ */
+export function buildSiteNavigationSchema(
+  items: { name: string; url: string }[],
+  locale: Locale
+): Record<string, unknown> {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const prefix = locale === 'en-US' ? '/en-US' : '';
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'SiteNavigationElement',
+    name: items.map((item) => item.name),
+    url: items.map((item) => `${baseUrl}${prefix}${item.url}`),
+  };
 }

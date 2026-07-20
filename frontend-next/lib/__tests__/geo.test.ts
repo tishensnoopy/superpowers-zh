@@ -7,6 +7,8 @@ import {
   buildNewsSummary,
   buildFaqSummary,
   buildLlmsTxtContent,
+  buildSpeakableSchema,
+  buildSiteNavigationSchema,
 } from '../geo';
 import type { SiteSettings, Product, CourseObjective, Teacher, Campus, NewsArticle, FaqItem } from '../api';
 
@@ -413,5 +415,55 @@ describe('buildLlmsTxtContent', () => {
     const result = buildLlmsTxtContent(settings, [], [], [], [], [], 'zh-CN');
     expect(result).toContain('## 机构简介');
     expect(result).toContain('027-12345678');
+  });
+
+  it('课程有 aiSummary 时优先使用课程级摘要（而非自动拼装）', () => {
+    const settings = { name: '佑森小课堂' } as any;
+    const products = [{
+      name: '幼小衔接班',
+      slug: 'yousen-youxiao-xianjie',
+      aiSummary: '专注 5-6 岁儿童幼小衔接，培养学习习惯与基础知识。',
+      shortDescription: '通用描述',
+    }] as any;
+    const result = buildLlmsTxtContent(settings, products, [], [], [], [], 'zh-CN');
+    expect(result).toContain('专注 5-6 岁儿童幼小衔接，培养学习习惯与基础知识。');
+  });
+
+  it('校区有 aiSummary 时优先使用校区级摘要', () => {
+    const settings = { name: '佑森小课堂' } as any;
+    const campuses = [{
+      name: '百步亭校区',
+      slug: 'baiting',
+      aiSummary: '位于江岸区百步亭社区，交通便利，8年办学经验。',
+      address: '武汉市江岸区',
+    }] as any;
+    const result = buildLlmsTxtContent(settings, [], [], campuses, [], [], 'zh-CN');
+    expect(result).toContain('位于江岸区百步亭社区，交通便利，8年办学经验。');
+  });
+});
+
+describe('buildSpeakableSchema', () => {
+  it('生成 Speakable schema（标记语音搜索可读区域）', () => {
+    const schema = buildSpeakableSchema('https://example.com', ['#hero', '#main-content']);
+    expect(schema['@type']).toBe('SpeakableSpecification');
+    expect(schema['@context']).toBe('https://schema.org');
+    expect(schema.url).toBe('https://example.com');
+    expect(schema.cssSelector).toEqual(['#hero', '#main-content']);
+  });
+});
+
+describe('buildSiteNavigationSchema', () => {
+  it('生成站点导航结构化数据（帮助 AI 理解站点结构）', () => {
+    const navItems = [
+      { name: '课程', url: '/courses' },
+      { name: '校区', url: '/campuses' },
+      { name: '关于我们', url: '/about' },
+    ];
+    const schema = buildSiteNavigationSchema(navItems, 'zh-CN');
+    expect(schema['@type']).toBe('SiteNavigationElement');
+    expect(schema['@context']).toBe('https://schema.org');
+    expect(schema.name as string[]).toHaveLength(3);
+    expect(schema.url as string[]).toHaveLength(3);
+    expect((schema.url as string[])[0]).toContain('/courses');
   });
 });
