@@ -98,7 +98,7 @@
     "overlayColor": {
       "type": "string",
       "maxLength": 20,
-      "description": "Overlay color (hex)",
+      "description": "遮罩颜色：填入 6 位十六进制色值（如 #1C2B3A），留空使用默认深蓝灰",
       "pluginOptions": {
         "i18n": {
           "localized": true

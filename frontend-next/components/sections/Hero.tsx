@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 
 export default function Hero({ section }: { section: Section }) {
   const t = useTranslations('sections.hero');
-  const { title, subtitle, description, backgroundImage, buttonText, isFullWidth = true, image1, image2, badgeText, stats } = section;
+  const { title, subtitle, description, backgroundImage, buttonText, isFullWidth = true, image1, image2, badgeText, stats, overlayColor } = section;
 
   // 后台可配的统计数字；未配置时回退到 i18n 默认 4 项
   const displayStats: { value: string; label: string }[] =
@@ -21,13 +21,17 @@ export default function Hero({ section }: { section: Section }) {
 
   const image1Url = getImageUrl(image1) || 'https://images.unsplash.com/photo-1586694680938-9682c9e1f736?w=400&h=480&fit=crop&auto=format';
   const image2Url = getImageUrl(image2) || 'https://images.unsplash.com/photo-1617117206620-b01f2919ff86?w=340&h=360&fit=crop&auto=format';
+  const bgImageUrl = getImageUrl(backgroundImage) || null;
+
+  // 遮罩颜色：后台可配 overlayColor（hex 格式如 #1a2a3a），未配置时用品牌深色默认值
+  const overlayHex = /^#[0-9A-Fa-f]{6}$/.test(overlayColor || '') ? overlayColor! : '#1C2B3A';
 
   return (
     <section className="relative pt-[120px] min-h-screen flex items-center overflow-hidden">
-      <div className="absolute inset-0 bg-[var(--brand-dark,#1C2B3A)]">
-        {backgroundImage?.url ? (
+      <div className="absolute inset-0" style={{ backgroundColor: 'var(--brand-dark,#1C2B3A)' }}>
+        {bgImageUrl ? (
           <img
-            src={backgroundImage.url}
+            src={bgImageUrl}
             alt=""
             className="w-full h-full object-cover opacity-30"
           />
@@ -37,7 +41,7 @@ export default function Hero({ section }: { section: Section }) {
         <div
           className="absolute inset-0"
           style={{
-            background: 'linear-gradient(105deg, rgba(var(--brand-dark-rgb,28,43,58),0.96) 0%, rgba(var(--brand-dark-rgb,28,43,58),0.80) 45%, rgba(var(--brand-primary-rgb,245,133,31),0.25) 100%)',
+            background: `linear-gradient(105deg, ${overlayHex}F5 0%, ${overlayHex}CC 45%, var(--brand-primary,#F5851F)40 100%)`,
           }}
         />
       </div>

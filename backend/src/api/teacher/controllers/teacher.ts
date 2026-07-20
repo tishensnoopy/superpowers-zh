@@ -8,10 +8,14 @@ export default factories.createCoreController(UID, ({ strapi }) => ({
 
     const entityFilters: any = {};
     if (filters?.subject) {
-      entityFilters.subject = { $eq: filters.subject };
+      // Strapi v5: filters[subject][$eq]=xxx 解析为 { subject: { $eq: 'xxx' } }
+      // 直接使用即可，不要二次包装
+      const subjectValue = typeof filters.subject === 'object' ? filters.subject.$eq : filters.subject;
+      if (subjectValue) entityFilters.subject = { $eq: subjectValue };
     }
     if (filters?.isFeatured !== undefined) {
-      entityFilters.isFeatured = { $eq: filters.isFeatured === 'true' };
+      const featuredValue = typeof filters.isFeatured === 'object' ? filters.isFeatured.$eq : filters.isFeatured;
+      if (featuredValue !== undefined) entityFilters.isFeatured = { $eq: featuredValue === 'true' };
     }
 
     const campusSlug = filters?.campus?.slug?.$eq || filters?.campusSlug;

@@ -89,4 +89,39 @@ describe('Hero 组件', () => {
     expect(screen.getByText('办学经验')).toBeInTheDocument();
     expect(screen.queryByText('8年+')).not.toBeInTheDocument();
   });
+
+  it('backgroundImage 使用 getImageUrl 处理（相对路径→完整 URL）', () => {
+    render(
+      <Hero
+        section={
+          {
+            ...mockSection,
+            backgroundImage: { url: '/uploads/hero-bg.jpg' },
+          } as any
+        }
+      />
+    );
+    const bgImg = screen.getByAltText('');
+    const src = bgImg.getAttribute('src') || '';
+    // getImageUrl 会加 CMS base URL 前缀或保持相对路径
+    expect(src).toContain('hero-bg.jpg');
+  });
+
+  it('overlayColor 后台配置后遮罩使用自定义颜色', () => {
+    const { container } = render(
+      <Hero
+        section={
+          {
+            ...mockSection,
+            overlayColor: '#1a2a3a',
+          } as any
+        }
+      />
+    );
+    // 遮罩层应在 inline style 中包含自定义颜色
+    const overlay = container.querySelector('[style*="linear-gradient"]');
+    expect(overlay).toBeTruthy();
+    const style = overlay?.getAttribute('style') || '';
+    expect(style).toContain('1a2a3a');
+  });
 });

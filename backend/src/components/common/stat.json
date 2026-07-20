@@ -8,11 +8,13 @@
   "attributes": {
     "value": {
       "type": "string",
-      "required": true
+      "required": true,
+      "description": "统计数字（如 8年+ / 3000+ / 98% / 6所）"
     },
     "label": {
       "type": "string",
-      "required": true
+      "required": true,
+      "description": "统计标签（如 专注幼教 / 毕业学员 / 家长满意度 / 直营校区）"
     }
   }
 }

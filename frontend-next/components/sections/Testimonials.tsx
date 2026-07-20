@@ -51,9 +51,9 @@ export default function Testimonials({ section }: { section: Section }) {
                 <p className="text-muted-foreground text-sm leading-relaxed mb-6">&ldquo;{testimonial.content}&rdquo;</p>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full overflow-hidden bg-muted flex items-center justify-center text-[var(--brand-primary,#F5851F)] font-bold text-sm shrink-0">
-                    {testimonial.avatar?.url ? (
+                    {getImageUrl(testimonial.avatar) ? (
                       <img
-                        src={testimonial.avatar.url}
+                        src={getImageUrl(testimonial.avatar)!}
                         alt={testimonial.author}
                         className="w-full h-full object-cover"
                       />

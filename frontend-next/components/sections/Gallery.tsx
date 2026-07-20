@@ -1,5 +1,6 @@
 import { Heart } from 'lucide-react';
 import type { Section } from '@/lib/api';
+import { getImageUrl } from '@/lib/api';
 import { useTranslations } from 'next-intl';
 
 export default function Gallery({ section }: { section: Section }) {
@@ -46,7 +47,7 @@ export default function Gallery({ section }: { section: Section }) {
               }`}
             >
               <img
-                src={img.image?.url || img.url}
+                src={getImageUrl(img.image) || getImageUrl(img) || ''}
                 alt={img.alt || img.caption || ''}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
