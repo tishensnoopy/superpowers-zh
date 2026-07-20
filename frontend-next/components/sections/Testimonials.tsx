@@ -1,5 +1,6 @@
 import { Star } from 'lucide-react';
 import type { Section } from '@/lib/api';
+import { getImageUrl } from '@/lib/api';
 import { useTranslations } from 'next-intl';
 
 interface Testimonial {
