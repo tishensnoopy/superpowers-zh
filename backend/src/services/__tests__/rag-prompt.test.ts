@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { SYSTEM_PROMPT_TEMPLATE } from '../rag-service';
 
 describe('SYSTEM_PROMPT_TEMPLATE 防幻觉约束', () => {
-  it('包含"暂无该信息"兜底话术要求', () => {
-    expect(SYSTEM_PROMPT_TEMPLATE).toContain('暂无该信息');
+  it('包含"暂时没有该信息，已为您转接人工客服"兜底话术要求', () => {
+    expect(SYSTEM_PROMPT_TEMPLATE).toContain('暂时没有该信息，已为您转接人工客服');
   });
 
   it('明确禁止编造校区/课程/价格/政策', () => {
@@ -13,8 +13,8 @@ describe('SYSTEM_PROMPT_TEMPLATE 防幻觉约束', () => {
     expect(SYSTEM_PROMPT_TEMPLATE).toMatch(/政策/);
   });
 
-  it('检索不到答案时引导转人工或留资', () => {
-    expect(SYSTEM_PROMPT_TEMPLATE).toContain('转人工');
+  it('检索不到答案时引导转人工客服或留资', () => {
+    expect(SYSTEM_PROMPT_TEMPLATE).toContain('转接人工客服');
     expect(SYSTEM_PROMPT_TEMPLATE).toMatch(/留(下|资)|姓名电话/);
   });
 

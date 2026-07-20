@@ -442,6 +442,75 @@ describe('rag-service', () => {
       expect(systemPrompt).toContain('中文 prompt');
       expect(systemPrompt).not.toContain('English prompt');
     });
+
+    describe('BUG-5：systemPrompt 缺少 {retrieved_docs} 占位符时仍注入知识库', () => {
+      afterEach(() => {
+        delete process.env.AI_CHAT_SYSTEM_PROMPT;
+      });
+
+      test('env AI_CHAT_SYSTEM_PROMPT 无占位符时，知识库内容追加到末尾', async () => {
+        clearCache();
+        // 无 ai-config，走 env 兜底
+        const emptyStrapi = buildMockStrapiWithAiConfig(null);
+        setStrapi(emptyStrapi as any);
+        process.env.AI_CHAT_SYSTEM_PROMPT = '你是佑森小课堂的AI客服助手，基于知识库回答。';
+
+        mockChat.mockResolvedValue({ content: 'answer', tokenCount: 1, latencyMs: 1 });
+
+        await generateAnswer('question', docs, [], 'zh-CN', false);
+
+        const systemPrompt = mockChat.mock.calls[0][0][0].content;
+        expect(systemPrompt).toContain('你是佑森小课堂的AI客服助手');
+        // 即使 env 缺占位符，检索到的知识库内容也必须注入
+        expect(systemPrompt).toContain('佑森在武汉有6大校区');
+        expect(systemPrompt).toContain('课程包括幼小衔接班');
+      });
+
+      test('DB systemPrompt 无占位符时，知识库内容追加到末尾', async () => {
+        clearCache();
+
+        const aiConfigRow = {
+          provider: 'qwen',
+          model: 'qwen-plus',
+          embeddingModel: 'text-embedding-v2',
+          apiKey: 'sk-test',
+          apiEndpoint: 'https://test',
+          systemPrompt: '你是AI客服，基于知识库回答问题。',
+          systemPromptEn: null,
+          temperature: 0.3,
+          maxTokens: 1000,
+          topK: 5,
+          chunkSize: 500,
+          chunkOverlap: 50,
+          isActive: true,
+        };
+        const configStrapi = buildMockStrapiWithAiConfig(aiConfigRow);
+        setStrapi(configStrapi as any);
+
+        mockChat.mockResolvedValue({ content: 'answer', tokenCount: 1, latencyMs: 1 });
+
+        await generateAnswer('question', docs, [], 'zh-CN', false);
+
+        const systemPrompt = mockChat.mock.calls[0][0][0].content;
+        expect(systemPrompt).toContain('你是AI客服');
+        expect(systemPrompt).toContain('佑森在武汉有6大校区');
+        expect(systemPrompt).toContain('课程包括幼小衔接班');
+      });
+
+      test('无占位符且 docs 为空时，也追加空态提示', async () => {
+        clearCache();
+        const emptyStrapi = buildMockStrapiWithAiConfig(null);
+        setStrapi(emptyStrapi as any);
+        process.env.AI_CHAT_SYSTEM_PROMPT = '你是AI客服。';
+
+        mockChat.mockResolvedValue({ content: 'answer', tokenCount: 1, latencyMs: 1 });
+
+        await generateAnswer('question', [], [], 'zh-CN', false);
+
+        const systemPrompt = mockChat.mock.calls[0][0][0].content;
+        expect(systemPrompt).toContain('暂无相关');
+      });
+    });
   });
 
   describe('feedbackToFaq', () => {

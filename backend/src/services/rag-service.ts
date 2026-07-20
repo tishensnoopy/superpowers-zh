@@ -48,8 +48,8 @@ export const SYSTEM_PROMPT_TEMPLATE = `你是佑森小课堂的AI客服助手。
 
 【最高优先级规则——禁止编造】
 1. 你只能使用下方"知识库内容"中的信息作答。
-2. 知识库中没有的信息，一律回答"暂无该信息"，不得编造任何校区、课程、价格、政策、师资细节。
-3. 检索结果与问题无关时，不得强行作答；如实说明并引导家长：转人工客服，或留下姓名电话预约回电。
+2. 知识库中没有的信息，一律回答"暂时没有该信息，已为您转接人工客服"，不得编造任何校区、课程、价格、政策、师资细节。
+3. 检索结果与问题无关时，不得强行作答；按第 2 条话术如实说明，并引导家长留下姓名电话预约回电。
 4. 涉及费用、名额、开班时间等可能变动的信息，即使知识库中有，也建议家长致电确认。
 
 知识库内容:
@@ -137,6 +137,20 @@ export async function retrieve(
   };
 }
 
+/**
+ * BUG-5 修复：向 prompt 模板注入知识库内容。
+ *
+ * 当模板包含 {retrieved_docs} 占位符时做常规替换；
+ * 当模板缺失占位符（例如管理员在后台改写了 prompt、或 env 覆盖忘了加占位符），
+ * 把"知识库内容"整块追加到模板末尾 —— 防止检索结果静默丢失导致 AI 凭空编造。
+ */
+function injectDocsIntoPrompt(template: string, docsSection: string): string {
+  if (template.includes('{retrieved_docs}')) {
+    return template.replace('{retrieved_docs}', docsSection);
+  }
+  return `${template}\n\n知识库内容:\n${docsSection}`;
+}
+
 async function buildSystemPrompt(
   retrievedDocs: RetrievedDoc[],
   locale: 'zh-CN' | 'en-US' = 'zh-CN'
@@ -157,17 +171,17 @@ async function buildSystemPrompt(
     try {
       const aiConfig = await getActiveAiConfig(strapiInstance);
       if (locale === 'en-US' && aiConfig?.systemPromptEn) {
-        return aiConfig.systemPromptEn.replace('{retrieved_docs}', docsSection);
+        return injectDocsIntoPrompt(aiConfig.systemPromptEn, docsSection);
       }
       if (aiConfig?.systemPrompt) {
-        return aiConfig.systemPrompt.replace('{retrieved_docs}', docsSection);
+        return injectDocsIntoPrompt(aiConfig.systemPrompt, docsSection);
       }
     } catch (err) {
       console.warn('[rag-service] Failed to load ai-config systemPrompt, using default:', err instanceof Error ? err.message : err, err instanceof Error ? err.stack : '');
     }
   }
 
-  return (process.env.AI_CHAT_SYSTEM_PROMPT || SYSTEM_PROMPT_TEMPLATE).replace('{retrieved_docs}', docsSection);
+  return injectDocsIntoPrompt(process.env.AI_CHAT_SYSTEM_PROMPT || SYSTEM_PROMPT_TEMPLATE, docsSection);
 }
 
 /**
