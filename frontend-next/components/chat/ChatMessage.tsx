@@ -63,7 +63,7 @@ export default function ChatMessage({
         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
           isUser ? 'bg-gray-100' : 'text-white'
         }`}
-        style={!isUser ? { background: 'linear-gradient(135deg, #F5851F, #FF6B35)' } : undefined}
+        style={!isUser ? { background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' } : undefined}
         aria-label={isUser ? t('userAriaLabel') : t('assistantAriaLabel')}
       >
         {isUser ? <User size={16} className="text-gray-600" /> : <Bot size={16} />}

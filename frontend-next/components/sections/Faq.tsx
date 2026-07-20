@@ -61,7 +61,7 @@ export default function Faq({ section }: { section: Section }) {
       <div className="max-w-[1400px] mx-auto px-8">
         <div className="text-center mb-16">
           <h2
-            className="text-[#1C2B3A] mb-4"
+            className="text-[var(--brand-dark,#1C2B3A)] mb-4"
             style={{
               fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
               fontSize: '2.25rem',
@@ -82,7 +82,7 @@ export default function Faq({ section }: { section: Section }) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 aria-label={tFaq('searchAriaLabel')}
-                className="w-full pl-12 pr-4 py-3 rounded-xl border border-border bg-card focus:outline-none focus:border-[#F5851F] transition-colors"
+                className="w-full pl-12 pr-4 py-3 rounded-xl border border-border bg-card focus:outline-none focus:border-[var(--brand-primary,#F5851F)] transition-colors"
               />
             </div>
           </div>
@@ -95,8 +95,8 @@ export default function Faq({ section }: { section: Section }) {
               onClick={() => setActiveCategory(cat.value)}
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-all border ${
                 activeCategory === cat.value
-                  ? 'bg-[#F5851F] text-white border-[#F5851F] shadow-md'
-                  : 'bg-card text-[#1C2B3A] border-border hover:border-[#F5851F] hover:text-[#F5851F]'
+                  ? 'bg-[var(--brand-primary,#F5851F)] text-white border-[var(--brand-primary,#F5851F)] shadow-md'
+                  : 'bg-card text-[var(--brand-dark,#1C2B3A)] border-border hover:border-[var(--brand-primary,#F5851F)] hover:text-[var(--brand-primary,#F5851F)]'
               }`}
             >
               {cat.label}
@@ -124,7 +124,7 @@ export default function Faq({ section }: { section: Section }) {
                   aria-expanded={isOpen}
                   aria-controls={`faq-content-${faq.id}`}
                 >
-                  <span className="font-semibold text-[#1C2B3A]">{faq.question}</span>
+                  <span className="font-semibold text-[var(--brand-dark,#1C2B3A)]">{faq.question}</span>
                   <ChevronDown
                     size={20}
                     className={`text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
@@ -144,13 +144,13 @@ export default function Faq({ section }: { section: Section }) {
                           <span className="text-xs text-muted-foreground mr-2">{tFaq('feedbackPrompt')}</span>
                           <button
                             onClick={() => handleFeedback(faq.id, true)}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-border bg-card hover:border-[#F5851F] hover:text-[#F5851F] transition-colors"
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-border bg-card hover:border-[var(--brand-primary,#F5851F)] hover:text-[var(--brand-primary,#F5851F)] transition-colors"
                           >
                             <ThumbsUp size={12} /> {tFaq('helpful')}
                           </button>
                           <button
                             onClick={() => handleFeedback(faq.id, false)}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-border bg-card hover:border-[#F5851F] hover:text-[#F5851F] transition-colors"
+                            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-border bg-card hover:border-[var(--brand-primary,#F5851F)] hover:text-[var(--brand-primary,#F5851F)] transition-colors"
                           >
                             <ThumbsDown size={12} /> {tFaq('notHelpful')}
                           </button>
@@ -160,7 +160,7 @@ export default function Faq({ section }: { section: Section }) {
                         <span className="text-xs text-muted-foreground">{tCommon('submitting')}</span>
                       )}
                       {(given === 'helpful' || given === 'notHelpful') && (
-                        <span className="text-xs text-[#F5851F] font-semibold">{tFaq('thanksForFeedback')}</span>
+                        <span className="text-xs text-[var(--brand-primary,#F5851F)] font-semibold">{tFaq('thanksForFeedback')}</span>
                       )}
                     </div>
                   )}

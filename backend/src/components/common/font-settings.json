@@ -1,0 +1,39 @@
+{
+  "collectionName": "components_common_font_settings",
+  "info": {
+    "displayName": "字体设置",
+    "description": "全局字体配置：留空使用默认字体（Nunito + Noto Sans SC）",
+    "icon": "font"
+  },
+  "options": {},
+  "attributes": {
+    "fontFamily": {
+      "type": "string",
+      "maxLength": 64,
+      "description": "字体族名称（英文/拼音，如 MyCustomFont），与字体文件配套填写"
+    },
+    "fontFile": {
+      "type": "media",
+      "multiple": false,
+      "description": "自定义字体文件（woff2/ttf/otf/woff），上传后全站生效"
+    },
+    "fontFormat": {
+      "type": "enumeration",
+      "enum": ["woff2", "ttf", "otf", "woff"],
+      "default": "woff2",
+      "description": "字体文件格式"
+    },
+    "fontWeight": {
+      "type": "string",
+      "maxLength": 10,
+      "default": "400",
+      "description": "字重，如 400 / 700"
+    },
+    "fontDisplay": {
+      "type": "enumeration",
+      "enum": ["swap", "block", "fallback", "optional"],
+      "default": "swap",
+      "description": "字体加载策略，推荐 swap"
+    }
+  }
+}

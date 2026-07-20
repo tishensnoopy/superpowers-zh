@@ -6,14 +6,25 @@ import { useTranslations } from 'next-intl';
 
 export default function Hero({ section }: { section: Section }) {
   const t = useTranslations('sections.hero');
-  const { title, subtitle, description, backgroundImage, buttonText, isFullWidth = true, image1, image2 } = section;
+  const { title, subtitle, description, backgroundImage, buttonText, isFullWidth = true, image1, image2, badgeText, stats } = section;
+
+  // 后台可配的统计数字；未配置时回退到 i18n 默认 4 项
+  const displayStats: { value: string; label: string }[] =
+    Array.isArray(stats) && stats.length > 0
+      ? stats.map((s: any) => ({ value: String(s?.value ?? ''), label: String(s?.label ?? '') }))
+      : [
+          { value: t('stat1Num'), label: t('stat1Label') },
+          { value: t('stat2Num'), label: t('stat2Label') },
+          { value: t('stat3Num'), label: t('stat3Label') },
+          { value: t('stat4Num'), label: t('stat4Label') },
+        ];
 
   const image1Url = getImageUrl(image1) || 'https://images.unsplash.com/photo-1586694680938-9682c9e1f736?w=400&h=480&fit=crop&auto=format';
   const image2Url = getImageUrl(image2) || 'https://images.unsplash.com/photo-1617117206620-b01f2919ff86?w=340&h=360&fit=crop&auto=format';
 
   return (
     <section className="relative pt-[120px] min-h-screen flex items-center overflow-hidden">
-      <div className="absolute inset-0 bg-[#1C2B3A]">
+      <div className="absolute inset-0 bg-[var(--brand-dark,#1C2B3A)]">
         {backgroundImage?.url ? (
           <img
             src={backgroundImage.url}
@@ -26,14 +37,14 @@ export default function Hero({ section }: { section: Section }) {
         <div
           className="absolute inset-0"
           style={{
-            background: 'linear-gradient(105deg, rgba(28,43,58,0.96) 0%, rgba(28,43,58,0.80) 45%, rgba(245,133,31,0.25) 100%)',
+            background: 'linear-gradient(105deg, rgba(var(--brand-dark-rgb,28,43,58),0.96) 0%, rgba(var(--brand-dark-rgb,28,43,58),0.80) 45%, rgba(var(--brand-primary-rgb,245,133,31),0.25) 100%)',
           }}
         />
       </div>
 
       <div
         className="absolute top-24 right-0 w-[520px] h-[520px] rounded-full opacity-10 blur-3xl pointer-events-none"
-        style={{ background: '#F5851F' }}
+        style={{ background: 'var(--brand-primary,#F5851F)' }}
       />
       <div
         className="absolute bottom-0 left-1/3 w-[300px] h-[300px] rounded-full opacity-5 blur-2xl pointer-events-none"
@@ -44,7 +55,7 @@ export default function Hero({ section }: { section: Section }) {
         <div className="grid grid-cols-12 gap-6 items-center">
           <div className="col-span-12 lg:col-span-7">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-white/80 text-sm mb-8">
-              <Sparkles size={14} className="text-[#F5851F]" />
+              <Sparkles size={14} className="text-[var(--brand-primary,#F5851F)]" />
               <span>{subtitle || t('subtitleFallback')}</span>
             </div>
 
@@ -64,18 +75,13 @@ export default function Hero({ section }: { section: Section }) {
             </p>
 
             <div className="flex items-center gap-8 mb-10">
-              {[
-                { num: t('stat1Num'), label: t('stat1Label') },
-                { num: t('stat2Num'), label: t('stat2Label') },
-                { num: t('stat3Num'), label: t('stat3Label') },
-                { num: t('stat4Num'), label: t('stat4Label') },
-              ].map((stat) => (
+              {displayStats.map((stat) => (
                 <div key={stat.label} className="text-center">
                   <div
                     className="text-2xl font-black text-white leading-none mb-1"
-                    style={{ fontFamily: "'Nunito', sans-serif", color: '#F5851F' }}
+                    style={{ fontFamily: "'Nunito', sans-serif", color: 'var(--brand-primary,#F5851F)' }}
                   >
-                    {stat.num}
+                    {stat.value}
                   </div>
                   <div className="text-white/60 text-xs">{stat.label}</div>
                 </div>
@@ -86,7 +92,7 @@ export default function Hero({ section }: { section: Section }) {
               <Link
                 href="/appointment"
                 className="flex items-center gap-2 px-8 py-4 rounded-xl text-white font-bold text-base shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-[1.03]"
-                style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
+                style={{ background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' }}
               >
                 <CalendarDays size={18} />
                 {buttonText || t('buttonTextFallback')}
@@ -120,12 +126,12 @@ export default function Hero({ section }: { section: Section }) {
               <div className="absolute bottom-32 right-4 bg-white rounded-2xl p-4 shadow-xl flex items-center gap-3">
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center text-white"
-                  style={{ background: '#F5851F' }}
+                  style={{ background: 'var(--brand-primary,#F5851F)' }}
                 >
                   <Star size={18} fill="white" />
                 </div>
                 <div>
-                  <div className="font-black text-sm text-[#1C2B3A]">{t('badgeTitle')}</div>
+                  <div className="font-black text-sm text-[var(--brand-dark,#1C2B3A)]">{badgeText || t('badgeTitle')}</div>
                   <div className="text-xs text-muted-foreground">{t('badgeDesc')}</div>
                 </div>
               </div>

@@ -42,8 +42,8 @@ export default function TeamFilter({
       'inline-flex items-center justify-center px-4 py-2 text-sm font-medium cursor-pointer',
       'rounded-[20px] border transition-all whitespace-nowrap',
       active
-        ? 'bg-[#F5851F] text-white border-[#F5851F]'
-        : 'bg-card text-muted-foreground border-border hover:border-[#F5851F] hover:text-[#F5851F]',
+        ? 'bg-[var(--brand-primary,#F5851F)] text-white border-[var(--brand-primary,#F5851F)]'
+        : 'bg-card text-muted-foreground border-border hover:border-[var(--brand-primary,#F5851F)] hover:text-[var(--brand-primary,#F5851F)]',
     ].join(' ');
 
   return (
@@ -53,7 +53,7 @@ export default function TeamFilter({
     >
       {/* 校区筛选 */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-        <span className="text-sm font-bold text-[#1C2B3A] sm:mr-2 shrink-0">{t('campusLabel')}</span>
+        <span className="text-sm font-bold text-[var(--brand-dark,#1C2B3A)] sm:mr-2 shrink-0">{t('campusLabel')}</span>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
@@ -77,7 +77,7 @@ export default function TeamFilter({
 
       {/* 科目筛选 */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-        <span className="text-sm font-bold text-[#1C2B3A] sm:mr-2 shrink-0">{t('subjectLabel')}</span>
+        <span className="text-sm font-bold text-[var(--brand-dark,#1C2B3A)] sm:mr-2 shrink-0">{t('subjectLabel')}</span>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"

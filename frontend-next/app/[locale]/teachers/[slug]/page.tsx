@@ -86,15 +86,15 @@ export default async function TeacherDetailPage({ params }: PageProps) {
       <div className="max-w-[1200px] mx-auto px-8">
         {/* 面包屑 */}
         <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
-          <Link href="/" className="hover:text-[#F5851F] transition-colors">
+          <Link href="/" className="hover:text-[var(--brand-primary,#F5851F)] transition-colors">
             {tSeo('home')}
           </Link>
           <span>/</span>
-          <Link href="/teachers" className="hover:text-[#F5851F] transition-colors">
+          <Link href="/teachers" className="hover:text-[var(--brand-primary,#F5851F)] transition-colors">
             {tSeo('teachers')}
           </Link>
           <span>/</span>
-          <span className="text-[#1C2B3A] font-medium">{teacher.name}</span>
+          <span className="text-[var(--brand-dark,#1C2B3A)] font-medium">{teacher.name}</span>
         </nav>
 
         {/* Hero 区 */}
@@ -105,7 +105,7 @@ export default async function TeacherDetailPage({ params }: PageProps) {
           <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
             {/* 大头像 */}
             <div className="flex-shrink-0">
-              <div className="relative w-48 h-48 rounded-full overflow-hidden bg-[#FFF3E5] flex items-center justify-center border-4 border-[#F5851F]/20">
+              <div className="relative w-48 h-48 rounded-full overflow-hidden bg-[#FFF3E5] flex items-center justify-center border-4 border-[var(--brand-primary,#F5851F)]/20">
                 {teacher.avatar?.url ? (
                   <StrapiImage
                     src={teacher.avatar}
@@ -115,7 +115,7 @@ export default async function TeacherDetailPage({ params }: PageProps) {
                     className="object-cover"
                   />
                 ) : (
-                  <span className="text-6xl font-bold text-[#F5851F]">
+                  <span className="text-6xl font-bold text-[var(--brand-primary,#F5851F)]">
                     {teacher.name.charAt(0)}
                   </span>
                 )}
@@ -125,7 +125,7 @@ export default async function TeacherDetailPage({ params }: PageProps) {
             {/* 基本信息 */}
             <div className="flex-1 text-center md:text-left">
               <h1
-                className="text-3xl font-bold text-[#1C2B3A] mb-2"
+                className="text-3xl font-bold text-[var(--brand-dark,#1C2B3A)] mb-2"
                 style={{ fontSize: '2rem', fontWeight: 800 }}
               >
                 {teacher.name}
@@ -139,13 +139,13 @@ export default async function TeacherDetailPage({ params }: PageProps) {
                 {teacher.subject && (
                   <span
                     className="inline-block px-3 py-1 rounded-full text-xs font-medium text-white"
-                    style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
+                    style={{ background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' }}
                   >
                     {SUBJECT_LABELS[teacher.subject] ? tTeachers(SUBJECT_LABELS[teacher.subject]) : teacher.subject}
                   </span>
                 )}
                 {typeof teacher.teachingYears === 'number' && (
-                  <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-[#FFF3E5] text-[#F5851F]">
+                  <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-[#FFF3E5] text-[var(--brand-primary,#F5851F)]">
                     {teacher.teachingYears}{tTeachers('teachingYearsUnit')}
                   </span>
                 )}
@@ -161,7 +161,7 @@ export default async function TeacherDetailPage({ params }: PageProps) {
                 <div className="mb-4">
                   <Link
                     href={`/campuses/${teacher.campus.slug}`}
-                    className="inline-flex items-center gap-1 text-sm text-[#F5851F] hover:underline"
+                    className="inline-flex items-center gap-1 text-sm text-[var(--brand-primary,#F5851F)] hover:underline"
                   >
                     📍 {teacher.campus.name}
                   </Link>
@@ -172,7 +172,7 @@ export default async function TeacherDetailPage({ params }: PageProps) {
               <Link
                 href="/contact"
                 className="inline-block px-6 py-2.5 rounded-xl text-white font-medium text-sm transition-transform hover:scale-105"
-                style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
+                style={{ background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' }}
               >
                 {tTeachers('bookTrial')}
               </Link>
@@ -186,7 +186,7 @@ export default async function TeacherDetailPage({ params }: PageProps) {
           {teacher.education && (
             <div className="bg-card rounded-2xl border border-border shadow-sm p-6">
               <h2
-                className="text-lg font-bold text-[#1C2B3A] mb-3"
+                className="text-lg font-bold text-[var(--brand-dark,#1C2B3A)] mb-3"
                 style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}
               >
                 {tTeachers('education')}
@@ -201,7 +201,7 @@ export default async function TeacherDetailPage({ params }: PageProps) {
           {teacher.teachingFeatures && (
             <div className="bg-card rounded-2xl border border-border shadow-sm p-6">
               <h2
-                className="text-lg font-bold text-[#1C2B3A] mb-3"
+                className="text-lg font-bold text-[var(--brand-dark,#1C2B3A)] mb-3"
                 style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}
               >
                 {tTeachers('teachingFeatures')}
@@ -217,7 +217,7 @@ export default async function TeacherDetailPage({ params }: PageProps) {
         {achievementList.length > 0 && (
           <div className="bg-card rounded-2xl border border-border shadow-sm p-6 mt-6">
             <h2
-              className="text-lg font-bold text-[#1C2B3A] mb-4"
+              className="text-lg font-bold text-[var(--brand-dark,#1C2B3A)] mb-4"
               style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}
             >
               {tTeachers('achievements')}
@@ -227,7 +227,7 @@ export default async function TeacherDetailPage({ params }: PageProps) {
                 <span
                   key={idx}
                   className="inline-block px-3 py-1 rounded-full text-xs font-medium text-white"
-                  style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
+                  style={{ background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' }}
                 >
                   {item}
                 </span>

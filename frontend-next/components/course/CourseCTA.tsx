@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 export default function CourseCTA({ courseName }: { courseName: string }) {
   const t = useTranslations('courses');
   return (
-    <section className="py-16" style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}>
+    <section className="py-16" style={{ background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' }}>
       <div className="max-w-[1400px] mx-auto px-8 text-center">
         <h2
           className="text-white mb-4"
@@ -22,7 +22,7 @@ export default function CourseCTA({ courseName }: { courseName: string }) {
         </p>
         <Link
           href="/contact"
-          className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-white text-[#F5851F] font-bold text-base hover:bg-white/90 transition-colors duration-200 shadow-lg"
+          className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-white text-[var(--brand-primary,#F5851F)] font-bold text-base hover:bg-white/90 transition-colors duration-200 shadow-lg"
         >
           <Calendar size={20} />
           {t('bookNow')}

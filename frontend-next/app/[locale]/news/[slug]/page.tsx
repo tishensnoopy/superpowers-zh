@@ -110,11 +110,11 @@ export default async function NewsDetailPage({ params }: PageProps) {
       <div className="max-w-[800px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* 面包屑导航 */}
         <nav className="flex items-center gap-2 py-6 text-sm text-[#9CA3AF]">
-          <Link href="/" className="flex items-center gap-1 hover:text-[#F5851F] transition-colors">
+          <Link href="/" className="flex items-center gap-1 hover:text-[var(--brand-primary,#F5851F)] transition-colors">
             <Home size={14} /> {tNav('home')}
           </Link>
           <span>/</span>
-          <Link href="/news" className="hover:text-[#F5851F] transition-colors">
+          <Link href="/news" className="hover:text-[var(--brand-primary,#F5851F)] transition-colors">
             {tNav('news')}
           </Link>
           {categoryLabel && (
@@ -128,7 +128,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
         <article>
           {/* 1. 新闻标题 */}
           <h1
-            className="text-[#1C2B3A] mb-4 leading-tight"
+            className="text-[var(--brand-dark,#1C2B3A)] mb-4 leading-tight"
             style={{
               fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
               fontSize: 'clamp(1.5rem, 4vw, 2rem)',
@@ -143,7 +143,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
             {categoryLabel && (
               <span
                 className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold"
-                style={{ background: '#FFF3E5', color: '#F5851F' }}
+                style={{ background: '#FFF3E5', color: 'var(--brand-primary,#F5851F)' }}
               >
                 {categoryLabel}
               </span>
@@ -191,7 +191,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
             <Link
               href="/news"
               className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg font-semibold transition-all hover:scale-105"
-              style={{ background: '#FFF3E5', color: '#F5851F' }}
+              style={{ background: '#FFF3E5', color: 'var(--brand-primary,#F5851F)' }}
             >
               <ArrowLeft size={16} /> {tNews('backToList')}
             </Link>

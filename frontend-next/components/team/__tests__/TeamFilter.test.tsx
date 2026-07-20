@@ -102,7 +102,7 @@ describe('TeamFilter 组件', () => {
       />
     );
     const chip = screen.getByText('百步亭');
-    expect(chip).toHaveClass('bg-[#F5851F]');
+    expect(chip).toHaveClass('bg-[var(--brand-primary,#F5851F)]');
     expect(chip).toHaveClass('text-white');
   });
 
@@ -115,7 +115,7 @@ describe('TeamFilter 组件', () => {
       />
     );
     const chip = screen.getByText('英语');
-    expect(chip).toHaveClass('bg-[#F5851F]');
+    expect(chip).toHaveClass('bg-[var(--brand-primary,#F5851F)]');
     expect(chip).toHaveClass('text-white');
   });
 
@@ -128,7 +128,7 @@ describe('TeamFilter 组件', () => {
       />
     );
     const allChip = screen.getAllByText('全部')[0];
-    expect(allChip).not.toHaveClass('bg-[#F5851F]');
+    expect(allChip).not.toHaveClass('bg-[var(--brand-primary,#F5851F)]');
   });
 
   it('默认选中校区"全部"', () => {
@@ -139,7 +139,7 @@ describe('TeamFilter 组件', () => {
       />
     );
     const allChip = screen.getAllByText('全部')[0];
-    expect(allChip).toHaveClass('bg-[#F5851F]');
+    expect(allChip).toHaveClass('bg-[var(--brand-primary,#F5851F)]');
   });
 
   it('默认选中科目"全部"', () => {
@@ -150,6 +150,6 @@ describe('TeamFilter 组件', () => {
       />
     );
     const allChip = screen.getAllByText('全部')[1];
-    expect(allChip).toHaveClass('bg-[#F5851F]');
+    expect(allChip).toHaveClass('bg-[var(--brand-primary,#F5851F)]');
   });
 });

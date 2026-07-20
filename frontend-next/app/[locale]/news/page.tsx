@@ -74,7 +74,7 @@ export default async function NewsListPage({ params, searchParams }: PageProps) 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="py-12 text-center">
           <h1
-            className="text-[#1C2B3A] mb-4"
+            className="text-[var(--brand-dark,#1C2B3A)] mb-4"
             style={{
               fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
               fontSize: 'clamp(2rem, 5vw, 3rem)',
@@ -100,9 +100,9 @@ export default async function NewsListPage({ params, searchParams }: PageProps) 
                 className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${
                   isActive
                     ? 'text-white shadow-md'
-                    : 'bg-white text-[#6B7280] border border-[#E5E7EB] hover:border-[#F5851F] hover:text-[#F5851F]'
+                    : 'bg-white text-[#6B7280] border border-[#E5E7EB] hover:border-[var(--brand-primary,#F5851F)] hover:text-[var(--brand-primary,#F5851F)]'
                 }`}
-                style={isActive ? { background: '#F5851F' } : {}}
+                style={isActive ? { background: 'var(--brand-primary,#F5851F)' } : {}}
               >
                 {t(cat.label)}
               </Link>
@@ -127,7 +127,7 @@ export default async function NewsListPage({ params, searchParams }: PageProps) 
                 {safeCurrentPage > 1 && (
                   <Link
                     href={buildPageHref(safeCurrentPage - 1)}
-                    className="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-white border border-[#E5E7EB] text-sm text-[#6B7280] hover:border-[#F5851F] hover:text-[#F5851F] transition-colors"
+                    className="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-white border border-[#E5E7EB] text-sm text-[#6B7280] hover:border-[var(--brand-primary,#F5851F)] hover:text-[var(--brand-primary,#F5851F)] transition-colors"
                   >
                     <ChevronLeft size={16} /> {t('prevPage')}
                   </Link>
@@ -140,9 +140,9 @@ export default async function NewsListPage({ params, searchParams }: PageProps) 
                     className={`inline-flex items-center justify-center w-10 h-10 rounded-lg text-sm font-semibold transition-all ${
                       pageNum === safeCurrentPage
                         ? 'text-white shadow-md'
-                        : 'bg-white text-[#6B7280] border border-[#E5E7EB] hover:border-[#F5851F] hover:text-[#F5851F]'
+                        : 'bg-white text-[#6B7280] border border-[#E5E7EB] hover:border-[var(--brand-primary,#F5851F)] hover:text-[var(--brand-primary,#F5851F)]'
                     }`}
-                    style={pageNum === safeCurrentPage ? { background: '#F5851F' } : {}}
+                    style={pageNum === safeCurrentPage ? { background: 'var(--brand-primary,#F5851F)' } : {}}
                   >
                     {pageNum}
                   </Link>
@@ -151,7 +151,7 @@ export default async function NewsListPage({ params, searchParams }: PageProps) 
                 {safeCurrentPage < totalPages && (
                   <Link
                     href={buildPageHref(safeCurrentPage + 1)}
-                    className="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-white border border-[#E5E7EB] text-sm text-[#6B7280] hover:border-[#F5851F] hover:text-[#F5851F] transition-colors"
+                    className="inline-flex items-center gap-1 px-4 py-2 rounded-lg bg-white border border-[#E5E7EB] text-sm text-[#6B7280] hover:border-[var(--brand-primary,#F5851F)] hover:text-[var(--brand-primary,#F5851F)] transition-colors"
                   >
                     {t('nextPage')} <ChevronRight size={16} />
                   </Link>

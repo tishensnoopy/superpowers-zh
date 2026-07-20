@@ -85,7 +85,7 @@ export default function ChatInput({ onSend, isLoading, disabled = false }: ChatI
           aria-busy={isLoading}
           aria-label={t('sendButton')}
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-          style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
+          style={{ background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' }}
         >
           {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
         </button>

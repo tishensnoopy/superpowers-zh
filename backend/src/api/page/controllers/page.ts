@@ -2,11 +2,17 @@ import type { Core } from '@strapi/strapi';
 
 const UID = 'api::page.page';
 
-const PAGE_POPULATE = {
+// seo 必须深取 ogImage：seo: true 不会返回组件内的媒体字段，
+// 前端 OpenGraph 分享图依赖该字段（契约见 src/__tests__/api-populate.test.ts）。
+export const PAGE_POPULATE = {
   sections: {
     populate: '*',
   },
-  seo: true,
+  seo: {
+    populate: {
+      ogImage: true,
+    },
+  },
 } as const;
 
 export default {

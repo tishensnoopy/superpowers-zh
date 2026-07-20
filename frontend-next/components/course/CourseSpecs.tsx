@@ -37,7 +37,7 @@ export default function CourseSpecs({ product }: { product: Product }) {
         {hasSpecs && (
           <div className="lg:col-span-2">
             <h2
-              className="text-[#1C2B3A] mb-6"
+              className="text-[var(--brand-dark,#1C2B3A)] mb-6"
               style={{
                 fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
                 fontSize: '1.5rem',
@@ -57,10 +57,10 @@ export default function CourseSpecs({ product }: { product: Product }) {
                     className="bg-card rounded-xl p-4 border border-border text-center"
                   >
                     <div className="w-10 h-10 rounded-full bg-[#FFF3E5] flex items-center justify-center mx-auto mb-2">
-                      <Icon size={18} className="text-[#F5851F]" />
+                      <Icon size={18} className="text-[var(--brand-primary,#F5851F)]" />
                     </div>
                     <div className="text-xs text-muted-foreground mb-1">{config.label}</div>
-                    <div className="text-sm font-bold text-[#1C2B3A]">{value}</div>
+                    <div className="text-sm font-bold text-[var(--brand-dark,#1C2B3A)]">{value}</div>
                   </div>
                 );
               })}
@@ -69,7 +69,7 @@ export default function CourseSpecs({ product }: { product: Product }) {
         )}
 
         {hasPrice && (
-          <div className="bg-gradient-to-br from-[#F5851F] to-[#FF6B35] rounded-2xl p-6 text-white text-center shadow-lg">
+          <div className="bg-gradient-to-br from-[var(--brand-primary,#F5851F)] to-[#FF6B35] rounded-2xl p-6 text-white text-center shadow-lg">
             <div className="text-xs opacity-80 mb-2">{t('coursePrice')}</div>
             <div className="flex items-baseline justify-center gap-2 mb-2">
               {hasDiscount && (

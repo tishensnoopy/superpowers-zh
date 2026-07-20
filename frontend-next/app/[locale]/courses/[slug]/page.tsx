@@ -88,7 +88,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
         <section className="py-16 bg-background">
           <div className="max-w-[1400px] mx-auto px-8">
             <h2
-              className="text-[#1C2B3A] mb-6"
+              className="text-[var(--brand-dark,#1C2B3A)] mb-6"
               style={{
                 fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
                 fontSize: '1.75rem',
@@ -111,7 +111,7 @@ export default async function CourseDetailPage({ params }: PageProps) {
         <section className="py-16 bg-muted/30">
           <div className="max-w-[1400px] mx-auto px-8">
             <h2
-              className="text-[#1C2B3A] mb-6"
+              className="text-[var(--brand-dark,#1C2B3A)] mb-6"
               style={{
                 fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
                 fontSize: '1.75rem',

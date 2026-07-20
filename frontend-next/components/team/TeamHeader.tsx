@@ -19,7 +19,7 @@ export default function TeamHeader() {
     >
       <div className="max-w-[1400px] mx-auto px-8">
         <h1
-          className="text-[#1C2B3A] mb-4"
+          className="text-[var(--brand-dark,#1C2B3A)] mb-4"
           style={{
             fontSize: '2.5rem',
             fontWeight: 800,
@@ -37,7 +37,7 @@ export default function TeamHeader() {
               key={s.label}
               className="px-5 py-3 rounded-xl bg-card border border-border shadow-sm"
             >
-              <span className="text-lg font-bold text-[#F5851F]">{`${s.value} ${s.label}`}</span>
+              <span className="text-lg font-bold text-[var(--brand-primary,#F5851F)]">{`${s.value} ${s.label}`}</span>
             </div>
           ))}
         </div>

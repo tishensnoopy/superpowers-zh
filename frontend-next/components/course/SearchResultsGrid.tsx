@@ -60,12 +60,12 @@ export default function SearchResultsGrid({ results, loading, error, onRetry }: 
         style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}
       >
         <AlertCircle size={48} className="text-[#FF6B35] mb-4" />
-        <p className="text-[#1C2B3A] text-lg font-medium mb-2">{error}</p>
+        <p className="text-[var(--brand-dark,#1C2B3A)] text-lg font-medium mb-2">{error}</p>
         <button
           type="button"
           onClick={onRetry}
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-medium transition-all hover:shadow-lg"
-          style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
+          style={{ background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' }}
         >
           <RefreshCw size={14} />
           {t('retry')}
@@ -81,7 +81,7 @@ export default function SearchResultsGrid({ results, loading, error, onRetry }: 
         style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}
       >
         <div className="text-5xl mb-4 opacity-40">🔍</div>
-        <p className="text-[#1C2B3A] text-lg font-medium mb-2">{t('noResults')}</p>
+        <p className="text-[var(--brand-dark,#1C2B3A)] text-lg font-medium mb-2">{t('noResults')}</p>
         <p className="text-muted-foreground text-sm">{t('noResultsHint')}</p>
       </div>
     );
@@ -97,7 +97,7 @@ export default function SearchResultsGrid({ results, loading, error, onRetry }: 
               <div className="p-6 border-b border-border" style={{ background: '#EFF6FF' }}>
                 <div className="text-4xl mb-4">📚</div>
                 <h3
-                  className="text-xl font-bold text-[#1C2B3A]"
+                  className="text-xl font-bold text-[var(--brand-dark,#1C2B3A)]"
                   style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}
                 >
                   {product.name}

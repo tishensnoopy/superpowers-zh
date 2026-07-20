@@ -188,7 +188,7 @@ export default function FloatingChat({ locale = 'zh-CN' }: { locale?: 'zh-CN' | 
         onClick={handleOpen}
         aria-label={t('onlineConsult')}
         className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-5 py-3 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-200 hover:scale-105"
-        style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
+        style={{ background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' }}
       >
         <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
           <MessageCircle size={20} className="text-white" />
@@ -203,7 +203,7 @@ export default function FloatingChat({ locale = 'zh-CN' }: { locale?: 'zh-CN' | 
       {/* Header */}
       <div
         className="flex items-center justify-between px-4 py-3 text-white"
-        style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
+        style={{ background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' }}
       >
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
@@ -241,7 +241,7 @@ export default function FloatingChat({ locale = 'zh-CN' }: { locale?: 'zh-CN' | 
                 <Link
                   href={msg.actionUrl}
                   className="px-4 py-2 rounded-lg text-white text-sm font-semibold"
-                  style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
+                  style={{ background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' }}
                 >
                   {t('bookNow')}
                 </Link>

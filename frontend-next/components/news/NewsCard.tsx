@@ -40,7 +40,7 @@ export default function NewsCard({ news }: NewsCardProps) {
           {categoryLabel && (
             <span
               className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
-              style={{ background: '#FFF3E5', color: '#F5851F' }}
+              style={{ background: '#FFF3E5', color: 'var(--brand-primary,#F5851F)' }}
             >
               {categoryLabel}
             </span>
@@ -55,7 +55,7 @@ export default function NewsCard({ news }: NewsCardProps) {
 
         {/* 标题 */}
         <h3
-          className="text-[#1C2B3A] font-bold mb-2 line-clamp-2 transition-colors group-hover:text-[#F5851F]"
+          className="text-[var(--brand-dark,#1C2B3A)] font-bold mb-2 line-clamp-2 transition-colors group-hover:text-[var(--brand-primary,#F5851F)]"
           style={{ fontSize: '18px', lineHeight: 1.5 }}
         >
           {title}

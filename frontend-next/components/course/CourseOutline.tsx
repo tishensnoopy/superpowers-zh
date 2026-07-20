@@ -14,7 +14,7 @@ export default function CourseOutline({ outline }: { outline?: CourseModule[] })
             <BookOpen size={20} className="text-[#2563EB]" />
           </div>
           <h2
-            className="text-[#1C2B3A]"
+            className="text-[var(--brand-dark,#1C2B3A)]"
             style={{
               fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
               fontSize: '1.75rem',
@@ -37,7 +37,7 @@ export default function CourseOutline({ outline }: { outline?: CourseModule[] })
                   </div>
                   <div className="flex-1 bg-card rounded-2xl p-6 border border-border shadow-sm">
                     <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-lg font-bold text-[#1C2B3A]">{module.title}</h3>
+                      <h3 className="text-lg font-bold text-[var(--brand-dark,#1C2B3A)]">{module.title}</h3>
                       {module.lessonCount && module.lessonCount > 0 && (
                         <span className="text-sm text-[#2563EB] font-medium bg-[#EFF6FF] px-3 py-1 rounded-full">
                           {module.lessonCount} {t('lessonCountUnit')}

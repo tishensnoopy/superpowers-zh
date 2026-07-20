@@ -16,11 +16,11 @@ export default function CategoryFilter({ categories, selected, onChange }: Categ
       'rounded-full border transition-all whitespace-nowrap',
       active
         ? 'text-white border-transparent shadow-md'
-        : 'bg-card text-[#4A5568] border-border hover:shadow-sm hover:border-[#F5851F] hover:text-[#F5851F]',
+        : 'bg-card text-[#4A5568] border-border hover:shadow-sm hover:border-[var(--brand-primary,#F5851F)] hover:text-[var(--brand-primary,#F5851F)]',
     ].join(' ');
 
   const activeStyle = (active: boolean): React.CSSProperties =>
-    active ? { background: 'linear-gradient(135deg, #F5851F, #FF6B35)' } : {};
+    active ? { background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' } : {};
 
   return (
     <div

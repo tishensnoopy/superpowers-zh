@@ -8,7 +8,7 @@ function StarRating({ rating }: { rating: number }) {
       {[1, 2, 3, 4, 5].map((star) => (
         <span
           key={star}
-          className={star <= rating ? 'text-[#F5851F]' : 'text-muted-foreground/30'}
+          className={star <= rating ? 'text-[var(--brand-primary,#F5851F)]' : 'text-muted-foreground/30'}
           style={{ fontSize: '1rem' }}
         >
           ★
@@ -30,7 +30,7 @@ export default function CourseTestimonials({ testimonials }: { testimonials?: Co
             <MessageSquare size={20} className="text-[#059669]" />
           </div>
           <h2
-            className="text-[#1C2B3A]"
+            className="text-[var(--brand-dark,#1C2B3A)]"
             style={{
               fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
               fontSize: '1.75rem',
@@ -48,10 +48,10 @@ export default function CourseTestimonials({ testimonials }: { testimonials?: Co
                   <StarRating rating={t.rating || 5} />
                   <p className="text-sm text-muted-foreground leading-relaxed my-4">{t.content}</p>
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-[#FFF3E5] flex items-center justify-center text-[#F5851F] font-bold text-sm">
+                    <div className="w-8 h-8 rounded-full bg-[#FFF3E5] flex items-center justify-center text-[var(--brand-primary,#F5851F)] font-bold text-sm">
                       {t.parentName.charAt(0)}
                     </div>
-                    <span className="text-sm font-medium text-[#1C2B3A]">{t.parentName}</span>
+                    <span className="text-sm font-medium text-[var(--brand-dark,#1C2B3A)]">{t.parentName}</span>
                   </div>
                 </div>
               </div>

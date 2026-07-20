@@ -197,10 +197,10 @@ export default function ContactForm({ section }: { section: Section }) {
 
   return (
     <section className="py-24 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[#1C2B3A]">
+      <div className="absolute inset-0 bg-[var(--brand-dark,#1C2B3A)]">
         <div
           className="absolute inset-0"
-          style={{ background: 'linear-gradient(135deg, rgba(28,43,58,0.96) 0%, rgba(245,133,31,0.3) 100%)' }}
+          style={{ background: 'linear-gradient(135deg, rgba(var(--brand-dark-rgb,28,43,58),0.96) 0%, rgba(var(--brand-primary-rgb,245,133,31),0.3) 100%)' }}
         />
       </div>
       <div className="relative max-w-[1000px] mx-auto px-8">
@@ -219,7 +219,7 @@ export default function ContactForm({ section }: { section: Section }) {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
-          <div className="lg:w-[33.33%] bg-gradient-to-br from-[#F5851F] via-[#FF6B35] to-[#FF8C42] rounded-2xl p-8 text-white relative overflow-hidden">
+          <div className="lg:w-[33.33%] bg-gradient-to-br from-[var(--brand-primary,#F5851F)] via-[#FF6B35] to-[#FF8C42] rounded-2xl p-8 text-white relative overflow-hidden">
             <div className="absolute -top-20 -right-20 w-48 h-48 bg-white/10 rounded-full" />
             <div className="absolute -bottom-12 -left-12 w-36 h-36 bg-white/8 rounded-full" />
 
@@ -301,7 +301,7 @@ export default function ContactForm({ section }: { section: Section }) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="childName" className="block text-gray-800 text-sm font-semibold mb-2">
-                    {t('childNameLabel')} <span className="text-[#F5851F] ml-1">*</span>
+                    {t('childNameLabel')} <span className="text-[var(--brand-primary,#F5851F)] ml-1">*</span>
                   </label>
                   <input
                     id="childName"
@@ -309,7 +309,7 @@ export default function ContactForm({ section }: { section: Section }) {
                     value={values.childName || ''}
                     onChange={(e) => handleFieldChange('childName', e.target.value)}
                     placeholder={t('childNamePlaceholder')}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[var(--brand-primary,#F5851F)] transition-colors"
                     style={{ borderColor: errors.childName ? '#DC2626' : 'rgba(0,0,0,0.1)' }}
                   />
                   {errors.childName && <p className="text-[#DC2626] text-xs mt-1">{errors.childName}</p>}
@@ -317,7 +317,7 @@ export default function ContactForm({ section }: { section: Section }) {
 
                 <div>
                   <label htmlFor="parentName" className="block text-gray-800 text-sm font-semibold mb-2">
-                    {t('parentNameLabel')} <span className="text-[#F5851F] ml-1">*</span>
+                    {t('parentNameLabel')} <span className="text-[var(--brand-primary,#F5851F)] ml-1">*</span>
                   </label>
                   <input
                     id="parentName"
@@ -325,7 +325,7 @@ export default function ContactForm({ section }: { section: Section }) {
                     value={values.parentName || ''}
                     onChange={(e) => handleFieldChange('parentName', e.target.value)}
                     placeholder={t('parentNamePlaceholder')}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[var(--brand-primary,#F5851F)] transition-colors"
                     style={{ borderColor: errors.parentName ? '#DC2626' : 'rgba(0,0,0,0.1)' }}
                   />
                   {errors.parentName && <p className="text-[#DC2626] text-xs mt-1">{errors.parentName}</p>}
@@ -333,7 +333,7 @@ export default function ContactForm({ section }: { section: Section }) {
 
                 <div>
                   <label htmlFor="phone" className="block text-gray-800 text-sm font-semibold mb-2">
-                    {t('phoneLabel')} <span className="text-[#F5851F] ml-1">*</span>
+                    {t('phoneLabel')} <span className="text-[var(--brand-primary,#F5851F)] ml-1">*</span>
                   </label>
                   <input
                     id="phone"
@@ -341,7 +341,7 @@ export default function ContactForm({ section }: { section: Section }) {
                     value={values.phone || ''}
                     onChange={(e) => handleFieldChange('phone', e.target.value)}
                     placeholder={t('phonePlaceholder')}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[var(--brand-primary,#F5851F)] transition-colors"
                     style={{ borderColor: errors.phone ? '#DC2626' : 'rgba(0,0,0,0.1)' }}
                   />
                   {errors.phone && <p className="text-[#DC2626] text-xs mt-1">{errors.phone}</p>}
@@ -349,13 +349,13 @@ export default function ContactForm({ section }: { section: Section }) {
 
                 <div className="md:col-span-2">
                   <label htmlFor="campus" className="block text-gray-800 text-sm font-semibold mb-2">
-                    {t('campusLabel')} <span className="text-[#F5851F] ml-1">*</span>
+                    {t('campusLabel')} <span className="text-[var(--brand-primary,#F5851F)] ml-1">*</span>
                   </label>
                   <select
                     id="campus"
                     value={values.campus || ''}
                     onChange={(e) => handleFieldChange('campus', e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[var(--brand-primary,#F5851F)] transition-colors"
                     style={{ borderColor: errors.campus ? '#DC2626' : 'rgba(0,0,0,0.1)' }}
                   >
                     <option value="">{t('campusPlaceholder')}</option>
@@ -378,7 +378,7 @@ export default function ContactForm({ section }: { section: Section }) {
                     value={values.age || ''}
                     onChange={(e) => handleFieldChange('age', e.target.value)}
                     placeholder={t('optional')}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[var(--brand-primary,#F5851F)] transition-colors"
                     style={{ borderColor: 'rgba(0,0,0,0.1)' }}
                   />
                 </div>
@@ -391,7 +391,7 @@ export default function ContactForm({ section }: { section: Section }) {
                     id="course"
                     value={values.course || ''}
                     onChange={(e) => handleFieldChange('course', e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[var(--brand-primary,#F5851F)] transition-colors"
                     style={{ borderColor: 'rgba(0,0,0,0.1)' }}
                   >
                     <option value="">{t('optional')}</option>
@@ -410,7 +410,7 @@ export default function ContactForm({ section }: { section: Section }) {
                     type="date"
                     value={values.preferredDate || ''}
                     onChange={(e) => handleFieldChange('preferredDate', e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[var(--brand-primary,#F5851F)] transition-colors"
                     style={{ borderColor: 'rgba(0,0,0,0.1)' }}
                   />
                 </div>
@@ -423,7 +423,7 @@ export default function ContactForm({ section }: { section: Section }) {
                     id="preferredTimeSlot"
                     value={values.preferredTimeSlot || ''}
                     onChange={(e) => handleFieldChange('preferredTimeSlot', e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[var(--brand-primary,#F5851F)] transition-colors"
                     style={{ borderColor: 'rgba(0,0,0,0.1)' }}
                   >
                     <option value="">{t('optional')}</option>
@@ -443,7 +443,7 @@ export default function ContactForm({ section }: { section: Section }) {
                     onChange={(e) => handleFieldChange('message', e.target.value)}
                     placeholder={t('messagePlaceholder')}
                     rows={2}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[#F5851F] transition-colors"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm focus:outline-none focus:border-[var(--brand-primary,#F5851F)] transition-colors"
                     style={{ borderColor: 'rgba(0,0,0,0.1)' }}
                   />
                 </div>
@@ -455,7 +455,7 @@ export default function ContactForm({ section }: { section: Section }) {
                 type="submit"
                 disabled={submitting}
                 className="w-full mt-6 py-4 rounded-xl text-white font-bold text-base shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
-                style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
+                style={{ background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' }}
               >
                 {submitting ? t('submitting') : (submitText || t('submitTextFallback'))}
               </button>

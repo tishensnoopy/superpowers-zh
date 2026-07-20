@@ -15,7 +15,7 @@ export default function Features({ section }: { section: Section }) {
             {t('badge')}
           </div>
           <h2
-            className="text-[#1C2B3A] mb-4"
+            className="text-[var(--brand-dark,#1C2B3A)] mb-4"
             style={{
               fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
               fontSize: '2.25rem',
@@ -33,7 +33,7 @@ export default function Features({ section }: { section: Section }) {
           {(Array.isArray(features) ? features : (features?.data || [])).map((feature: any) => {
             return (
               <div key={feature.id} className="col-span-12 sm:col-span-6 lg:col-span-3">
-                <div className={`h-full bg-card rounded-2xl p-8 border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col ${feature.isHighlighted ? 'ring-2 ring-[#F5851F]' : ''}`}>
+                <div className={`h-full bg-card rounded-2xl p-8 border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col ${feature.isHighlighted ? 'ring-2 ring-[var(--brand-primary,#F5851F)]' : ''}`}>
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center mb-5"
                     style={{ background: '#EFF6FF' }}
@@ -41,7 +41,7 @@ export default function Features({ section }: { section: Section }) {
                     <Sparkles size={24} style={{ color: '#2563EB' }} />
                   </div>
                   <h3
-                    className="text-lg font-bold text-[#1C2B3A] mb-3"
+                    className="text-lg font-bold text-[var(--brand-dark,#1C2B3A)] mb-3"
                     style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}
                   >
                     {feature.title}

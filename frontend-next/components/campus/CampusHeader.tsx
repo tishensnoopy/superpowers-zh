@@ -7,10 +7,10 @@ export default function CampusHeader() {
   return (
     <div className="text-center mb-12">
       <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-white shadow-sm mb-5">
-        <MapPin size={28} className="text-[#F5851F]" />
+        <MapPin size={28} className="text-[var(--brand-primary,#F5851F)]" />
       </div>
       <h1
-        className="text-[#1C2B3A] mb-4"
+        className="text-[var(--brand-dark,#1C2B3A)] mb-4"
         style={{
           fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
           fontSize: '2.5rem',

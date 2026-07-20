@@ -397,4 +397,21 @@ describe('buildLlmsTxtContent', () => {
     expect(result).toContain('新闻10');
     expect(result).not.toContain('新闻11');
   });
+
+  it('后台配置 aiSummary 时写入 llms.txt 机构简介区（GEO）', () => {
+    const settings = {
+      name: '佑森小课堂',
+      aiSummary: '佑森小课堂是武汉专注幼小衔接的教育机构，8年经验，6大校区。',
+    } as any;
+    const result = buildLlmsTxtContent(settings, [], [], [], [], [], 'zh-CN');
+    expect(result).toContain('## 机构简介');
+    expect(result).toContain('佑森小课堂是武汉专注幼小衔接的教育机构，8年经验，6大校区。');
+  });
+
+  it('未配置 aiSummary 时机构简介区回退为联系信息摘要', () => {
+    const settings = { name: '佑森小课堂', phone: '027-12345678' } as any;
+    const result = buildLlmsTxtContent(settings, [], [], [], [], [], 'zh-CN');
+    expect(result).toContain('## 机构简介');
+    expect(result).toContain('027-12345678');
+  });
 });

@@ -67,14 +67,14 @@ export default function Navigation({
           ) : (
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-lg font-black shadow-sm"
-              style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
+              style={{ background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' }}
             >
               {settings.name?.[0] || t('brandNameFallback')[0]}
             </div>
           )}
           <div>
             <div
-              className="font-black text-[18px] leading-tight text-[#1C2B3A]"
+              className="font-black text-[18px] leading-tight text-[var(--brand-dark,#1C2B3A)]"
               style={{ fontFamily: "'Nunito', sans-serif" }}
             >
               {settings.name || t('brandNameFallback')}
@@ -99,8 +99,8 @@ export default function Navigation({
                   <button
                     className={`flex items-center gap-1 px-4 py-2 text-sm rounded-lg transition-all duration-200 ${
                       active
-                        ? 'text-[#F5851F] bg-[#FFF3E5]'
-                        : 'text-[#4A5568] hover:text-[#F5851F] hover:bg-[#FFF3E5]'
+                        ? 'text-[var(--brand-primary,#F5851F)] bg-[#FFF3E5]'
+                        : 'text-[#4A5568] hover:text-[var(--brand-primary,#F5851F)] hover:bg-[#FFF3E5]'
                     }`}
                     onClick={() => handleDropdownToggle(item.id)}
                   >
@@ -119,8 +119,8 @@ export default function Navigation({
                             href={child.url}
                             className={`block px-4 py-2.5 text-sm transition-all duration-200 ${
                               isActive(child.url)
-                                ? 'text-[#F5851F] bg-[#FFF3E5]'
-                                : 'text-[#4A5568] hover:text-[#F5851F] hover:bg-[#FFF3E5]'
+                                ? 'text-[var(--brand-primary,#F5851F)] bg-[#FFF3E5]'
+                                : 'text-[#4A5568] hover:text-[var(--brand-primary,#F5851F)] hover:bg-[#FFF3E5]'
                             }`}
                           >
                             {child.name}
@@ -139,8 +139,8 @@ export default function Navigation({
                 href={item.url}
                 className={`px-4 py-2 text-sm rounded-lg transition-all duration-200 ${
                   active
-                    ? 'text-[#F5851F] bg-[#FFF3E5] font-medium'
-                    : 'text-[#4A5568] hover:text-[#F5851F] hover:bg-[#FFF3E5]'
+                    ? 'text-[var(--brand-primary,#F5851F)] bg-[#FFF3E5] font-medium'
+                    : 'text-[#4A5568] hover:text-[var(--brand-primary,#F5851F)] hover:bg-[#FFF3E5]'
                 }`}
               >
                 {item.name}
@@ -156,14 +156,14 @@ export default function Navigation({
               href={`tel:${settings.phone}`}
               className="hidden md:flex items-center gap-2 text-sm text-[#4A5568]"
             >
-              <Phone size={15} className="text-[#F5851F]" />
+              <Phone size={15} className="text-[var(--brand-primary,#F5851F)]" />
               <span className="font-medium">{settings.phone}</span>
             </a>
           )}
           <Link
             href="/appointment"
             className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.03]"
-            style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
+            style={{ background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' }}
           >
             {t('bookFreeTrial')}
           </Link>
@@ -189,7 +189,7 @@ export default function Navigation({
                 <div key={item.id} className="relative">
                   <button
                     className={`flex items-center justify-between w-full py-2.5 text-sm transition-colors ${
-                      active ? 'text-[#F5851F] font-medium' : 'text-foreground'
+                      active ? 'text-[var(--brand-primary,#F5851F)] font-medium' : 'text-foreground'
                     }`}
                     onClick={() => handleDropdownToggle(item.id)}
                   >
@@ -207,8 +207,8 @@ export default function Navigation({
                           onClick={() => handleMobileNavClick(child.url)}
                           className={`block w-full text-left py-2 text-sm transition-colors ${
                             isActive(child.url)
-                              ? 'text-[#F5851F] font-medium'
-                              : 'text-muted-foreground hover:text-[#F5851F]'
+                              ? 'text-[var(--brand-primary,#F5851F)] font-medium'
+                              : 'text-muted-foreground hover:text-[var(--brand-primary,#F5851F)]'
                           }`}
                         >
                           {child.name}
@@ -225,7 +225,7 @@ export default function Navigation({
                 key={item.id}
                 onClick={() => handleMobileNavClick(item.url)}
                 className={`block w-full text-left py-2.5 text-sm transition-colors ${
-                  active ? 'text-[#F5851F] font-medium' : 'text-foreground hover:text-[#F5851F]'
+                  active ? 'text-[var(--brand-primary,#F5851F)] font-medium' : 'text-foreground hover:text-[var(--brand-primary,#F5851F)]'
                 }`}
               >
                 {item.name}
@@ -235,7 +235,7 @@ export default function Navigation({
           <button
             onClick={() => handleMobileNavClick('/appointment')}
             className="mt-3 py-3 rounded-xl text-white text-sm font-semibold text-center"
-            style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
+            style={{ background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' }}
           >
             {t('bookFreeTrial')}
           </button>

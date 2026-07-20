@@ -44,6 +44,32 @@
       "description": "Background image",
       "multiple": false
     },
+    "image1": {
+      "type": "media",
+      "description": "Overlay image 1 (floating card, left)",
+      "multiple": false
+    },
+    "image2": {
+      "type": "media",
+      "description": "Overlay image 2 (floating card, right)",
+      "multiple": false
+    },
+    "badgeText": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "Badge text on overlay image (e.g. 优质教学)",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "stats": {
+      "type": "component",
+      "repeatable": true,
+      "component": "common.stat",
+      "description": "Stats row (e.g. 8年经验 / 6大校区)"
+    },
     "buttonText": {
       "type": "string",
       "maxLength": 50,

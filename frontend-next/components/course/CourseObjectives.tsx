@@ -11,10 +11,10 @@ export default function CourseObjectives({ objectives }: { objectives?: CourseOb
       <div className="max-w-[1400px] mx-auto px-8">
         <div className="flex items-center gap-3 mb-10">
           <div className="w-10 h-10 rounded-xl bg-[#FFF3E5] flex items-center justify-center">
-            <Target size={20} className="text-[#F5851F]" />
+            <Target size={20} className="text-[var(--brand-primary,#F5851F)]" />
           </div>
           <h2
-            className="text-[#1C2B3A]"
+            className="text-[var(--brand-dark,#1C2B3A)]"
             style={{
               fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
               fontSize: '1.75rem',
@@ -30,12 +30,12 @@ export default function CourseObjectives({ objectives }: { objectives?: CourseOb
               <div key={obj.id} className="col-span-12 sm:col-span-6 lg:col-span-4">
                 <div className="h-full bg-card rounded-2xl p-6 border border-border shadow-sm flex gap-4">
                   <div
-                    className="flex-shrink-0 w-10 h-10 rounded-full bg-[#F5851F] text-white flex items-center justify-center font-bold"
+                    className="flex-shrink-0 w-10 h-10 rounded-full bg-[var(--brand-primary,#F5851F)] text-white flex items-center justify-center font-bold"
                   >
                     {index + 1}
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-base font-bold text-[#1C2B3A] mb-2">{obj.title}</h3>
+                    <h3 className="text-base font-bold text-[var(--brand-dark,#1C2B3A)] mb-2">{obj.title}</h3>
                     {obj.description && (
                       <p className="text-sm text-muted-foreground leading-relaxed">{obj.description}</p>
                     )}

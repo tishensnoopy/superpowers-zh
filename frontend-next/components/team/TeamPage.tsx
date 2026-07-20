@@ -84,7 +84,7 @@ export default function TeamPage({ locale = 'zh-CN' }: { locale?: Locale }) {
             <div className="py-32 text-center text-muted-foreground">{tCommon('loading')}</div>
           ) : error ? (
             <div className="py-32 text-center">
-              <h2 className="text-2xl font-bold text-[#1C2B3A] mb-4">{tCourses('loadFailed')}</h2>
+              <h2 className="text-2xl font-bold text-[var(--brand-dark,#1C2B3A)] mb-4">{tCourses('loadFailed')}</h2>
               <p className="text-muted-foreground">{tCommon('retryLater')}</p>
             </div>
           ) : (

@@ -17,10 +17,10 @@ export default function CampusTeachers({ teachers }: CampusTeachersProps) {
     <section className="py-8">
       <div className="flex items-center gap-3 mb-8">
         <div className="w-10 h-10 rounded-xl bg-[#FFF3E5] flex items-center justify-center">
-          <Users size={20} className="text-[#F5851F]" />
+          <Users size={20} className="text-[var(--brand-primary,#F5851F)]" />
         </div>
         <h2
-          className="text-[#1C2B3A]"
+          className="text-[var(--brand-dark,#1C2B3A)]"
           style={{
             fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
             fontSize: '1.75rem',
@@ -39,7 +39,7 @@ export default function CampusTeachers({ teachers }: CampusTeachersProps) {
               <Link
                 key={teacher.id}
                 href={`/teachers/${slug}`}
-                className="bg-card rounded-2xl p-5 border border-border shadow-sm text-center hover:-translate-y-1 hover:border-[#F5851F] hover:shadow-md transition-all duration-300"
+                className="bg-card rounded-2xl p-5 border border-border shadow-sm text-center hover:-translate-y-1 hover:border-[var(--brand-primary,#F5851F)] hover:shadow-md transition-all duration-300"
               >
                 <div className="relative w-20 h-20 mx-auto mb-3 rounded-full overflow-hidden bg-muted">
                   {avatar?.url ? (
@@ -53,13 +53,13 @@ export default function CampusTeachers({ teachers }: CampusTeachersProps) {
                   ) : (
                     <div
                       className="w-full h-full flex items-center justify-center text-white text-2xl font-bold"
-                      style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
+                      style={{ background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' }}
                     >
                       {name.charAt(0)}
                     </div>
                   )}
                 </div>
-                <div className="font-bold text-[#1C2B3A] mb-1">{name}</div>
+                <div className="font-bold text-[var(--brand-dark,#1C2B3A)] mb-1">{name}</div>
                 {title && (
                   <div className="text-sm text-muted-foreground">{title}</div>
                 )}

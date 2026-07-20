@@ -53,7 +53,7 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
       />
       <div className="max-w-[1400px] mx-auto px-8 pt-16">
         <h1
-          className="text-[#1C2B3A] text-center"
+          className="text-[var(--brand-dark,#1C2B3A)] text-center"
           style={{
             fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
             fontSize: 'clamp(2rem, 5vw, 3rem)',

@@ -184,7 +184,7 @@ export function buildFaqSummary(faqItems: FaqItem[]): string {
  * 调用以上所有生成器，按 llms.txt 标准格式组装
  */
 export function buildLlmsTxtContent(
-  settings: Pick<SiteSettings, 'name' | 'slogan' | 'phone' | 'email' | 'address'>,
+  settings: Pick<SiteSettings, 'name' | 'slogan' | 'phone' | 'email' | 'address' | 'aiSummary'>,
   products: Product[],
   teachers: Teacher[],
   campuses: Campus[],
@@ -201,8 +201,10 @@ export function buildLlmsTxtContent(
   sections.push(`> ${settings.slogan || '专注幼小衔接教育'} | Focus on preschool-primary transition education.`);
   sections.push('');
 
-  // 机构简介 / About
-  const orgSummary = buildOrgSummary(settings, locale);
+  // 机构简介 / About：后台「站点设置 → aiSummary」优先（GEO 可调入口），未配置回退联系信息摘要
+  const orgSummary = settings.aiSummary?.trim()
+    ? settings.aiSummary.trim()
+    : buildOrgSummary(settings, locale);
   sections.push('## 机构简介 / About');
   sections.push('');
   sections.push(orgSummary);

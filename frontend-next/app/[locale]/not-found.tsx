@@ -7,7 +7,7 @@ export default function NotFound() {
   return (
     <div
       className="min-h-screen flex items-center justify-center"
-      style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
+      style={{ background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' }}
     >
       <div className="text-center px-8">
         <div
@@ -28,7 +28,7 @@ export default function NotFound() {
         <div className="flex gap-4 justify-center flex-wrap">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-white text-[#F5851F] rounded-xl font-semibold hover:bg-white/90 transition-colors shadow-lg"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-white text-[var(--brand-primary,#F5851F)] rounded-xl font-semibold hover:bg-white/90 transition-colors shadow-lg"
           >
             <Home size={18} /> {t('backToHome')}
           </Link>

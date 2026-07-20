@@ -25,7 +25,7 @@ export default function CourseHeader({ product }: { product: Product }) {
     <section className="pt-[120px] pb-16 bg-gradient-to-b from-[#FFF3E5] to-background">
       <div className="max-w-[1400px] mx-auto px-8">
         <h1
-          className="text-[#1C2B3A] mb-4"
+          className="text-[var(--brand-dark,#1C2B3A)] mb-4"
           style={{
             fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
             fontSize: '2.5rem',
@@ -52,7 +52,7 @@ export default function CourseHeader({ product }: { product: Product }) {
                     className="flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border shadow-sm"
                   >
                     <Icon size={16} />
-                    <span className="text-sm font-medium text-[#1C2B3A]">{value}</span>
+                    <span className="text-sm font-medium text-[var(--brand-dark,#1C2B3A)]">{value}</span>
                   </div>
                 );
               })}
@@ -63,7 +63,7 @@ export default function CourseHeader({ product }: { product: Product }) {
               {originalPrice && originalPrice > price && (
                 <span className="text-sm text-muted-foreground line-through">¥{originalPrice}</span>
               )}
-              <span className="text-2xl font-bold text-[#F5851F]">¥{price}</span>
+              <span className="text-2xl font-bold text-[var(--brand-primary,#F5851F)]">¥{price}</span>
             </div>
           )}
         </div>

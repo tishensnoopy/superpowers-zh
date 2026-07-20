@@ -9,7 +9,7 @@ export default function CampusCard({ campus }: { campus: Campus }) {
   return (
     <Link
       href={`/campuses/${slug}`}
-      className="group block bg-card rounded-2xl overflow-hidden border border-border shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#F5851F] hover:shadow-lg"
+      className="group block bg-card rounded-2xl overflow-hidden border border-border shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[var(--brand-primary,#F5851F)] hover:shadow-lg"
     >
       <div className="relative aspect-[16/9] overflow-hidden">
         {coverImage?.url ? (
@@ -23,13 +23,13 @@ export default function CampusCard({ campus }: { campus: Campus }) {
         ) : (
           <div
             className="w-full h-full"
-            style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
+            style={{ background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' }}
           />
         )}
       </div>
       <div className="p-5">
         <h3
-          className="text-[#1C2B3A] font-bold mb-3"
+          className="text-[var(--brand-dark,#1C2B3A)] font-bold mb-3"
           style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif", fontSize: '1.25rem' }}
         >
           {name}

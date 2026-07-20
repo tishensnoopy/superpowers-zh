@@ -1,0 +1,18 @@
+{
+  "collectionName": "components_common_stats",
+  "info": {
+    "displayName": "stat",
+    "description": "统计数字（如 8年经验 / 6大校区），用于 hero 等区域"
+  },
+  "options": {},
+  "attributes": {
+    "value": {
+      "type": "string",
+      "required": true
+    },
+    "label": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

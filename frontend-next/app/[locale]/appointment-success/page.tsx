@@ -54,7 +54,7 @@ export default function AppointmentSuccessPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-[#F5851F] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-12 h-12 border-4 border-[var(--brand-primary,#F5851F)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-muted-foreground">{t('verifying')}</p>
         </div>
       </div>
@@ -71,7 +71,7 @@ export default function AppointmentSuccessPage() {
               <AlertCircle size={40} className="text-[#DC2626]" />
             </div>
             <h1
-              className="text-[#1C2B3A] mb-4"
+              className="text-[var(--brand-dark,#1C2B3A)] mb-4"
               style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif", fontSize: '2rem', fontWeight: 800 }}
             >
               {t('accessRestricted')}
@@ -82,7 +82,7 @@ export default function AppointmentSuccessPage() {
             <Link
               href="/"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-white font-semibold"
-              style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
+              style={{ background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' }}
             >
               {t('backToHomeToBook')}
             </Link>
@@ -101,7 +101,7 @@ export default function AppointmentSuccessPage() {
           </div>
 
           <h1
-            className="text-[#1C2B3A] mb-4"
+            className="text-[var(--brand-dark,#1C2B3A)] mb-4"
             style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif", fontSize: '2rem', fontWeight: 800 }}
           >
             {t('successTitle')}
@@ -113,7 +113,7 @@ export default function AppointmentSuccessPage() {
 
           <div className="bg-[#F8F9FF] rounded-2xl p-6 mb-8 text-left">
             <h3
-              className="text-[#1C2B3A] mb-4 text-center"
+              className="text-[var(--brand-dark,#1C2B3A)] mb-4 text-center"
               style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif", fontWeight: 700 }}
             >
               {t('appointmentInfo')}
@@ -125,7 +125,7 @@ export default function AppointmentSuccessPage() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">{t('parentNameLabel')}</p>
-                  <p className="font-semibold text-[#1C2B3A]">{appointment.parentName || appointment.name || tCommon('notFilled')}</p>
+                  <p className="font-semibold text-[var(--brand-dark,#1C2B3A)]">{appointment.parentName || appointment.name || tCommon('notFilled')}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -134,7 +134,7 @@ export default function AppointmentSuccessPage() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">{t('phoneLabel')}</p>
-                  <p className="font-semibold text-[#1C2B3A]">{appointment.phone || tCommon('notFilled')}</p>
+                  <p className="font-semibold text-[var(--brand-dark,#1C2B3A)]">{appointment.phone || tCommon('notFilled')}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -143,7 +143,7 @@ export default function AppointmentSuccessPage() {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">{t('campusLabel')}</p>
-                  <p className="font-semibold text-[#1C2B3A]">
+                  <p className="font-semibold text-[var(--brand-dark,#1C2B3A)]">
                     {CAMPUS_LABELS[appointment.campus] ? t(CAMPUS_LABELS[appointment.campus]) : (appointment.campus || tCommon('notFilled'))}
                   </p>
                 </div>
@@ -155,7 +155,7 @@ export default function AppointmentSuccessPage() {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">{t('ageLabel')}</p>
-                    <p className="font-semibold text-[#1C2B3A]">{appointment.age} {t('yearsOld')}</p>
+                    <p className="font-semibold text-[var(--brand-dark,#1C2B3A)]">{appointment.age} {t('yearsOld')}</p>
                   </div>
                 </div>
               )}
@@ -166,7 +166,7 @@ export default function AppointmentSuccessPage() {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">{t('courseLabel')}</p>
-                    <p className="font-semibold text-[#1C2B3A]">
+                    <p className="font-semibold text-[var(--brand-dark,#1C2B3A)]">
                       {COURSE_LABELS[appointment.course] ? t(COURSE_LABELS[appointment.course]) : appointment.course}
                     </p>
                   </div>
@@ -179,7 +179,7 @@ export default function AppointmentSuccessPage() {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">{t('preferredTimeSlotLabel')}</p>
-                    <p className="font-semibold text-[#1C2B3A]">
+                    <p className="font-semibold text-[var(--brand-dark,#1C2B3A)]">
                       {TIME_SLOT_LABELS[appointment.preferredTimeSlot] ? t(TIME_SLOT_LABELS[appointment.preferredTimeSlot]) : appointment.preferredTimeSlot}
                     </p>
                   </div>
@@ -192,7 +192,7 @@ export default function AppointmentSuccessPage() {
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">{t('messageLabel')}</p>
-                    <p className="font-semibold text-[#1C2B3A]">{appointment.message}</p>
+                    <p className="font-semibold text-[var(--brand-dark,#1C2B3A)]">{appointment.message}</p>
                   </div>
                 </div>
               )}
@@ -200,7 +200,7 @@ export default function AppointmentSuccessPage() {
           </div>
 
           <div className="bg-[#FFF3E5] rounded-xl p-4 mb-8">
-            <p className="text-sm text-[#F5851F]">
+            <p className="text-sm text-[var(--brand-primary,#F5851F)]">
               {t('hotlinePrompt')}<span className="font-bold">{tContact('hotlineValue')}</span>
             </p>
           </div>
@@ -209,13 +209,13 @@ export default function AppointmentSuccessPage() {
             <Link
               href="/"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl text-white font-semibold"
-              style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
+              style={{ background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' }}
             >
               {tCommon('backToHome')}
             </Link>
             <Link
               href="/courses"
-              className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl text-[#1C2B3A] font-semibold border border-border hover:bg-muted transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl text-[var(--brand-dark,#1C2B3A)] font-semibold border border-border hover:bg-muted transition-colors"
             >
               <ArrowLeft size={16} />
               {t('continueBrowsingCourses')}

@@ -4,6 +4,7 @@ import { setRequestLocale, getMessages, getTranslations } from 'next-intl/server
 import { NextIntlClientProvider } from 'next-intl';
 import { getSiteSettings, getNavigationTree, getFooter, getImageUrl, type Locale } from '@/lib/api';
 import { buildWebSiteSchema, buildOrganizationSchema, buildJsonLd } from '@/lib/seo';
+import { buildThemeCss } from '@/lib/theme';
 import { routing } from '@/i18n/routing';
 import LayoutShell from '@/components/layout/LayoutShell';
 import Navigation from '@/components/layout/Navigation';
@@ -129,6 +130,13 @@ export default async function LocaleLayout({
     ? `'${safeFontFamily}', var(--font-nunito), var(--font-default), sans-serif`
     : `var(--font-nunito), var(--font-default), sans-serif`;
 
+  // 后台「站点设置」品牌色 → 全站 CSS 变量（未配置时输出品牌默认色）
+  const themeCss = buildThemeCss({
+    primaryColor: settings?.primaryColor,
+    darkColor: settings?.darkColor,
+  });
+  const faviconUrl = getImageUrl(settings?.favicon);
+
   const cmsUrl =
     process.env.NEXT_PUBLIC_STRAPI_API_URL || 'http://localhost:1337';
   // 相对路径（如 /api/strapi）走 Next.js rewrites 同源代理，无需 dns-prefetch / preconnect
@@ -153,6 +161,8 @@ export default async function LocaleLayout({
       style={{ fontFamily }}
     >
       <head>
+        <style data-theme-vars="" dangerouslySetInnerHTML={{ __html: themeCss }} />
+        {faviconUrl && <link rel="icon" href={faviconUrl} />}
         {fontFaceCSS && (
           <style dangerouslySetInnerHTML={{ __html: fontFaceCSS }} />
         )}

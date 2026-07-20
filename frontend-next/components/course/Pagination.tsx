@@ -42,7 +42,7 @@ export default function Pagination({ page, pageCount, onChange }: PaginationProp
       'inline-flex items-center justify-center w-9 h-9 rounded-lg border transition-all',
       disabled
         ? 'border-border text-muted-foreground/40 cursor-not-allowed bg-muted/30'
-        : 'border-border text-[#4A5568] hover:border-[#F5851F] hover:text-[#F5851F] bg-card cursor-pointer',
+        : 'border-border text-[#4A5568] hover:border-[var(--brand-primary,#F5851F)] hover:text-[var(--brand-primary,#F5851F)] bg-card cursor-pointer',
     ].join(' ');
 
   const pageButtonClass = (active: boolean) =>
@@ -50,11 +50,11 @@ export default function Pagination({ page, pageCount, onChange }: PaginationProp
       'inline-flex items-center justify-center min-w-9 h-9 px-2 rounded-lg text-sm font-medium transition-all',
       active
         ? 'text-white border border-transparent shadow-md'
-        : 'text-[#4A5568] border border-border bg-card hover:border-[#F5851F] hover:text-[#F5851F] cursor-pointer',
+        : 'text-[#4A5568] border border-border bg-card hover:border-[var(--brand-primary,#F5851F)] hover:text-[var(--brand-primary,#F5851F)] cursor-pointer',
     ].join(' ');
 
   const activeStyle = (active: boolean): React.CSSProperties =>
-    active ? { background: 'linear-gradient(135deg, #F5851F, #FF6B35)' } : {};
+    active ? { background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' } : {};
 
   return (
     <div

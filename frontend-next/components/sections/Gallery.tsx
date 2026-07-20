@@ -21,7 +21,7 @@ export default function Gallery({ section }: { section: Section }) {
             {t('badge')}
           </div>
           <h2
-            className="text-[#1C2B3A] mb-4"
+            className="text-[var(--brand-dark,#1C2B3A)] mb-4"
             style={{
               fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
               fontSize: '2.25rem',

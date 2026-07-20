@@ -47,4 +47,46 @@ describe('Hero 组件', () => {
     const link = screen.getByRole('link', { name: /了解课程体系/ });
     expect(link).toHaveAttribute('href', '/courses');
   });
+
+  it('后台提供的 image1/image2 优先于默认占位图', () => {
+    render(
+      <Hero
+        section={
+          {
+            ...mockSection,
+            image1: { url: '/uploads/custom1.png' },
+            image2: { url: '/uploads/custom2.png' },
+          } as any
+        }
+      />
+    );
+    const srcs = screen.getAllByRole('img').map((i) => i.getAttribute('src') || '');
+    expect(srcs.some((s) => s.includes('custom1.png'))).toBe(true);
+    expect(srcs.some((s) => s.includes('custom2.png'))).toBe(true);
+    expect(srcs.some((s) => s.includes('unsplash'))).toBe(false);
+  });
+
+  it('后台提供的 badgeText 覆盖默认徽章文案', () => {
+    render(<Hero section={{ ...mockSection, badgeText: '金牌师资' } as any} />);
+    expect(screen.getByText('金牌师资')).toBeInTheDocument();
+  });
+
+  it('后台提供的 stats 覆盖默认统计数字', () => {
+    render(
+      <Hero
+        section={
+          {
+            ...mockSection,
+            stats: [
+              { value: '10年+', label: '办学经验' },
+              { value: '8所', label: '直营校区' },
+            ],
+          } as any
+        }
+      />
+    );
+    expect(screen.getByText('10年+')).toBeInTheDocument();
+    expect(screen.getByText('办学经验')).toBeInTheDocument();
+    expect(screen.queryByText('8年+')).not.toBeInTheDocument();
+  });
 });

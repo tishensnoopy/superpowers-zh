@@ -36,11 +36,11 @@ export default async function AppointmentPage({ params }: { params: Promise<{ lo
       />
       <div className="max-w-[1200px] mx-auto px-8">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#F5851F]/10 border border-[#F5851F]/20 text-[#F5851F] text-sm mb-6">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--brand-primary,#F5851F)]/10 border border-[var(--brand-primary,#F5851F)]/20 text-[var(--brand-primary,#F5851F)] text-sm mb-6">
             📅 {t('badgeText')}
           </div>
           <h1
-            className="text-[#1C2B3A] mb-4"
+            className="text-[var(--brand-dark,#1C2B3A)] mb-4"
             style={{
               fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
               fontSize: 'clamp(2rem, 5vw, 3rem)',

@@ -55,7 +55,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
       <div className="max-w-[1200px] mx-auto px-8">
         <div className="text-center mb-12">
           <h1
-            className="text-[#1C2B3A] mb-4"
+            className="text-[var(--brand-dark,#1C2B3A)] mb-4"
             style={{
               fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
               fontSize: 'clamp(2rem, 5vw, 3rem)',
@@ -75,10 +75,10 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
             const content = (
               <div className="bg-card rounded-2xl p-6 border border-border shadow-sm hover:shadow-md transition-shadow text-center h-full">
                 <div className="w-12 h-12 rounded-xl bg-[#FFF3E5] flex items-center justify-center mx-auto mb-4">
-                  <Icon size={22} className="text-[#F5851F]" />
+                  <Icon size={22} className="text-[var(--brand-primary,#F5851F)]" />
                 </div>
                 <div className="text-xs text-muted-foreground mb-1">{card.label}</div>
-                <div className="text-sm font-semibold text-[#1C2B3A] break-all">{card.value}</div>
+                <div className="text-sm font-semibold text-[var(--brand-dark,#1C2B3A)] break-all">{card.value}</div>
               </div>
             );
             return card.href ? (
@@ -92,20 +92,20 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
         {campuses.length > 0 && (
           <div className="bg-card rounded-2xl p-6 border border-border shadow-sm mb-12">
             <h2
-              className="text-[#1C2B3A] mb-5 flex items-center gap-2"
+              className="text-[var(--brand-dark,#1C2B3A)] mb-5 flex items-center gap-2"
               style={{
                 fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
                 fontSize: '1.5rem',
                 fontWeight: 700,
               }}
             >
-              <MapPin size={22} className="text-[#F5851F]" />
+              <MapPin size={22} className="text-[var(--brand-primary,#F5851F)]" />
               {t('campusContactTitle')}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {campuses.map((campus: any) => (
                 <div key={campus.id} className="p-4 rounded-xl border border-border bg-background">
-                  <div className="font-semibold text-[#1C2B3A] mb-2">{campus.name}</div>
+                  <div className="font-semibold text-[var(--brand-dark,#1C2B3A)] mb-2">{campus.name}</div>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                     <User size={14} />
                     {campus.contactPerson || '—'}
@@ -113,7 +113,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
                   {campus.phone ? (
                     <a
                       href={`tel:${campus.phone}`}
-                      className="flex items-center gap-2 text-sm text-muted-foreground hover:text-[#F5851F] transition-colors mb-1"
+                      className="flex items-center gap-2 text-sm text-muted-foreground hover:text-[var(--brand-primary,#F5851F)] transition-colors mb-1"
                     >
                       <Phone size={14} />
                       {campus.phone}

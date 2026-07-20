@@ -304,6 +304,12 @@ export interface SiteSettings {
   publicSecurityRecord?: string;
   seo?: Seo;
   fontSettings?: FontSettings;
+  /** 品牌主色（hex），后台「站点设置」可调，留空用默认 #F5851F */
+  primaryColor?: string;
+  /** 深色（标题/深色背景，hex），后台可调，留空用默认 #1C2B3A */
+  darkColor?: string;
+  /** GEO：给 AI 搜索引擎看的机构摘要（写入 llms.txt） */
+  aiSummary?: string;
 }
 
 export interface NavigationItem {
@@ -330,9 +336,12 @@ export interface SocialLink {
   id: number;
   documentId?: string;
   platform: string;
-  url: string;
+  /** 纯二维码条目可为空 */
+  url?: string;
   icon?: string;
   label?: string;
+  /** 关注二维码图片（如微信公众号二维码），后台可上传 */
+  qrImage?: { url: string; alternativeText?: string } | null;
 }
 
 export interface QuickLink {

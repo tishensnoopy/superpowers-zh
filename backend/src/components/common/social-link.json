@@ -27,14 +27,23 @@
     },
     "url": {
       "type": "string",
-      "required": true,
+      "required": false,
       "maxLength": 500,
-      "description": "Social media profile URL",
+      "description": "Social media profile URL (optional when QR image is used)",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
       }
+    },
+    "qrImage": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images"
+      ],
+      "description": "QR code image (e.g. WeChat official account)"
     },
     "label": {
       "type": "string",

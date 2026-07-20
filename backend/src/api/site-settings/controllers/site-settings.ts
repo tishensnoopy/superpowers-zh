@@ -1,12 +1,15 @@
 import { factories } from '@strapi/strapi';
 
+// 'seo.ogImage' / 'fontSettings.fontFile' 点路径深取组件内媒体字段；浅层 'seo' 不返回 ogImage。
+export const SITE_SETTINGS_POPULATE = ['logo', 'favicon', 'seo.ogImage', 'fontSettings.fontFile'];
+
 export default factories.createCoreController('api::site-settings.site-settings', ({ strapi }) => ({
   async find(ctx) {
     console.log('[SiteSettings] find() called - getting global site settings');
     try {
       ctx.query = {
         ...ctx.query,
-        populate: ['logo', 'favicon', 'seo'],
+        populate: SITE_SETTINGS_POPULATE,
       };
       const result = await super.find(ctx);
       console.log('[SiteSettings] find() completed successfully');

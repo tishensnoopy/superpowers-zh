@@ -27,7 +27,7 @@ export default function CampusInfoCard({ campus }: { campus: Campus }) {
   return (
     <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
       <h2
-        className="text-[#1C2B3A] mb-5"
+        className="text-[var(--brand-dark,#1C2B3A)] mb-5"
         style={{
           fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
           fontSize: '1.5rem',
@@ -42,11 +42,11 @@ export default function CampusInfoCard({ campus }: { campus: Campus }) {
           return (
             <li key={row.label} className="flex items-start gap-3">
               <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-[#FFF3E5] flex items-center justify-center">
-                <Icon size={18} className="text-[#F5851F]" />
+                <Icon size={18} className="text-[var(--brand-primary,#F5851F)]" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-xs text-muted-foreground mb-0.5">{row.label}</div>
-                <div className="text-sm text-[#1C2B3A] break-words">{row.value}</div>
+                <div className="text-sm text-[var(--brand-dark,#1C2B3A)] break-words">{row.value}</div>
               </div>
             </li>
           );

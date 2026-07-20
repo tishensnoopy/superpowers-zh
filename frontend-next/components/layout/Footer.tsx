@@ -4,8 +4,33 @@ import { Link } from '@/i18n/navigation';
 import { Phone, MapPin, Mail } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { Footer as FooterData, SiteSettings, SocialLink } from '@/lib/api';
+import { getImageUrl } from '@/lib/api';
 
 function renderSocialLink(social: SocialLink) {
+  const qrUrl = getImageUrl(social.qrImage);
+  const label = social.label || social.platform;
+
+  // 二维码内容块：有 qrImage 显示图片，否则回退文字标签
+  const tile = (
+    <div className="w-16 h-16 bg-white/10 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:bg-white/20 overflow-hidden">
+      {qrUrl ? (
+        <img src={qrUrl} alt={label} className="w-full h-full object-contain p-1 bg-white rounded-md" />
+      ) : (
+        <span className="text-white/80 text-xs font-medium text-center px-1">{label}</span>
+      )}
+    </div>
+  );
+
+  // 无链接（纯二维码）时不渲染 <a>，避免无意义跳转
+  if (!social.url) {
+    return (
+      <div key={social.id} className="flex flex-col items-center gap-1.5 group" title={label}>
+        {tile}
+        <span className="text-white/60 text-xs group-hover:text-white transition-colors">{label}</span>
+      </div>
+    );
+  }
+
   return (
     <a
       key={social.id}
@@ -13,16 +38,10 @@ function renderSocialLink(social: SocialLink) {
       target="_blank"
       rel="noopener noreferrer"
       className="flex flex-col items-center gap-1.5 group"
-      title={social.label || social.platform}
+      title={label}
     >
-      <div className="w-16 h-16 bg-white/10 rounded-lg flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:bg-white/20">
-        <span className="text-white/80 text-xs font-medium text-center px-1">
-          {social.label || social.platform}
-        </span>
-      </div>
-      <span className="text-white/60 text-xs group-hover:text-white transition-colors">
-        {social.label || social.platform}
-      </span>
+      {tile}
+      <span className="text-white/60 text-xs group-hover:text-white transition-colors">{label}</span>
     </a>
   );
 }
@@ -76,12 +95,20 @@ export default function Footer({
         <div className="grid grid-cols-12 gap-8">
           <div className="col-span-12 lg:col-span-4">
             <div className="flex items-center gap-3 mb-5">
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-lg font-black"
-                style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
-              >
-                {settings.name?.[0] || t('brandNameFallback')[0]}
-              </div>
+              {getImageUrl(settings.logo) ? (
+                <img
+                  src={getImageUrl(settings.logo)!}
+                  alt={settings.name || t('brandNameFallback')}
+                  className="h-10 w-auto max-w-[160px] object-contain"
+                />
+              ) : (
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-lg font-black"
+                  style={{ background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' }}
+                >
+                  {settings.name?.[0] || t('brandNameFallback')[0]}
+                </div>
+              )}
               <div>
                 <div
                   className="font-black text-[18px] leading-tight text-white"
@@ -98,19 +125,19 @@ export default function Footer({
             <div className="space-y-3">
               {settings.address && (
                 <div className="flex items-center gap-3 text-white/60 text-sm">
-                  <MapPin size={15} className="text-[#F5851F] shrink-0" />
+                  <MapPin size={15} className="text-[var(--brand-primary,#F5851F)] shrink-0" />
                   {settings.address}
                 </div>
               )}
               {settings.phone && (
                 <div className="flex items-center gap-3 text-white/60 text-sm">
-                  <Phone size={15} className="text-[#F5851F] shrink-0" />
+                  <Phone size={15} className="text-[var(--brand-primary,#F5851F)] shrink-0" />
                   {settings.phone}
                 </div>
               )}
               {settings.email && (
                 <div className="flex items-center gap-3 text-white/60 text-sm">
-                  <Mail size={15} className="text-[#F5851F] shrink-0" />
+                  <Mail size={15} className="text-[var(--brand-primary,#F5851F)] shrink-0" />
                   {settings.email}
                 </div>
               )}
@@ -125,7 +152,7 @@ export default function Footer({
                 </h4>
                 <ul className="space-y-3">
                   {COURSE_LINKS.map((link) => (
-                    <li key={link.url}><Link href={link.url} className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">{link.title}</Link></li>
+                    <li key={link.url}><Link href={link.url} className="text-white/50 text-sm hover:text-[var(--brand-primary,#F5851F)] transition-colors">{link.title}</Link></li>
                   ))}
                 </ul>
               </div>
@@ -135,7 +162,7 @@ export default function Footer({
                 </h4>
                 <ul className="space-y-3">
                   {ABOUT_LINKS.map((link) => (
-                    <li key={link.url}><Link href={link.url} className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">{link.title}</Link></li>
+                    <li key={link.url}><Link href={link.url} className="text-white/50 text-sm hover:text-[var(--brand-primary,#F5851F)] transition-colors">{link.title}</Link></li>
                   ))}
                 </ul>
               </div>
@@ -145,7 +172,7 @@ export default function Footer({
                 </h4>
                 <ul className="space-y-3">
                   {quickLinks.map((link: any) => (
-                    <li key={link.url}><Link href={link.url} className="text-white/50 text-sm hover:text-[#F5851F] transition-colors">{link.title}</Link></li>
+                    <li key={link.url}><Link href={link.url} className="text-white/50 text-sm hover:text-[var(--brand-primary,#F5851F)] transition-colors">{link.title}</Link></li>
                   ))}
                 </ul>
               </div>

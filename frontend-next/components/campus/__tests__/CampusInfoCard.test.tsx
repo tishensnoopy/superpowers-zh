@@ -59,7 +59,7 @@ describe('CampusInfoCard 组件', () => {
     expect(screen.queryByText(/面积/)).not.toBeInTheDocument();
   });
 
-  it('所有可选字段缺失时仅显示地址', () => {
+  it('联系电话/联系人缺失时显示占位符 —（其余可选行隐藏）', () => {
     const minimal = {
       id: 3,
       name: '动物园校区',
@@ -68,7 +68,9 @@ describe('CampusInfoCard 组件', () => {
     };
     render(<CampusInfoCard campus={minimal as any} />);
     expect(screen.getByText('武汉市汉阳区动物园附近')).toBeInTheDocument();
+    // 地址 + 电话占位 + 联系人占位 = 3 行
     const rows = screen.getAllByRole('listitem');
-    expect(rows).toHaveLength(1);
+    expect(rows).toHaveLength(3);
+    expect(screen.getAllByText('—')).toHaveLength(2);
   });
 });

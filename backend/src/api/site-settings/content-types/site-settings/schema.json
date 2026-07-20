@@ -114,6 +114,30 @@
           "localized": true
         }
       }
+    },
+    "primaryColor": {
+      "type": "string",
+      "maxLength": 20,
+      "description": "品牌主色（hex，如 #F5851F），留空用默认"
+    },
+    "darkColor": {
+      "type": "string",
+      "maxLength": 20,
+      "description": "深色（标题/深色背景，hex，如 #1C2B3A），留空用默认"
+    },
+    "fontSettings": {
+      "type": "component",
+      "component": "common.font-settings",
+      "description": "字体设置：字体族 + 字体文件，留空用默认字体"
+    },
+    "aiSummary": {
+      "type": "text",
+      "description": "GEO：给 AI 搜索引擎看的机构摘要（写入 llms.txt）",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   },
   "admin": {
@@ -190,6 +214,25 @@
         {
           "field": "seo",
           "label": "SEO 配置"
+        },
+        {
+          "field": "primaryColor",
+          "label": "品牌主色",
+          "placeholder": "#F5851F"
+        },
+        {
+          "field": "darkColor",
+          "label": "深色（标题/背景）",
+          "placeholder": "#1C2B3A"
+        },
+        {
+          "field": "fontSettings",
+          "label": "字体设置"
+        },
+        {
+          "field": "aiSummary",
+          "label": "AI 摘要（GEO）",
+          "placeholder": "写给 AI 搜索引擎看的机构简介，将写入 llms.txt"
         }
       ]
     }

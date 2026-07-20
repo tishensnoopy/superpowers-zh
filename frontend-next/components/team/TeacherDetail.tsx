@@ -27,13 +27,13 @@ export default function TeacherDetail({ teacher, onClose }: TeacherDetailProps) 
 
   return (
     <div
-      className="relative bg-card rounded-2xl border border-[#F5851F]/30 shadow-md p-8"
+      className="relative bg-card rounded-2xl border border-[var(--brand-primary,#F5851F)]/30 shadow-md p-8"
       style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}
     >
       <div className="flex flex-col md:flex-row gap-8">
         {/* 左侧：大头像 + 基本信息 */}
         <div className="flex-shrink-0 flex flex-col items-center md:items-start">
-          <div className="relative w-40 h-40 rounded-full overflow-hidden bg-[#FFF3E5] flex items-center justify-center border-4 border-[#F5851F]/20">
+          <div className="relative w-40 h-40 rounded-full overflow-hidden bg-[#FFF3E5] flex items-center justify-center border-4 border-[var(--brand-primary,#F5851F)]/20">
             {avatar?.url ? (
               <StrapiImage
                 src={avatar}
@@ -43,13 +43,13 @@ export default function TeacherDetail({ teacher, onClose }: TeacherDetailProps) 
                 className="object-cover"
               />
             ) : (
-              <span className="text-5xl font-bold text-[#F5851F]">{initial}</span>
+              <span className="text-5xl font-bold text-[var(--brand-primary,#F5851F)]">{initial}</span>
             )}
           </div>
-          <h3 className="mt-4 text-xl font-bold text-[#1C2B3A]">{name}</h3>
+          <h3 className="mt-4 text-xl font-bold text-[var(--brand-dark,#1C2B3A)]">{name}</h3>
           {title && <p className="text-sm text-muted-foreground mt-1">{title}</p>}
           {typeof teachingYears === 'number' && (
-            <p className="text-sm text-[#F5851F] mt-1">{teachingYears} {t('teachingYearsUnit')}</p>
+            <p className="text-sm text-[var(--brand-primary,#F5851F)] mt-1">{teachingYears} {t('teachingYearsUnit')}</p>
           )}
         </div>
 
@@ -57,27 +57,27 @@ export default function TeacherDetail({ teacher, onClose }: TeacherDetailProps) 
         <div className="flex-1 min-w-0">
           {education && (
             <div className="mb-6">
-              <h4 className="text-base font-bold text-[#1C2B3A] mb-2">{t('education')}</h4>
+              <h4 className="text-base font-bold text-[var(--brand-dark,#1C2B3A)] mb-2">{t('education')}</h4>
               <p className="text-sm text-muted-foreground leading-relaxed">{education}</p>
             </div>
           )}
 
           {teachingFeatures && (
             <div className="mb-6">
-              <h4 className="text-base font-bold text-[#1C2B3A] mb-2">{t('teachingFeatures')}</h4>
+              <h4 className="text-base font-bold text-[var(--brand-dark,#1C2B3A)] mb-2">{t('teachingFeatures')}</h4>
               <p className="text-sm text-muted-foreground leading-relaxed">{teachingFeatures}</p>
             </div>
           )}
 
           {achievementList.length > 0 && (
             <div>
-              <h4 className="text-base font-bold text-[#1C2B3A] mb-3">{t('achievements')}</h4>
+              <h4 className="text-base font-bold text-[var(--brand-dark,#1C2B3A)] mb-3">{t('achievements')}</h4>
               <div className="flex flex-wrap gap-2">
                 {achievementList.map((item, idx) => (
                   <span
                     key={idx}
                     className="inline-block px-3 py-1 rounded-full text-xs font-medium text-white"
-                    style={{ background: 'linear-gradient(135deg, #F5851F, #FF6B35)' }}
+                    style={{ background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' }}
                   >
                     {item}
                   </span>

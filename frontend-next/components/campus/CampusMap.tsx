@@ -82,7 +82,7 @@ export default function CampusMap({ latitude, longitude, address, name }: Campus
 
         if (address) {
           const infoWindow = new AMap.InfoWindow({
-            content: `<div style="padding:4px 8px;font-size:14px;color:#1C2B3A;">${address}</div>`,
+            content: `<div style="padding:4px 8px;font-size:14px;color:var(--brand-dark,#1C2B3A);">${address}</div>`,
             offset: new AMap.Pixel(0, -30),
           });
           marker.on('click', () => infoWindow.open(map, marker.getPosition()));
@@ -111,14 +111,14 @@ export default function CampusMap({ latitude, longitude, address, name }: Campus
   return (
     <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
       <h2
-        className="text-[#1C2B3A] mb-5 flex items-center gap-2"
+        className="text-[var(--brand-dark,#1C2B3A)] mb-5 flex items-center gap-2"
         style={{
           fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
           fontSize: '1.5rem',
           fontWeight: 700,
         }}
       >
-        <MapPin size={22} className="text-[#F5851F]" />
+        <MapPin size={22} className="text-[var(--brand-primary,#F5851F)]" />
         {t('mapTitle')}
       </h2>
       {hasCoords ? (

@@ -13,7 +13,7 @@ export default function ProductComparison({ section }: { section: Section }) {
       <div className="max-w-[1400px] mx-auto px-8">
         <div className="text-center mb-16">
           <h2
-            className="text-[#1C2B3A] mb-4"
+            className="text-[var(--brand-dark,#1C2B3A)] mb-4"
             style={{
               fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
               fontSize: '2.25rem',
@@ -28,9 +28,9 @@ export default function ProductComparison({ section }: { section: Section }) {
           <table className="w-full bg-card rounded-2xl border border-border">
             <thead>
               <tr>
-                <th className="p-4 text-left font-bold text-[#1C2B3A] bg-muted/50">{t('specColumnHeader')}</th>
+                <th className="p-4 text-left font-bold text-[var(--brand-dark,#1C2B3A)] bg-muted/50">{t('specColumnHeader')}</th>
                 {productData.map((product: any) => (
-                  <th key={product.id} className="p-4 text-center font-bold text-[#1C2B3A] bg-muted/50 min-w-[200px]">
+                  <th key={product.id} className="p-4 text-center font-bold text-[var(--brand-dark,#1C2B3A)] bg-muted/50 min-w-[200px]">
                     {product.name}
                   </th>
                 ))}

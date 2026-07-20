@@ -15,7 +15,7 @@ export default function RichText({ section }: { section: Section }) {
         <div className={`max-w-4xl mx-auto ${alignClasses[alignment] || alignClasses.left}`}>
           {title && (
             <h2
-              className="text-[#1C2B3A] mb-6"
+              className="text-[var(--brand-dark,#1C2B3A)] mb-6"
               style={{
                 fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
                 fontSize: '2rem',

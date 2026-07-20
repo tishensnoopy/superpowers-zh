@@ -15,7 +15,7 @@ export default function CampusGallery({ campus }: { campus: Campus }) {
   return (
     <div className="bg-card rounded-2xl p-6 border border-border shadow-sm">
       <h2
-        className="text-[#1C2B3A] mb-5"
+        className="text-[var(--brand-dark,#1C2B3A)] mb-5"
         style={{
           fontFamily: "'Nunito', 'Noto Sans SC', sans-serif",
           fontSize: '1.5rem',
@@ -53,7 +53,7 @@ export default function CampusGallery({ campus }: { campus: Campus }) {
                   aria-label={t('switchToImageAriaLabel', { index: index + 1 })}
                   className={`relative aspect-[4/3] rounded-lg overflow-hidden border-2 transition-all ${
                     index === activeIndex
-                      ? 'border-[#F5851F] ring-2 ring-[#F5851F]/30'
+                      ? 'border-[var(--brand-primary,#F5851F)] ring-2 ring-[var(--brand-primary,#F5851F)]/30'
                       : 'border-transparent opacity-70 hover:opacity-100'
                   }`}
                 >

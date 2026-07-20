@@ -22,7 +22,7 @@ export default function SearchBar({ value, onChange, placeholder }: SearchBarPro
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder ?? t('searchPlaceholder')}
-        className="w-full pl-11 pr-4 py-3 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[#F5851F] focus:ring-2 focus:ring-[#F5851F]/20 transition-all"
+        className="w-full pl-11 pr-4 py-3 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[var(--brand-primary,#F5851F)] focus:ring-2 focus:ring-[var(--brand-primary,#F5851F)]/20 transition-all"
         style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}
       />
     </div>
