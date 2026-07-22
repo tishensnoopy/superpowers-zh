@@ -1,7 +1,7 @@
 import { Link } from '@/i18n/navigation';
 import { notFound } from 'next/navigation';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { getTeachers, getTeacherBySlug, type Locale } from '@/lib/api';
+import { getTeachers, getTeacherBySlug, getTeacherPrimaryCampus, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd, buildPersonSchema, buildBreadcrumbSchema } from '@/lib/seo';
 import StrapiImage from '@/components/ui/StrapiImage';
 import type { Metadata } from 'next';
@@ -157,16 +157,19 @@ export default async function TeacherDetailPage({ params }: PageProps) {
               </div>
 
               {/* 所属校区 */}
-              {teacher.campus && (
-                <div className="mb-4">
-                  <Link
-                    href={`/campuses/${teacher.campus.slug}`}
-                    className="inline-flex items-center gap-1 text-sm text-[var(--brand-primary,#F5851F)] hover:underline"
-                  >
-                    📍 {teacher.campus.name}
-                  </Link>
-                </div>
-              )}
+              {(() => {
+                const primaryCampus = getTeacherPrimaryCampus(teacher);
+                return primaryCampus ? (
+                  <div className="mb-4">
+                    <Link
+                      href={`/campuses/${primaryCampus.slug}`}
+                      className="inline-flex items-center gap-1 text-sm text-[var(--brand-primary,#F5851F)] hover:underline"
+                    >
+                      📍 {primaryCampus.name}
+                    </Link>
+                  </div>
+                ) : null;
+              })()}
 
               {/* CTA */}
               <Link
