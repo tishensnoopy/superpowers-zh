@@ -132,6 +132,16 @@
         }
       }
     },
+    "formattedAddress": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "高德 Geocoding API 返回的标准化地址（自动填充，对照 address 用于发现歧义）",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
     "sortOrder": {
       "type": "integer",
       "default": 0,

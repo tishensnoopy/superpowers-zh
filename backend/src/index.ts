@@ -36,6 +36,61 @@ export default {
       }
     }
 
+    // ------------------------------------------------------------
+    // campus geocoding lifecycle：保存时自动调高德 API 把 address 转换为 GCJ-02 坐标
+    // 错误隔离：geocoding 失败不阻断保存，保留旧坐标
+    // ------------------------------------------------------------
+    try {
+      const { geocodeAddress } = await import('./services/amap-geocode-service');
+      strapi.db.lifecycles.subscribe({
+        models: ['api::campus.campus'],
+        beforeCreate: async (event: any) => {
+          const data = event?.params?.data;
+          if (!data?.address) return;
+          try {
+            const result = await geocodeAddress(data.address);
+            if (result) {
+              data.latitude = result.latitude;
+              data.longitude = result.longitude;
+              data.formattedAddress = result.formattedAddress;
+              console.log(`[campus-geocode] beforeCreate: "${data.address}" → ${result.latitude},${result.longitude}`);
+            } else {
+              console.warn(`[campus-geocode] beforeCreate: geocoding 失败，保留原数据，地址: "${data.address}"`);
+            }
+          } catch (err) {
+            console.warn('[campus-geocode] beforeCreate 异常:', err);
+          }
+        },
+        beforeUpdate: async (event: any) => {
+          const data = event?.params?.data;
+          if (!data?.address) return;
+          try {
+            const existing = await strapi.db.query('api::campus.campus').findOne({
+              where: { id: event.params.where.id },
+              select: ['address'],
+            });
+            if (existing?.address === data.address) {
+              return;
+            }
+            const result = await geocodeAddress(data.address);
+            if (result) {
+              data.latitude = result.latitude;
+              data.longitude = result.longitude;
+              data.formattedAddress = result.formattedAddress;
+              console.log(`[campus-geocode] beforeUpdate: "${data.address}" → ${result.latitude},${result.longitude}`);
+            } else {
+              console.warn(`[campus-geocode] beforeUpdate: geocoding 失败，保留旧坐标，地址: "${data.address}"`);
+            }
+          } catch (err) {
+            console.warn('[campus-geocode] beforeUpdate 异常:', err);
+          }
+        },
+      });
+      console.log('[Register] campus geocoding lifecycle subscribed');
+    } catch (err) {
+      console.warn('[Register] Failed to subscribe campus geocoding lifecycle:', err);
+    }
+
     console.log('[Register] Lifecycle hooks registered');
   },
 
