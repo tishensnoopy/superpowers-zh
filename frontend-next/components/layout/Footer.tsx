@@ -195,9 +195,27 @@ export default function Footer({
           <p className="text-white/35 text-sm">
             {footer.copyright || t('copyrightFallback')}
             {settings.icp && <span className="mx-2">·</span>}
-            {settings.icp && <span>{settings.icp}</span>}
+            {settings.icp && (
+              <a
+                href={settings.icpUrl || 'https://beian.miit.gov.cn/'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white/60 transition-colors"
+              >
+                {settings.icp}
+              </a>
+            )}
             {settings.publicSecurityRecord && <span className="mx-2">·</span>}
-            {settings.publicSecurityRecord && <span>{settings.publicSecurityRecord}</span>}
+            {settings.publicSecurityRecord && (
+              <a
+                href={settings.publicSecurityRecordUrl || 'http://www.beian.gov.cn/'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-white/60 transition-colors"
+              >
+                {settings.publicSecurityRecord}
+              </a>
+            )}
           </p>
           <div className="flex items-center gap-6 text-white/35 text-sm">
             <Link href="/privacy-policy" className="hover:text-white/60 transition-colors">{t('privacyPolicy')}</Link>

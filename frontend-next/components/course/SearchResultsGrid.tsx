@@ -3,6 +3,7 @@
 import { Link } from '@/i18n/navigation';
 import { AlertCircle, CheckCircle, Clock, RefreshCw } from 'lucide-react';
 import type { Product } from '@/lib/api';
+import { getImageUrl } from '@/lib/api';
 import { useTranslations } from 'next-intl';
 
 interface SearchResultsGridProps {
@@ -91,11 +92,18 @@ export default function SearchResultsGrid({ results, loading, error, onRetry }: 
     <div className="grid grid-cols-12 gap-6">
       {results.map((product) => {
         const specValues = product.specValues || {};
+        const thumbUrl = getImageUrl(product.thumbnail) || getImageUrl(product.images?.[0]);
         return (
           <div key={product.id} className="col-span-12 sm:col-span-6 lg:col-span-3">
             <div className="h-full bg-card rounded-2xl overflow-hidden border border-border shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col">
               <div className="p-6 border-b border-border" style={{ background: '#EFF6FF' }}>
-                <div className="text-4xl mb-4">📚</div>
+                {thumbUrl ? (
+                  <div className="mb-4 -mx-6 -mt-6 h-32 overflow-hidden">
+                    <img src={thumbUrl} alt={product.name} className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <div className="text-4xl mb-4 opacity-50">📚</div>
+                )}
                 <h3
                   className="text-xl font-bold text-[var(--brand-dark,#1C2B3A)]"
                   style={{ fontFamily: "'Nunito', 'Noto Sans SC', sans-serif" }}

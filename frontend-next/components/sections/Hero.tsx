@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 
 export default function Hero({ section }: { section: Section }) {
   const t = useTranslations('sections.hero');
-  const { title, subtitle, description, backgroundImage, buttonText, isFullWidth = true, image1, image2, badgeText, stats, overlayColor } = section;
+  const { title, subtitle, description, backgroundImage, buttonText, buttonUrl, button2Text, button2Url, isFullWidth = true, image1, image2, badgeText, badgeDesc, stats, overlayColor } = section;
 
   // 后台可配的统计数字；未配置时回退到 i18n 默认 4 项
   const displayStats: { value: string; label: string }[] =
@@ -23,8 +23,21 @@ export default function Hero({ section }: { section: Section }) {
   const image2Url = getImageUrl(image2) || 'https://images.unsplash.com/photo-1617117206620-b01f2919ff86?w=340&h=360&fit=crop&auto=format';
   const bgImageUrl = getImageUrl(backgroundImage) || null;
 
-  // 遮罩颜色：后台可配 overlayColor（hex 格式如 #1a2a3a），未配置时用品牌深色默认值
-  const overlayHex = /^#[0-9A-Fa-f]{6}$/.test(overlayColor || '') ? overlayColor! : '#1C2B3A';
+  // 遮罩样式：支持 frosted 毛玻璃 / transparent 透明 / HEX / rgba 半透明 / 默认渐变
+  const overlayRaw = (overlayColor || '').trim();
+  const isFrosted = overlayRaw.toLowerCase() === 'frosted';
+  const isTransparent = overlayRaw.toLowerCase() === 'transparent';
+  const isRgba = /^rgba?\([^)]+\)$/.test(overlayRaw);
+  const isHex = /^#[0-9A-Fa-f]{6}$/.test(overlayRaw);
+  const hex = isHex ? overlayRaw : '#1C2B3A';
+
+  const overlayStyle: React.CSSProperties = isFrosted
+    ? { background: 'rgba(28, 43, 58, 0.35)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }
+    : isTransparent
+      ? { background: 'transparent' }
+      : isRgba
+        ? { background: overlayRaw }
+        : { background: `linear-gradient(105deg, ${hex}F5 0%, ${hex}CC 45%, var(--brand-primary,#F5851F)40 100%)` };
 
   return (
     <section className="relative pt-[120px] min-h-screen flex items-center overflow-hidden">
@@ -33,16 +46,14 @@ export default function Hero({ section }: { section: Section }) {
           <img
             src={bgImageUrl}
             alt=""
-            className="w-full h-full object-cover opacity-30"
+            className={`w-full h-full object-cover ${isFrosted || isTransparent ? 'opacity-100' : 'opacity-30'}`}
           />
         ) : (
           <div className="w-full h-full" />
         )}
         <div
           className="absolute inset-0"
-          style={{
-            background: `linear-gradient(105deg, ${overlayHex}F5 0%, ${overlayHex}CC 45%, var(--brand-primary,#F5851F)40 100%)`,
-          }}
+          style={overlayStyle}
         />
       </div>
 
@@ -94,7 +105,7 @@ export default function Hero({ section }: { section: Section }) {
 
             <div className="flex items-center gap-4 flex-wrap">
               <Link
-                href="/appointment"
+                href={buttonUrl || "/appointment"}
                 className="flex items-center gap-2 px-8 py-4 rounded-xl text-white font-bold text-base shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-[1.03]"
                 style={{ background: 'linear-gradient(135deg, var(--brand-primary,#F5851F), #FF6B35)' }}
               >
@@ -102,10 +113,10 @@ export default function Hero({ section }: { section: Section }) {
                 {buttonText || t('buttonTextFallback')}
               </Link>
               <Link
-                href="/courses"
+                href={button2Url || "/courses"}
                 className="flex items-center gap-2 px-8 py-4 rounded-xl font-semibold text-base border border-white/30 text-white hover:bg-white/10 transition-all duration-200"
               >
-                {t('secondaryButton')}
+                {button2Text || t('secondaryButton')}
                 <ChevronRight size={18} />
               </Link>
             </div>
@@ -136,7 +147,7 @@ export default function Hero({ section }: { section: Section }) {
                 </div>
                 <div>
                   <div className="font-black text-sm text-[var(--brand-dark,#1C2B3A)]">{badgeText || t('badgeTitle')}</div>
-                  <div className="text-xs text-muted-foreground">{t('badgeDesc')}</div>
+                  <div className="text-xs text-muted-foreground">{badgeDesc || t('badgeDesc')}</div>
                 </div>
               </div>
             </div>

@@ -150,7 +150,7 @@ export async function getPageBySlug(slug: string, locale: Locale = 'zh-CN'): Pro
 
 export async function getProducts(locale: Locale = 'zh-CN', filters?: { category?: string }) {
   const params = new URLSearchParams();
-  params.set('populate', 'thumbnail,categories,specs,objectives,outline,testimonials');
+  params.set('populate', 'thumbnail,images,categories,specs,objectives,outline,testimonials');
   params.set('locale', locale);
   if (filters?.category) {
     params.set('category', filters.category);
@@ -297,11 +297,14 @@ export interface SiteSettings {
   logo?: { url: string; alternativeText?: string } | null;
   favicon?: { url: string; alternativeText?: string } | null;
   phone?: string;
+  showPhoneInNav?: boolean;
   email?: string;
   address?: string;
   wechat?: string;
   icp?: string;
+  icpUrl?: string;
   publicSecurityRecord?: string;
+  publicSecurityRecordUrl?: string;
   seo?: Seo;
   fontSettings?: FontSettings;
   /** 品牌主色（hex），后台「站点设置」可调，留空用默认 #F5851F */

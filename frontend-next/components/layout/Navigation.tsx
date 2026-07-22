@@ -151,7 +151,7 @@ export default function Navigation({
 
         <div className="flex items-center gap-3">
           <LanguageSwitcher />
-          {settings.phone && (
+          {settings.phone && settings.showPhoneInNav !== false && (
             <a
               href={`tel:${settings.phone}`}
               className="hidden md:flex items-center gap-2 text-sm text-[#4A5568]"
