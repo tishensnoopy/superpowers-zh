@@ -633,7 +633,7 @@ export async function getTeacherBySlug(slug: string, locale: Locale = 'zh-CN'): 
     warn(`[i18n] ${locale} missing, fallback to zh-CN: teachers/${slug}`);
     const fallbackParams = new URLSearchParams();
     fallbackParams.set('filters[slug][$eq]', slug);
-    fallbackParams.set('populate', 'avatar,campus');
+    fallbackParams.set('populate', 'avatar,campus_links.campus');
     fallbackParams.set('locale', 'zh-CN');
     const fallbackResult = await fetchApi<{ data: Teacher[] }>(`/api/teachers?${fallbackParams.toString()}`);
     const teacher = fallbackResult.data[0] || null;

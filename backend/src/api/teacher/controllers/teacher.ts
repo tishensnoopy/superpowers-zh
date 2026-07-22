@@ -18,9 +18,54 @@ export default factories.createCoreController(UID, ({ strapi }) => ({
       if (featuredValue !== undefined) entityFilters.isFeatured = { $eq: featuredValue === 'true' };
     }
 
-    const campusSlug = filters?.campus?.slug?.$eq || filters?.campusSlug;
+    const rawCampusSlug = filters?.campus?.slug;
+    const campusSlug = (typeof rawCampusSlug === 'object' ? rawCampusSlug?.$eq : rawCampusSlug) || filters?.campusSlug;
+    // 经 campus_teacher_links 中间表过滤：先查 active 关联指向 slug 校区的 teacher documentId
+    // （Strapi v5 document service 对 relation 属性的 deep filter 支持不稳定，改用两步查询）
+    let teacherDocumentIds: string[] | null = null;
     if (campusSlug) {
-      entityFilters.campus = { slug: { $eq: campusSlug } };
+      const campus = await strapi.documents('api::campus.campus').findFirst({
+        filters: { slug: { $eq: campusSlug } },
+        ...(locale ? { locale } : {}),
+      });
+      if (!campus) {
+        ctx.body = {
+          data: [],
+          meta: {
+            pagination: {
+              page: parseInt(page as string, 10) || 1,
+              pageSize: parseInt(pageSize as string, 10) || 25,
+              pageCount: 0,
+              total: 0,
+            },
+          },
+        };
+        return;
+      }
+      const links = await strapi
+        .documents('api::campus-teacher-link.campus-teacher-link')
+        .findMany({
+          filters: { campus: campus.id, status: 'active' },
+          populate: { teacher: true },
+        });
+      teacherDocumentIds = (links as any[])
+        .map((l) => l?.teacher?.documentId)
+        .filter((id): id is string => typeof id === 'string');
+      if (teacherDocumentIds.length === 0) {
+        ctx.body = {
+          data: [],
+          meta: {
+            pagination: {
+              page: parseInt(page as string, 10) || 1,
+              pageSize: parseInt(pageSize as string, 10) || 25,
+              pageCount: 0,
+              total: 0,
+            },
+          },
+        };
+        return;
+      }
+      entityFilters.documentId = { $in: teacherDocumentIds };
     }
 
     const sortArr = sort ? (Array.isArray(sort) ? sort : [sort]) : [{ sortOrder: 'asc' }];
@@ -35,13 +80,13 @@ export default factories.createCoreController(UID, ({ strapi }) => ({
         limit,
         start,
         populate: {
-        campus_links: {
-          filters: { status: 'active' },
-          populate: { campus: true },
+          campus_links: {
+            filters: { status: 'active' },
+            populate: { campus: true },
+          },
+          avatar: true,
+          seo: true,
         },
-        avatar: true,
-        seo: true,
-      },
         status: 'published',
         ...(locale ? { locale } : {}),
       }),
