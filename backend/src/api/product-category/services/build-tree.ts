@@ -54,3 +54,39 @@ export function buildTree(flatList: CategoryRow[]): CategoryNode[] {
 
   return build(null);
 }
+
+/**
+ * 检查 possibleDescendantDocId 是否是 categoryDocId 的后代（含间接，不含自身）。
+ * BFS 遍历子树。findChildren 为依赖注入的查询函数（便于测试）。
+ */
+export async function detectCycle(
+  categoryDocId: string,
+  possibleDescendantDocId: string,
+  findChildren: (docId: string) => Promise<{ documentId: string }[]>
+): Promise<boolean> {
+  const queue: string[] = [];
+  const visited = new Set<string>();
+
+  // 从直接子节点开始（自身不算后代）
+  const directChildren = await findChildren(categoryDocId);
+  for (const child of directChildren) {
+    queue.push(child.documentId);
+  }
+
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    if (visited.has(current)) continue;
+    visited.add(current);
+
+    if (current === possibleDescendantDocId) {
+      return true;
+    }
+
+    const children = await findChildren(current);
+    for (const child of children) {
+      queue.push(child.documentId);
+    }
+  }
+
+  return false;
+}

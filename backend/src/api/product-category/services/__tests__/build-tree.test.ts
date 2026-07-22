@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { buildTree, type CategoryRow } from '../build-tree';
+import { describe, it, expect, vi } from 'vitest';
+import { buildTree, detectCycle, type CategoryRow } from '../build-tree';
 
 describe('buildTree 纯函数', () => {
   it('空列表返回空数组', () => {
@@ -53,5 +53,36 @@ describe('buildTree 纯函数', () => {
     const tree = buildTree(rows);
     expect(tree[0].description).toBe('desc');
     expect(tree[0].image).toEqual({ url: '/img.jpg' });
+  });
+});
+
+describe('detectCycle 循环检测', () => {
+  it('直接子节点命中返回 true', async () => {
+    const findChildren = vi.fn()
+      .mockResolvedValueOnce([{ documentId: 'child-a' }])
+      .mockResolvedValue([]);
+    const result = await detectCycle('parent-x', 'child-a', findChildren);
+    expect(result).toBe(true);
+  });
+
+  it('深层后代命中返回 true', async () => {
+    const findChildren = vi.fn()
+      .mockResolvedValueOnce([{ documentId: 'child-a' }])
+      .mockResolvedValueOnce([{ documentId: 'grandchild' }])
+      .mockResolvedValue([]);
+    const result = await detectCycle('parent-x', 'grandchild', findChildren);
+    expect(result).toBe(true);
+  });
+
+  it('无后代关系返回 false', async () => {
+    const findChildren = vi.fn().mockResolvedValue([]);
+    const result = await detectCycle('parent-x', 'unrelated', findChildren);
+    expect(result).toBe(false);
+  });
+
+  it('自身不算后代返回 false', async () => {
+    const findChildren = vi.fn().mockResolvedValue([]);
+    const result = await detectCycle('parent-x', 'parent-x', findChildren);
+    expect(result).toBe(false);
   });
 });
