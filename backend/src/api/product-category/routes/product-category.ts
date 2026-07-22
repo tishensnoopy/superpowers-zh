@@ -26,6 +26,22 @@ export default {
     },
     {
       method: 'POST',
+      path: '/product-categories/reorder',
+      handler: 'api::product-category.product-category.reorder',
+      config: {
+        auth: { enabled: true },
+      },
+    },
+    {
+      method: 'POST',
+      path: '/product-categories/move',
+      handler: 'api::product-category.product-category.move',
+      config: {
+        auth: { enabled: true },
+      },
+    },
+    {
+      method: 'POST',
       path: '/product-categories',
       handler: 'api::product-category.product-category.create',
       config: {
