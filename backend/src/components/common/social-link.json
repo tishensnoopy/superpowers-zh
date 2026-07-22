@@ -23,13 +23,13 @@
         "youtube"
       ],
       "required": true,
-      "description": "Social media platform"
+      "description": "枚举值：wechat(微信) / weibo(微博) / qq(QQ) / douyin(抖音) / linkedin(领英) / twitter(X) / facebook(Facebook) / instagram(Instagram) / youtube(YouTube)"
     },
     "url": {
       "type": "string",
       "required": false,
       "maxLength": 500,
-      "description": "Social media profile URL (optional when QR image is used)",
+      "description": "社交媒体主页 URL（使用二维码时可选填），绝对 URL（如 https://...）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -43,12 +43,12 @@
       "allowedTypes": [
         "images"
       ],
-      "description": "QR code image (e.g. WeChat official account)"
+      "description": "二维码图片（如微信公众号），建议尺寸 200x200，支持 JPG/PNG"
     },
     "label": {
       "type": "string",
       "maxLength": 100,
-      "description": "Display label for the link",
+      "description": "链接显示文字（如 关注公众号）",
       "pluginOptions": {
         "i18n": {
           "localized": true

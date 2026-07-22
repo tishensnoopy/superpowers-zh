@@ -13,7 +13,7 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Section title",
+      "description": "区块标题",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -24,7 +24,7 @@
       "type": "component",
       "component": "common.testimonial",
       "repeatable": true,
-      "description": "List of testimonials",
+      "description": "客户评价列表",
       "pluginOptions": {
         "i18n": {
           "localized": true

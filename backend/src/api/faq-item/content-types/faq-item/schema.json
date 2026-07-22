@@ -18,7 +18,7 @@
       "type": "string",
       "required": true,
       "maxLength": 500,
-      "description": "FAQ question",
+      "description": "FAQ 问题文本",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -28,7 +28,7 @@
     "answer": {
       "type": "text",
       "required": true,
-      "description": "FAQ answer",
+      "description": "FAQ 答案，支持 Markdown 语法",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -38,7 +38,7 @@
     "category": {
       "type": "string",
       "maxLength": 100,
-      "description": "FAQ category",
+      "description": "FAQ 分类名称（如 入学咨询 / 课程 / 收费）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -48,7 +48,7 @@
     "tags": {
       "type": "string",
       "maxLength": 500,
-      "description": "Tags (comma separated)",
+      "description": "标签，逗号分隔（如 拼音,数学,试听）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -58,29 +58,29 @@
     "isActive": {
       "type": "boolean",
       "default": true,
-      "description": "Whether this FAQ is active"
+      "description": "是否在前台展示"
     },
     "sortOrder": {
       "type": "integer",
       "default": 0,
-      "description": "Sort order"
+      "description": "排序权重，数值越小越靠前"
     },
     "sourceDocument": {
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::knowledge-base.knowledge-base",
       "inversedBy": "faqs",
-      "description": "Source knowledge base document"
+      "description": "来源知识库文档"
     },
     "feedbackCount": {
       "type": "integer",
       "default": 0,
-      "description": "Total feedback count"
+      "description": "用户反馈总数"
     },
     "helpfulCount": {
       "type": "integer",
       "default": 0,
-      "description": "Helpful feedback count"
+      "description": "认为有用的人数"
     },
     "sourceType": {
       "type": "enumeration",
@@ -90,13 +90,13 @@
         "chat-feedback"
       ],
       "default": "manual",
-      "description": "How this FAQ was created"
+      "description": "枚举值：manual(人工录入) / ai-generated(AI 生成) / chat-feedback(对话反馈提炼)"
     },
     "sourceSession": {
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::chat-session.chat-session",
-      "description": "Source chat session for AI-generated FAQs"
+      "description": "AI 生成 FAQ 的来源会话"
     },
     "reviewStatus": {
       "type": "enumeration",
@@ -106,12 +106,12 @@
         "rejected"
       ],
       "default": "approved",
-      "description": "Review status for AI-generated FAQs"
+      "description": "枚举值：pending(待审核) / approved(已通过) / rejected(已拒绝)；AI 生成 FAQ 需审核"
     },
     "vectorSynced": {
       "type": "boolean",
       "default": false,
-      "description": "Whether this FAQ is synced to vector DB"
+      "description": "是否已同步到向量数据库"
     }
   },
   "pluginOptions": {

@@ -17,7 +17,7 @@
     "copyright": {
       "type": "string",
       "maxLength": 500,
-      "description": "Copyright text",
+      "description": "页脚版权文字（如 © 2026 XX 教育有限公司 版权所有）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -28,7 +28,7 @@
       "type": "component",
       "component": "common.social-link",
       "repeatable": true,
-      "description": "Social media links",
+      "description": "社交媒体链接列表（微信/微博/抖音等）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -39,7 +39,7 @@
       "type": "component",
       "component": "common.quick-link",
       "repeatable": true,
-      "description": "Quick navigation links",
+      "description": "快捷导航链接列表",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -48,7 +48,7 @@
     },
     "aboutText": {
       "type": "text",
-      "description": "About company text in footer",
+      "description": "页脚公司简介文案",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -58,7 +58,7 @@
     "seo": {
       "type": "component",
       "component": "common.seo",
-      "description": "SEO configuration",
+      "description": "SEO 配置",
       "pluginOptions": {
         "i18n": {
           "localized": true

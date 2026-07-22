@@ -15,6 +15,7 @@
     "fontFile": {
       "type": "media",
       "multiple": false,
+      "allowedTypes": ["files"],
       "description": "自定义字体文件（woff2/ttf/otf/woff），上传后全站生效"
     },
     "fontFormat": {

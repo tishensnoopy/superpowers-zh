@@ -33,7 +33,7 @@
     "rating": {
       "type": "integer",
       "default": 5,
-      "description": "评分（1-5）"
+      "description": "评分，数值 1-5（5 为满分）"
     }
   }
 }

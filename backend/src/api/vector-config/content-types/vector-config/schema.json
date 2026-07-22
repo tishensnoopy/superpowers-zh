@@ -15,7 +15,8 @@
     "name": {
       "type": "string",
       "required": true,
-      "maxLength": 100
+      "maxLength": 100,
+      "description": "配置名称（如 默认向量库 / 测试库）"
     },
     "provider": {
       "type": "enumeration",
@@ -24,11 +25,13 @@
         "qdrant",
         "milvus"
       ],
-      "default": "pgvector"
+      "default": "pgvector",
+      "description": "枚举值：pgvector(PostgreSQL pgvector 扩展) / qdrant(Qdrant) / milvus(Milvus)"
     },
     "dimension": {
       "type": "integer",
-      "default": 1536
+      "default": 1536,
+      "description": "向量维度，单位 维（如 1536 / 768，需与嵌入模型匹配）"
     },
     "indexType": {
       "type": "enumeration",
@@ -36,18 +39,22 @@
         "ivfflat",
         "hnsw"
       ],
-      "default": "ivfflat"
+      "default": "ivfflat",
+      "description": "枚举值：ivfflat(IVF Flat 索引) / hnsw(HNSW 索引)"
     },
     "indexParams": {
-      "type": "json"
+      "type": "json",
+      "description": "索引参数 JSON（如 {\"lists\":100,\"probes\":10}）"
     },
     "connectionConfig": {
       "type": "json",
-      "private": true
+      "private": true,
+      "description": "连接配置 JSON（含密码等敏感信息，private 字段不在 API 返回）"
     },
     "isActive": {
       "type": "boolean",
-      "default": false
+      "default": false,
+      "description": "是否启用此配置（同一时间只应激活一个）"
     }
   }
 }

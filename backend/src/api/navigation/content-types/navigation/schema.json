@@ -18,7 +18,7 @@
       "type": "string",
       "required": true,
       "maxLength": 100,
-      "description": "Navigation item name",
+      "description": "导航项显示名称（如 关于我们 / 课程体系）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -29,7 +29,7 @@
       "type": "string",
       "required": true,
       "maxLength": 500,
-      "description": "Target URL (can be internal path or external URL)",
+      "description": "链接地址，相对路径（如 /about）或绝对 URL（如 https://...）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -39,7 +39,7 @@
     "icon": {
       "type": "string",
       "maxLength": 100,
-      "description": "Icon name (from icon library)",
+      "description": "图标名称（来自图标库，如 Home / Users）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -49,31 +49,31 @@
     "position": {
       "type": "integer",
       "default": 0,
-      "description": "Sort order (lower = earlier)"
+      "description": "排序权重，数值越小越靠前"
     },
     "isActive": {
       "type": "boolean",
       "default": true,
-      "description": "Whether this navigation item is active"
+      "description": "是否启用此导航项"
     },
     "children": {
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::navigation.navigation",
       "mappedBy": "parent",
-      "description": "Child navigation items (dropdown menu)"
+      "description": "子导航项（下拉菜单）"
     },
     "parent": {
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::navigation.navigation",
       "inversedBy": "children",
-      "description": "Parent navigation item"
+      "description": "父级导航项"
     },
     "isExternal": {
       "type": "boolean",
       "default": false,
-      "description": "Whether this is an external link"
+      "description": "是否为外部链接（true 时新窗口打开）"
     }
   },
   "pluginOptions": {

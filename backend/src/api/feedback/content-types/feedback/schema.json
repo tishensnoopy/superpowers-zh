@@ -15,23 +15,28 @@
     "name": {
       "type": "string",
       "required": true,
-      "maxLength": 100
+      "maxLength": 100,
+      "description": "提交人姓名"
     },
     "email": {
       "type": "email",
-      "required": true
+      "required": true,
+      "description": "提交人邮箱"
     },
     "phone": {
       "type": "string",
-      "maxLength": 20
+      "maxLength": 20,
+      "description": "联系电话（选填）"
     },
     "subject": {
       "type": "string",
-      "maxLength": 200
+      "maxLength": 200,
+      "description": "反馈主题"
     },
     "message": {
       "type": "text",
-      "required": true
+      "required": true,
+      "description": "反馈正文内容"
     },
     "status": {
       "type": "enumeration",
@@ -40,22 +45,27 @@
         "replied",
         "closed"
       ],
-      "default": "pending"
+      "default": "pending",
+      "description": "枚举值：pending(待回复) / replied(已回复) / closed(已关闭)"
     },
     "reply": {
-      "type": "text"
+      "type": "text",
+      "description": "管理员回复内容"
     },
     "sourcePage": {
       "type": "string",
-      "maxLength": 100
+      "maxLength": 100,
+      "description": "提交来源页面路径"
     },
     "ipAddress": {
       "type": "string",
-      "maxLength": 45
+      "maxLength": 45,
+      "description": "提交者 IP 地址（用于反垃圾）"
     },
     "userAgent": {
       "type": "string",
-      "maxLength": 500
+      "maxLength": 500,
+      "description": "提交者浏览器 User-Agent"
     }
   }
 }

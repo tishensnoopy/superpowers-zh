@@ -12,7 +12,7 @@
     "icon": {
       "type": "string",
       "maxLength": 100,
-      "description": "Button icon",
+      "description": "按钮图标名称（来自图标库，如 Phone / MessageCircle）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -22,7 +22,7 @@
     "label": {
       "type": "string",
       "maxLength": 50,
-      "description": "Button text",
+      "description": "按钮文字（如 立即咨询）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -38,12 +38,12 @@
         "callback"
       ],
       "default": "contact",
-      "description": "Action type"
+      "description": "枚举值：contact(跳转联系表单) / chat(打开 AI 对话) / phone(拨打电话) / callback(预约回拨)"
     },
     "phone": {
       "type": "string",
       "maxLength": 50,
-      "description": "Phone number",
+      "description": "电话号码（仅 action=phone 时使用）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -53,7 +53,7 @@
     "wechat": {
       "type": "string",
       "maxLength": 100,
-      "description": "WeChat ID",
+      "description": "微信号（仅 action=chat 或 callback 时使用）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -67,7 +67,7 @@
         "bottom-left"
       ],
       "default": "bottom-right",
-      "description": "Button position"
+      "description": "枚举值：bottom-right(右下角) / bottom-left(左下角)；按钮位置"
     }
   }
 }

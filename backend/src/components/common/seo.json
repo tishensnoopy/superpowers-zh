@@ -12,7 +12,7 @@
     "metaTitle": {
       "type": "string",
       "maxLength": 60,
-      "description": "Meta title",
+      "description": "SEO 标题（浏览器标签/搜索结果标题），建议 60 字以内",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -22,7 +22,7 @@
     "metaDescription": {
       "type": "string",
       "maxLength": 160,
-      "description": "Meta description",
+      "description": "SEO 描述（搜索结果摘要），建议 160 字以内",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -32,7 +32,7 @@
     "metaKeywords": {
       "type": "string",
       "maxLength": 200,
-      "description": "Meta keywords",
+      "description": "SEO 关键词，逗号分隔（对部分搜索引擎有效）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -42,7 +42,7 @@
     "canonicalUrl": {
       "type": "string",
       "maxLength": 500,
-      "description": "Canonical URL",
+      "description": "规范链接 URL（用于解决重复内容问题），绝对 URL（如 https://...）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -52,7 +52,7 @@
     "ogTitle": {
       "type": "string",
       "maxLength": 60,
-      "description": "Open Graph title",
+      "description": "Open Graph 标题（分享到社交平台时显示）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -62,7 +62,7 @@
     "ogDescription": {
       "type": "string",
       "maxLength": 160,
-      "description": "Open Graph description",
+      "description": "Open Graph 描述（分享到社交平台时显示）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -73,7 +73,8 @@
       "type": "media",
       "multiple": false,
       "required": false,
-      "description": "Open Graph image"
+      "allowedTypes": ["images"],
+      "description": "Open Graph 分享图，建议尺寸 1200x630，支持 JPG/PNG/WebP"
     },
     "ogType": {
       "type": "enumeration",
@@ -83,7 +84,7 @@
         "product"
       ],
       "default": "website",
-      "description": "Open Graph type"
+      "description": "枚举值：website(网站) / article(文章) / product(产品)；Open Graph 类型"
     },
     "noindex": {
       "type": "boolean",

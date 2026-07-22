@@ -13,7 +13,7 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Section title",
+      "description": "区块标题",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -22,7 +22,7 @@
     },
     "description": {
       "type": "text",
-      "description": "Section description",
+      "description": "区块描述文案",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -33,7 +33,7 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::product.product",
-      "description": "Related products"
+      "description": "关联展示的产品列表"
     },
     "columns": {
       "type": "enumeration",
@@ -43,18 +43,18 @@
         "4"
       ],
       "default": "3",
-      "description": "Number of columns"
+      "description": "枚举值：2(两列) / 3(三列) / 4(四列)；网格列数"
     },
     "showFilter": {
       "type": "boolean",
       "default": true,
-      "description": "Show category filter"
+      "description": "是否显示分类筛选器"
     },
     "categoryFilter": {
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::product-category.product-category",
-      "description": "Available categories for filtering"
+      "description": "可筛选的分类列表"
     }
   }
 }

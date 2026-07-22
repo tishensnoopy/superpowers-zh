@@ -13,7 +13,7 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Section title",
+      "description": "区块标题",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -24,13 +24,13 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::product.product",
-      "description": "Products to compare (max 4)"
+      "description": "对比产品列表（建议最多 4 个）"
     },
     "specs": {
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::product-spec.product-spec",
-      "description": "Specifications to compare"
+      "description": "对比规格列表"
     }
   }
 }

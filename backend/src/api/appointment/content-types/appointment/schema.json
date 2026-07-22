@@ -61,7 +61,7 @@
         "afternoon",
         "evening"
       ],
-      "description": "期望时段（选填）"
+      "description": "枚举值：morning(上午) / afternoon(下午) / evening(晚上)；期望时段（选填）"
     },
     "message": {
       "type": "text",
@@ -76,7 +76,7 @@
         "cancelled"
       ],
       "default": "pending",
-      "description": "预约状态"
+      "description": "枚举值：pending(待确认) / confirmed(已确认) / completed(已完成) / cancelled(已取消)"
     },
     "sourcePage": {
       "type": "string",

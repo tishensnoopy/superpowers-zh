@@ -58,11 +58,11 @@
     },
     "price": {
       "type": "float",
-      "description": "价格"
+      "description": "售价，单位 元"
     },
     "originalPrice": {
       "type": "float",
-      "description": "原价（用于显示折扣）"
+      "description": "原价，单位 元（用于显示折扣）"
     },
     "sku": {
       "type": "string",
@@ -89,12 +89,14 @@
     "images": {
       "type": "media",
       "multiple": true,
-      "description": "产品图片"
+      "allowedTypes": ["images"],
+      "description": "产品图片，建议尺寸 1200x1200，支持 JPG/PNG/WebP"
     },
     "thumbnail": {
       "type": "media",
-      "description": "产品缩略图",
-      "multiple": false
+      "description": "产品缩略图，建议尺寸 400x400，支持 JPG/PNG/WebP",
+      "multiple": false,
+      "allowedTypes": ["images"]
     },
     "categories": {
       "type": "relation",
@@ -139,7 +141,7 @@
     },
     "teachingMethod": {
       "type": "richtext",
-      "description": "教学方法描述",
+      "description": "教学方法描述，支持 Markdown 语法",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -178,149 +180,6 @@
           "localized": true
         }
       }
-    }
-  },
-  "admin": {
-    "list": {
-      "title": "产品管理",
-      "description": "管理产品目录",
-      "fields": [
-        {
-          "field": "name",
-          "label": "产品名称",
-          "sortable": true
-        },
-        {
-          "field": "slug",
-          "label": "URL 路径",
-          "sortable": true
-        },
-        {
-          "field": "price",
-          "label": "价格",
-          "sortable": true
-        },
-        {
-          "field": "isFeatured",
-          "label": "特色",
-          "sortable": true
-        },
-        {
-          "field": "isInStock",
-          "label": "库存",
-          "sortable": true
-        },
-        {
-          "field": "publishedAt",
-          "label": "发布时间",
-          "sortable": true
-        }
-      ],
-      "filters": [
-        {
-          "field": "categories",
-          "label": "分类"
-        },
-        {
-          "field": "isFeatured",
-          "label": "特色产品"
-        },
-        {
-          "field": "isInStock",
-          "label": "库存状态"
-        },
-        {
-          "field": "publishedAt",
-          "label": "发布状态"
-        }
-      ]
-    },
-    "edit": {
-      "title": "编辑产品",
-      "description": "创建或编辑产品",
-      "fields": [
-        {
-          "field": "name",
-          "label": "产品名称",
-          "placeholder": "请输入产品名称"
-        },
-        {
-          "field": "slug",
-          "label": "URL 路径",
-          "placeholder": "请输入产品路径"
-        },
-        {
-          "field": "sku",
-          "label": "SKU 编码",
-          "placeholder": "请输入 SKU 编码"
-        },
-        {
-          "field": "price",
-          "label": "价格"
-        },
-        {
-          "field": "originalPrice",
-          "label": "原价"
-        },
-        {
-          "field": "stock",
-          "label": "库存数量"
-        },
-        {
-          "field": "isInStock",
-          "label": "有库存"
-        },
-        {
-          "field": "isFeatured",
-          "label": "设为特色产品"
-        },
-        {
-          "field": "shortDescription",
-          "label": "简短描述",
-          "placeholder": "请输入简短描述"
-        },
-        {
-          "field": "description",
-          "label": "详细描述"
-        },
-        {
-          "field": "images",
-          "label": "产品图片"
-        },
-        {
-          "field": "thumbnail",
-          "label": "缩略图"
-        },
-        {
-          "field": "categories",
-          "label": "产品分类"
-        },
-        {
-          "field": "specs",
-          "label": "产品规格"
-        },
-        {
-          "field": "seo",
-          "label": "SEO 配置"
-        },
-        {
-          "field": "teachingMethod",
-          "label": "教学方法",
-          "placeholder": "请输入教学方法描述"
-        },
-        {
-          "field": "objectives",
-          "label": "学习目标"
-        },
-        {
-          "field": "outline",
-          "label": "课程大纲"
-        },
-        {
-          "field": "testimonials",
-          "label": "家长评价"
-        }
-      ]
     }
   },
   "pluginOptions": {

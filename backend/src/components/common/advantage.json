@@ -13,7 +13,7 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Advantage title",
+      "description": "优势标题",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -23,7 +23,7 @@
     "description": {
       "type": "string",
       "maxLength": 500,
-      "description": "Advantage description",
+      "description": "优势描述",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -33,7 +33,7 @@
     "icon": {
       "type": "string",
       "maxLength": 100,
-      "description": "Icon name",
+      "description": "图标名称（来自图标库，如 Star / Award / Shield）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -43,7 +43,7 @@
     "color": {
       "type": "string",
       "maxLength": 20,
-      "description": "Icon color (hex)",
+      "description": "图标颜色，HEX 格式（如 #F5851F），留空使用默认色 #F5851F",
       "default": "#F5851F",
       "pluginOptions": {
         "i18n": {
@@ -54,7 +54,7 @@
     "bgColor": {
       "type": "string",
       "maxLength": 20,
-      "description": "Icon background color (hex)",
+      "description": "图标背景色，HEX 格式（如 #FFF3E5），留空使用默认色 #FFF3E5",
       "default": "#FFF3E5",
       "pluginOptions": {
         "i18n": {

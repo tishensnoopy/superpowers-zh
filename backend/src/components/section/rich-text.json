@@ -12,7 +12,7 @@
     "content": {
       "type": "text",
       "required": true,
-      "description": "Rich text content",
+      "description": "富文本内容，支持 Markdown 语法",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -22,7 +22,7 @@
     "title": {
       "type": "string",
       "maxLength": 200,
-      "description": "Section title",
+      "description": "区块标题",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -37,7 +37,7 @@
         "right"
       ],
       "default": "left",
-      "description": "Content alignment"
+      "description": "枚举值：left(左对齐) / center(居中) / right(右对齐)；内容对齐方式"
     }
   }
 }

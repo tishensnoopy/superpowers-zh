@@ -13,12 +13,13 @@
       "type": "media",
       "multiple": false,
       "required": true,
-      "description": "Gallery image"
+      "allowedTypes": ["images"],
+      "description": "图集图片，建议尺寸 1200x800，支持 JPG/PNG/WebP"
     },
     "title": {
       "type": "string",
       "maxLength": 200,
-      "description": "Image title",
+      "description": "图片标题",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -28,7 +29,7 @@
     "description": {
       "type": "string",
       "maxLength": 500,
-      "description": "Image description",
+      "description": "图片描述",
       "pluginOptions": {
         "i18n": {
           "localized": true

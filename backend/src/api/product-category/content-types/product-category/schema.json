@@ -18,7 +18,7 @@
       "type": "string",
       "required": true,
       "maxLength": 100,
-      "description": "Category name",
+      "description": "分类名称",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -30,11 +30,11 @@
       "required": true,
       "unique": true,
       "maxLength": 100,
-      "description": "Category URL path"
+      "description": "分类 URL 路径（如 /courses/pinyin）"
     },
     "description": {
       "type": "text",
-      "description": "Category description",
+      "description": "分类描述",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -43,39 +43,40 @@
     },
     "image": {
       "type": "media",
-      "description": "Category icon/image",
-      "multiple": false
+      "description": "分类图标/封面图，建议尺寸 400x400，支持 JPG/PNG/WebP",
+      "multiple": false,
+      "allowedTypes": ["images"]
     },
     "position": {
       "type": "integer",
       "default": 0,
-      "description": "Sort order"
+      "description": "排序权重，数值越小越靠前"
     },
     "isActive": {
       "type": "boolean",
       "default": true,
-      "description": "Whether this category is active"
+      "description": "是否启用此分类"
     },
     "parent": {
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::product-category.product-category",
       "inversedBy": "children",
-      "description": "Parent category"
+      "description": "父级分类（用于构建层级分类树）"
     },
     "children": {
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::product-category.product-category",
       "mappedBy": "parent",
-      "description": "Child categories"
+      "description": "子分类列表"
     },
     "products": {
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::product.product",
       "mappedBy": "categories",
-      "description": "Products in this category"
+      "description": "此分类下的产品列表"
     }
   },
   "pluginOptions": {

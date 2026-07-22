@@ -16,19 +16,23 @@
       "type": "string",
       "required": true,
       "unique": true,
-      "maxLength": 100
+      "maxLength": 100,
+      "description": "会话唯一标识（UUID 或自定义 ID）"
     },
     "visitorId": {
       "type": "string",
-      "maxLength": 100
+      "maxLength": 100,
+      "description": "访客标识（来自浏览器 cookie）"
     },
     "visitorName": {
       "type": "string",
-      "maxLength": 100
+      "maxLength": 100,
+      "description": "访客姓名（如对话中收集到）"
     },
     "visitorPhone": {
       "type": "string",
-      "maxLength": 20
+      "maxLength": 20,
+      "description": "访客联系电话（如对话中收集到）"
     },
     "status": {
       "type": "enumeration",
@@ -37,35 +41,42 @@
         "transferred",
         "closed"
       ],
-      "default": "active"
+      "default": "active",
+      "description": "枚举值：active(进行中) / transferred(已转人工) / closed(已关闭)"
     },
     "sourcePage": {
       "type": "string",
-      "maxLength": 200
+      "maxLength": 200,
+      "description": "发起会话的来源页面路径"
     },
     "transferredAt": {
-      "type": "datetime"
+      "type": "datetime",
+      "description": "转人工时间"
     },
     "transferredTo": {
       "type": "string",
-      "maxLength": 100
+      "maxLength": 100,
+      "description": "转接对象（客服工号或姓名）"
     },
     "closedAt": {
-      "type": "datetime"
+      "type": "datetime",
+      "description": "会话关闭时间"
     },
     "metadata": {
-      "type": "json"
+      "type": "json",
+      "description": "会话元数据 JSON（如来源渠道/UTM 参数等）"
     },
     "messageCount": {
       "type": "integer",
       "default": 0,
-      "description": "Number of user messages in this session"
+      "description": "用户消息数，单位 条"
     },
     "messages": {
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::chat-message.chat-message",
-      "mappedBy": "session"
+      "mappedBy": "session",
+      "description": "会话消息列表"
     }
   }
 }

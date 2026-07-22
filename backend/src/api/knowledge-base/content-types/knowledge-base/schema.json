@@ -18,7 +18,7 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Document title",
+      "description": "文档标题",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -27,7 +27,7 @@
     },
     "content": {
       "type": "text",
-      "description": "Document content",
+      "description": "文档正文内容，支持 Markdown 语法",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -45,7 +45,7 @@
         "content-sync"
       ],
       "default": "manual",
-      "description": "Source type"
+      "description": "枚举值：manual(人工录入) / faq(FAQ 同步) / pdf(PDF 上传) / webpage(网页抓取) / chat-history(对话历史) / content-sync(内容同步)"
     },
     "status": {
       "type": "enumeration",
@@ -56,7 +56,7 @@
         "failed"
       ],
       "default": "pending",
-      "description": "Processing status"
+      "description": "枚举值：pending(待处理) / processing(处理中) / ready(就绪) / failed(失败)"
     },
     "vectorizationStatus": {
       "type": "enumeration",
@@ -67,12 +67,12 @@
         "failed"
       ],
       "default": "pending",
-      "description": "向量化状态"
+      "description": "枚举值：pending(待向量化) / processing(向量化中) / completed(已完成) / failed(失败)"
     },
     "statusMessage": {
       "type": "string",
       "maxLength": 500,
-      "description": "Status message (error reason, etc.)",
+      "description": "状态说明信息（如错误原因）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -81,7 +81,7 @@
     },
     "vectorDbIds": {
       "type": "json",
-      "description": "Vector database IDs (array)",
+      "description": "向量数据库记录 ID 数组",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -91,20 +91,20 @@
     "chunkCount": {
       "type": "integer",
       "default": 0,
-      "description": "Number of document chunks"
+      "description": "文档分块数量，单位 个"
     },
     "processedAt": {
       "type": "datetime",
-      "description": "Processing completed timestamp"
+      "description": "处理完成时间"
     },
     "failedAt": {
       "type": "datetime",
-      "description": "Failed timestamp"
+      "description": "处理失败时间"
     },
     "retryCount": {
       "type": "integer",
       "default": 0,
-      "description": "Number of retries"
+      "description": "重试次数，单位 次"
     },
     "priority": {
       "type": "enumeration",
@@ -114,12 +114,12 @@
         "high"
       ],
       "default": "medium",
-      "description": "Processing priority"
+      "description": "枚举值：low(低) / medium(中) / high(高)；处理优先级"
     },
     "tags": {
       "type": "string",
       "maxLength": 500,
-      "description": "Tags (comma separated)",
+      "description": "标签，逗号分隔",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -129,7 +129,7 @@
     "seo": {
       "type": "component",
       "component": "common.seo",
-      "description": "SEO configuration",
+      "description": "SEO 配置",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -141,7 +141,7 @@
       "relation": "oneToMany",
       "target": "api::faq-item.faq-item",
       "mappedBy": "sourceDocument",
-      "description": "FAQs generated from this document"
+      "description": "从本文档生成的 FAQ 列表"
     },
     "file": {
       "type": "media",
@@ -150,12 +150,12 @@
         "files",
         "images"
       ],
-      "description": "Uploaded document file"
+      "description": "上传的文档文件，支持 PDF/Word/TXT/Markdown"
     },
     "sourceUrl": {
       "type": "string",
       "maxLength": 500,
-      "description": "Source URL for webpage type",
+      "description": "来源网页 URL（仅 sourceType=webpage 时使用）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -165,7 +165,7 @@
     "category": {
       "type": "string",
       "maxLength": 100,
-      "description": "Document category",
+      "description": "文档分类",
       "pluginOptions": {
         "i18n": {
           "localized": true

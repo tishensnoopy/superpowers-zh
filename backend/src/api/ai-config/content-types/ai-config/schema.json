@@ -15,7 +15,8 @@
     "name": {
       "type": "string",
       "required": true,
-      "maxLength": 100
+      "maxLength": 100,
+      "description": "配置名称（如 默认配置 / 测试配置）"
     },
     "provider": {
       "type": "enumeration",
@@ -24,53 +25,65 @@
         "openai",
         "custom"
       ],
-      "default": "qwen"
+      "default": "qwen",
+      "description": "枚举值：qwen(阿里通义千问) / openai(OpenAI) / custom(自定义)"
     },
     "model": {
       "type": "string",
       "maxLength": 100,
-      "default": "qwen-plus"
+      "default": "qwen-plus",
+      "description": "对话模型名称（如 qwen-plus / gpt-4o）"
     },
     "embeddingModel": {
       "type": "string",
       "maxLength": 100,
-      "default": "text-embedding-v2"
+      "default": "text-embedding-v2",
+      "description": "嵌入模型名称（如 text-embedding-v2 / text-embedding-3-small）"
     },
     "apiKey": {
       "type": "string",
       "maxLength": 500,
-      "private": true
+      "private": true,
+      "description": "API Key（private 字段，不在 API 返回）"
     },
     "apiEndpoint": {
       "type": "string",
-      "maxLength": 500
+      "maxLength": 500,
+      "description": "API 接入地址 URL（如 https://dashscope.aliyuncs.com/...）"
     },
     "systemPrompt": {
-      "type": "text"
+      "type": "text",
+      "description": "系统提示词，定义 AI 角色与行为"
     },
     "temperature": {
       "type": "float",
-      "default": 0.7
+      "default": 0.7,
+      "description": "采样温度，数值 0-2（越高越随机，越低越确定）"
     },
     "maxTokens": {
       "type": "integer",
-      "default": 2000
+      "default": 2000,
+      "description": "单次回复最大 Token 数，单位 个"
     },
     "topK": {
       "type": "integer",
-      "default": 5
+      "default": 5,
+      "description": "向量检索返回 Top K 个相关文档，单位 个"
     },
     "chunkSize": {
       "type": "integer",
-      "default": 500
+      "default": 500,
+      "description": "文档分块大小，单位 字符"
     },
     "chunkOverlap": {
       "type": "integer",
-      "default": 50
+      "default": 50,
+      "description": "相邻分块重叠字符数，单位 字符"
     },
     "isActive": {
       "type": "boolean",
-      "default": false
+      "default": false,
+      "description": "是否启用此配置（同一时间只应激活一个）"
     }
   }
 }

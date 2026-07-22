@@ -36,7 +36,7 @@
       "allowedTypes": [
         "images"
       ],
-      "description": "校区封面图"
+      "description": "校区封面图，建议尺寸 1600x900，支持 JPG/PNG/WebP"
     },
     "gallery": {
       "type": "media",
@@ -44,7 +44,7 @@
       "allowedTypes": [
         "images"
       ],
-      "description": "校区环境图集"
+      "description": "校区环境图集，建议尺寸 1200x800，支持 JPG/PNG/WebP"
     },
     "address": {
       "type": "string",

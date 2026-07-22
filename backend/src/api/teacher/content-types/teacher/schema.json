@@ -46,7 +46,7 @@
       "allowedTypes": [
         "images"
       ],
-      "description": "教师头像"
+      "description": "教师头像，建议尺寸 400x400，支持 JPG/PNG/WebP"
     },
     "campus": {
       "type": "relation",
@@ -63,12 +63,12 @@
         "english",
         "comprehensive"
       ],
-      "description": "教授科目"
+      "description": "枚举值：pinyin(拼音) / math(数学) / english(英语) / comprehensive(综合)"
     },
     "teachingYears": {
       "type": "integer",
       "default": 0,
-      "description": "教龄（年）"
+      "description": "教龄，单位 年"
     },
     "education": {
       "type": "text",

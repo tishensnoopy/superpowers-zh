@@ -13,7 +13,7 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Member name",
+      "description": "成员姓名",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -23,7 +23,7 @@
     "position": {
       "type": "string",
       "maxLength": 200,
-      "description": "Job position",
+      "description": "职位/头衔（如 创始人 / 主讲教师）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -33,12 +33,13 @@
     "avatar": {
       "type": "media",
       "multiple": false,
-      "description": "Member photo"
+      "allowedTypes": ["images"],
+      "description": "成员头像，建议尺寸 400x400，支持 JPG/PNG/WebP"
     },
     "bio": {
       "type": "string",
       "maxLength": 500,
-      "description": "Biography",
+      "description": "成员简介",
       "pluginOptions": {
         "i18n": {
           "localized": true

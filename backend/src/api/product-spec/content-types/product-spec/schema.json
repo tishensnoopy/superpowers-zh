@@ -18,7 +18,7 @@
       "type": "string",
       "required": true,
       "maxLength": 100,
-      "description": "Specification name (e.g., 'Dimensions')",
+      "description": "规格名称（如 课时数 / 适合年龄 / 班型）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -30,12 +30,12 @@
       "required": true,
       "unique": true,
       "maxLength": 50,
-      "description": "Specification code (e.g., 'dimensions')"
+      "description": "规格代码（如 lesson_count / age_range），用于程序识别，唯一"
     },
     "unit": {
       "type": "string",
       "maxLength": 20,
-      "description": "Unit (e.g., 'mm', 'kg')",
+      "description": "数值单位（如 课时 / 岁 / 人）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -51,11 +51,11 @@
         "boolean"
       ],
       "default": "text",
-      "description": "Value type"
+      "description": "枚举值：text(文本) / number(数值) / select(下拉选择) / boolean(是否)"
     },
     "options": {
       "type": "string",
-      "description": "Select options (comma separated, for type=select)",
+      "description": "下拉选项，逗号分隔（仅当 type=select 时使用，如 小班,中班,大班）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -65,12 +65,12 @@
     "isVisible": {
       "type": "boolean",
       "default": true,
-      "description": "Whether to show in comparison table"
+      "description": "是否在对比表中展示"
     },
     "position": {
       "type": "integer",
       "default": 0,
-      "description": "Sort order in comparison table"
+      "description": "在对比表中的排序，数值越小越靠前"
     }
   },
   "pluginOptions": {

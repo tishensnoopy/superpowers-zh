@@ -13,7 +13,7 @@
       "type": "string",
       "required": true,
       "maxLength": 100,
-      "description": "Field label",
+      "description": "字段显示标签（如 姓名 / 邮箱 / 留言）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -24,12 +24,7 @@
       "type": "string",
       "required": true,
       "maxLength": 100,
-      "description": "Field name",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+      "description": "字段名（用于表单提交 key，如 name / email）"
     },
     "type": {
       "type": "enumeration",
@@ -41,17 +36,17 @@
         "select"
       ],
       "required": true,
-      "description": "Field type"
+      "description": "枚举值：text(单行文本) / email(邮箱) / phone(电话) / textarea(多行文本) / select(下拉选择)"
     },
     "required": {
       "type": "boolean",
       "default": false,
-      "description": "Required field"
+      "description": "是否为必填字段"
     },
     "placeholder": {
       "type": "string",
       "maxLength": 200,
-      "description": "Placeholder text",
+      "description": "输入框占位提示文字",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -60,7 +55,7 @@
     },
     "options": {
       "type": "json",
-      "description": "Select options",
+      "description": "下拉选项 JSON（仅 type=select 时使用，如 [\"选项1\",\"选项2\"]）",
       "pluginOptions": {
         "i18n": {
           "localized": true

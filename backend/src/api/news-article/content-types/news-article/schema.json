@@ -41,7 +41,7 @@
     },
     "content": {
       "type": "richtext",
-      "description": "文章正文（详情页展示）",
+      "description": "文章正文，支持 Markdown 语法（详情页展示）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -54,7 +54,7 @@
       "allowedTypes": [
         "images"
       ],
-      "description": "封面图"
+      "description": "封面图，建议尺寸 1200x630，支持 JPG/PNG/WebP"
     },
     "category": {
       "type": "enumeration",
@@ -64,7 +64,7 @@
         "event_notice"
       ],
       "default": "company_news",
-      "description": "文章分类"
+      "description": "枚举值：company_news(公司新闻) / industry_news(行业动态) / event_notice(活动公告)"
     },
     "isFeatured": {
       "type": "boolean",

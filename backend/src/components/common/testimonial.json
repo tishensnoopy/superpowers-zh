@@ -12,7 +12,7 @@
     "content": {
       "type": "text",
       "required": true,
-      "description": "Testimonial content",
+      "description": "评价内容",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -23,7 +23,7 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Author name",
+      "description": "评价人姓名",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -33,7 +33,7 @@
     "position": {
       "type": "string",
       "maxLength": 200,
-      "description": "Author position",
+      "description": "评价人头衔（如 学员家长 / 毕业学员）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -43,7 +43,7 @@
     "company": {
       "type": "string",
       "maxLength": 200,
-      "description": "Author company",
+      "description": "评价人所在公司/单位",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -53,7 +53,8 @@
     "avatar": {
       "type": "media",
       "multiple": false,
-      "description": "Author photo"
+      "allowedTypes": ["images"],
+      "description": "评价人头像，建议尺寸 200x200，支持 JPG/PNG/WebP"
     }
   }
 }

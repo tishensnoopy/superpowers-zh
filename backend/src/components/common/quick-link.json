@@ -13,7 +13,7 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Link title",
+      "description": "链接显示文字（如 关于我们 / 师资团队）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -24,7 +24,7 @@
       "type": "string",
       "required": true,
       "maxLength": 500,
-      "description": "Link URL",
+      "description": "链接地址，相对路径（如 /about）或绝对 URL（如 https://...）",
       "pluginOptions": {
         "i18n": {
           "localized": true

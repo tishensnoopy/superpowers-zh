@@ -38,13 +38,15 @@
     },
     "logo": {
       "type": "media",
-      "description": "站点 Logo 图片",
-      "multiple": false
+      "description": "站点 Logo 图片，建议尺寸 200x200，支持 SVG/PNG/WebP",
+      "multiple": false,
+      "allowedTypes": ["images"]
     },
     "favicon": {
       "type": "media",
-      "description": "网站图标",
-      "multiple": false
+      "description": "网站图标 favicon，建议尺寸 32x32 或 64x64，支持 ICO/PNG/SVG",
+      "multiple": false,
+      "allowedTypes": ["images"]
     },
     "phone": {
       "type": "string",
@@ -55,6 +57,11 @@
           "localized": true
         }
       }
+    },
+    "showPhoneInNav": {
+      "type": "boolean",
+      "default": true,
+      "description": "是否在导航栏显示电话号码，关闭后导航栏将不显示电话组件"
     },
     "email": {
       "type": "string",
@@ -95,6 +102,11 @@
         }
       }
     },
+    "icpUrl": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "ICP 备案号点击跳转链接，默认指向工信部备案查询网址 https://beian.miit.gov.cn/"
+    },
     "publicSecurityRecord": {
       "type": "string",
       "maxLength": 100,
@@ -104,6 +116,11 @@
           "localized": true
         }
       }
+    },
+    "publicSecurityRecordUrl": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "公安备案号点击跳转链接，默认指向全国互联网安全管理平台 http://www.beian.gov.cn/"
     },
     "seo": {
       "type": "component",
@@ -162,127 +179,8 @@
     "defaultOgImage": {
       "type": "media",
       "multiple": false,
-      "description": "站点级默认分享图（页面未配置 OG 图时回退到此图）"
-    }
-  },
-  "admin": {
-    "list": {
-      "title": "站点设置",
-      "description": "管理全局站点配置",
-      "fields": [
-        {
-          "field": "name",
-          "label": "站点名称"
-        },
-        {
-          "field": "phone",
-          "label": "联系电话"
-        },
-        {
-          "field": "email",
-          "label": "联系邮箱"
-        }
-      ]
-    },
-    "edit": {
-      "title": "编辑站点设置",
-      "description": "修改全局站点配置",
-      "fields": [
-        {
-          "field": "name",
-          "label": "站点名称",
-          "placeholder": "请输入站点名称"
-        },
-        {
-          "field": "slogan",
-          "label": "站点标语",
-          "placeholder": "请输入站点标语"
-        },
-        {
-          "field": "logo",
-          "label": "站点 Logo"
-        },
-        {
-          "field": "favicon",
-          "label": "网站图标"
-        },
-        {
-          "field": "phone",
-          "label": "联系电话",
-          "placeholder": "请输入联系电话"
-        },
-        {
-          "field": "email",
-          "label": "联系邮箱",
-          "placeholder": "请输入联系邮箱"
-        },
-        {
-          "field": "address",
-          "label": "公司地址",
-          "placeholder": "请输入公司地址"
-        },
-        {
-          "field": "wechat",
-          "label": "微信号",
-          "placeholder": "请输入微信号"
-        },
-        {
-          "field": "icp",
-          "label": "ICP 备案号",
-          "placeholder": "请输入 ICP 备案号"
-        },
-        {
-          "field": "publicSecurityRecord",
-          "label": "公安备案号",
-          "placeholder": "请输入公安备案号"
-        },
-        {
-          "field": "seo",
-          "label": "SEO 配置"
-        },
-        {
-          "field": "primaryColor",
-          "label": "品牌主色",
-          "placeholder": "#F5851F"
-        },
-        {
-          "field": "darkColor",
-          "label": "深色（标题/背景）",
-          "placeholder": "#1C2B3A"
-        },
-        {
-          "field": "fontSettings",
-          "label": "字体设置"
-        },
-        {
-          "field": "aiSummary",
-          "label": "AI 摘要（GEO）",
-          "placeholder": "写给 AI 搜索引擎看的机构简介，将写入 llms.txt"
-        },
-        {
-          "field": "googleVerification",
-          "label": "Google 验证码",
-          "placeholder": "google-site-verification=xxx"
-        },
-        {
-          "field": "bingVerification",
-          "label": "Bing 验证码",
-          "placeholder": "msvalidate.01=xxx"
-        },
-        {
-          "field": "baiduVerification",
-          "label": "百度验证码",
-          "placeholder": "baidu-site-verification=xxx"
-        },
-        {
-          "field": "analytics",
-          "label": "统计代码"
-        },
-        {
-          "field": "defaultOgImage",
-          "label": "默认分享图"
-        }
-      ]
+      "allowedTypes": ["images"],
+      "description": "站点级默认分享图，建议尺寸 1200x630，支持 JPG/PNG/WebP（页面未配置 OG 图时回退到此图）"
     }
   },
   "pluginOptions": {

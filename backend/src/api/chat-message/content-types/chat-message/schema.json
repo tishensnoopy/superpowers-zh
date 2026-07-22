@@ -16,7 +16,8 @@
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::chat-session.chat-session",
-      "inversedBy": "messages"
+      "inversedBy": "messages",
+      "description": "所属会话"
     },
     "role": {
       "type": "enumeration",
@@ -25,25 +26,31 @@
         "assistant",
         "system"
       ],
-      "required": true
+      "required": true,
+      "description": "枚举值：user(用户消息) / assistant(AI 回复) / system(系统消息)"
     },
     "content": {
       "type": "text",
-      "required": true
+      "required": true,
+      "description": "消息正文内容"
     },
     "tokenCount": {
       "type": "integer",
-      "default": 0
+      "default": 0,
+      "description": "Token 消耗数，单位 个"
     },
     "latencyMs": {
       "type": "integer",
-      "default": 0
+      "default": 0,
+      "description": "AI 回复延迟，单位 毫秒"
     },
     "retrievedDocs": {
-      "type": "json"
+      "type": "json",
+      "description": "检索召回的知识库文档片段 JSON"
     },
     "metadata": {
-      "type": "json"
+      "type": "json",
+      "description": "消息元数据 JSON（如模型名/温度等）"
     }
   }
 }

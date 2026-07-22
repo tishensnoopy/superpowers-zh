@@ -13,7 +13,7 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Section title",
+      "description": "区块标题",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -22,7 +22,7 @@
     },
     "description": {
       "type": "text",
-      "description": "Section description",
+      "description": "区块描述文案",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -33,7 +33,7 @@
       "type": "component",
       "component": "common.feature",
       "repeatable": true,
-      "description": "List of features",
+      "description": "特性项列表",
       "pluginOptions": {
         "i18n": {
           "localized": true

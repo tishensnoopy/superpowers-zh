@@ -13,7 +13,7 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Form title",
+      "description": "表单区块标题",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -22,7 +22,7 @@
     },
     "description": {
       "type": "text",
-      "description": "Form description",
+      "description": "表单区块描述文案",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -33,7 +33,7 @@
       "type": "component",
       "component": "common.form-field",
       "repeatable": true,
-      "description": "Form fields",
+      "description": "表单字段列表",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -44,7 +44,7 @@
       "type": "string",
       "default": "提交",
       "maxLength": 50,
-      "description": "Submit button text",
+      "description": "提交按钮文字",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -54,7 +54,7 @@
     "successMessage": {
       "type": "string",
       "maxLength": 200,
-      "description": "Success message",
+      "description": "提交成功提示文案",
       "pluginOptions": {
         "i18n": {
           "localized": true

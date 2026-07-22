@@ -93,7 +93,7 @@
         "sidebar-right"
       ],
       "default": "full-width",
-      "description": "页面布局"
+      "description": "枚举值：full-width(全宽) / boxed(盒装) / sidebar-left(左侧栏) / sidebar-right(右侧栏)"
     },
     "showNavigation": {
       "type": "boolean",
@@ -104,99 +104,6 @@
       "type": "boolean",
       "default": true,
       "description": "显示页脚"
-    }
-  },
-  "admin": {
-    "list": {
-      "title": "页面管理",
-      "description": "管理网站页面，支持动态区块组装",
-      "fields": [
-        {
-          "field": "title",
-          "label": "页面标题",
-          "sortable": true
-        },
-        {
-          "field": "slug",
-          "label": "URL 路径",
-          "sortable": true
-        },
-        {
-          "field": "isHomepage",
-          "label": "首页",
-          "sortable": true
-        },
-        {
-          "field": "layout",
-          "label": "布局",
-          "sortable": true
-        },
-        {
-          "field": "publishedAt",
-          "label": "发布时间",
-          "sortable": true
-        }
-      ],
-      "filters": [
-        {
-          "field": "isHomepage",
-          "label": "首页"
-        },
-        {
-          "field": "layout",
-          "label": "布局"
-        },
-        {
-          "field": "publishedAt",
-          "label": "发布状态"
-        }
-      ]
-    },
-    "edit": {
-      "title": "编辑页面",
-      "description": "创建或编辑网站页面",
-      "fields": [
-        {
-          "field": "title",
-          "label": "页面标题",
-          "placeholder": "请输入页面标题"
-        },
-        {
-          "field": "slug",
-          "label": "URL 路径",
-          "placeholder": "请输入页面路径，如 /about"
-        },
-        {
-          "field": "isHomepage",
-          "label": "设为首页",
-          "description": "勾选后该页面将作为网站首页"
-        },
-        {
-          "field": "layout",
-          "label": "页面布局"
-        },
-        {
-          "field": "showNavigation",
-          "label": "显示导航栏"
-        },
-        {
-          "field": "showFooter",
-          "label": "显示页脚"
-        },
-        {
-          "field": "sections",
-          "label": "页面区块",
-          "description": "拖拽区块组件来构建页面内容"
-        },
-        {
-          "field": "parent",
-          "label": "父页面"
-        },
-        {
-          "field": "seo",
-          "label": "SEO 配置"
-        }
-      ]
     }
   },
   "pluginOptions": {

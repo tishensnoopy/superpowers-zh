@@ -13,7 +13,7 @@
       "type": "string",
       "required": true,
       "maxLength": 200,
-      "description": "Section title",
+      "description": "区块标题",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -24,12 +24,12 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::faq-item.faq-item",
-      "description": "Related FAQ items"
+      "description": "关联 FAQ 项列表"
     },
     "showSearch": {
       "type": "boolean",
       "default": true,
-      "description": "Show search box"
+      "description": "是否显示搜索框"
     }
   }
 }

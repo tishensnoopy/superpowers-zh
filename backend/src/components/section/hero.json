@@ -12,8 +12,7 @@
     "title": {
       "type": "string",
       "required": true,
-      "maxLength": 200,
-      "description": "Main title",
+      "description": "主标题（建议 ≤200 字符）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -22,8 +21,7 @@
     },
     "subtitle": {
       "type": "string",
-      "maxLength": 300,
-      "description": "Subtitle",
+      "description": "副标题（建议 ≤300 字符）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -32,7 +30,7 @@
     },
     "description": {
       "type": "text",
-      "description": "Description text",
+      "description": "描述文案，支持 Markdown 语法",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -41,23 +39,34 @@
     },
     "backgroundImage": {
       "type": "media",
-      "description": "Background image",
-      "multiple": false
+      "description": "Hero 区域背景大图，建议尺寸 1920x1080，支持 JPG/PNG/WebP",
+      "multiple": false,
+      "allowedTypes": ["images"]
     },
     "image1": {
       "type": "media",
-      "description": "Overlay image 1 (floating card, left)",
-      "multiple": false
+      "description": "悬浮卡片图 1（左侧），建议尺寸 400x500，支持 PNG/WebP",
+      "multiple": false,
+      "allowedTypes": ["images"]
     },
     "image2": {
       "type": "media",
-      "description": "Overlay image 2 (floating card, right)",
-      "multiple": false
+      "description": "悬浮卡片图 2（右侧），建议尺寸 400x500，支持 PNG/WebP",
+      "multiple": false,
+      "allowedTypes": ["images"]
     },
     "badgeText": {
       "type": "string",
-      "maxLength": 100,
-      "description": "Badge text on overlay image (e.g. 优质教学)",
+      "description": "悬浮卡片上的徽标文字（如 优质教学）（建议 ≤100 字符）",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "badgeDesc": {
+      "type": "string",
+      "description": "徽标卡片第二行描述文字（如 连续5年优质教育机构）（建议 ≤100 字符）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -68,12 +77,11 @@
       "type": "component",
       "repeatable": true,
       "component": "common.stat",
-      "description": "Stats row (e.g. 8年经验 / 6大校区)"
+      "description": "统计数字行（如 8年经验 / 6大校区）"
     },
     "buttonText": {
       "type": "string",
-      "maxLength": 50,
-      "description": "Button text",
+      "description": "按钮文字（建议 ≤50 字符）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -82,8 +90,25 @@
     },
     "buttonUrl": {
       "type": "string",
-      "maxLength": 500,
-      "description": "Button link",
+      "description": "按钮链接地址，相对路径（如 /courses）或绝对 URL（如 https://...）（建议 ≤500 字符）",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "button2Text": {
+      "type": "string",
+      "description": "第二个按钮文字（建议 ≤50 字符）",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "button2Url": {
+      "type": "string",
+      "description": "第二个按钮链接地址，相对路径或绝对 URL（建议 ≤500 字符）",
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -93,12 +118,11 @@
     "isFullWidth": {
       "type": "boolean",
       "default": true,
-      "description": "Whether to display full width"
+      "description": "是否全宽展示"
     },
     "overlayColor": {
       "type": "string",
-      "maxLength": 20,
-      "description": "遮罩颜色：填入 6 位十六进制色值（如 #1C2B3A），留空使用默认深蓝灰",
+      "description": "遮罩样式，支持：'frosted' 毛玻璃 | 'transparent' 完全透明 | HEX 色值（如 #1C2B3A）| rgba 半透明（如 rgba(28,43,58,0.4)）；留空使用默认深蓝灰渐变（建议 ≤80 字符）",
       "pluginOptions": {
         "i18n": {
           "localized": true
