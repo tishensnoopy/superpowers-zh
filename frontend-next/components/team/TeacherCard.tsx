@@ -1,7 +1,7 @@
 'use client';
 
 import StrapiImage from '@/components/ui/StrapiImage';
-import type { Teacher } from '@/lib/api';
+import { getTeacherPrimaryCampus, type Teacher } from '@/lib/api';
 import { useTranslations } from 'next-intl';
 
 interface TeacherCardProps {
@@ -18,9 +18,9 @@ export default function TeacherCard({ teacher, isSelected, onSelect }: TeacherCa
     english: t('english'),
     comprehensive: t('comprehensive'),
   };
-  const { name, title, avatar, campus, subject, teachingYears } = teacher;
+  const { name, title, avatar, subject, teachingYears } = teacher;
 
-  const campusName = campus?.name;
+  const campusName = getTeacherPrimaryCampus(teacher)?.name;
   const subjectLabel = subject ? subjectLabels[subject] : null;
   const initial = name ? name.charAt(0) : '';
 

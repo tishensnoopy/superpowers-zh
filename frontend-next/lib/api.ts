@@ -562,6 +562,17 @@ export async function createAppointment(data: AppointmentData) {
 
 // === Teacher 接口与 API ===
 
+/** 校区↔教师中间表记录（支持 status 软删除） */
+export interface CampusTeacherLink {
+  id: number;
+  documentId?: string;
+  status: 'active' | 'inactive';
+  sortOrder?: number;
+  notes?: string;
+  campus?: Campus;
+  teacher?: Teacher;
+}
+
 export interface Teacher {
   id: number;
   documentId?: string;
@@ -569,7 +580,8 @@ export interface Teacher {
   slug: string;
   title: string;
   avatar?: { url: string; alternativeText?: string } | null;
-  campus?: Campus | null;
+  /** 经中间表的多对多校区关联（替代旧 campus manyToOne） */
+  campus_links?: CampusTeacherLink[];
   subject?: 'pinyin' | 'math' | 'english' | 'comprehensive';
   teachingYears?: number;
   education?: string;
@@ -603,7 +615,7 @@ export async function getTeachers(
     params.set('filters[isFeatured][$eq]', String(filters.featured));
   }
   params.set('sort', 'sortOrder:asc');
-  params.set('populate', 'avatar,campus');
+  params.set('populate', 'avatar,campus_links.campus');
   const result = await fetchApi<{ data: Teacher[] }>(`/api/teachers?${params.toString()}`);
   log(`${LOG_PREFIX} Teachers loaded: ${result.data.length} items`);
   return result;
@@ -613,7 +625,7 @@ export async function getTeacherBySlug(slug: string, locale: Locale = 'zh-CN'): 
   log(`${LOG_PREFIX} Fetching teacher by slug: ${slug} (locale: ${locale})...`);
   const params = new URLSearchParams();
   params.set('filters[slug][$eq]', slug);
-  params.set('populate', 'avatar,campus');
+  params.set('populate', 'avatar,campus_links.campus');
   params.set('locale', locale);
   const result = await fetchApi<{ data: Teacher[] }>(`/api/teachers?${params.toString()}`);
 
@@ -653,17 +665,40 @@ export interface Campus {
   latitude?: number;
   longitude?: number;
   sortOrder?: number;
-  teachers?: Teacher[];
+  /** 经中间表的多对多教师关联（替代旧 teachers oneToMany） */
+  teacher_links?: CampusTeacherLink[];
   seo?: Seo;
   /** GEO：校区级 AI 摘要 */
   aiSummary?: string;
+}
+
+// === 中间表 helper：从 campus_links / teacher_links 提取 active 关系 ===
+
+/** 从 campus.teacher_links 提取 active 状态的 teacher 列表（按 sortOrder 排序） */
+export function extractActiveTeachers(campus: Campus): Teacher[] {
+  return (campus.teacher_links ?? [])
+    .filter((link) => link.status === 'active')
+    .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+    .map((link) => link.teacher)
+    .filter((t): t is Teacher => !!t);
+}
+
+/** 从 teacher.campus_links 提取首个 active 状态的 campus（按 sortOrder 排序） */
+export function getTeacherPrimaryCampus(teacher: Teacher): Campus | null {
+  return (
+    (teacher.campus_links ?? [])
+      .filter((link) => link.status === 'active')
+      .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+      .map((link) => link.campus)
+      .find((c): c is Campus => !!c) ?? null
+  );
 }
 
 export async function getCampuses(locale: Locale = 'zh-CN') {
   log(`${LOG_PREFIX} Fetching campuses...`);
   const params = new URLSearchParams();
   params.set('sort', 'sortOrder:asc');
-  params.set('populate', 'coverImage,gallery,teachers');
+  params.set('populate', 'coverImage,gallery,teacher_links.teacher');
   params.set('locale', locale);
   const result = await fetchApi<{ data: Campus[] }>(`/api/campuses?${params.toString()}`);
   log(`${LOG_PREFIX} Campuses loaded: ${result.data.length} items`);

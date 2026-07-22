@@ -9,7 +9,12 @@ const mockTeacher = {
   title: '高级教师',
   subject: 'pinyin',
   teachingYears: 10,
-  campus: { id: 1, name: '百步亭校区', slug: 'yousen-baibuting' },
+  campus_links: [{
+    id: 1,
+    status: 'active' as const,
+    sortOrder: 0,
+    campus: { id: 1, name: '百步亭校区', slug: 'yousen-baibuting' },
+  }],
 };
 
 describe('TeacherCard 组件', () => {

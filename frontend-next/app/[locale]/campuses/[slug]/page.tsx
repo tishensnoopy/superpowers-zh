@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { getCampuses, getCampusBySlug, type Locale } from '@/lib/api';
+import { getCampuses, getCampusBySlug, extractActiveTeachers, type Locale } from '@/lib/api';
 import { buildMetadata, buildJsonLd, buildLocalBusinessSchema, buildBreadcrumbSchema } from '@/lib/seo';
 import CampusDetailHeader from '@/components/campus/CampusDetailHeader';
 import CampusGallery from '@/components/campus/CampusGallery';
@@ -85,7 +85,7 @@ export default async function CampusDetailPage({ params }: PageProps) {
           </div>
         </section>
 
-        <CampusTeachers teachers={campus.teachers} />
+        <CampusTeachers teachers={extractActiveTeachers(campus)} />
 
         <div className="mt-12">
           <CampusMap

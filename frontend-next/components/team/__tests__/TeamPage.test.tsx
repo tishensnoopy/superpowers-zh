@@ -5,6 +5,9 @@ import TeamPage from '@/components/team/TeamPage';
 vi.mock('@/lib/api', () => ({
   getTeachers: vi.fn(),
   getImageUrl: vi.fn(() => null),
+  getTeacherPrimaryCampus: vi.fn((teacher: any) =>
+    teacher?.campus_links?.[0]?.campus ?? null
+  ),
 }));
 
 import { getTeachers } from '@/lib/api';
@@ -19,7 +22,12 @@ const makeTeacher = (id: number, name: string) => ({
   education: `${name}的教育背景`,
   teachingFeatures: `${name}的教学特色`,
   achievements: [`${name}荣誉`],
-  campus: { id, name: '百步亭校区', slug: 'yousen-baibuting' },
+  campus_links: [{
+    id,
+    status: 'active' as const,
+    sortOrder: 0,
+    campus: { id, name: '百步亭校区', slug: 'yousen-baibuting' },
+  }],
 });
 
 describe('TeamPage 页面', () => {
