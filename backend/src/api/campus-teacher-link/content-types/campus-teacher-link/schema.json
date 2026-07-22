@@ -1,0 +1,51 @@
+{
+  "kind": "collectionType",
+  "collectionName": "campus_teacher_links",
+  "info": {
+    "singularName": "campus-teacher-link",
+    "pluralName": "campus-teacher-links",
+    "displayName": "校区教师关联",
+    "description": "校区↔教师多对多关系中间表（显式，支持 status 软删除）",
+    "icon": "Link"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": false
+    }
+  },
+  "attributes": {
+    "campus": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::campus.campus",
+      "inversedBy": "teacher_links",
+      "description": "关联校区"
+    },
+    "teacher": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::teacher.teacher",
+      "inversedBy": "campus_links",
+      "description": "关联教师"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": ["active", "inactive"],
+      "default": "active",
+      "required": true,
+      "description": "关系状态：active=当前有效，inactive=历史归档"
+    },
+    "sortOrder": {
+      "type": "integer",
+      "default": 0,
+      "description": "排序"
+    },
+    "notes": {
+      "type": "text",
+      "description": "关系备注（如外聘、主讲等）"
+    }
+  }
+}
