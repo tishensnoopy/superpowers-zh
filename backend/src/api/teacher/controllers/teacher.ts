@@ -34,7 +34,14 @@ export default factories.createCoreController(UID, ({ strapi }) => ({
         sort: sortArr as any,
         limit,
         start,
-        populate: { campus: true, avatar: true, seo: true },
+        populate: {
+        campus_links: {
+          filters: { status: 'active' },
+          populate: { campus: true },
+        },
+        avatar: true,
+        seo: true,
+      },
         status: 'published',
         ...(locale ? { locale } : {}),
       }),
@@ -65,7 +72,14 @@ export default factories.createCoreController(UID, ({ strapi }) => ({
     const { locale } = ctx.query as any;
     const teacher = await strapi.documents(UID).findOne({
       documentId: id,
-      populate: { campus: true, avatar: true, seo: true },
+      populate: {
+        campus_links: {
+          filters: { status: 'active' },
+          populate: { campus: true },
+        },
+        avatar: true,
+        seo: true,
+      },
       status: 'published',
       ...(locale ? { locale } : {}),
     });

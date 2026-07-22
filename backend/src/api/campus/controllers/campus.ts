@@ -21,8 +21,13 @@ export default factories.createCoreController(UID, ({ strapi }) => ({
       populate: {
         coverImage: true,
         gallery: true,
-        teachers: {
-          populate: { avatar: true },
+        teacher_links: {
+          filters: { status: 'active' },
+          populate: {
+            teacher: {
+              populate: { avatar: true },
+            },
+          },
         },
         seo: true,
       },
@@ -53,8 +58,13 @@ export default factories.createCoreController(UID, ({ strapi }) => ({
       populate: {
         coverImage: true,
         gallery: true,
-        teachers: {
-          populate: { avatar: true },
+        teacher_links: {
+          filters: { status: 'active' },
+          populate: {
+            teacher: {
+              populate: { avatar: true },
+            },
+          },
         },
         seo: true,
       },

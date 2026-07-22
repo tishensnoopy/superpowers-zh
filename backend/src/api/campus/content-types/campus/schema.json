@@ -147,13 +147,6 @@
       "default": 0,
       "description": "排序"
     },
-    "teachers": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::teacher.teacher",
-      "mappedBy": "campus",
-      "description": "校区教师（旧 oneToMany，迁移完成后将删除）"
-    },
     "teacher_links": {
       "type": "relation",
       "relation": "oneToMany",

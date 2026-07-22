@@ -48,13 +48,6 @@
       ],
       "description": "教师头像，建议尺寸 400x400，支持 JPG/PNG/WebP"
     },
-    "campus": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "api::campus.campus",
-      "inversedBy": "teachers",
-      "description": "所属校区（旧 manyToOne，迁移完成后将删除）"
-    },
     "campus_links": {
       "type": "relation",
       "relation": "oneToMany",

@@ -100,6 +100,16 @@ const PRODUCT_POPULATE = {
   outline: true,
   testimonials: true,
   seo: true,
+  campus_links: {
+    filters: { status: 'active' },
+    populate: { campus: true },
+  },
+  teacher_links: {
+    filters: { status: 'active' },
+    populate: {
+      teacher: { populate: { avatar: true } },
+    },
+  },
 } as const;
 
 const PRODUCT_POPULATE_DETAIL = {
