@@ -33,6 +33,13 @@ RUN npm run build
 # 将编译后的 config/*.js 复制到 config/ 目录（Strapi 生产模式只加载 .js）
 RUN cp dist/config/*.js config/
 
+# 修复 Strapi v5 BUG：AssetCard 的 CardCheckbox 默认 opacity:0/pointer-events:none
+# 导致用户看不到媒体库勾选框。src/admin/app.tsx 通过 bootstrap 钩子动态注入；
+# 这里作为构建时兜底，直接 sed 注入到 dist/build/index.html 的 </style> 后。
+RUN if ! grep -q "strapi-media-checkbox-fix" dist/build/index.html 2>/dev/null; then \
+      sed -i 's|</style>|</style><style id="strapi-media-checkbox-fix">[class*="asset-card"] [role="checkbox"],[class*="AssetCard"] [role="checkbox"],[class*="asset-card"] input[type="checkbox"],[class*="AssetCard"] input[type="checkbox"]{opacity:1 !important;pointer-events:auto !important;z-index:10 !important;}</style>|' dist/build/index.html; \
+    fi
+
 # 移除 devDependencies，仅保留生产依赖
 RUN npm prune --production
 
