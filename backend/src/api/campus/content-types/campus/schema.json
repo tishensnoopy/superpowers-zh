@@ -152,7 +152,21 @@
       "relation": "oneToMany",
       "target": "api::teacher.teacher",
       "mappedBy": "campus",
-      "description": "校区教师"
+      "description": "校区教师（旧 oneToMany，迁移完成后将删除）"
+    },
+    "teacher_links": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::campus-teacher-link.campus-teacher-link",
+      "mappedBy": "campus",
+      "description": "校区↔教师多对多关联（经中间表，支持 status 软删除）"
+    },
+    "product_links": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::campus-product-link.campus-product-link",
+      "mappedBy": "campus",
+      "description": "校区↔课程多对多关联（经中间表）"
     },
     "seo": {
       "type": "component",

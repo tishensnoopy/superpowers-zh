@@ -111,6 +111,20 @@
       "target": "api::product-spec.product-spec",
       "description": "产品规格"
     },
+    "campus_links": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::campus-product-link.campus-product-link",
+      "mappedBy": "product",
+      "description": "课程↔校区多对多关联（经中间表，支持 status 软删除）"
+    },
+    "teacher_links": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::teacher-product-link.teacher-product-link",
+      "mappedBy": "product",
+      "description": "课程↔教师多对多关联（经中间表）"
+    },
     "seo": {
       "type": "component",
       "component": "common.seo",
